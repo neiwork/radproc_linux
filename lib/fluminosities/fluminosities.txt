@@ -1,0 +1,1 @@
+./Debug/luminosityIC.cpp.o ./Debug/luminositySynchrotron.cpp.o ./Debug/opticalDepthSSA.cpp.o
