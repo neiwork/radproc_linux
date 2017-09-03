@@ -101,34 +101,24 @@ double eEmax(double z, double B)
 
 void prepareGlobalCfg()
 {
-	static const double Gamma = GlobalConfig.get<double>("Gamma", 10);
-
+	//static const double Gamma = GlobalConfig.get<double>("Gamma", 10);
 	//GlobalConfig.put("Dlorentz", GlobalConfig.get<double>("Dlorentz", computeDlorentz(Gamma)));
-
 	//DefOpt_IntLosses.samples_x = GlobalConfig.get<int>("integrate-losses.samples.x", DefOpt_IntLosses.samples_x);
 	//DefOpt_IntLosses.samples_t = GlobalConfig.get<int>("integrate-losses.samples.t", DefOpt_IntLosses.samples_t);
 	//DefOpt_IntLosses.samples_y = GlobalConfig.get<int>("integrate-losses.samples.y", DefOpt_IntLosses.samples_y);
-
 	fmath_configure(GlobalConfig);
 }
-
-
 
 void initializeEnergyPoints(Vector& v, double logEmin, double logEmax)
 {
 	double Emax = 1.6e-12*pow(10, logEmax);
 	double Emin = 1.6e-12*pow(10, logEmin);
-
 	double E_int = pow((10 * Emax / Emin), (1.0 / (v.size() - 1)));
-
 	v[0] = Emin;
-
 	for (size_t i = 1; i < v.size(); ++i){
 		v[i] = v[i - 1] * E_int;
 	}
-
 }
-
 
 //VER
 void initializeRPoints(Vector& v, double Rmin, double Rmax)

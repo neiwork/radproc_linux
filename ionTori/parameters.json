@@ -1,23 +1,14 @@
 {
-	"id":"M87",
-	"Mdot":5.7e-10,
-	"vWind":1.0e7,
-	"starT":4.0e3,
-	"h_d":3.1e3,
-	"N_s":1.3e9,
-	"eph_s":37.0,
-	"pseda":1,
+	"id":"Sgr A*",
+	"mass_bh":"1.0",
+	"a":"0.7",
+	"n":"3.0",
+	"temp_ec":"1.0e11",
+	"xi":"1.0e-2",
+	"lambda":"0.98",
 
-	"subEq":1.0,
-	"cmbT": 2.7,
-
-	"injector":"multiple",
-	"Lj": 1.0e44,
-	"openingAngle": 0.1,
-	"inc": 20,
-	"Gamma": 3.0,
-	"accEfficiency": 0.1,
-	"primaryIndex": 2.0,
+	"energy_c":"1.e-10",
+	"beta":"0.5",
 
 	"file": {
 		"luminosity":"ntLuminosity.txt",

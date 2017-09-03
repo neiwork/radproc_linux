@@ -27,8 +27,7 @@ int main()
 		
 		//radiativeLosses(model,folder+"\\electronLosses.txt");
 		
-
-
+        
 		//ParamSpaceValues psv(model.electron.ps);
 
 		//psv.fill([&](const SpaceIterator& i){
@@ -50,7 +49,7 @@ int main()
 	catch (std::runtime_error& e)
 	{
 		std::cout << "ERROR: " << e.what() << std::endl;
-		throw;
+//		throw;
 	}
 
 	return 0;
