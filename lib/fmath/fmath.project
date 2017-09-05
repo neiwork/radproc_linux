@@ -106,6 +106,8 @@
     <File Name="physics.h"/>
     <File Name="RungeKutta.cpp"/>
     <File Name="RungeKutta.h"/>
+    <File Name="bisection.cpp"/>
+    <File Name="bisection.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include"/>
 </CodeLite_Project>

@@ -1,6 +1,7 @@
 #include "State.h"
 
 #include <fparameters/Dimension.h>
+#include <fmath/physics.h>
 #include <fparameters/SpaceIterator.h>
 
 #include <boost/property_tree/ptree.hpp>
@@ -15,18 +16,20 @@ State::State(boost::property_tree::ptree& cfg) :
 	particles.push_back(&photon);
 
 	for (auto p : particles) {
-		initializeParticle(*p,cfg);
+		initializeParticle(*p, cfg);
 	}
-
+	
 	magf.initialize();
 	magf.fill([&](const SpaceIterator& i){
-		return computeMagField(i.val(DIM_R));
-	});
-	
-	tpf.initialize();
-	tpf.fill([&](const SpaceIterator& i){
-		return blackBody(i.val(DIM_E),i.val(DIM_R));
-	});
+	    double r = i.val(DIM_R);
+	    double theta = i.val(DIM_THETA);
+	    return sqrt( beta * 24.0 * pi * pressureTot(r, theta) );
+	  };
+	  
+//	tpf.initialize();
+//	tpf.fill([&](const SpaceIterator& i){
+//		return blackBody(i.val(DIM_E), i.val(DIM_R));
+//	  };
 	
 }
 
@@ -44,20 +47,20 @@ void State::initializeParticle(Particle& p, boost::property_tree::ptree& cfg)
 	p.configure(cfg.get_child("particle.default"));
 	p.configure(cfg.get_child("particle."+p.id));
 
-	p.ps.add(createDimension(p,"energy",initializeEnergyPoints,cfg));
+	p.ps.add(createDimension(p, "energy", initializeEnergyPoints, cfg));
 
 	// we can't use createDimension because we're multiplying by pc before creating them
 	// add dimension for R
-	double rmin = p.getpar(cfg,"dim.radius.min", 1.0)*pc;
-	double rmax = p.getpar(cfg,"dim.radius.max", 1.0e3)*pc;
+//	double rmin = p.getpar(cfg,"dim.radius.min", 1.0)*pc;
+//	double rmax = p.getpar(cfg,"dim.radius.max", 1.0e3)*pc;
 	int nR = p.getpar(cfg,"dim.radius.samples", 5); // solo por ahora; y no deberia ser usado directamente desde otro lado
 	p.ps.add(new Dimension(nR, bind(initializeRPoints, std::placeholders::_1, rmin, rmax)));
 
 	// add dimension for T
-	double tmin = p.getpar(cfg, "dim.time.min", 1.0)*pc;
-	double tmax = p.getpar(cfg, "dim.time.max", 1.0e3)*pc;
-	int tR = p.getpar(cfg, "dim.time.samples", 5); // solo por ahora; y no deberia ser usado directamente desde otro lado
-	p.ps.add(new Dimension(tR, bind(initializeCrossingTimePoints, std::placeholders::_1, tmin, tmax)));
+	// double tmin = p.getpar(cfg, "dim.time.min", 1.0)*pc;
+	// double tmax = p.getpar(cfg, "dim.time.max", 1.0e3)*pc;
+	// int tR = p.getpar(cfg, "dim.time.samples", 5); // solo por ahora; y no deberia ser usado directamente desde otro lado
+	// p.ps.add(new Dimension(tR, bind(initializeCrossingTimePoints, std::placeholders::_1, tmin, tmax)));
 
 
 	//p.ps.addDerivation([](const SpaceIterator& i){

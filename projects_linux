@@ -1,0 +1,98 @@
+1) Instalar codeLite:  https://downloads.codelite.org/
+
+
+*****esto ignoralo por ahora***********
+Opciones pque hay que setear para compilar los proyectos y/o librerias
+
+Build setting -> compilers -> GCC -> C++ Compiler: cambiar /usr/bin/g++ por /usr/bin/g++ -std=c++11
+
+En las librerias: 
+Compiler:   .;..;../../external/include
+Linker: Search path   ../../lib/  (no linkeo librerias a otras lib)
+
+
+En el proyecto principal:
+Compiler: 	Include paths:  .;../lib;../external/include
+			Preprocessors:  BOOST_SYSTEM_NO_DEPRECATED;BOOST_NO_CXX11_SCOPED_ENUMS
+
+Linker:		Libraries search path: ../external/lib;../lib/fmath/Debug;../lib/fparameters/Debug;../lib/fparticle/Debug;../lib/flosses/Debug;../lib/fluminosities/Debug;../lib/inout/Debug
+			Libraries: 	boost_filesystem;boost_system;fmath;fparameters;fparticle;flosses;fluminosities;inout
+*************************************
+
+
+2) GIT and Github
+
+i) install git
+	$ 	sudo apt-get install git-all	 
+
+ii) Indico a Git quien soy
+	$	git config --global user.name "neiwork"  (neiwork is my username)
+
+	$	git config --global user.email florenciavieyro@gmail.com	
+
+iii) bajo el repositorio:
+
+desde la carpeta donde queres que se baje el repositorio:
+
+$ git clone https://github.com/neiwork/radproc_linux
+
+etso te generara la carpeta radproc_linux/
+
+
+
+3) Instalar las librerias boost: 
+
+http://www.boost.org/doc/libs/1_64_0/more/getting_started/unix-variants.html
+
+i) Download boost_1_64_0.tar.bz2.
+
+El repositorio radproc_linux debe incluir el external adentro.
+
+ii) In the directory where you want to put the Boost installation, execute
+    tar --bzip2 -xf PATH/radproc_linux/boost_1_64_0.tar.bz2
+
+iii) $	cd boost_1_64_0/
+	 $	./bootstrap.sh --prefix=PATH/radproc_linux/external
+
+	 (ej ./bootstrap.sh --prefix=/home/flor/projects/github/radproc_linux/external )
+
+	 $	./b2 install  (and patience)
+
+
+
+
+
+
+
+
+
+Algunos comandos b'asicos de git:
+
+git status	(me muestra a diferencia entre lo que tengo en mi compu y l que hay en el repositorio)
+
+git pull (me bajo la ultima version del repositorio si alguien subio cambios)
+
+git add <filename>  (agrego ese archivo)
+git add *  (agrego todo lo nuevo)
+
+git commit -m "Commit message"  (es importante dejar mensajes sobre los cambios que hice); con commit los cambio en el respositorio local, pero aun no en el remoto
+
+git push (ahi si subo los cambios al repositorio)
+
+
+git rm --cached -r mydirectory
+
+
+new repository
+
+echo "# radproc_linux" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/neiwork/radproc_linux.git
+git push -u origin master
+
+…or push an existing repository from the command line
+
+git remote add origin https://github.com/neiwork/radproc_linux.git
+git push -u origin master

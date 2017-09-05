@@ -20,6 +20,7 @@
     <File Name="write.cpp"/>
     <File Name="write.h"/>
     <File Name="functions.cpp"/>
+    <File Name="functions.h"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
     <Project Name="fmath"/>

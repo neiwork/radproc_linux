@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Session Name="/home/flor/projects/github/radproc_linux/ionTori/ionTori.workspace">
+<Session Name="/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/ionTori.workspace">
   <int Value="0" Name="m_selectedTab"/>
-  <wxString Value="/home/flor/projects/github/radproc_linux/ionTori/ionTori.workspace" Name="m_workspaceName"/>
+  <wxString Value="/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/ionTori.workspace" Name="m_workspaceName"/>
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
-      <wxString Value="/home/flor/projects/github/radproc_linux/lib/inout/ioutil.cpp" Name="FileName"/>
-      <int Value="21" Name="FirstVisibleLine"/>
-      <int Value="33" Name="CurrentLine"/>
+      <wxString Value="/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/functions.cpp" Name="FileName"/>
+      <int Value="66" Name="FirstVisibleLine"/>
+      <int Value="94" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
