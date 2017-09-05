@@ -5,22 +5,23 @@
 #include <fmath/bisection.h>
 
 #include <fparameters/parameters.h>
-#include <boost/property_tree/ptree_fwd.hpp>
+
+#include <boost/property_tree/ptree.hpp>
 
 
-void readSpinMbh(const double massBH, const double spinBH)
+
+void readSpinMbh(double massBH, double spinBH)
 {	
 	massBH = GlobalConfig.get<double>("massBH");
     spinBH = GlobalConfig.get<double>("spinBH") * massBH;
 	
-	static const double accEfficiency = GlobalConfig.get<double>("accEfficiency",2);
-
 }
 
 
 // Keplerian specific angular momentum
 double keplAngularMom(double r) {
 	
+	double massBH, spinBH;
 	readSpinMbh(massBH, spinBH);
 	
     return sqrt(massBH) * ( r*r - 2.0 * spinBH * sqrt(massBH*r) + spinBH*spinBH ) /
@@ -30,6 +31,7 @@ double keplAngularMom(double r) {
 // Torus Parameters
 void torusParameters(double *l_0, double *rCusp, double *rCenter) {
     
+	double massBH, spinBH;
 	readSpinMbh(massBH, spinBH);
 	
 	// Auxiliary variables
@@ -57,8 +59,8 @@ void torusParameters(double *l_0, double *rCusp, double *rCenter) {
 
 double g_tt(double r, double theta) {
 	
-	static const double massBH = GlobalConfig.get<double>("massBH");
-    static const double spinBH = GlobalConfig.get<double>("spinBH") * massBH;
+	double massBH, spinBH;
+	readSpinMbh(massBH, spinBH);
 	
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
     return - (1.0 - 2.0*massBH*r / sigma);
@@ -66,9 +68,8 @@ double g_tt(double r, double theta) {
 
 double g_rr(double r, double theta) {
 	
-	static const double massBH = GlobalConfig.get<double>("massBH");
-    static const double spinBH = GlobalConfig.get<double>("spinBH") * massBH;
-	
+	double massBH, spinBH;
+	readSpinMbh(massBH, spinBH);
 	
     double delta = r*r - 2.0 * massBH * r + spinBH*spinBH;
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
@@ -76,24 +77,25 @@ double g_rr(double r, double theta) {
 }
 
 double g_thetatheta(double r, double theta) {    // = Sigma
-	static const double massBH = GlobalConfig.get<double>("massBH");
-    static const double spinBH = GlobalConfig.get<double>("spinBH") * massBH;
-	
+	double massBH, spinBH;
+	readSpinMbh(massBH, spinBH);
+
     return r*r + spinBH*spinBH*sin(theta)*sin(theta);
 }
 
 double g_tphi(double r, double theta) {
 	
-
+	double massBH, spinBH;
+	readSpinMbh(massBH, spinBH);
 	
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
     return -(2.0*massBH*r*spinBH / sigma) * cos(theta)*cos(theta);
 }
 
 double g_phiphi(double r, double theta) {
-	
-	static const double massBH = GlobalConfig.get<double>("massBH");
-    static const double spinBH = GlobalConfig.get<double>("spinBH") * massBH;
+
+	double massBH, spinBH;
+	readSpinMbh(massBH, spinBH);
 	
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
     return ( r*r + spinBH*spinBH + 2.0*massBH*r*spinBH*spinBH*cos(theta)*cos(theta) / sigma )
@@ -110,7 +112,7 @@ double angularVel(double r, double theta)  {
 // POTENTIAL FUNCTION
 double potential(double r, double theta) {
     double aux = g_tt(r,theta) + 2.0*angularVel(r,theta)*g_tphi(r,theta) + 
-    g_phiphi(r,theta) * p2(angularVel(r,theta));
+    g_phiphi(r,theta) * P2(angularVel(r,theta));
     return (aux < 0.0) ? 0.5 * log(-aux / P2(g_tt(r,theta)+angularVel(r,theta)*g_tphi(r,theta))) : 0.0;
 }
 

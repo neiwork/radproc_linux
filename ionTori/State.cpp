@@ -1,17 +1,18 @@
 #include "State.h"
 
+#include "functions.h"
 #include <fparameters/Dimension.h>
 #include <fmath/physics.h>
 #include <fparameters/SpaceIterator.h>
-
+#include <fparameters/parameters.h>
 #include <boost/property_tree/ptree.hpp>
 
 State::State(boost::property_tree::ptree& cfg) :
  electron{ "electron" },
  photon{ "photon" },
- magf(photon.ps, false)
- //tpf(photon.ps, false)
- {
+ magf(photon.ps, false),
+denf(photon.ps,false)
+{
 	particles.push_back(&electron);
 	particles.push_back(&photon);
 
@@ -21,10 +22,10 @@ State::State(boost::property_tree::ptree& cfg) :
 	
 	magf.initialize();
 	magf.fill([&](const SpaceIterator& i){
+		static const double beta = GlobalConfig.get<double>("beta");
 	    double r = i.val(DIM_R);
 	    double theta = i.val(DIM_THETA);
-		return r*theta;
-//	    return sqrt( beta * 24.0 * pi * pressureTot(r, theta) );
+		return sqrt( beta * 24.0 * pi * pressureTot(r, theta) );
 	  });
 	  
 //	tpf.initialize();
