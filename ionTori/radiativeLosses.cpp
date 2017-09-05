@@ -62,7 +62,7 @@ void radiativeLosses(State& st, const std::string& filename)
 		//	return blackBody(E,r);},   
 		//		Emin, 1.0e4*Emin ) / i.val(DIM_E);
 		
-		double eIC = lossesIC(E, st.electron, st.tpf, i.coord, Emin, 1.0e4*Emin) /E;
+		//double eIC = lossesIC(E, st.electron, st.tpf, i.coord, Emin, 1.0e4*Emin) /E;
 					
 				
 		double Reff = 1.0e5;
@@ -72,7 +72,7 @@ void radiativeLosses(State& st, const std::string& filename)
 		
 		file << fmtE << "\t" << logR 
 							<< "\t" << safeLog10(eSyn) 
-							<< "\t" << safeLog10(eIC)
+							//<< "\t" << safeLog10(eIC)
 							<< "\t" << safeLog10(eDif)
 							<< "\t" << safeLog10(eAcc)
 							//<< "\t" << safeLog10(eAdia) 

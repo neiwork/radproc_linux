@@ -25,14 +25,25 @@
 
 void prepareGlobalCfg()
 {
-    static const double massBH = GlobalConfig.get<double>("massBH");
+    /*static const double massBH = GlobalConfig.get<double>("massBH");
     static const double spinBH = GlobalConfig.get<double>("spinBH") * massBH;
     static const double lambda = GlobalConfig.get<double>("lambda");
     static const double xi = GlobalConfig.get<double>("xi");
     static const double n = GlobalConfig.get<double>("n");
     static const double energyC = GlobalConfig.get<double>("energyC");
-    static const double beta = GlobalConfig.get<double>("beta");
+	static const double beta = GlobalConfig.get<double>("beta");*/
     
+	
+	/*GlobalConfig.put("massBH", GlobalConfig.get<double>("massBH"));
+    GlobalConfig.put("spinBH", GlobalConfig.get<double>("spinBH") * massBH);
+    GlobalConfig.put("lambda", GlobalConfig.get<double>("lambda"));
+    GlobalConfig.put("xi", GlobalConfig.get<double>("xi"));
+    GlobalConfig.put("n", GlobalConfig.get<double>("n"));
+    GlobalConfig.put("energyC", GlobalConfig.get<double>("energyC"));
+	GlobalConfig.put("beta", GlobalConfig.get<double>("beta"));*/
+	
+	//OJO con los nombres beta y n!!
+	
 	//GlobalConfig.put("Dlorentz", GlobalConfig.get<double>("Dlorentz", computeDlorentz(Gamma)));
 	//DefOpt_IntLosses.samples_x = GlobalConfig.get<int>("integrate-losses.samples.x", DefOpt_IntLosses.samples_x);
 	//DefOpt_IntLosses.samples_t = GlobalConfig.get<int>("integrate-losses.samples.t", DefOpt_IntLosses.samples_t);

@@ -5,16 +5,16 @@
 ## Debug
 ProjectName            :=inout
 ConfigurationName      :=Debug
-WorkspacePath          := "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori"
-ProjectPath            := "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/lib/inout"
+WorkspacePath          :=/home/flor/projects/github/radproc_linux/ionTori
+ProjectPath            :=/home/flor/projects/github/radproc_linux/lib/inout
 IntermediateDirectory  :=./Debug
 OutDir                 := $(IntermediateDirectory)
 CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
-User                   :=Eduardo Mario Gutiérrez
-Date                   :=30/08/17
-CodeLitePath           :="/home/eduardog/.codelite"
+User                   :=flor
+Date                   :=05/09/17
+CodeLitePath           :=/home/flor/.codelite
 LinkerName             :=/usr/bin/g++
 SharedObjectLinkerName :=/usr/bin/g++ -shared -fPIC
 ObjectSuffix           :=.o
@@ -48,7 +48,7 @@ LibPath                := $(LibraryPathSwitch). $(LibraryPathSwitch)../../lib/ $
 ## AR, CXX, CC, AS, CXXFLAGS and CFLAGS can be overriden using an environment variables
 ##
 AR       := /usr/bin/ar rcu
-CXX      := /usr/bin/g++  -std=c++11
+CXX      := /usr/bin/g++ -std=c++11
 CC       := /usr/bin/gcc
 CXXFLAGS :=  -g $(Preprocessors)
 CFLAGS   :=  -g $(Preprocessors)
@@ -77,8 +77,8 @@ $(OutputFile): $(Objects)
 	@echo "" > $(IntermediateDirectory)/.d
 	@echo $(Objects0)  > $(ObjectsFileList)
 	$(AR) $(ArchiveOutputSwitch)$(OutputFile) @$(ObjectsFileList) $(ArLibs)
-	@$(MakeDirCommand) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/.build-debug"
-	@echo rebuilt > "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/.build-debug/inout"
+	@$(MakeDirCommand) "/home/flor/projects/github/radproc_linux/ionTori/.build-debug"
+	@echo rebuilt > "/home/flor/projects/github/radproc_linux/ionTori/.build-debug/inout"
 
 MakeIntermediateDirs:
 	@test -d ./Debug || $(MakeDirCommand) ./Debug
@@ -94,12 +94,12 @@ PreBuild:
 ## Objects
 ##
 $(IntermediateDirectory)/ioutil.cpp$(ObjectSuffix): ioutil.cpp $(IntermediateDirectory)/ioutil.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/lib/inout/ioutil.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/ioutil.cpp$(ObjectSuffix) $(IncludePath)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/flor/projects/github/radproc_linux/lib/inout/ioutil.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/ioutil.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/ioutil.cpp$(DependSuffix): ioutil.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/ioutil.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/ioutil.cpp$(DependSuffix) -MM "ioutil.cpp"
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/ioutil.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/ioutil.cpp$(DependSuffix) -MM ioutil.cpp
 
 $(IntermediateDirectory)/ioutil.cpp$(PreprocessSuffix): ioutil.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/ioutil.cpp$(PreprocessSuffix) "ioutil.cpp"
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/ioutil.cpp$(PreprocessSuffix) ioutil.cpp
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

@@ -13,6 +13,7 @@ const DimensionCoord
 	DIM_R = 1,
 	DIM_THETA = 2;
 
+
 /* define the inital values of the global parameters*/
 void prepareGlobalCfg();
 

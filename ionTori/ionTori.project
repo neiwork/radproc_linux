@@ -19,8 +19,8 @@
     <File Name="targetFields.h" ExcludeProjConfig="Debug"/>
     <File Name="write.cpp"/>
     <File Name="write.h"/>
-    <File Name="functions.cpp"/>
-    <File Name="functions.h"/>
+    <File Name="functions.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="functions.h" ExcludeProjConfig="Debug"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
     <Project Name="fmath"/>

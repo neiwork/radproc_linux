@@ -9,8 +9,8 @@
 State::State(boost::property_tree::ptree& cfg) :
  electron{ "electron" },
  photon{ "photon" },
- magf(photon.ps, false),
- tpf(photon.ps, false)
+ magf(photon.ps, false)
+ //tpf(photon.ps, false)
  {
 	particles.push_back(&electron);
 	particles.push_back(&photon);
@@ -23,8 +23,9 @@ State::State(boost::property_tree::ptree& cfg) :
 	magf.fill([&](const SpaceIterator& i){
 	    double r = i.val(DIM_R);
 	    double theta = i.val(DIM_THETA);
-	    return sqrt( beta * 24.0 * pi * pressureTot(r, theta) );
-	  };
+		return r*theta;
+//	    return sqrt( beta * 24.0 * pi * pressureTot(r, theta) );
+	  });
 	  
 //	tpf.initialize();
 //	tpf.fill([&](const SpaceIterator& i){
@@ -51,8 +52,8 @@ void State::initializeParticle(Particle& p, boost::property_tree::ptree& cfg)
 
 	// we can't use createDimension because we're multiplying by pc before creating them
 	// add dimension for R
-//	double rmin = p.getpar(cfg,"dim.radius.min", 1.0)*pc;
-//	double rmax = p.getpar(cfg,"dim.radius.max", 1.0e3)*pc;
+	double rmin = p.getpar(cfg,"dim.radius.min",10);   //rmin y rmax tiene que sacarlos de algun lado
+	double rmax = p.getpar(cfg,"dim.radius.max",10);
 	int nR = p.getpar(cfg,"dim.radius.samples", 5); // solo por ahora; y no deberia ser usado directamente desde otro lado
 	p.ps.add(new Dimension(nR, bind(initializeRPoints, std::placeholders::_1, rmin, rmax)));
 
