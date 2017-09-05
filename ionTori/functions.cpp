@@ -1,6 +1,6 @@
 // FUNCTIONS
 #include "functions.h"
-#include "modelParameters.h"
+//#include "modelParameters.h"
 #include <fmath/physics.h>
 #include <fmath/bisection.h>
 
@@ -23,16 +23,17 @@ double keplAngularMom(double r) {
 	
 	double massBH, spinBH;
 	readSpinMbh(massBH, spinBH);
-	
+
     return sqrt(massBH) * ( r*r - 2.0 * spinBH * sqrt(massBH*r) + spinBH*spinBH ) /
                (pow(r, 1.5) - 2.0 * massBH * sqrt(r) + spinBH* sqrt(massBH) );
 }
 
 // Torus Parameters
-void torusParameters(double *l_0, double *rCusp, double *rCenter) {
+void torusParameters(double l_0, double rCusp, double rCenter) {
     
 	double massBH, spinBH;
 	readSpinMbh(massBH, spinBH);
+	static const double lambda = GlobalConfig.get<double>("lambda");
 	
 	// Auxiliary variables
 	
@@ -49,9 +50,16 @@ void torusParameters(double *l_0, double *rCusp, double *rCenter) {
     double l_ms = keplAngularMom(r_ms);              // Keplerian specific angular momentum at r = r_ms
     double l_mb = keplAngularMom(r_mb);              // Keplerian specific angular momentum at r = r_mb
     
-    *l_0 = (1.0 - lambda) * l_ms + lambda * l_mb;
-    *rCusp = bisection(r_mb, r_ms, angular_mom(r) - (*l_0));
-    *rCenter = bisection(r_ms, 1000.0, angular_mom(r) - (*l_0));
+    l_0 = (1.0 - lambda) * l_ms + lambda * l_mb;
+	//rCusp = bisection(r_mb, r_ms, keplAngularMom(r) - (l_0));
+    //rCenter = bisection(r_ms, 1000.0, keplAngularMom(r) - (l_0));	
+	//para pasar una funcion que hay que modificar como argumento,
+	//hay que hacerlo como sigue:
+
+	rCusp = bisection(r_mb, r_ms, [&l_0](double r) {return keplAngularMom(r) - (l_0); });
+	rCenter = bisection(r_ms, 1000.0, [&l_0](double r) {return keplAngularMom(r) - (l_0); });
+
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +114,9 @@ double g_phiphi(double r, double theta) {
 
 // ANGULAR VELOCITIY OF THE TORUS
 double angularVel(double r, double theta)  {
-  return - ( g_tphi(r, theta) + (*l_0) * g_tt(r,theta) ) / ( g_phiphi(r, theta) + * (*l_0) * g_phiphi(r, theta) );
+	
+  static const double l_0 = GlobalConfig.get<double>("l_0");
+  return - ( g_tphi(r, theta) + (l_0) * g_tt(r,theta) ) / ( g_phiphi(r, theta) + * (*l_0) * g_phiphi(r, theta) );
 }
 
 // POTENTIAL FUNCTION

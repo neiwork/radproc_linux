@@ -2,6 +2,7 @@
 
 #include "State.h"
 
+#include "functions.h"
 #include <fmath/interpolation.h>
 #include <fmath/RungeKutta.h>
 
@@ -33,17 +34,14 @@ void prepareGlobalCfg()
     static const double energyC = GlobalConfig.get<double>("energyC");
 	static const double beta = GlobalConfig.get<double>("beta");*/
     
+	double l_0, rCusp, rCenter;
+
+	torusParameters(l_0, rCusp, rCenter);
 	
-	/*GlobalConfig.put("massBH", GlobalConfig.get<double>("massBH"));
-    GlobalConfig.put("spinBH", GlobalConfig.get<double>("spinBH") * massBH);
-    GlobalConfig.put("lambda", GlobalConfig.get<double>("lambda"));
-    GlobalConfig.put("xi", GlobalConfig.get<double>("xi"));
-    GlobalConfig.put("n", GlobalConfig.get<double>("n"));
-    GlobalConfig.put("energyC", GlobalConfig.get<double>("energyC"));
-	GlobalConfig.put("beta", GlobalConfig.get<double>("beta"));*/
-	
-	//OJO con los nombres beta y n!!
-	
+	GlobalConfig.put("l_0", GlobalConfig.get<double>("l_0"), l_0);
+    GlobalConfig.put("rCusp", GlobalConfig.get<double>("rCusp"), rCusp);
+    GlobalConfig.put("rCenter", GlobalConfig.get<double>("rCenter"), rCenter);
+    
 	//GlobalConfig.put("Dlorentz", GlobalConfig.get<double>("Dlorentz", computeDlorentz(Gamma)));
 	//DefOpt_IntLosses.samples_x = GlobalConfig.get<int>("integrate-losses.samples.x", DefOpt_IntLosses.samples_x);
 	//DefOpt_IntLosses.samples_t = GlobalConfig.get<int>("integrate-losses.samples.t", DefOpt_IntLosses.samples_t);

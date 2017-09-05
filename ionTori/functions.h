@@ -1,6 +1,6 @@
 #pragma once
 
-void torusParameters();
+void torusParameters(double l_0, double rCusp, double rCenter);
 
 double energyDensity(double r, double theta);
 
