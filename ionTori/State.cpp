@@ -53,10 +53,16 @@ void State::initializeParticle(Particle& p, boost::property_tree::ptree& cfg)
 
 	// we can't use createDimension because we're multiplying by pc before creating them
 	// add dimension for R
-	double rmin = p.getpar(cfg,"dim.radius.min",10);   //rmin y rmax tiene que sacarlos de algun lado
-	double rmax = p.getpar(cfg,"dim.radius.max",10);
+    double rmin = GlobalConfig.get<double>("rCusp");
+    double rmax = 3.0 * GlobalConfig.get<double>("rCenter");
 	int nR = p.getpar(cfg,"dim.radius.samples", 5); // solo por ahora; y no deberia ser usado directamente desde otro lado
-	p.ps.add(new Dimension(nR, bind(initializeRPoints, std::placeholders::_1, rmin, rmax)));
+	p.ps.add(new Dimension(nR, bind(initializePoints, std::placeholders::_1, rmin, rmax)));
+    
+    // add dimension for theta
+    double thetamin =0.0;                           // los defino aca porque no se si puedo poner pi en el .json
+    double thetamax = pi/2.0 - 1.e-2;
+    int thetaR = p.getpar(cfg, "dim.theta.samples", 5);
+    p.ps.add(new Dimension(thetaR, bind(initializePoints, std::placeholders::_1, thetamin, thetamax)));
 
 	// add dimension for T
 	// double tmin = p.getpar(cfg, "dim.time.min", 1.0)*pc;

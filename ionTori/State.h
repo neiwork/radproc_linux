@@ -14,7 +14,6 @@ public:
 	Particle photon;
 
 	ParamSpaceValues magf;
-//	ParamSpaceValues tpf;
 	ParamSpaceValues denf;
 
 	State(boost::property_tree::ptree& cfg);

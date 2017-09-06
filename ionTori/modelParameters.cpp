@@ -36,11 +36,28 @@ void prepareGlobalCfg()
     
 	double l_0, rCusp, rCenter;
 
-	torusParameters(l_0, rCusp, rCenter);
+	torusParameters(&l_0, &rCusp, &rCenter);
 	
 	GlobalConfig.put("l_0", GlobalConfig.get<double>("l_0"), l_0);
     GlobalConfig.put("rCusp", GlobalConfig.get<double>("rCusp"), rCusp);
     GlobalConfig.put("rCenter", GlobalConfig.get<double>("rCenter"), rCenter);
+    
+    mu_i = GlobalConfig.get<double>("mu_i");
+    mu_e = GlobalConfig.get<double>("mu_e");
+    xi = GlobalConfig.get<double>("xi");
+    
+    double M_0 = mu_i / (mu_e + mu_i);
+    double M_1 = mu_i * xi / (mu_e + mu_i * xi);
+    
+    GlobalConfig.put("M_0", GlobalConfig.get<double>("M_0"), M_0);
+    GlobalConfig.put("M_1", GlobalConfig.get<double>("M_1"), M_1);
+    
+    double temp_ec = GlobalConfig.get<double>("temp_ec");
+    double beta = GlobalConfig.get<double>("beta");
+    double energyC = GlobalConfig.get<double>("energyC");
+    
+    double pK = boltzmann * temp_ec / ( (1.0 - beta) * mu * pow(energyC, 2.0/3.0) * mu_e * M_1 );
+    GlobalConfig.put("pK", GlobalConfig.get<double>("pK")), pK);
     
 	//GlobalConfig.put("Dlorentz", GlobalConfig.get<double>("Dlorentz", computeDlorentz(Gamma)));
 	//DefOpt_IntLosses.samples_x = GlobalConfig.get<int>("integrate-losses.samples.x", DefOpt_IntLosses.samples_x);
@@ -60,26 +77,14 @@ void initializeEnergyPoints(Vector& v, double logEmin, double logEmax)
 	}
 }
 
-void initializeRPoints(Vector& v, double Rmin, double Rmax)
+void initializePoints(Vector& v, double min, double max)
 {
 
-	double R_int = pow((Rmax / Rmin), (1.0 / (v.size() - 1.0)));
+	double var_int = pow((max / min), (1.0 / (v.size() - 1.0)));
 
-	v[0] = Rmin;
-
-	for (size_t i = 1; i < v.size(); ++i){
-		v[i] = v[i - 1] * R_int;
-	}
-}
-
-void initializeThetaPoints(Vector& v, double Thetamin, double Thetamax)
-{
-
-	double Theta_int = pow((Thetamax / Thetamin), (1.0 / (v.size() - 1.0)));
-
-	v[0] = Thetamin;
+	v[0] = min;
 
 	for (size_t i = 1; i < v.size(); ++i){
-		v[i] = v[i - 1] * Theta_int;
+		v[i] = v[i - 1] * var_int;
 	}
 }
