@@ -9,6 +9,7 @@
 #include <fparameters/parameters.h>
 #include <fmath/physics.h>
 #include <fmath/configure.h>
+#include <fmath/constants.h>
 #include <iostream>
 #include <algorithm>
 
@@ -42,9 +43,9 @@ void prepareGlobalCfg()
     GlobalConfig.put("rCusp", GlobalConfig.get<double>("rCusp"), rCusp);
     GlobalConfig.put("rCenter", GlobalConfig.get<double>("rCenter"), rCenter);
     
-    mu_i = GlobalConfig.get<double>("mu_i");
-    mu_e = GlobalConfig.get<double>("mu_e");
-    xi = GlobalConfig.get<double>("xi");
+    static const double mu_i = GlobalConfig.get<double>("mu_i");
+    static const double mu_e = GlobalConfig.get<double>("mu_e");
+    static const double xi = GlobalConfig.get<double>("xi");
     
     double M_0 = mu_i / (mu_e + mu_i);
     double M_1 = mu_i * xi / (mu_e + mu_i * xi);
@@ -52,12 +53,12 @@ void prepareGlobalCfg()
     GlobalConfig.put("M_0", GlobalConfig.get<double>("M_0"), M_0);
     GlobalConfig.put("M_1", GlobalConfig.get<double>("M_1"), M_1);
     
-    double temp_ec = GlobalConfig.get<double>("temp_ec");
-    double beta = GlobalConfig.get<double>("beta");
-    double energyC = GlobalConfig.get<double>("energyC");
+    static const double temp_ec = GlobalConfig.get<double>("temp_ec");
+    static const double beta = GlobalConfig.get<double>("beta");
+    static const double energyC = GlobalConfig.get<double>("energyC");
     
-    double pK = boltzmann * temp_ec / ( (1.0 - beta) * mu * pow(energyC, 2.0/3.0) * mu_e * M_1 );
-    GlobalConfig.put("pK", GlobalConfig.get<double>("pK")), pK);
+    double pK = boltzmann * temp_ec / ( (1.0 - beta) * atomicMassUnit * pow(energyC, 2.0/3.0) * mu_e * M_1 );
+    GlobalConfig.put("pK", GlobalConfig.get<double>("pK"), pK);
     
 	//GlobalConfig.put("Dlorentz", GlobalConfig.get<double>("Dlorentz", computeDlorentz(Gamma)));
 	//DefOpt_IntLosses.samples_x = GlobalConfig.get<int>("integrate-losses.samples.x", DefOpt_IntLosses.samples_x);

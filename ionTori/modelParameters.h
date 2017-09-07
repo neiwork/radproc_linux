@@ -24,9 +24,9 @@ double eEmax(double z, double B);
 
 //void fillMagnetic(State& st);
 
-void initializeRPoints(Vector& v, double Rmin, double Rmax);
+void initializePoints(Vector& v, double min, double max);
 
-void initializeThetaPoints(Vector& v, double Thetamin, double Thetamax);
+void torusParameters(double *l_0, double *rCusp, double *rCenter);
 
 void initializeEnergyPoints(Vector& v, double logEmin, double logEmax);
 
