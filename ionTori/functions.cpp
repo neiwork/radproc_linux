@@ -1,11 +1,13 @@
 // FUNCTIONS
 #include "functions.h"
-//#include "modelParameters.h"
-#include <fmath/physics.h>
-#include <fmath/bisection.h>
+
+
+#include "modelParameters.h"
+
+
 
 #include <fparameters/parameters.h>
-
+#include <fmath/physics.h>
 #include <boost/property_tree/ptree.hpp>
 
 
@@ -17,7 +19,7 @@ void readSpinMbh(double massBH, double spinBH)
 }
 
 
-// Keplerian specific angular momentum
+/*// Keplerian specific angular momentum
 double keplAngularMom(double r) {
 	
 	double massBH, spinBH;
@@ -25,13 +27,14 @@ double keplAngularMom(double r) {
 
     return sqrt(massBH) * ( r*r - 2.0 * spinBH * sqrt(massBH*r) + spinBH*spinBH ) /
                (pow(r, 1.5) - 2.0 * massBH * sqrt(r) + spinBH* sqrt(massBH) );
-}
+}*/
 
 // Torus Parameters
-void torusParameters(double *l_0, double *rCusp, double *rCenter) {
+/*void torusParameters(double *l_0, double *rCusp, double *rCenter) {
     
-	double massBH, spinBH;
-	readSpinMbh(massBH, spinBH);
+	
+	massBH = GlobalConfig.get<double>("massBH");
+    spinBH = GlobalConfig.get<double>("spinBH") * massBH;
 	static const double lambda = GlobalConfig.get<double>("lambda");
 	
 	// Auxiliary variables
@@ -54,7 +57,7 @@ void torusParameters(double *l_0, double *rCusp, double *rCenter) {
 	*rCusp = bisection(r_mb, r_ms, [&l_0](double r) {return keplAngularMom(r) - (l_0); } );
 	*rCenter = bisection(r_ms, 1000.0, [&l_0](double r) {return keplAngularMom(r) - (l_0); } );
 
-}
+}*/
 
 /////////////////////////////////////////////////////////////////////////////////////
 // METRIC COMPONENTS (in Boyer-Lindquist coordinates)
@@ -144,7 +147,7 @@ double energyDensity (double r, double theta) {
 // PRESSURE
 double pressureTot (double r, double theta) {
     static const double pK = GlobalConfig.get<double>("pK");
-    static const double pK = GlobalConfig.get<double>("n");
+    static const double n = GlobalConfig.get<double>("n");
 
     return pK * pow(energyDensity(r, theta), 1.0 + 1.0/n);
 }

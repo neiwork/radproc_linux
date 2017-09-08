@@ -1,6 +1,7 @@
 #include "State.h"
 
 #include "functions.h"
+#include "modelParameters.h"
 #include <fparameters/Dimension.h>
 #include <fmath/physics.h>
 #include <fparameters/SpaceIterator.h>

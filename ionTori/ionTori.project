@@ -19,8 +19,10 @@
     <File Name="targetFields.h" ExcludeProjConfig="Debug"/>
     <File Name="write.cpp"/>
     <File Name="write.h"/>
-    <File Name="functions.cpp" ExcludeProjConfig="Debug"/>
-    <File Name="functions.h" ExcludeProjConfig="Debug"/>
+    <File Name="functions.cpp" ExcludeProjConfig=""/>
+    <File Name="functions.h" ExcludeProjConfig=""/>
+    <File Name="toroParam.cpp"/>
+    <File Name="toroParam.h"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
     <Project Name="fmath"/>

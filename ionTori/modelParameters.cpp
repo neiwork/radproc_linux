@@ -1,29 +1,19 @@
 #include "modelParameters.h"
 
-#include "State.h"
+//#include "State.h"
 
-#include "functions.h"
-#include <fmath/interpolation.h>
-#include <fmath/RungeKutta.h>
+//#include "targetFields.h"
+#include "toroParam.h"
+
 
 #include <fparameters/parameters.h>
 #include <fmath/physics.h>
 #include <fmath/configure.h>
-#include <fmath/constants.h>
+
 #include <iostream>
 #include <algorithm>
 
-// void fillMagnetic(State& st)
-// {
-	//static const double Gj = GlobalConfig.get<double>("Gamma");
 
-//	st.magf.fill([&](const SpaceIterator& i) {
-//		double z = i.val(DIM_R);
-//		int z_ix = i.coord[DIM_R];
-
-//		return computeMagField(z);  
-//	});
-//}*/
 
 void prepareGlobalCfg()
 {
@@ -39,9 +29,9 @@ void prepareGlobalCfg()
 
 	torusParameters(&l_0, &rCusp, &rCenter);
 	
-	GlobalConfig.put("l_0", GlobalConfig.get<double>("l_0"), l_0);
-    GlobalConfig.put("rCusp", GlobalConfig.get<double>("rCusp"), rCusp);
-    GlobalConfig.put("rCenter", GlobalConfig.get<double>("rCenter"), rCenter);
+	GlobalConfig.put("l_0", GlobalConfig.get<double>("l_0", l_0));
+    GlobalConfig.put("rCusp", GlobalConfig.get<double>("rCusp", rCusp));
+    GlobalConfig.put("rCenter", GlobalConfig.get<double>("rCenter", rCenter));
     
     static const double mu_i = GlobalConfig.get<double>("mu_i");
     static const double mu_e = GlobalConfig.get<double>("mu_e");
@@ -50,15 +40,15 @@ void prepareGlobalCfg()
     double M_0 = mu_i / (mu_e + mu_i);
     double M_1 = mu_i * xi / (mu_e + mu_i * xi);
     
-    GlobalConfig.put("M_0", GlobalConfig.get<double>("M_0"), M_0);
-    GlobalConfig.put("M_1", GlobalConfig.get<double>("M_1"), M_1);
+    GlobalConfig.put("M_0", GlobalConfig.get<double>("M_0", M_0));
+    GlobalConfig.put("M_1", GlobalConfig.get<double>("M_1", M_1));
     
     static const double temp_ec = GlobalConfig.get<double>("temp_ec");
     static const double beta = GlobalConfig.get<double>("beta");
     static const double energyC = GlobalConfig.get<double>("energyC");
     
     double pK = boltzmann * temp_ec / ( (1.0 - beta) * atomicMassUnit * pow(energyC, 2.0/3.0) * mu_e * M_1 );
-    GlobalConfig.put("pK", GlobalConfig.get<double>("pK"), pK);
+    GlobalConfig.put("pK", GlobalConfig.get<double>("pK", pK));
     
 	//GlobalConfig.put("Dlorentz", GlobalConfig.get<double>("Dlorentz", computeDlorentz(Gamma)));
 	//DefOpt_IntLosses.samples_x = GlobalConfig.get<int>("integrate-losses.samples.x", DefOpt_IntLosses.samples_x);

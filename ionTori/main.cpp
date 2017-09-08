@@ -1,6 +1,8 @@
 #include <stdio.h>
 
 
+#include "modelParameters.h"
+#include "targetFields.h"
 #include "State.h"
 #include "write.h"
 
