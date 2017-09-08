@@ -60,7 +60,10 @@ iii) $	cd boost_1_64_0/
 
 
 
+4) ionTori project-> settings:
 
+executable to run/debug: ./$(IntermediateDirectory)/$(ProjectName)
+working directory: .
 
 
 
