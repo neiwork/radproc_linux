@@ -5,6 +5,7 @@
 #include "targetFields.h"
 #include "State.h"
 #include "write.h"
+#include "radiativeLosses.h"
 
 #include <inout/ioutil.h>
 
@@ -27,7 +28,7 @@ int main()
 		State model(GlobalConfig.get_child("model"));
 		
 		
-		//radiativeLosses(model,folder+"\\electronLosses.txt");
+		radiativeLosses(model, folder+"\\electronLosses.txt");
 		
         
 		//ParamSpaceValues psv(model.electron.ps);

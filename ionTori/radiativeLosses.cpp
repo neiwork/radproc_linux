@@ -18,9 +18,8 @@
 void radiativeLosses(State& st, const std::string& filename)
 {
 	
-	
-	static const double accEfficiency = GlobalConfig.get<double>("accEfficiency");
-	static const double starT = GlobalConfig.get<double>("starT");
+//	static const double accEfficiency = GlobalConfig.get<double>("accEfficiency");
+//	static const double starT = GlobalConfig.get<double>("starT");
 	//static const double Gamma = GlobalConfig.get<double>("Gamma");
 	
 	//std::vector<File*> files;
@@ -39,8 +38,7 @@ void radiativeLosses(State& st, const std::string& filename)
 		//<< "\t" << "Ad" 
 		<< std::endl;
 	
-	double Emin = boltzmann*starT / 100.0;
-
+//	double Emin = 8.17e-7*1.1;
 	
 	st.electron.ps.iterate([&](const SpaceIterator& i){
 
@@ -50,6 +48,7 @@ void radiativeLosses(State& st, const std::string& filename)
 
 		double E = i.val(DIM_E);
 		double r = i.val(DIM_R);
+//        double theta = i.val(DIM_THETA);
 		
 		double logR = log10(r/pc);
 
@@ -65,16 +64,16 @@ void radiativeLosses(State& st, const std::string& filename)
 		//double eIC = lossesIC(E, st.electron, st.tpf, i.coord, Emin, 1.0e4*Emin) /E;
 					
 				
-		double Reff = 1.0e5;
-		double eDif  = diffusionRate(E, Reff, B);
-		double eAcc = accelerationRate(E, B, accEfficiency);
+//		double Reff = 1.0e5;
+//		double eDif  = diffusionRate(E, Reff, B);
+//		double eAcc = accelerationRate(E, B, accEfficiency);
 		//double eAdia = adiabaticLosses(i.val(DIM_E), i.val(DIM_R), vel_lat, Gamma) / i.val(DIM_E);
 		
 		file << fmtE << "\t" << logR 
 							<< "\t" << safeLog10(eSyn) 
 							//<< "\t" << safeLog10(eIC)
-							<< "\t" << safeLog10(eDif)
-							<< "\t" << safeLog10(eAcc)
+							//<< "\t" << safeLog10(eDif)
+							//<< "\t" << safeLog10(eAcc)
 							//<< "\t" << safeLog10(eAdia) 
 							<< std::endl;
 	
