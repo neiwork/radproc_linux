@@ -48,9 +48,7 @@ void radiativeLosses(State& st, const std::string& filename)
 
 		double E = i.val(DIM_E);
 		double r = i.val(DIM_R);
-//        double theta = i.val(DIM_THETA);
-		
-		double logR = log10(r/pc);
+        double theta = i.val(DIM_THETA);
 
 		double B = magf; // i.par.magneticField;
 
@@ -69,7 +67,9 @@ void radiativeLosses(State& st, const std::string& filename)
 //		double eAcc = accelerationRate(E, B, accEfficiency);
 		//double eAdia = adiabaticLosses(i.val(DIM_E), i.val(DIM_R), vel_lat, Gamma) / i.val(DIM_E);
 		
-		file << fmtE << "\t" << logR 
+		file << fmtE << "\t" << r
+                            << "\t" << theta
+                            << "\t" << magf
 							<< "\t" << safeLog10(eSyn) 
 							//<< "\t" << safeLog10(eIC)
 							//<< "\t" << safeLog10(eDif)

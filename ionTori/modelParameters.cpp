@@ -70,11 +70,12 @@ void initializeEnergyPoints(Vector& v, double logEmin, double logEmax)
 
 void initializePoints(Vector& v, double min, double max)
 {
-	double var_int = pow((max / min), (1.0 / (v.size() - 1.0)));
+//	double var_int = pow((max / min), (1.0 / (v.size() - 1.0)));
 
+    double var_int = (max-min) / v.size();
 	v[0] = min;
 
 	for (size_t i = 1; i < v.size(); ++i){
-		v[i] = v[i - 1] * var_int;
+		v[i] = v[i - 1] + var_int;
 	}
 }

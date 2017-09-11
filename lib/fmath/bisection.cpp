@@ -17,8 +17,7 @@
 
 #include "bisection.h"
 
-#define ZERO 1.0E-20
-
+#define ZERO 1.0E-10
 
 double bisection(double A, double B, fun1 fun)
 {
@@ -29,17 +28,16 @@ double bisection(double A, double B, fun1 fun)
 		std::cout << "F(A) and F(B) have same sign";
 	}
 
-	double TOL = 1.0e-2;  //Tolerancia
-	int N0 = 20; // 'Input maximum number of iterations '
+	double tol = 1.0e-2;  //Tolerancia
+	int n0 = 20; // 'Input maximum number of iterations '
 
 	double P;
 //     STEP 1
-	int I = 1;
+	int i = 1;
 
 	//     STEP 2
 
-	//016   IF(I.GT.N0) GOTO 020
-	while (I <= N0) {
+	while (i <= n0) {
 		//STEP 3
 		// COMPUTE P(I)
 		P = A + (B - A) / 2.0;
@@ -50,12 +48,12 @@ double bisection(double A, double B, fun1 fun)
 					// PROCEDURE COMPLETED SUCCESSFULLY
 					//deberia salir
 				//}
-		if (!(abs(FP) <= 1.0E-20 && (B - A) / 2.0 < TOL)) {
+		if ( ! ( abs(FP) <= ZERO && (B - A) / 2.0 < tol) ) {
 			//          STEP 5
-			I = I + 1;
+			i = i + 1;
 			//          STEP 6
 			//          COMPUTE A(I) AND B(I)
-			if (FA*FP > 0) {
+			if (FA*FP > 0.0) {
 				A = P;
 				FA = FP;
 			}
@@ -64,6 +62,9 @@ double bisection(double A, double B, fun1 fun)
 				FB = FP;
 			}
 		}
+		else
+		  return P;
+            
 		//020   CONTINUE cierro el do while
 	}
 

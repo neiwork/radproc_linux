@@ -1,114 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Session Name="/home/flor/projects/github/radproc_linux/ionTori/ionTori.workspace">
-  <int Value="11" Name="m_selectedTab"/>
-  <wxString Value="/home/flor/projects/github/radproc_linux/ionTori/ionTori.workspace" Name="m_workspaceName"/>
+<Session Name="/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/ionTori.workspace">
+  <int Value="2" Name="m_selectedTab"/>
+  <wxString Value="/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/ionTori.workspace" Name="m_workspaceName"/>
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
-      <wxString Value="/home/flor/projects/github/radproc_linux/ionTori/functions.cpp" Name="FileName"/>
-      <int Value="0" Name="FirstVisibleLine"/>
-      <int Value="1" Name="CurrentLine"/>
+      <wxString Value="/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/modelParameters.cpp" Name="FileName"/>
+      <int Value="29" Name="FirstVisibleLine"/>
+      <int Value="74" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
     <TabInfo>
-      <wxString Value="/home/flor/projects/github/radproc_linux/ionTori/modelParameters.cpp" Name="FileName"/>
-      <int Value="13" Name="FirstVisibleLine"/>
-      <int Value="29" Name="CurrentLine"/>
+      <wxString Value="/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/State.cpp" Name="FileName"/>
+      <int Value="9" Name="FirstVisibleLine"/>
+      <int Value="28" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
     <TabInfo>
-      <wxString Value="/home/flor/projects/github/radproc_linux/ionTori/main.cpp" Name="FileName"/>
-      <int Value="8" Name="FirstVisibleLine"/>
-      <int Value="24" Name="CurrentLine"/>
-      <wxArrayString Name="Bookmarks"/>
-      <IntVector Name="CollapsedFolds"/>
-    </TabInfo>
-    <TabInfo>
-      <wxString Value="/home/flor/projects/github/radproc_linux/lib/inout/ioutil.cpp" Name="FileName"/>
-      <int Value="23" Name="FirstVisibleLine"/>
-      <int Value="41" Name="CurrentLine"/>
-      <wxArrayString Name="Bookmarks"/>
-      <IntVector Name="CollapsedFolds"/>
-    </TabInfo>
-    <TabInfo>
-      <wxString Value="/home/flor/projects/github/radproc_linux/external/include/boost/property_tree/json_parser.hpp" Name="FileName"/>
-      <int Value="48" Name="FirstVisibleLine"/>
-      <int Value="71" Name="CurrentLine"/>
-      <wxArrayString Name="Bookmarks"/>
-      <IntVector Name="CollapsedFolds"/>
-    </TabInfo>
-    <TabInfo>
-      <wxString Value="/usr/include/c++/5/bits/move.h" Name="FileName"/>
-      <int Value="33" Name="FirstVisibleLine"/>
-      <int Value="50" Name="CurrentLine"/>
-      <wxArrayString Name="Bookmarks"/>
-      <IntVector Name="CollapsedFolds"/>
-    </TabInfo>
-    <TabInfo>
-      <wxString Value="/home/flor/projects/github/radproc_linux/external/include/boost/property_tree/json_parser/error.hpp" Name="FileName"/>
-      <int Value="6" Name="FirstVisibleLine"/>
-      <int Value="18" Name="CurrentLine"/>
-      <wxArrayString Name="Bookmarks"/>
-      <IntVector Name="CollapsedFolds"/>
-    </TabInfo>
-    <TabInfo>
-      <wxString Value="/home/flor/projects/github/radproc_linux/ionTori/modelParameters.h" Name="FileName"/>
-      <int Value="17" Name="FirstVisibleLine"/>
-      <int Value="17" Name="CurrentLine"/>
-      <wxArrayString Name="Bookmarks"/>
-      <IntVector Name="CollapsedFolds"/>
-    </TabInfo>
-    <TabInfo>
-      <wxString Value="/home/flor/projects/github/radproc_linux/ionTori/toroParam.cpp" Name="FileName"/>
-      <int Value="18" Name="FirstVisibleLine"/>
-      <int Value="49" Name="CurrentLine"/>
-      <wxArrayString Name="Bookmarks"/>
-      <IntVector Name="CollapsedFolds"/>
-    </TabInfo>
-    <TabInfo>
-      <wxString Value="/usr/include/c++/5/functional" Name="FileName"/>
-      <int Value="2235" Name="FirstVisibleLine"/>
-      <int Value="2266" Name="CurrentLine"/>
-      <wxArrayString Name="Bookmarks"/>
-      <IntVector Name="CollapsedFolds"/>
-    </TabInfo>
-    <TabInfo>
-      <wxString Value="/usr/include/c++/5/bits/stl_function.h" Name="FileName"/>
-      <int Value="103" Name="FirstVisibleLine"/>
-      <int Value="104" Name="CurrentLine"/>
-      <wxArrayString Name="Bookmarks"/>
-      <IntVector Name="CollapsedFolds"/>
-    </TabInfo>
-    <TabInfo>
-      <wxString Value="/home/flor/projects/github/radproc_linux/lib/fmath/bisection.cpp" Name="FileName"/>
-      <int Value="34" Name="FirstVisibleLine"/>
-      <int Value="70" Name="CurrentLine"/>
+      <wxString Value="/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/functions.cpp" Name="FileName"/>
+      <int Value="143" Name="FirstVisibleLine"/>
+      <int Value="151" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
   </TabInfoArray>
   <SerializedObject Name="m_breakpoints">
-    <long Value="2" Name="Count"/>
+    <long Value="1" Name="Count"/>
     <SerializedObject Name="Breakpoint0">
-      <wxString Value="/home/flor/projects/github/radproc_linux/ionTori/main.cpp" Name="file"/>
-      <int Value="25" Name="lineno"/>
-      <wxString Value="" Name="function_name"/>
-      <wxString Value="" Name="memory_address"/>
-      <int Value="1" Name="bp_type"/>
-      <int Value="0" Name="watchpoint_type"/>
-      <wxString Value="" Name="watchpt_data"/>
-      <CData Name="commandlist"/>
-      <bool Value="0" Name="regex"/>
-      <bool Value="0" Name="is_temp"/>
-      <bool Value="1" Name="is_enabled"/>
-      <int Value="0" Name="ignore_number"/>
-      <wxString Value="" Name="conditions"/>
-      <int Value="0" Name="origin"/>
-    </SerializedObject>
-    <SerializedObject Name="Breakpoint1">
-      <wxString Value="/home/flor/projects/github/radproc_linux/ionTori/modelParameters.cpp" Name="file"/>
-      <int Value="28" Name="lineno"/>
+      <wxString Value="/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/functions.cpp" Name="file"/>
+      <int Value="152" Name="lineno"/>
       <wxString Value="" Name="function_name"/>
       <wxString Value="" Name="memory_address"/>
       <int Value="1" Name="bp_type"/>

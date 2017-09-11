@@ -113,7 +113,7 @@ double g_phiphi(double r, double theta) {
 double angularVel(double r, double theta)  {
 	
   static const double l_0 = GlobalConfig.get<double>("l_0");
-  return - ( g_tphi(r, theta) + l_0 * g_tt(r,theta) ) / ( g_phiphi(r, theta) + l_0 * g_phiphi(r, theta) );
+  return - ( g_tphi(r, theta) + l_0 * g_tt(r,theta) ) / ( g_phiphi(r, theta) + l_0 * g_tphi(r, theta) );
 }
 
 // POTENTIAL FUNCTION
