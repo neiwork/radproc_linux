@@ -29,13 +29,14 @@ void radiativeLosses(State& st, const std::string& filename)
 	std::ofstream file;
 	file.open(filename.c_str(), std::ios::out);
 
-	file << "Log(E/eV)" << "\t" << "Log(R/pc)"
+	file << "Log(E/eV)" << "\t" << "r [M]"
+        << "\t" << "Theta"
 		<< "\t" << "Synchr"
-		<< "\t" << "IC"
-		<< "\t" << "ICAux"
-		<< "\t" << "Diff"
-		<< "\t" << "Acc"
-		//<< "\t" << "Ad" 
+//		<< "\t" << "IC"
+//		<< "\t" << "ICAux"
+//		<< "\t" << "Diff"
+//		<< "\t" << "Acc"
+//		//<< "\t" << "Ad" 
 		<< std::endl;
 	
 //	double Emin = 8.17e-7*1.1;
@@ -69,7 +70,6 @@ void radiativeLosses(State& st, const std::string& filename)
 		
 		file << fmtE << "\t" << r
                             << "\t" << theta
-                            << "\t" << magf
 							<< "\t" << safeLog10(eSyn) 
 							//<< "\t" << safeLog10(eIC)
 							//<< "\t" << safeLog10(eDif)

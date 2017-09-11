@@ -104,7 +104,7 @@ double g_phiphi(double r, double theta) {
 	
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
     return ( r*r + spinBH*spinBH + 2.0*massBH*r*spinBH*spinBH*cos(theta)*cos(theta) / sigma )
-    * sin(theta)*sin(theta);
+    * cos(theta)*cos(theta);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
