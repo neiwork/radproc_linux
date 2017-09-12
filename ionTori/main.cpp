@@ -28,8 +28,10 @@ int main()
 		State model(GlobalConfig.get_child("model"));
 		
 		
-		radiativeLosses(model, folder+"\\electronLosses.txt");
+		radiativeLosses(model, folder+"/electronLosses.txt");
 		
+		
+		writeRandTParamSpace(getFileName(folder, "magf"), model.magf, 0);
         
 		//ParamSpaceValues psv(model.electron.ps);
 
@@ -44,7 +46,7 @@ int main()
 		
 		//distribution(model.electron, model);
 
-		//writeAllSpaceParam(getFileName(folder, "eDist"), model.electron.distribution);
+		
 
 		//processes(model, getFileName(folder, "luminosity"));
 

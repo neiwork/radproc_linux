@@ -61,21 +61,19 @@ void writeEandRParamSpace(const std::string& filename, const ParamSpaceValues& d
 
 	// version acotada
 	//double time = log10(data.ps[1][t]);
+	
+	data.ps.iterate([&](const SpaceIterator& i){
 
-	for (int r_ix = 0; r_ix < data.ps[1].size(); r_ix++) {
-
-		double logR = log10(data.ps[1][r_ix] / pc);
+		double logE = log10(i.val(DIM_E) / 1.6e-12);
 		
-		data.ps.iterate([&](const SpaceIterator& i){
+		double r = i.val(DIM_R);
 
-			double logE = log10(i.val(DIM_E) / 1.6e-12);
+		double logQ = safeLog10(data.get(i));
 
-			double logQ = safeLog10(data.get(i));
-
-			file << logE << '\t' << logR << '\t' << logQ << std::endl;;
+		file << logE << '\t' << r << '\t' << logQ << std::endl;
 			
-		}, { -1, r_ix, t });  
-	}
+	}, { -1, -1, t });  
+
 	file.close();
 	generateViewScript(filename);
 }
@@ -127,38 +125,21 @@ void writeRandTParamSpace(const std::string& filename, const ParamSpaceValues& d
 	std::ofstream file;
 	file.open(dataName(filename).c_str(), std::ios::out);
 
-	// version acotada
-	double logE = log10(data.ps[0][E]/1.6e-12);
 
+	data.ps.iterate([&file, &data](const SpaceIterator& i){
 
-	file << "log(E)=" << logE << '\t' ;
-
-	for (size_t t_ix = 0; t_ix < data.ps[2].size(); t_ix++) {
-		double time = data.ps[2][t_ix];
-		file << "t=" << log10(time) << '\t';
-	}
-
-
-	for (int r_ix = 0; r_ix < data.ps[1].size(); r_ix++) {
-
-		file << std::endl;
-
-		double logR = data.ps[1][r_ix] / pc;
-
-		file << logR << '\t';
-
-		data.ps.iterate([&file, &data](const SpaceIterator& i){
-
-			double logQ = safeLog10(data.get(i));
-
-			file << logQ << '\t';
-			;
-		}, { E, r_ix, -1 });  //el -1 indica que las E se recorren, no quedan fijas
-		//las otras dos dimensiones quedan fijas en las posiciones r y t (recordar que la primera es 0 )
-	}
+		double r = i.val(DIM_R);
+		double theta = i.val(DIM_THETA);
+		
+		file << r << '\t' << theta << '\t' << data.get(i) << std::endl;
+		
+	}, { E, -1, -1 });  //el -1 indica que las E se recorren, no quedan fijas
+	//las otras dos dimensiones quedan fijas en las posiciones r y t (recordar que la primera es 0 )
+	
 	file.close();
 	generateViewScript(filename);
 }
+
 
 void writeEnergyFunction(const std::string& filename, const ParamSpaceValues& data, int r, int t)
 {
