@@ -27,11 +27,12 @@ int main()
 		prepareGlobalCfg();
 		State model(GlobalConfig.get_child("model"));
 		
+		//radiativeLosses(model, folder+"\\electronLosses.txt");
 		
-		radiativeLosses(model, folder+"/electronLosses.txt");
 		
-		
-		writeRandTParamSpace(getFileName(folder, "magf"), model.magf, 0);
+		//writeRandTParamSpace(getFileName(folder, "\\magf"), model.magf, 0);
+        writeRandTParamSpace("magf.dat", model.magf, 0);
+        writeRandTParamSpace("denf.dat", model.denf_i, 0);
         
 		//ParamSpaceValues psv(model.electron.ps);
 

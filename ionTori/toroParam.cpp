@@ -23,7 +23,7 @@ double keplAngularMom(double r) {
 }
 
 // Torus Parameters
-void torusParameters(double *l_0, double *rCusp, double *rCenter) {
+void torusParameters(double& l_0, double& rCusp, double& rCenter) {
     
 	
 	static const double massBH = GlobalConfig.get<double>("massBH");

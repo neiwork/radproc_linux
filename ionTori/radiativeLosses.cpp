@@ -6,6 +6,7 @@
 
 
 #include <flosses/lossesSyn.h>
+#include <flosses/lossesBrem.h>
 #include <flosses/nonThermalLosses.h>
 #include <flosses/lossesIC.h>
 #include <fparameters/SpaceIterator.h>
@@ -32,6 +33,7 @@ void radiativeLosses(State& st, const std::string& filename)
 	file << "Log(E/eV)" << "\t" << "r [M]"
         << "\t" << "Theta"
 		<< "\t" << "Synchr"
+        << "\t" << "Brems ei"
 //		<< "\t" << "IC"
 //		<< "\t" << "ICAux"
 //		<< "\t" << "Diff"
@@ -44,7 +46,8 @@ void radiativeLosses(State& st, const std::string& filename)
 	st.electron.ps.iterate([&](const SpaceIterator& i){
 
 		const double magf{ st.magf.get(i) };
-		//const double tpf{ st.tpf.get(i) };
+		const double denf_e{ st.denf_e.get(i) };
+        const double denf_i{ st.denf_i.get(i) };
 		double fmtE = log10(i.val(DIM_E) / 1.6e-12);
 
 		double E = i.val(DIM_E);
@@ -52,8 +55,13 @@ void radiativeLosses(State& st, const std::string& filename)
         double theta = i.val(DIM_THETA);
 
 		double B = magf; // i.par.magneticField;
+ //       double density_e = denf_e;
+        double density_i  = denf_i;
 
 		double eSyn = lossesSyn(E, B, st.electron) / E;
+        
+//        double eBrem_ee = lossesBremss(E, density_e, st.electron) / E;
+        double eBrem_ei  = lossesBremss(E, density_i, st.electron) / E;
 		
 		//double eIC = lossesIC(E, st.electron, 
 		//	[&E,&r](double E){
@@ -70,7 +78,9 @@ void radiativeLosses(State& st, const std::string& filename)
 		
 		file << fmtE << "\t" << r
                             << "\t" << theta
-							<< "\t" << safeLog10(eSyn) 
+							<< "\t" << safeLog10(eSyn)
+//                            << "\t" << safeLog10(eBrem_ee)
+                            << "\t" << safeLog10(eBrem_ei)
 							//<< "\t" << safeLog10(eIC)
 							//<< "\t" << safeLog10(eDif)
 							//<< "\t" << safeLog10(eAcc)

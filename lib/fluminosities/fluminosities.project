@@ -16,6 +16,10 @@
     <File Name="luminositySynchrotron.h"/>
     <File Name="opticalDepthSSA.cpp"/>
     <File Name="opticalDepthSSA.h"/>
+    <File Name="thermalBremss.cpp"/>
+    <File Name="thermalSync.cpp"/>
+    <File Name="thermalSync.h"/>
+    <File Name="thermalBremss.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include"/>
   <Dependencies Name="Debug">

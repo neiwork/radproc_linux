@@ -10,10 +10,12 @@ public:
 	std::vector<Particle*> particles;
 
 	Particle electron;
+    Particle proton;
 	Particle photon;
 
 	ParamSpaceValues magf;
-	ParamSpaceValues denf;
+	ParamSpaceValues denf_i;
+    ParamSpaceValues denf_e;
 
 	State(boost::property_tree::ptree& cfg);
 	

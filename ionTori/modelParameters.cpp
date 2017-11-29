@@ -27,7 +27,7 @@ void prepareGlobalCfg()
     
 	double l_0, rCusp, rCenter;
 
-	torusParameters(&l_0, &rCusp, &rCenter);
+	torusParameters(l_0, rCusp, rCenter);
 	
 	GlobalConfig.put("l_0", GlobalConfig.get<double>("l_0", l_0));
     GlobalConfig.put("rCusp", GlobalConfig.get<double>("rCusp", rCusp));
@@ -61,7 +61,7 @@ void initializeEnergyPoints(Vector& v, double logEmin, double logEmax)
 {
 	double Emax = 1.6e-12*pow(10, logEmax);
 	double Emin = 1.6e-12*pow(10, logEmin);
-	double E_int = pow((10 * Emax / Emin), (1.0 / (v.size() - 1)));
+	double E_int = pow((50 * Emax / Emin), (1.0 / (v.size() - 1)));
 	v[0] = Emin;
 	for (size_t i = 1; i < v.size(); ++i){
 		v[i] = v[i - 1] * E_int;

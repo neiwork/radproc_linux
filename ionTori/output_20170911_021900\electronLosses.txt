@@ -1,1 +1,0 @@
-Log(E/eV)	Log(R/pc)	Synchr	IC	ICAux	Diff	Acc
