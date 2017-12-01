@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=Eduardo Mario Gutiérrez
-Date                   :=25/09/17
+Date                   :=01/12/17
 CodeLitePath           :="/home/eduardog/.codelite"
 LinkerName             :=/usr/bin/g++
 SharedObjectLinkerName :=/usr/bin/g++ -shared -fPIC
@@ -60,7 +60,7 @@ AS       := /usr/bin/as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/luminosityIC.cpp$(ObjectSuffix) $(IntermediateDirectory)/luminositySynchrotron.cpp$(ObjectSuffix) $(IntermediateDirectory)/opticalDepthSSA.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/luminosityIC.cpp$(ObjectSuffix) $(IntermediateDirectory)/luminositySynchrotron.cpp$(ObjectSuffix) $(IntermediateDirectory)/opticalDepthSSA.cpp$(ObjectSuffix) $(IntermediateDirectory)/thermalBremss.cpp$(ObjectSuffix) $(IntermediateDirectory)/thermalSync.cpp$(ObjectSuffix) 
 
 
 
@@ -116,6 +116,22 @@ $(IntermediateDirectory)/opticalDepthSSA.cpp$(DependSuffix): opticalDepthSSA.cpp
 
 $(IntermediateDirectory)/opticalDepthSSA.cpp$(PreprocessSuffix): opticalDepthSSA.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/opticalDepthSSA.cpp$(PreprocessSuffix) "opticalDepthSSA.cpp"
+
+$(IntermediateDirectory)/thermalBremss.cpp$(ObjectSuffix): thermalBremss.cpp $(IntermediateDirectory)/thermalBremss.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/lib/fluminosities/thermalBremss.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/thermalBremss.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/thermalBremss.cpp$(DependSuffix): thermalBremss.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/thermalBremss.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/thermalBremss.cpp$(DependSuffix) -MM "thermalBremss.cpp"
+
+$(IntermediateDirectory)/thermalBremss.cpp$(PreprocessSuffix): thermalBremss.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/thermalBremss.cpp$(PreprocessSuffix) "thermalBremss.cpp"
+
+$(IntermediateDirectory)/thermalSync.cpp$(ObjectSuffix): thermalSync.cpp $(IntermediateDirectory)/thermalSync.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/lib/fluminosities/thermalSync.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/thermalSync.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/thermalSync.cpp$(DependSuffix): thermalSync.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/thermalSync.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/thermalSync.cpp$(DependSuffix) -MM "thermalSync.cpp"
+
+$(IntermediateDirectory)/thermalSync.cpp$(PreprocessSuffix): thermalSync.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/thermalSync.cpp$(PreprocessSuffix) "thermalSync.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=Eduardo Mario Gutiérrez
-Date                   :=25/09/17
+Date                   :=01/12/17
 CodeLitePath           :="/home/eduardog/.codelite"
 LinkerName             :=/usr/bin/g++
 SharedObjectLinkerName :=/usr/bin/g++ -shared -fPIC
@@ -60,7 +60,7 @@ AS       := /usr/bin/as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/modelParameters.cpp$(ObjectSuffix) $(IntermediateDirectory)/radiativeLosses.cpp$(ObjectSuffix) $(IntermediateDirectory)/State.cpp$(ObjectSuffix) $(IntermediateDirectory)/write.cpp$(ObjectSuffix) $(IntermediateDirectory)/functions.cpp$(ObjectSuffix) $(IntermediateDirectory)/toroParam.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/modelParameters.cpp$(ObjectSuffix) $(IntermediateDirectory)/radiativeLosses.cpp$(ObjectSuffix) $(IntermediateDirectory)/State.cpp$(ObjectSuffix) $(IntermediateDirectory)/write.cpp$(ObjectSuffix) $(IntermediateDirectory)/functions.cpp$(ObjectSuffix) $(IntermediateDirectory)/toroParam.cpp$(ObjectSuffix) $(IntermediateDirectory)/luminosities.cpp$(ObjectSuffix) 
 
 
 
@@ -178,6 +178,14 @@ $(IntermediateDirectory)/toroParam.cpp$(DependSuffix): toroParam.cpp
 
 $(IntermediateDirectory)/toroParam.cpp$(PreprocessSuffix): toroParam.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/toroParam.cpp$(PreprocessSuffix) "toroParam.cpp"
+
+$(IntermediateDirectory)/luminosities.cpp$(ObjectSuffix): luminosities.cpp $(IntermediateDirectory)/luminosities.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/luminosities.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/luminosities.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/luminosities.cpp$(DependSuffix): luminosities.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/luminosities.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/luminosities.cpp$(DependSuffix) -MM "luminosities.cpp"
+
+$(IntermediateDirectory)/luminosities.cpp$(PreprocessSuffix): luminosities.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/luminosities.cpp$(PreprocessSuffix) "luminosities.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

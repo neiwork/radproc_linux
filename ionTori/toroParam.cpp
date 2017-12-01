@@ -45,9 +45,9 @@ void torusParameters(double& l_0, double& rCusp, double& rCenter) {
     double l_ms = keplAngularMom(r_ms);              // Keplerian specific angular momentum at r = r_ms
     double l_mb = keplAngularMom(r_mb);             // Keplerian specific angular momentum at r = r_mb
     
-    *l_0 = (1.0 - lambda) * l_ms + lambda * l_mb;
+    l_0 = (1.0 - lambda) * l_ms + lambda * l_mb;
 
-	*rCusp = bisection(r_mb, r_ms, [&l_0](double r) {return keplAngularMom(r) - (*l_0); } );
-	*rCenter = bisection(r_ms, 1000.0, [&l_0](double r) {return keplAngularMom(r) - (*l_0); } );
+	rCusp = bisection(r_mb, r_ms, [&l_0](double r) {return keplAngularMom(r) - (l_0); } );
+	rCenter = bisection(r_ms, 1000.0, [&l_0](double r) {return keplAngularMom(r) - (l_0); } );
 
 }

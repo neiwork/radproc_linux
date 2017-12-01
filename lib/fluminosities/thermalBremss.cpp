@@ -3,45 +3,44 @@
 #include <fparameters/parameters.h>
 #include <fmath/physics.h>
 
-double eiCoolingRate() {
+double eiAuxFunction(double norm_temp) {
+    if (norm_temp < 1.0)
+        return 4.0 * sqrt(2.0 * norm_temp / P3(pi)) * (1.0 + 1.781 * pow(norm_temp, 1.34));
+    else if (norm_temp >= 1.0)
+        return 9.0 * norm_temp / (2.0 * pi) * (log(1.123 * norm_temp + 0.48) + 1.5);
+}
+
+double eiCoolingRate(double norm_temp, double denf_e, double denf_i) {
     
-    norm_temp = boltzmann * temp_e(r, theta) / (electronMass * cLight2);
     return denf_i * denf_e * thomson * fineStructConst * electronMass * P3(cLight) * eiAuxFunction(norm_temp);
+}    // pasar solo la temperatura en un punto.
+
+double eeAuxFunction(double norm_temp) {
+    
+    if (norm_temp < 1.0)
+        return 20.0/(9.0 * sqrt(pi)) * (44.0-3.0*P2(pi)) * pow(norm_temp, 1.5) * 
+        (1.0 + 1.1*norm_temp + P2(norm_temp) - 1.25 * pow(norm_temp, 2.5));
+    else if (norm_temp >= 1.0)
+        return 24.0 * norm_temp * (log(2.0 * 0.5616 * norm_temp) + 1.28);
 }
 
-double eiAuxFunction(double temp) {
-    
-    if (temp < 1.0)
-        return 4.0 * sqrt(2.0 * temp / P3(PI)) * (1.0 + 1.781 * pow(temp, 1.34));
-    else if (temp >= 1.0)
-        return 9.0 * temp / (2.0 * PI) * (log(1.123 * temp + 0.48) + 1.5);
-}
-
-double eeCoolingRate() {
-    
-    norm_temp = boltzmann * temp_e(r, theta) / (electronMass * cLight2);
+double eeCoolingRate(double norm_temp, double denf_e) {
     return P2(denf_e *electronRadius) * fineStructConst * electronMass * P3(cLight) * eeAuxFunction(norm_temp);
 }
 
-double eeAuxFunction(double temp) {
-    
-    if (temp < 1.0)
-        return 20.0/(9.0 * sqrt(PI)) * (44.0-3.0*P2(PI)) * pow(temp, 1.5) * (1.0 + 1.1*temp + P2(temp) - 1.25*pow(temp,2.5));
-    else if (temp >= 1.0)
-        return 24.0 * temp * (log(2.0 * 0.5616 * temp) + 1.28);
+double gauntFactor(double temp_aux) {
+    if (temp_aux < 1.0)
+        return sqrt(3.0 / pi * temp_aux );
+    else if (temp_aux >= 1.0)
+        return sqrt(3.0) / pi * log(4.0 / 0.576965 * temp_aux);
 }
 
-double jBremss(double frecuency, double r, double theta) {
+double jBremss(double energy, double temp, double denf_i, double denf_e) {
     
-    double aux = eeCoolingRate() + eiCoolingRate();
-    double aux2 = boltzmann * temp_e(r, theta) / (planck * frecuency);
+    double norm_temp = boltzmann * temp / (electronMass * cLight2);
     
-    return aux/(4.0*PI) * planck/(boltzmann*temp_e(r, theta)) * exp(- (1.0/aux2)) * gauntFactor(aux2, frecuency);
-}
-
-double gauntFactor(double temp, double frecuency) {
-    if (temp < 1.0)
-        return sqrt(3.0 / PI * temp );
-    else if (temp >= 1.0)
-        return sqrt(3.0) / PI * log(4.0 / 0.576965 * temp);
+    double aux = eeCoolingRate(norm_temp, denf_e) + eiCoolingRate(norm_temp, denf_e, denf_i);
+    double temp_aux = boltzmann * temp / energy;
+    
+    return aux/(4.0*pi) * planck/(boltzmann*temp) * exp(- (1.0/temp_aux)) * gauntFactor(temp_aux);
 }

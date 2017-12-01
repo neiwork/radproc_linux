@@ -1,5 +1,3 @@
 #pragma once
 
-#include <fparticle/Particle.h>
-
-double jSync(double);
+double jSync(double, double, double, double);

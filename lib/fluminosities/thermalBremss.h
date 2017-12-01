@@ -2,4 +2,4 @@
 
 #include <fparticle/Particle.h>
 
-double jBremss(double);
+double jBremss(double, double, double, double);

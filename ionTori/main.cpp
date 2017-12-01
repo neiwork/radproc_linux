@@ -6,6 +6,7 @@
 #include "State.h"
 #include "write.h"
 #include "radiativeLosses.h"
+#include "luminosities.h"
 
 #include <inout/ioutil.h>
 
@@ -28,6 +29,7 @@ int main()
 		State model(GlobalConfig.get_child("model"));
 		
 		//radiativeLosses(model, folder+"\\electronLosses.txt");
+        luminosities(model, folder+"\\electronLuminosities.txt");
 		
 		
 		//writeRandTParamSpace(getFileName(folder, "\\magf"), model.magf, 0);

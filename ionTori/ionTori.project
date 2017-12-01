@@ -23,6 +23,8 @@
     <File Name="functions.h" ExcludeProjConfig=""/>
     <File Name="toroParam.cpp"/>
     <File Name="toroParam.h"/>
+    <File Name="luminosities.cpp"/>
+    <File Name="luminosities.h"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
     <Project Name="fmath"/>

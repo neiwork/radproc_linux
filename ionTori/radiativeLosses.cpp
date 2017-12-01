@@ -88,7 +88,7 @@ void radiativeLosses(State& st, const std::string& filename)
 							<< std::endl;
 	
 
-	}, { -1, -1, -1 }); 
+	}, { -1, -1, -1 });  // poner 0 para que no integre sobre la energía
 
 
 	file.close();

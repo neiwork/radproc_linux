@@ -108,6 +108,8 @@
     <File Name="RungeKutta.h"/>
     <File Name="bisection.cpp"/>
     <File Name="bisection.h"/>
+    <File Name="mathFunctions.cpp"/>
+    <File Name="mathFunctions.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include"/>
 </CodeLite_Project>

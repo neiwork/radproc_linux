@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=Eduardo Mario Gutiérrez
-Date                   :=25/09/17
+Date                   :=01/12/17
 CodeLitePath           :="/home/eduardog/.codelite"
 LinkerName             :=/usr/bin/g++
 SharedObjectLinkerName :=/usr/bin/g++ -shared -fPIC
@@ -60,7 +60,7 @@ AS       := /usr/bin/as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/elimiGaussiana.cpp$(ObjectSuffix) $(IntermediateDirectory)/gaussianScaledPivoting.cpp$(ObjectSuffix) $(IntermediateDirectory)/interpolation.cpp$(ObjectSuffix) $(IntermediateDirectory)/matrixInit.cpp$(ObjectSuffix) $(IntermediateDirectory)/RungeKutta.cpp$(ObjectSuffix) $(IntermediateDirectory)/bisection.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/elimiGaussiana.cpp$(ObjectSuffix) $(IntermediateDirectory)/gaussianScaledPivoting.cpp$(ObjectSuffix) $(IntermediateDirectory)/interpolation.cpp$(ObjectSuffix) $(IntermediateDirectory)/matrixInit.cpp$(ObjectSuffix) $(IntermediateDirectory)/RungeKutta.cpp$(ObjectSuffix) $(IntermediateDirectory)/bisection.cpp$(ObjectSuffix) $(IntermediateDirectory)/mathFunctions.cpp$(ObjectSuffix) 
 
 
 
@@ -140,6 +140,14 @@ $(IntermediateDirectory)/bisection.cpp$(DependSuffix): bisection.cpp
 
 $(IntermediateDirectory)/bisection.cpp$(PreprocessSuffix): bisection.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/bisection.cpp$(PreprocessSuffix) "bisection.cpp"
+
+$(IntermediateDirectory)/mathFunctions.cpp$(ObjectSuffix): mathFunctions.cpp $(IntermediateDirectory)/mathFunctions.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/lib/fmath/mathFunctions.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/mathFunctions.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/mathFunctions.cpp$(DependSuffix): mathFunctions.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/mathFunctions.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/mathFunctions.cpp$(DependSuffix) -MM "mathFunctions.cpp"
+
+$(IntermediateDirectory)/mathFunctions.cpp$(PreprocessSuffix): mathFunctions.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/mathFunctions.cpp$(PreprocessSuffix) "mathFunctions.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)
