@@ -1,3 +1,7 @@
 #pragma once
 
-double jSync(double, double, double, double);
+//#include <fparticle/Particle.h> este no es necesario incluirlo aca porque no lo estas usando por ahora
+
+
+double jSync(double energy, double temp, double magfield, double denf_e);
+//double mAux(double frecuency, double norm_temp, double magfield);

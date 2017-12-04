@@ -11,9 +11,25 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include <fmath/mathFunctions.h>
 #include <fluminosities/thermalSync.h>
 #include <fluminosities/thermalBremss.h>
+#include <fmath/physics.h>
 
+
+/*double jSync(double energy, double temp, double magfield, double denf_e) {
+    
+    double frecuency = energy / planck;
+    double norm_temp = boltzmann * temp / (electronMass * cLight2);
+	
+	//double bessel =  bessk(1,3.0);
+	
+	//(1.0/4.0*pi) deberia ser (1.0/(4.0*pi)) ? lo mismo con el denominador del resultado
+    return (1.0/4.0*pi) * P2(electronCharge)/(sqrt(3.0)*cLight) * (4.0 * pi * denf_e * frecuency) / 
+		(bessk(2, 1.0/norm_temp) * mAux(frecuency, norm_temp, magfield));
+}   // esto debería tener unidades de erg cm^-3 ster^-1
+
+*/
 void luminosities(State& st, const std::string& filename) {
     
     std::ofstream file;
@@ -36,9 +52,13 @@ void luminosities(State& st, const std::string& filename) {
         double energy = i.val(DIM_E);
         double r = i.val(DIM_R);
         double theta = i.val(DIM_THETA);
-    
-        double jSy = jSync(energy, temp_e(r, theta), magf, denf_e);
-        double jBr = jBremss(energy, temp_e(r, theta), denf_e, denf_i);
+		
+		double temp = temp_e(r, theta);
+		
+		  
+ //jSync(double energy, double temp, double magfield, double denf_e)
+        double jSy = jSync(energy, temp, magf, denf_e);
+        double jBr = jBremss(energy, temp, denf_e, denf_i);  
     
         file << fmtE << "\t" << r
                             << "\t" << theta

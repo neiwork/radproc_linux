@@ -1,11 +1,11 @@
 #include "luminosityPhotoHadronic.h"
 
-#include <fparameters\parameters.h>
-#include <fmath\RungeKutta.h>
-#include <fmath\interpolation.h>
-#include <flosses\crossSectionInel.h>
-#include <finjection\pgammaPionInj.h>
-#include <fmath\physics.h>
+#include <fparameters/parameters.h>
+#include <fmath/RungeKutta.h>
+#include <fmath/interpolation.h>
+#include <flosses/crossSectionInel.h>
+#include <finjection/pgammaPionInj.h>
+#include <fmath/physics.h>
 
 
 double luminosityPhotoHadronic(double E, Particle& creator, fun1 tpf)

@@ -1,4 +1,4 @@
-#include <thermalBremss.h>
+#include "thermalBremss.h"
 
 #include <fparameters/parameters.h>
 #include <fmath/physics.h>
@@ -38,6 +38,7 @@ double gauntFactor(double temp_aux) {
 double jBremss(double energy, double temp, double denf_i, double denf_e) {
     
     double norm_temp = boltzmann * temp / (electronMass * cLight2);
+	
     
     double aux = eeCoolingRate(norm_temp, denf_e) + eiCoolingRate(norm_temp, denf_e, denf_i);
     double temp_aux = boltzmann * temp / energy;

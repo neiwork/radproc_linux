@@ -1,4 +1,5 @@
 #include "mathFunctions.h"
+
 #include <math.h>
 
 double bessi0(double x)
@@ -19,7 +20,7 @@ double bessi0(double x)
                 +y*(-0.2057706e-1+y*(0.2635537e-1+y*(-0.1647633e-1
                 +y*0.392377e-2))))))));
     }
-return ans;
+	return ans;
 }
 
 double bessk0(double x)
@@ -38,7 +39,7 @@ double bessk0(double x)
                 +y*(0.2189568e-1+y*(-0.1062446e-1+y*(0.587872e-2
                 +y*(-0.251540e-2+y*0.53208e-3))))));
     }
-return ans;
+	return ans;
 }
 
 double bessi1(double x)
@@ -60,7 +61,7 @@ double bessi1(double x)
             +y*(0.163801e-2+y*(-0.1031555e-1+y*ans))));
         ans *= (exp(ax)/sqrt(ax));
     }
-return x < 0.0 ? -ans : ans;
+	return x < 0.0 ? -ans : ans;
 }
 
 double bessk1(double x)
@@ -82,19 +83,20 @@ double bessk1(double x)
     return ans;
 }
     
-double bessk(int n, double x) {
+double bessk(int n, double x) 
+{
 // Returns the modified Bessel function K_n(x) for positive x and n>=2.
     
-    int j;
-    double bk,bkm,bkp,tox;
+    //int j;
+   // double bk, bkm, bkp, tox;
     
-    tox=2.0/x;
-    bkm=bessk0(x);
-    bk=bessk1(x);
-    for (j=1;j<n;j++) {
-        bkp=bkm+j*tox*bk;
-        bkm=bk;
-        bk=bkp;
+    double tox = 2.0/x;
+    double bkm = bessk0(x);
+    double bk = bessk1(x);
+    for (int j=1;j<n;j++) {
+        double bkp = bkm + j*tox*bk;
+        bkm = bk;
+        bk = bkp;
     }
-return bk;
+	return bk;
 }

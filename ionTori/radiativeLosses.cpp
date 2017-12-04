@@ -46,8 +46,19 @@ void radiativeLosses(State& st, const std::string& filename)
 	st.electron.ps.iterate([&](const SpaceIterator& i){
 
 		const double magf{ st.magf.get(i) };
-		const double denf_e{ st.denf_e.get(i) };
         const double denf_i{ st.denf_i.get(i) };
+		//edu , esto de arriba es una forma de asignarle el valor del psv que corresponde al lugar i, a una nueva variable double
+		//el nombre de la variable puede ser cualquier cosa
+		//por ejemplo, en vez de hacer
+		//const double denf_e{ st.denf_e.get(i) };
+		//double density_e = denf_e;
+		//directamente haces
+		const double density_e{ st.denf_e.get(i) };
+		// o lo que es lo mismo
+		//const double density_e = st.denf_e.get(i);
+		
+		
+		
 		double fmtE = log10(i.val(DIM_E) / 1.6e-12);
 
 		double E = i.val(DIM_E);
@@ -55,7 +66,7 @@ void radiativeLosses(State& st, const std::string& filename)
         double theta = i.val(DIM_THETA);
 
 		double B = magf; // i.par.magneticField;
- //       double density_e = denf_e;
+        
         double density_i  = denf_i;
 
 		double eSyn = lossesSyn(E, B, st.electron) / E;

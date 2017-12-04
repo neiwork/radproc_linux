@@ -10,7 +10,7 @@ public:
 	std::vector<Particle*> particles;
 
 	Particle electron;
-    Particle proton;
+    //Particle proton;
 	Particle photon;
 
 	ParamSpaceValues magf;

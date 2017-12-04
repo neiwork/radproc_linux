@@ -11,8 +11,9 @@
 State::State(boost::property_tree::ptree& cfg) :
  electron{ "electron" },
  photon{ "photon" },
+ //proton("proton"),
  magf(photon.ps, false),
- denf_i(photon.ps, false)
+ denf_i(photon.ps, false),
  denf_e(photon.ps, false)
  {
 	particles.push_back(&electron);

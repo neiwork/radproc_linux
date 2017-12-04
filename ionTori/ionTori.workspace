@@ -18,7 +18,7 @@
       <Project Name="inout" ConfigName="Debug"/>
       <Project Name="ionTori" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="yes">
+    <WorkspaceConfiguration Name="Release" Selected="no">
       <Environment/>
       <Project Name="fmath" ConfigName="Release"/>
       <Project Name="fparameters" ConfigName="Release"/>

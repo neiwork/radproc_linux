@@ -1,11 +1,9 @@
 #pragma once
 
-#include <math.h>
+#include "physics.h"
+//double bessi0(double x);
+//double bessk0(double x);
+//double bessi1(double x);
+//double bessk1(double x);
 
-double bessi0(double);
-double bessk0(double);
-
-double bessi1(double);
-double bessk1(double);
-
-double bessk(int, double);
+double bessk(int n, double x);

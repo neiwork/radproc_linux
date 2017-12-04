@@ -34,7 +34,7 @@ int main()
 		
 		//writeRandTParamSpace(getFileName(folder, "\\magf"), model.magf, 0);
         writeRandTParamSpace("magf.dat", model.magf, 0);
-        writeRandTParamSpace("denf.dat", model.denf_i, 0);
+        //writeRandTParamSpace("denf.dat", model.denf_i, 0);
         
 		//ParamSpaceValues psv(model.electron.ps);
 
