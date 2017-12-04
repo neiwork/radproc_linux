@@ -39,9 +39,9 @@ LinkOptions            :=
 IncludePath            :=  $(IncludeSwitch). $(IncludeSwitch). $(IncludeSwitch)../lib $(IncludeSwitch)../external/include 
 IncludePCH             := 
 RcIncludePath          := 
-Libs                   := $(LibrarySwitch)boost_filesystem $(LibrarySwitch)boost_system $(LibrarySwitch)fmath $(LibrarySwitch)fparameters $(LibrarySwitch)fparticle $(LibrarySwitch)flosses $(LibrarySwitch)fluminosities $(LibrarySwitch)inout 
-ArLibs                 :=  "boost_filesystem" "boost_system" "fmath" "fparameters" "fparticle" "flosses" "fluminosities" "inout" 
-LibPath                := $(LibraryPathSwitch). $(LibraryPathSwitch)../external/lib $(LibraryPathSwitch)../lib/fmath/Debug $(LibraryPathSwitch)../lib/fparameters/Debug $(LibraryPathSwitch)../lib/fparticle/Debug $(LibraryPathSwitch)../lib/flosses/Debug $(LibraryPathSwitch)../lib/fluminosities/Debug $(LibraryPathSwitch)../lib/inout/Debug 
+Libs                   := $(LibrarySwitch)boost_filesystem $(LibrarySwitch)boost_system $(LibrarySwitch)fparameters $(LibrarySwitch)fparticle $(LibrarySwitch)flosses $(LibrarySwitch)fluminosities $(LibrarySwitch)inout $(LibrarySwitch)fmath 
+ArLibs                 :=  "boost_filesystem" "boost_system" "fparameters" "fparticle" "flosses" "fluminosities" "inout" "fmath" 
+LibPath                := $(LibraryPathSwitch)../external/lib $(LibraryPathSwitch)../lib/fmath/Debug $(LibraryPathSwitch)../lib/fparameters/Debug $(LibraryPathSwitch)../lib/fparticle/Debug $(LibraryPathSwitch)../lib/flosses/Debug $(LibraryPathSwitch)../lib/fluminosities/Debug $(LibraryPathSwitch)../lib/inout/Debug $(LibraryPathSwitch). 
 
 ##
 ## Common variables

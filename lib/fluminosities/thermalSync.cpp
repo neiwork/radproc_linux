@@ -1,16 +1,8 @@
 #include "thermalSync.h"
 
-#include <fmath/bisection.h>
-
 #include <fmath/mathFunctions.h>
 #include <fmath/physics.h>
-//#include <fparameters/parameters.h>
 
-
-double prueba (double x)
-{ return x*(x-1.0);}
-
-	
 
 double mAux(double frecuency, double norm_temp, double magfield) {
     
@@ -20,8 +12,6 @@ double mAux(double frecuency, double norm_temp, double magfield) {
     double alpha = 1.0;
     double beta   = 1.0;
     double gamma = 1.0;
-	
-	//double bessel =  bessk(2,xM);
 
 	double result = (4.0505 * alpha / pow(xM, 1.0/6.0) ) * (1.0 + 0.4*beta / pow(xM, 1.0/4.0) + 
                 0.5316 * gamma / sqrt(xM) ) * exp(-1.8899 * pow(xM, 1.0/3.0));
@@ -36,20 +26,10 @@ double jSync(double energy, double temp, double magfield, double denf_e)
 	
 	double bessel = bessk(2, 1.0/norm_temp);
 	
+	
 	//(1.0/4.0*pi) deberia ser (1.0/(4.0*pi)) ? lo mismo con el denominador del resultado
 	double result = (1.0/4.0*pi) * P2(electronCharge)/(sqrt(3.0)*cLight) * (4.0 * pi * denf_e * frecuency) / 
 		(bessel * mAux(frecuency, norm_temp, magfield));
-		
-		
-	double x = bisection(0.5,1.0/norm_temp,prueba);
-	
-    return x;
-}/*
-    
-	
-	
-	
 	
     return result;
 }   // esto debería tener unidades de erg cm^-3 ster^-1
-*/

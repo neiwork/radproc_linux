@@ -4,4 +4,3 @@
 
 
 double jSync(double energy, double temp, double magfield, double denf_e);
-//double mAux(double frecuency, double norm_temp, double magfield);
