@@ -3,15 +3,48 @@
 #include <fmath/mathFunctions.h>
 #include <fmath/physics.h>
 
+double auxiliaryFunction(double& alpha, double& beta, double& gamma, double temp) {
+    
+    if (temp < 5.0e8) {
+        alpha = 0.0431;
+        beta   = 10.44;
+        gamma = 16.61;
+    } else if (temp >= 5.0e8 && temp < 1.0e9) {
+        alpha = 1.121;
+        beta   = -10.65;
+        gamma = 9.169;
+    } else if (temp >= 1.0e9 && temp < 2.0e9) {
+        alpha = 1.180;
+        beta   = -4.008;
+        gamma = 1.559;
+    } else if (temp >= 2.0e9 && temp < 4.0e9) {
+        alpha = 1.045;
+        beta   = -0.1897;
+        gamma = 0.0595;
+    } else if (temp >= 4.0e9 && temp < 8.0e9) {
+        alpha = 0.9774;
+        beta   = 1.16;
+        gamma = 0.2641;
+    } else if (temp >= 8.0e9 && temp < 1.6e10) {
+        alpha = 0.9768;
+        beta   = 1.095;
+        gamma = 0.8332;
+    } else if (temp >= 1.6e10 && temp < 3.2e10) {
+        alpha = 0.9788;
+        beta   = 1.021;
+        gamma = 1.031;
+    } else if (temp >= 3.2e10) {
+        alpha = 1.0;
+        beta   = 1.0;
+        gamma = 1.0;
+    }
+}
 
-double mAux(double frecuency, double norm_temp, double magfield) {
+double mAux(double xM, double temp) {
     
-    double nu0 = (electronCharge * magfield) / (2.0 * pi * electronMass * cLight);
-    double xM = (2.0 * frecuency) / (3.0 * nu0 * (P2(norm_temp)));
+    double alpha, beta, gamma;
     
-    double alpha = 1.0;
-    double beta   = 1.0;
-    double gamma = 1.0;
+    auxiliaryFunction(alpha, beta, gamma, temp);
 
 	double result = (4.0505 * alpha / pow(xM, 1.0/6.0) ) * (1.0 + 0.4*beta / pow(xM, 1.0/4.0) + 
                 0.5316 * gamma / sqrt(xM) ) * exp(-1.8899 * pow(xM, 1.0/3.0));
@@ -19,17 +52,17 @@ double mAux(double frecuency, double norm_temp, double magfield) {
     return result;
 }
 
-double jSync(double energy, double temp, double magfield, double denf_e)
+double jSync(double energy, double temp, double magfield, double dens_e)
 {
 	double frecuency = energy / planck;
     double norm_temp = boltzmann * temp / (electronMass * cLight2);
 	
 	double bessel = bessk(2, 1.0/norm_temp);
+    double nu0 = (electronCharge * magfield) / (2.0 * pi * electronMass * cLight);
+    double xM = (2.0 * frecuency) / (3.0 * nu0 * (P2(norm_temp)));
 	
-	
-	//(1.0/4.0*pi) deberia ser (1.0/(4.0*pi)) ? lo mismo con el denominador del resultado
-	double result = (1.0/4.0*pi) * P2(electronCharge)/(sqrt(3.0)*cLight) * (4.0 * pi * denf_e * frecuency) / 
-		(bessel * mAux(frecuency, norm_temp, magfield));
+    double result = (1.0/(4.0*pi)) * P2(electronCharge)/(sqrt(3.0)*cLight) * (4.0 * pi * dens_e * frecuency) / 
+    bessel * mAux(xM, temp);
 	
     return result;
 }   // esto debería tener unidades de erg cm^-3 ster^-1

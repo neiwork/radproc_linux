@@ -5,16 +5,16 @@
 ## Debug
 ProjectName            :=fparticle
 ConfigurationName      :=Debug
-WorkspacePath          :=/home/flor/projects/github/radproc_linux/ionTori
-ProjectPath            :=/home/flor/projects/github/radproc_linux/lib/fparticle
+WorkspacePath          := "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori"
+ProjectPath            := "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/lib/fparticle"
 IntermediateDirectory  :=./Debug
 OutDir                 := $(IntermediateDirectory)
 CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
-User                   :=flor
-Date                   :=04/12/17
-CodeLitePath           :=/home/flor/.codelite
+User                   :=Eduardo Mario Gutiérrez
+Date                   :=05/12/17
+CodeLitePath           :="/home/eduardog/.codelite"
 LinkerName             :=/usr/bin/g++
 SharedObjectLinkerName :=/usr/bin/g++ -shared -fPIC
 ObjectSuffix           :=.o
@@ -48,7 +48,7 @@ LibPath                := $(LibraryPathSwitch). $(LibraryPathSwitch)../../lib/
 ## AR, CXX, CC, AS, CXXFLAGS and CFLAGS can be overriden using an environment variables
 ##
 AR       := /usr/bin/ar rcu
-CXX      := /usr/bin/g++ -std=c++11
+CXX      := /usr/bin/g++  -std=c++11
 CC       := /usr/bin/gcc
 CXXFLAGS :=  -g $(Preprocessors)
 CFLAGS   :=  -g $(Preprocessors)
@@ -77,8 +77,8 @@ $(OutputFile): $(Objects)
 	@echo "" > $(IntermediateDirectory)/.d
 	@echo $(Objects0)  > $(ObjectsFileList)
 	$(AR) $(ArchiveOutputSwitch)$(OutputFile) @$(ObjectsFileList) $(ArLibs)
-	@$(MakeDirCommand) "/home/flor/projects/github/radproc_linux/ionTori/.build-debug"
-	@echo rebuilt > "/home/flor/projects/github/radproc_linux/ionTori/.build-debug/fparticle"
+	@$(MakeDirCommand) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/.build-debug"
+	@echo rebuilt > "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/.build-debug/fparticle"
 
 MakeIntermediateDirs:
 	@test -d ./Debug || $(MakeDirCommand) ./Debug
@@ -94,12 +94,12 @@ PreBuild:
 ## Objects
 ##
 $(IntermediateDirectory)/Particle.cpp$(ObjectSuffix): Particle.cpp $(IntermediateDirectory)/Particle.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/flor/projects/github/radproc_linux/lib/fparticle/Particle.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/Particle.cpp$(ObjectSuffix) $(IncludePath)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/lib/fparticle/Particle.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/Particle.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/Particle.cpp$(DependSuffix): Particle.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/Particle.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/Particle.cpp$(DependSuffix) -MM Particle.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/Particle.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/Particle.cpp$(DependSuffix) -MM "Particle.cpp"
 
 $(IntermediateDirectory)/Particle.cpp$(PreprocessSuffix): Particle.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/Particle.cpp$(PreprocessSuffix) Particle.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/Particle.cpp$(PreprocessSuffix) "Particle.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

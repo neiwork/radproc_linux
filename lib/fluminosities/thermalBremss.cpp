@@ -10,9 +10,9 @@ double eiAuxFunction(double norm_temp) {
         return 9.0 * norm_temp / (2.0 * pi) * (log(1.123 * norm_temp + 0.48) + 1.5);
 }
 
-double eiCoolingRate(double norm_temp, double denf_e, double denf_i) {
+double eiCoolingRate(double norm_temp, double dens_e, double dens_i) {
     
-    return denf_i * denf_e * thomson * fineStructConst * electronMass * P3(cLight) * eiAuxFunction(norm_temp);
+    return dens_i * dens_e * thomson * fineStructConst * electronMass * P3(cLight) * eiAuxFunction(norm_temp);
 }    // pasar solo la temperatura en un punto.
 
 double eeAuxFunction(double norm_temp) {
@@ -24,8 +24,9 @@ double eeAuxFunction(double norm_temp) {
         return 24.0 * norm_temp * (log(2.0 * 0.5616 * norm_temp) + 1.28);
 }
 
-double eeCoolingRate(double norm_temp, double denf_e) {
-    return P2(denf_e *electronRadius) * fineStructConst * electronMass * P3(cLight) * eeAuxFunction(norm_temp);
+double eeCoolingRate(double norm_temp, double dens_e) {
+    return dens_e * dens_e * electronRadius * electronRadius *
+    fineStructConst * electronMass * P3(cLight) * eeAuxFunction(norm_temp);
 }
 
 double gauntFactor(double temp_aux) {
@@ -35,12 +36,11 @@ double gauntFactor(double temp_aux) {
         return sqrt(3.0) / pi * log(4.0 / 0.576965 * temp_aux);
 }
 
-double jBremss(double energy, double temp, double denf_i, double denf_e) {
+double jBremss(double energy, double temp, double dens_i, double dens_e) {
     
     double norm_temp = boltzmann * temp / (electronMass * cLight2);
 	
-    
-    double aux = eeCoolingRate(norm_temp, denf_e) + eiCoolingRate(norm_temp, denf_e, denf_i);
+    double aux = eeCoolingRate(norm_temp, dens_e) + eiCoolingRate(norm_temp, dens_e, dens_i);
     double temp_aux = boltzmann * temp / energy;
     
     return aux/(4.0*pi) * planck/(boltzmann*temp) * exp(- (1.0/temp_aux)) * gauntFactor(temp_aux);

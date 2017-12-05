@@ -25,8 +25,8 @@ void luminosities(State& st, const std::string& filename) {
 	file.open(filename.c_str(), std::ios::out);
 
 	file << "Log(E/eV)" 
-          << "\t" << "r [M]"
-          << "\t" << "Theta"
+      //    << "\t" << "r [M]"
+      //   << "\t" << "Theta"
 		  << "\t" << "Synchr"
           << "\t" << "Brems"
           << std::endl;
@@ -39,11 +39,13 @@ void luminosities(State& st, const std::string& filename) {
         double fmtE = log10(i.val(DIM_E) / 1.6e-12);
 
         double energy = i.val(DIM_E);
+
         double r = i.val(DIM_R);
         double theta = i.val(DIM_THETA);
 		
 		double temp = temp_e(r, theta);
 		
+        
         double jSy = jSync(energy, temp, magf, denf_e);
         double jBr = jBremss(energy, temp, denf_e, denf_i);  
     
@@ -54,7 +56,6 @@ void luminosities(State& st, const std::string& filename) {
                             << std::endl;
                             
     }, { -1, -1, -1 });
-    
     
     file.close();
     
