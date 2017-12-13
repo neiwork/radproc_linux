@@ -24,7 +24,7 @@ void tpfFill(State& st)
 		
 		 double temp = temp_e(r, theta);
 		 double jBr = jBremss(E, temp, denf_e, denf_i);  //[jBremss] = erg cm^-3 ster^-1
-		 return jBr; //4.0*pi*jBr/P2(E);
+		 return jBr*4.0*pi/P2(E);
 	  });
 }
 
