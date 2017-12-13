@@ -6,6 +6,7 @@
 #include "State.h"
 #include "write.h"
 #include "radiativeLosses.h"
+#include "distribution.h"
 #include "luminosities.h"
 
 #include <inout/ioutil.h>
@@ -28,7 +29,12 @@ int main()
 		prepareGlobalCfg();
 		State model(GlobalConfig.get_child("model"));
 		
+		tpfFill(model);  //esto completa la psv con los fotones de Bremsstrahlung
+		
 		//radiativeLosses(model, folder+"\\electronLosses.txt");
+		
+		thermalDistribution(model.electron, model);
+		
         luminosities(model, folder+"\\electronLuminosities.txt");
 		
 		

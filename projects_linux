@@ -16,7 +16,12 @@ Compiler: 	Include paths:  .;../lib;../external/include
 			Preprocessors:  BOOST_SYSTEM_NO_DEPRECATED;BOOST_NO_CXX11_SCOPED_ENUMS
 
 Linker:		Libraries search path: ../external/lib;../lib/fmath/Debug;../lib/fparameters/Debug;../lib/fparticle/Debug;../lib/flosses/Debug;../lib/fluminosities/Debug;../lib/inout/Debug
-			Libraries: 	boost_filesystem;boost_system;fmath;fparameters;fparticle;flosses;fluminosities;inout
+
+			Libraries: 	boost_filesystem;boost_system;fmath;fparameters;fparticle;flosses;fluminosities;inout;fmath
+			boost_filesystem;boost_system;fparameters;fparticle;fluminosities;flosses;inout;fmath
+
+			../external/lib;../lib/fmath/Release;../lib/fparameters/Release;../lib/fparticle/Release;../lib/flosses/Release;../lib/fluminosities/Release;../lib/inout/Release
+
 *************************************
 
 

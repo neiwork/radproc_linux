@@ -1,1 +1,0 @@
-./Debug/elimiGaussiana.cpp.o ./Debug/gaussianScaledPivoting.cpp.o ./Debug/interpolation.cpp.o ./Debug/matrixInit.cpp.o ./Debug/RungeKutta.cpp.o ./Debug/bisection.cpp.o ./Debug/mathFunctions.cpp.o

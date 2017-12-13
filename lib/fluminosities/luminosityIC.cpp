@@ -1,10 +1,11 @@
 #include "luminosityIC.h"
 
 
-#include <fmath/RungeKutta.h>
-#include <fmath/interpolation.h>
+
 #include <flosses/crossSectionInel.h>
 #include <fparameters/parameters.h>
+#include <fmath/RungeKutta.h>
+//#include <fmath/interpolation.h>
 #include <fmath/physics.h>
 
 #include <algorithm>

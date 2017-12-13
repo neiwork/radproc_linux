@@ -1,1 +1,0 @@
-./Debug/main.cpp.o ./Debug/modelParameters.cpp.o ./Debug/radiativeLosses.cpp.o ./Debug/State.cpp.o ./Debug/write.cpp.o ./Debug/functions.cpp.o ./Debug/toroParam.cpp.o ./Debug/luminosities.cpp.o

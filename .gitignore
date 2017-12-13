@@ -2,8 +2,12 @@
 boost_1_64_0/
 external/
 radproc/
+**/.codelite/
+
 
 *.gz
+*.mk
+Makefile
 
 # Prerequisites
 *.d
@@ -37,3 +41,7 @@ radproc/
 *.exe
 *.out
 *.app
+
+
+# Generated files
+*.txt

@@ -1,5 +1,5 @@
 #pragma once
 
-//#include <fparticle/Particle.h> este no es necesario incluirlo aca porque no lo estas usando por ahora
+/* Straub et al 2012; [jBremss] = erg cm^-3 ster^-1 */
 
 double jBremss(double energy, double temp, double dens_i, double dens_e);

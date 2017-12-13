@@ -13,6 +13,7 @@ State::State(boost::property_tree::ptree& cfg) :
  photon{ "photon" },
  //proton("proton"),
  magf(photon.ps, false),
+ tpf(photon.ps, false),
  denf_i(photon.ps, false),
  denf_e(photon.ps, false)
  {
@@ -47,10 +48,8 @@ State::State(boost::property_tree::ptree& cfg) :
           return energyDensity(r, theta) / (atomicMassUnit*mu);
       });
 	  
-//	tpf.initialize();
-//	tpf.fill([&](const SpaceIterator& i){
-//		return blackBody(i.val(DIM_E), i.val(DIM_R));
-//	  };
+      tpf.initialize();
+
 	
 }
 

@@ -14,6 +14,7 @@ public:
 	Particle photon;
 
 	ParamSpaceValues magf;
+	ParamSpaceValues tpf;
 	ParamSpaceValues denf_i;
     ParamSpaceValues denf_e;
 

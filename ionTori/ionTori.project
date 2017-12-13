@@ -2,7 +2,7 @@
 <CodeLite_Project Name="ionTori" Version="10.0.0" InternalType="Console">
   <Plugins>
     <Plugin Name="qmake">
-      <![CDATA[00010001N0005Debug000000000000]]>
+      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
     </Plugin>
   </Plugins>
   <Description/>
@@ -15,8 +15,8 @@
     <File Name="radiativeLosses.h"/>
     <File Name="State.cpp"/>
     <File Name="State.h"/>
-    <File Name="targetFields.cpp" ExcludeProjConfig="Debug"/>
-    <File Name="targetFields.h" ExcludeProjConfig="Debug"/>
+    <File Name="targetFields.cpp" ExcludeProjConfig=""/>
+    <File Name="targetFields.h" ExcludeProjConfig=""/>
     <File Name="write.cpp"/>
     <File Name="write.h"/>
     <File Name="functions.cpp" ExcludeProjConfig=""/>
@@ -25,6 +25,12 @@
     <File Name="toroParam.h"/>
     <File Name="luminosities.cpp"/>
     <File Name="luminosities.h"/>
+    <File Name="thermalCompton.h"/>
+    <File Name="thermalCompton.cpp"/>
+    <File Name="maxwellJuttner.cpp"/>
+    <File Name="maxwellJuttner.h"/>
+    <File Name="distribution.cpp"/>
+    <File Name="distribution.h"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
     <Project Name="fmath"/>
@@ -64,8 +70,8 @@
         <Library Value="boost_system"/>
         <Library Value="fparameters"/>
         <Library Value="fparticle"/>
-        <Library Value="flosses"/>
         <Library Value="fluminosities"/>
+        <Library Value="flosses"/>
         <Library Value="inout"/>
         <Library Value="fmath"/>
       </Linker>
@@ -103,12 +109,31 @@
         <SearchPaths/>
       </Completion>
     </Configuration>
-    <Configuration Name="Release" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-O2;-Wall" C_Options="-O2;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+    <Configuration Name="Release" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="prepend" BuildResWithGlobalSettings="append">
+      <Compiler Options="g;-O0;-Wall" C_Options="g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
-        <Preprocessor Value="NDEBUG"/>
+        <IncludePath Value="../lib"/>
+        <IncludePath Value="../external/include"/>
+        <Preprocessor Value="BOOST_SYSTEM_NO_DEPRECATED"/>
+        <Preprocessor Value="BOOST_NO_CXX11_SCOPED_ENUMS"/>
       </Compiler>
-      <Linker Options="" Required="yes"/>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="../external/lib"/>
+        <LibraryPath Value="../lib/fmath/Release"/>
+        <LibraryPath Value="../lib/fparameters/Release"/>
+        <LibraryPath Value="../lib/fparticle/Release"/>
+        <LibraryPath Value="../lib/flosses/Release"/>
+        <LibraryPath Value="../lib/fluminosities/Release"/>
+        <LibraryPath Value="../lib/inout/Release"/>
+        <Library Value="boost_filesystem"/>
+        <Library Value="boost_system"/>
+        <Library Value="fparameters"/>
+        <Library Value="fparticle"/>
+        <Library Value="fluminosities"/>
+        <Library Value="flosses"/>
+        <Library Value="inout"/>
+        <Library Value="fmath"/>
+      </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <BuildSystem Name="Default"/>
@@ -144,4 +169,12 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Release">
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+    <Project Name="fparticle"/>
+    <Project Name="flosses"/>
+    <Project Name="fluminosities"/>
+    <Project Name="inout"/>
+  </Dependencies>
 </CodeLite_Project>
