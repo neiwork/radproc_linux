@@ -7,7 +7,8 @@
 #include "write.h"
 #include "radiativeLosses.h"
 #include "distribution.h"
-#include "luminosities.h"
+//#include "luminosities.h"
+#include "luminosities2.h"
 
 #include <inout/ioutil.h>
 
@@ -29,17 +30,18 @@ int main()
 		prepareGlobalCfg();
 		State model(GlobalConfig.get_child("model"));
 		
-		tpfFill(model);  //esto completa la psv con los fotones de Bremsstrahlung
+		tpfFill_Bremss(model);  // esto completa la psv con los fotones de Bremsstrahlung
+        tpfFill_Sync(model);      // idem Sync
 		
-		//radiativeLosses(model, folder+"\\electronLosses.txt");
+		// radiativeLosses(model, folder+"\\electronLosses.txt");
 		
-		thermalDistribution(model.electron, model);
+		// thermalDistribution(model.electron, model);
 		
-        luminosities(model, folder+"\\electronLuminosities.txt");
+        luminosities2(model, folder+"\\electronLuminosities.txt");
 		
 		
 		//writeRandTParamSpace(getFileName(folder, "\\magf"), model.magf, 0);
-        writeRandTParamSpace("magf.dat", model.magf, 0);
+       // writeRandTParamSpace("magf.dat", model.magf, 0);
         //writeRandTParamSpace("denf.dat", model.denf_i, 0);
         
 		//ParamSpaceValues psv(model.electron.ps);

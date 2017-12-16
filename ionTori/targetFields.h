@@ -3,5 +3,6 @@
 #include "State.h"
 
 
-void tpfFill(State& st);
+void tpfFill_Bremss(State& st);
+void tpfFill_Sync(State& st);
 

@@ -18,6 +18,8 @@
     <File Name="thermalSync.cpp" ExcludeProjConfig=""/>
     <File Name="thermalSync.h" ExcludeProjConfig=""/>
     <File Name="thermalBremss.h" ExcludeProjConfig=""/>
+    <File Name="thermalIC.h"/>
+    <File Name="thermalIC.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include"/>
   <Dependencies Name="Debug">

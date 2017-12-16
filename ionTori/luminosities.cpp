@@ -17,6 +17,7 @@
 #include <fluminosities/luminosityIC.h>
 #include <fluminosities/thermalSync.h>
 #include <fluminosities/thermalBremss.h>
+#include <fluminosities/thermalIC.h>
 #include <fmath/mathFunctions.h>
 #include <fmath/physics.h>
 
@@ -51,26 +52,28 @@ void luminosities(State& st, const std::string& filename) {
 	//el iterate hay que hacerlo sobre el photon, asi las energias que recorremos son las de los fotones
 	st.photon.ps.iterate([&](const SpaceIterator& i){   
 
-        const double magf{ st.magf.get(i) };
-        const double denf_e{ st.denf_e.get(i) };
-        const double denf_i{ st.denf_i.get(i) };
+        // const double denf_e{ st.denf_e.get(i) };
+        // const double denf_i{ st.denf_i.get(i) };
         double fmtE = log10(i.val(DIM_E) / 1.6e-12);
 
         double energy = i.val(DIM_E);
 
         double r = i.val(DIM_R);
         double theta = i.val(DIM_THETA);
-		
-		double temp = temp_e(r, theta);
-		double theta_e = boltzmann*temp/(electronMass*cLight2);
-		
         
-        double jSy = jSync(energy, temp, magf, denf_e);
-        double jBr = st.tpf.get(i)*P2(energy);    // jBremss(energy, temp, denf_e, denf_i);  
-		double ic = comptBremss(energy, theta_e, r, theta, i, 
-						st.denf_e, st.tpf);
+        double norm_temp = boltzmann * st.tempElectrons.get(i) / electronMass / cLight2;
 		
-		double ic_2 = luminosityIC(energy, st.electron, i, st.tpf, temp/1.0e3);
+        double jBr = st.tpf1.get(i)*(energy*energy);    // jBremss(energy, temp, denf_e, denf_i);
+        double jSy = st.tpf2.get(i);                                 //jSync(energy, temp, magf, denf_e);
+        
+		double ic = comptBremss(energy, norm_temp, r, theta, i, st.denf_e, st.tpf1);
+                        
+        double jIC1 = jIC_Bremss(energy, norm_temp, r, theta, i, st.denf_e, jBr);
+        double jIC2 = jIC_Sync(energy, norm_temp, r, theta, i, st.denf_e, jSy);
+        
+        double jIC = jIC1 + jIC2;
+		
+		double ic_2 = luminosityIC(energy, st.electron, i, st.tpf1, temp_e(r, theta)/1.0e3);
 		
 		
 		double area_i = 2.0*pi*(r*dt)*dr;
@@ -85,6 +88,7 @@ void luminosities(State& st, const std::string& filename) {
                             << "\t" << safeLog10(jBr*emi_to_lumi)
 							<< "\t" << safeLog10(ic*emi_to_lumi)
 							<< "\t" << safeLog10(ic_2*vol_i) 
+                            << "\t" << safeLog10(jIC * emi_to_lumi)
                             << std::endl;
                             
     }, { -1, -1, -1 });

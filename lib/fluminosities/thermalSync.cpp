@@ -1,10 +1,11 @@
 #include "thermalSync.h"
 
-#include <fmath/mathFunctions.h>
 #include <fmath/physics.h>
+#include <boost/math/special_functions/bessel.hpp>
 
 double auxiliaryFunction(double& alpha, double& beta, double& gamma, double temp) {
     
+    // se podría interpolar entre uno y otro.
     if (temp < 5.0e8) {
         alpha = 0.0431;
         beta   = 10.44;
@@ -46,7 +47,7 @@ double mAux(double xM, double temp) {
     
     auxiliaryFunction(alpha, beta, gamma, temp);
 
-	double result = (4.0505 * alpha / pow(xM, 1.0/6.0) ) * (1.0 + 0.4*beta / pow(xM, 1.0/4.0) + 
+	double result = (4.0505 * alpha / pow(xM, 1.0/6.0) ) * (1.0 + 0.4*beta / pow(xM, 0.25) + 
                 0.5316 * gamma / sqrt(xM) ) * exp(-1.8899 * pow(xM, 1.0/3.0));
 	    
     return result;
@@ -57,12 +58,11 @@ double jSync(double energy, double temp, double magfield, double dens_e)
 	double frecuency = energy / planck;
     double norm_temp = boltzmann * temp / (electronMass * cLight2);
 	
-	double bessel = bessk(2, 1.0/norm_temp);
     double nu0 = (electronCharge * magfield) / (2.0 * pi * electronMass * cLight);
-    double xM = (2.0 * frecuency) / (3.0 * nu0 * (P2(norm_temp)));
+    double xM = (2.0 * frecuency) / (3.0 * nu0 * norm_temp*norm_temp);
 	
-    double result = (1.0/(4.0*pi)) * P2(electronCharge)/(sqrt(3.0)*cLight) * (4.0 * pi * dens_e * frecuency) / 
-    bessel * mAux(xM, temp);
+    double result = 0.25/pi * electronCharge*electronCharge / (sqrt(3.0)*cLight) *
+    4.0 * pi * dens_e * frecuency / boost::math::cyl_bessel_k(2, 1.0/norm_temp) * mAux(xM, temp);
 	
     return result;
-}   // esto debería tener unidades de erg cm^-3 ster^-1
+}   // esto debería tener unidades de erg cm^-3 ster^-1 s^-1 Hz^-1

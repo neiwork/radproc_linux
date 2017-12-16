@@ -94,7 +94,7 @@ double g_tphi(double r, double theta) {
 	readSpinMbh(&massBH, &spinBH);
 	
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
-    return -(2.0*massBH*r*spinBH / sigma) * cos(theta)*cos(theta);
+    return - 2.0*massBH*r*spinBH / sigma * cos(theta)*cos(theta);
 }
 
 double g_phiphi(double r, double theta) {
@@ -103,7 +103,7 @@ double g_phiphi(double r, double theta) {
 	readSpinMbh(&massBH, &spinBH);
 	
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
-    return ( r*r + spinBH*spinBH + 2.0*massBH*r*spinBH*spinBH*cos(theta)*cos(theta) / sigma )
+    return  r*r + spinBH*spinBH + 2.0*massBH*r*spinBH*spinBH*cos(theta)*cos(theta) / sigma
     * cos(theta)*cos(theta);
 }
 
@@ -118,9 +118,10 @@ double angularVel(double r, double theta)  {
 
 // POTENTIAL FUNCTION
 double potential(double r, double theta) {
-    double aux = g_tt(r,theta) + 2.0*angularVel(r, theta)*g_tphi(r,theta) + 
-    g_phiphi(r,theta) * P2(angularVel(r,theta));
-    return (aux < 0.0) ? 0.5 * log(-aux / P2(g_tt(r,theta)+angularVel(r,theta)*g_tphi(r,theta))) : 0.0;
+    double aux = g_tt(r,theta) + 2.0*angularVel(r, theta)*g_tphi(r, theta) + 
+    g_phiphi(r, theta) * angularVel(r, theta) * angularVel(r, theta);
+    return (aux < 0.0) ? 0.5 * log(-aux / (g_tt(r, theta)+angularVel(r, theta)*g_tphi(r, theta)) / 
+                                                                (g_tt(r, theta)+angularVel(r, theta)*g_tphi(r, theta))) : 0.0;
 }
 
 // NORMALIZED POTENTIAL FUNCTION
@@ -141,7 +142,7 @@ double energyDensity (double r, double theta) {
     static const double n = GlobalConfig.get<double>("n");
     static const double energyC = GlobalConfig.get<double>("energyC");
     
-    return ( w(r, theta) > 0.0 ) ? pow(pK, -n) * pow( pow(pK*pow(energyC, 1.0/n) + 1.0, w(r, theta)) - 1.0, n) : 0.0;
+    return ( w(r, theta) > 0.0 ) ? pow( (pow(pK*pow(energyC, 1.0/n) + 1.0, w(r, theta)) - 1.0) / pK, n) : 0.0;
 }
 
 // PRESSURE

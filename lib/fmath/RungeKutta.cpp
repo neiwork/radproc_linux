@@ -84,6 +84,7 @@ double RungeKutta(double a, double b, fun1 c, fun1 d, fun2 f, const RungeKuttaOp
 }
 
 RungeKuttaOpt DefOpt_RungeKuttaSimple{ 50, -1 };
+
 double RungeKuttaSimple(double a, double b, fun1 f, const RungeKuttaOpt& opt)
 {
 	int RK_N = opt.samples_x;

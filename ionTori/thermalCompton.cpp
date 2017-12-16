@@ -5,8 +5,6 @@
 #include <fmath/RungeKutta.h>
 #include <fmath/physics.h>
 
-
-
 double eta_1(double P, double A)
 {
 	return P*(A-1.0)/(1.0-A*P);

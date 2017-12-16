@@ -1,7 +1,7 @@
 {
 	"id":"Sgr A*",
 	"massBH":"1.0",
-	"spinBH":"0.7",
+	"spinBH":"0.0",
 	"n":"1.5",
 	"temp_ec":"1.0e10",
 	"xi":"1.0e-3",
@@ -32,20 +32,20 @@
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":5
+						"samples":10
 					},
 					"theta":{
 						"min":0.0,
 						"max":1.0,
-						"samples":5
+						"samples":10
 					}
 				}
 			},
 			"photon": {
 				"dim":{
 					"energy": {
-						"min":-6.0,
-						"max":16.0
+						"min":-11.0,
+						"max":9.0
 					}
 				}
 			},

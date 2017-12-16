@@ -7,7 +7,6 @@
 #include <fmath/physics.h>
 
 
-
 double fSyn(double x, double E, const Particle& creator, const ParamSpaceValues& magf, const SpaceCoord& psc)         //funcion a integrar   x=Ee; L=L(Ega)
 {
 	//double r = creator.ps.current->par.R;
