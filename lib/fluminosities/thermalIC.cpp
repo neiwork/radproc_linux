@@ -27,7 +27,7 @@ double jIC_Bremss(double energy, double norm_temp, double r,  double theta, cons
 						ParamSpaceValues& denf, double jBr) {
 
     double eta1 = 0.0, eta2 = 0.0, eta3 = 0.0, xc = 0.0;
-	double jBremss = jBr*energy*energy; //porque el tpf esta /E^2
+	double jBremss = jBr*energy*energy * 0.25 / pi; //porque el tpf esta /E^2
     
 	auxFunction(eta1, eta2, eta3, xc, energy, norm_temp, r, theta, distCoord, denf);
     

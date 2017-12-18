@@ -116,6 +116,13 @@ double angularVel(double r, double theta)  {
   return - ( g_tphi(r, theta) + l_0 * g_tt(r,theta) ) / ( g_phiphi(r, theta) + l_0 * g_tphi(r, theta) );
 }
 
+// REDSHIFT FACTOR
+double redshiftFactor(double r, double theta) {
+    
+    double omega = angularVel(r, theta);
+    return sqrt( g_tt(r, theta) + 2.0 * omega * g_tphi(r, theta) + omega*omega * g_phiphi(r, theta) );
+}
+
 // POTENTIAL FUNCTION
 double potential(double r, double theta) {
     double aux = g_tt(r,theta) + 2.0*angularVel(r, theta)*g_tphi(r, theta) + 

@@ -43,7 +43,7 @@ void luminosities2(State& st, const std::string& filename) {
     double dtheta = (thetaMax - thetaMin) / nT;
     
     double rMin = GlobalConfig.get<double>("rCusp")*1.1;
-    double rMax = GlobalConfig.get<double>("rCenter")*5.0;
+    double rMax = GlobalConfig.get<double>("rCenter")*3.0;
     
     rMin = rMin * gravitationalConstant * 1.0e6 * solarMass / cLight2;
     rMax = rMax * gravitationalConstant * 1.0e6 * solarMass / cLight2;
@@ -57,30 +57,25 @@ void luminosities2(State& st, const std::string& filename) {
         double energy = i.val(DIM_E);
         double frecuency = energy / planck;
         double luminosity = 0.0;
-        
-        cout << "boca1" << std::endl;
 
-        st.photon.ps.iterate([&](const SpaceIterator& i) {
-            
-            cout << "boca3" << std::endl;
-    
+        st.photon.ps.iterate([&](const SpaceIterator& j) {
+                
             // double fmtE = log10(energy / 1.6e-12);
 
-            double r = i.val(DIM_R);
+            double r = j.val(DIM_R);
             
             r = r * gravitationalConstant * 1.0e6 * solarMass / cLight2;
-            double theta = i.val(DIM_THETA);
+            double theta = j.val(DIM_THETA);
         
             double vol = 2.0*pi*dtheta* r*r * dr;
-            cout << "\n" << vol << std::endl;
         
-            double norm_temp = boltzmann * st.tempElectrons.get(i) / electronMass / cLight2;
+            double norm_temp = boltzmann * st.tempElectrons.get(j) / electronMass / cLight2;
 		
-            double jBr = st.tpf1.get(i) * energy*energy;
-            double jSy = st.tpf2.get(i);
+            double jBr = st.tpf1.get(j) * energy*energy;
+            double jSy = st.tpf2.get(j);
                         
-            double jIC1 = jIC_Bremss(energy, norm_temp, r, theta, i, st.denf_e, jBr);
-            double jIC2 = jIC_Sync(energy, norm_temp, r, theta, i, st.denf_e, jSy);
+            double jIC1 = jIC_Bremss(energy, norm_temp, r, theta, j, st.denf_e, jBr);
+            double jIC2 = jIC_Sync(energy, norm_temp, r, theta, j, st.denf_e, jSy);
         
             double jTotal = jBr + jSy + jIC1 + jIC2;
         
@@ -93,14 +88,14 @@ void luminosities2(State& st, const std::string& filename) {
             luminosity = luminosity +  jTotal * emissToLum;
             
                             
-        }, { 0, -1, -1 } );
-    
-        file << setw(10) << scientific << frecuency 
+        }, { i.coord[DIM_E], -1, -1 } );
+        
+        file << "\t" << frecuency << "\t"
         //                        << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * luminositySync
         //                        << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * luminosityBr
         //                        << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * luminosityIC1
         //                        << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * luminosityIC2
-                                    << setw(10) << scientific << frecuency * luminosity
+                                    << frecuency * luminosity
                                     << std::endl;
     
     }, { -1, 0, 0 } );
