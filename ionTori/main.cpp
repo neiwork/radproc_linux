@@ -20,6 +20,7 @@
 #include <fmath/physics.h>
 
 #include <boost/property_tree/ptree.hpp>
+#include <stdexcept>
 
 int main()
 {

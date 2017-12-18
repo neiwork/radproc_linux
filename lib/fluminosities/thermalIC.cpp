@@ -5,15 +5,25 @@
 #include <fparameters/parameters.h>
 #include <fparameters/ParamSpace.h>
 #include <fparameters/ParamSpaceValues.h>
+#include <iostream>
 
 void auxFunction(double& e1, double& e2,  double& e3, double& xc, double energy, double norm_temp, 
                                 double r, double theta, const SpaceCoord& distCoord, ParamSpaceValues& denf) {
     
-    double lim_inf = r;
+	double rg = gravitationalConstant * 1.0e6 * solarMass / cLight2;
+    
+	r = r / rg;
+	double lim_inf = r;
     double lim_sup = r*10.0;
     
-    double opticalDepth = RungeKuttaSimple(lim_inf, lim_sup, [&energy, &r, &theta, &denf, &distCoord](double r)
-                    {return thomson * denf.interpolate({ {DIM_R, r} , {DIM_THETA, theta} }, &distCoord); } );
+    double opticalDepth = RungeKuttaSimple(lim_inf, lim_sup, [&](double r){
+		try {
+			return thomson * denf.interpolate({ {DIM_R, r} , {DIM_THETA, theta} }, &distCoord);
+		} catch (std::runtime_error& e) {
+			std::cout << "WARNING: " << e.what() << std::endl;
+			return 0.0;
+		}
+	});
                     
     double P = 1.0 - exp(-opticalDepth);
     double A = 1.0 + norm_temp * (4.0 + 16.0 * norm_temp);
