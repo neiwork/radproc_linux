@@ -35,8 +35,8 @@ void luminosities2(State& st, const std::string& filename) {
     double nT = GlobalConfig.get<double>("model.particle.default.dim.theta.samples");
     double nR = GlobalConfig.get<double>("model.particle.default.dim.radius.samples");
     
-    nT = 10.0;
-    nR = 10.0;
+    //nT = 10.0;
+    //nR = 10.0;
     
     double thetaMin = 0.0;
     double thetaMax = pi / 4.0;
@@ -74,10 +74,10 @@ void luminosities2(State& st, const std::string& filename) {
             double jBr = st.tpf1.get(j) * energy*energy;
             double jSy = st.tpf2.get(j);
                         
-            double jIC1 = jIC_Bremss(energy, norm_temp, r, theta, j, st.denf_e, jBr);
-            double jIC2 = jIC_Sync(energy, norm_temp, r, theta, j, st.denf_e, jSy);
+            double jIC1 = jIC_Bremss(energy, norm_temp, r, theta, j, st.denf_e, jBr, rMax);
+            double jIC2 = jIC_Sync(energy, norm_temp, r, theta, j, st.denf_e, jSy, rMax);
         
-            double jTotal = jBr + jSy + jIC1 + jIC2;
+            double jTotal =  jBr + jSy + jIC1 + jIC2;
         
             double emissToLum = 4.0 * pi * vol;
         

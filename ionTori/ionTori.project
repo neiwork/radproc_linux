@@ -23,10 +23,6 @@
     <File Name="functions.h" ExcludeProjConfig=""/>
     <File Name="toroParam.cpp"/>
     <File Name="toroParam.h"/>
-    <File Name="luminosities.cpp"/>
-    <File Name="luminosities.h"/>
-    <File Name="thermalCompton.h"/>
-    <File Name="thermalCompton.cpp"/>
     <File Name="maxwellJuttner.cpp"/>
     <File Name="maxwellJuttner.h"/>
     <File Name="distribution.cpp"/>
@@ -179,4 +175,10 @@
       </Completion>
     </Configuration>
   </Settings>
+  <VirtualDirectory Name="pruebas">
+    <File Name="thermalCompton.cpp"/>
+    <File Name="thermalCompton.h"/>
+    <File Name="luminosities.cpp"/>
+    <File Name="luminosities.h"/>
+  </VirtualDirectory>
 </CodeLite_Project>

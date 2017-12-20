@@ -1,5 +1,7 @@
 #include "thermalSync.h"
 
+
+#include <fmath/mathFunctions.h>
 #include <fmath/physics.h>
 #include <boost/math/special_functions/bessel.hpp>
 
@@ -61,8 +63,12 @@ double jSync(double energy, double temp, double magfield, double dens_e)
     double nu0 = (electronCharge * magfield) / (2.0 * pi * electronMass * cLight);
     double xM = (2.0 * frecuency) / (3.0 * nu0 * norm_temp*norm_temp);
 	
-    double result = 0.25/pi * electronCharge*electronCharge / (sqrt(3.0)*cLight) *
-    4.0 * pi * dens_e * frecuency / boost::math::cyl_bessel_k(2, 1.0/norm_temp) * mAux(xM, temp);
+	double bessel = boost::math::cyl_bessel_k(2, 1.0/norm_temp);
+	double bessel2 = bessk(2, 1.0/norm_temp);
 	
-    return result;
+    double result = 0.25/pi * electronCharge*electronCharge / (sqrt(3.0)*cLight) *
+    4.0 * pi * dens_e * frecuency / bessel * mAux(xM, temp);
+	
+    //return result;
+	return bessel > 0.0 ? result : 0.0;
 }   // esto debería tener unidades de erg cm^-3 ster^-1 s^-1 Hz^-1
