@@ -70,5 +70,5 @@ double bisection(double A, double B, fun1 fun)
 
 	//     STEP 7
 	//     PROCEDURE COMPLETED UNSUCCESSFULLY
-	return P;
+	return 0.0;
 }

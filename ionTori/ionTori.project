@@ -46,6 +46,12 @@
     <Project Name="fluminosities"/>
     <Project Name="inout"/>
   </Dependencies>
+  <VirtualDirectory Name="pruebas">
+    <File Name="thermalCompton.cpp"/>
+    <File Name="thermalCompton.h"/>
+    <File Name="luminosities.cpp"/>
+    <File Name="luminosities.h"/>
+  </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -83,7 +89,6 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="./$(IntermediateDirectory)/$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
-      <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -142,7 +147,6 @@
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="./$(IntermediateDirectory)/$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
-      <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -175,10 +179,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <VirtualDirectory Name="pruebas">
-    <File Name="thermalCompton.cpp"/>
-    <File Name="thermalCompton.h"/>
-    <File Name="luminosities.cpp"/>
-    <File Name="luminosities.h"/>
-  </VirtualDirectory>
 </CodeLite_Project>

@@ -1,8 +1,6 @@
 #pragma once
 
-
-
-
+double w(double r, double theta);
 
 double energyDensity(double r, double theta);
 

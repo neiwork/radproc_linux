@@ -88,15 +88,23 @@ void State::initializeParticle(Particle& p, boost::property_tree::ptree& cfg)
 
 	// we can't use createDimension because we're multiplying by pc before creating them
 	// add dimension for R
-    double rmin = GlobalConfig.get<double>("rCusp") * 1.1;
-    double rmax = 3.0 * GlobalConfig.get<double>("rCenter");
-	int nR = p.getpar(cfg,"dim.radius.samples", 1); // solo por ahora; y no deberia ser usado directamente desde otro lado
+    double rmin = GlobalConfig.get<double>("rCusp") * p.getpar(cfg, "dim.radius.min", 1.1);
+    double rmax = GlobalConfig.get<double>("rCenter") * p.getpar(cfg, "dim.radius.max", 3.0);
+	int nR = p.getpar(cfg,"dim.radius.samples", 10); // solo por ahora; y no deberia ser usado directamente desde otro lado
 	p.ps.add(new Dimension(nR, bind(initializePoints, std::placeholders::_1, rmin, rmax)));
     
     // add dimension for theta
     double thetamin =0.0;                           // los defino aca porque no se si puedo poner pi en el .json
-    double thetamax = pi/4.0;
-    int thetaR = p.getpar(cfg, "dim.theta.samples", 1);
+    double thetamax = pi/4.0 * p.getpar(cfg, "dim.theta.max", 1.0);
+    int thetaR = p.getpar(cfg, "dim.theta.samples", 10);
+    
+    GlobalConfig.put("rmin", GlobalConfig.get<double>("rmin", rmin));
+    GlobalConfig.put("rmax", GlobalConfig.get<double>("rmax", rmax));
+    GlobalConfig.put("thetamin", GlobalConfig.get<double>("thetamin", thetamin));
+    GlobalConfig.put("thetamax", GlobalConfig.get<double>("thetamax", thetamax));
+
+    
+    
     p.ps.add(new Dimension(thetaR, bind(initializePoints, std::placeholders::_1, thetamin, thetamax)));
 
 	// add dimension for T

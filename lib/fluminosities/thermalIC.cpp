@@ -6,15 +6,20 @@
 #include <fparameters/ParamSpace.h>
 #include <fparameters/ParamSpaceValues.h>
 #include <iostream>
+#include <../ionTori/functions.h>
+#include <fmath/bisection.h>
 
 void auxFunction(double& e1, double& e2,  double& e3, double xc, double energy, double norm_temp, 
-                                double r, double theta, const SpaceCoord& distCoord, ParamSpaceValues& denf, double rOut) {
+                                double r, double theta, const SpaceCoord& distCoord, ParamSpaceValues& denf) {
     
 	double rg = gravitationalConstant * 1.0e6 * solarMass / cLight2;
     
 	r = r / rg;
-	double lim_inf = r;
-    double lim_sup = rOut/rg;
+	double lim_inf = r*1.01;
+    double lim_sup;
+    if ( lim_sup = abs(bisection(lim_inf, lim_inf*10.0, [&theta](double r) { return w(r, theta); } )) < 1.0e-10 ) {
+        lim_sup = r * 3.0;
+    } else {}
     
     double opticalDepth = rg*RungeKuttaSimple(lim_inf, lim_sup, [&](double r){
 		try {
@@ -33,7 +38,7 @@ void auxFunction(double& e1, double& e2,  double& e3, double xc, double energy, 
 }
 
 double jIC_Bremss(double energy, double norm_temp, double r,  double theta, const SpaceCoord& distCoord, 
-						ParamSpaceValues& denf, double jBr, double rOut) {
+						ParamSpaceValues& denf, double jBr) {
 
     double eta1 = 0.0, eta2 = 0.0, eta3 = 0.0;
 	double jBremss = jBr*energy*energy * 0.25 / pi; //porque el tpf esta /E^2
@@ -42,7 +47,7 @@ double jIC_Bremss(double energy, double norm_temp, double r,  double theta, cons
 	
 	if (xc <= 3.0*norm_temp)
 	{
-		auxFunction(eta1, eta2, eta3, xc, energy, norm_temp, r, theta, distCoord, denf, rOut);
+		auxFunction(eta1, eta2, eta3, xc, energy, norm_temp, r, theta, distCoord, denf);
 		
 		double coeff1 = jBremss*eta1*norm_temp;
 		double coeff2 = ( 1.0 - xc/norm_temp);
@@ -61,11 +66,11 @@ double jIC_Bremss(double energy, double norm_temp, double r,  double theta, cons
 }
     
 double jIC_Sync(double energy, double norm_temp, double r, double theta, const SpaceCoord& distCoord,
-                ParamSpaceValues& denf, double jSync, double rOut) {
+                ParamSpaceValues& denf, double jSync) {
                     
     double eta1 = 0.0, eta2 = 0.0, eta3 = 0.0, xc = 0.0;
     auxFunction(eta1, eta2, eta3, xc, energy, norm_temp, r, theta,
-                        distCoord, denf, rOut);
+                        distCoord, denf);
     
 	double result = jSync * ( eta1 - eta2*pow(xc/norm_temp, eta3) );
    	return result > 0.0 ? result : 0.0;

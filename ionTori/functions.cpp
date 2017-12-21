@@ -12,10 +12,10 @@
 
 
 
-void readSpinMbh(double *massBH, double *spinBH)
+void readSpinMbh(double& massBH, double& spinBH)
 {	
-	*massBH = GlobalConfig.get<double>("massBH");
-    *spinBH = GlobalConfig.get<double>("spinBH") * (*massBH);
+	massBH = GlobalConfig.get<double>("massBH");
+    spinBH = GlobalConfig.get<double>("spinBH") * massBH;
 }
 
 
@@ -65,7 +65,7 @@ double keplAngularMom(double r) {
 double g_tt(double r, double theta) {
 	
 	double massBH, spinBH;
-	readSpinMbh(&massBH, &spinBH);
+	readSpinMbh(massBH, spinBH);
 	
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
     return - (1.0 - 2.0*massBH*r / sigma);
@@ -74,7 +74,7 @@ double g_tt(double r, double theta) {
 double g_rr(double r, double theta) {
 	
 	double massBH, spinBH;
-	readSpinMbh(&massBH, &spinBH);
+	readSpinMbh(massBH, spinBH);
 	
     double delta = r*r - 2.0 * massBH * r + spinBH*spinBH;
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
@@ -83,7 +83,7 @@ double g_rr(double r, double theta) {
 
 double g_thetatheta(double r, double theta) {    // = Sigma
 	double massBH, spinBH;
-	readSpinMbh(&massBH, &spinBH);
+	readSpinMbh(massBH, spinBH);
 
     return r*r + spinBH*spinBH*sin(theta)*sin(theta);
 }
@@ -91,7 +91,7 @@ double g_thetatheta(double r, double theta) {    // = Sigma
 double g_tphi(double r, double theta) {
 	
 	double massBH, spinBH;
-	readSpinMbh(&massBH, &spinBH);
+	readSpinMbh(massBH, spinBH);
 	
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
     return - 2.0*massBH*r*spinBH / sigma * cos(theta)*cos(theta);
@@ -100,7 +100,7 @@ double g_tphi(double r, double theta) {
 double g_phiphi(double r, double theta) {
 
 	double massBH, spinBH;
-	readSpinMbh(&massBH, &spinBH);
+	readSpinMbh(massBH, spinBH);
 	
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
     return  r*r + spinBH*spinBH + 2.0*massBH*r*spinBH*spinBH*cos(theta)*cos(theta) / sigma
@@ -128,7 +128,7 @@ double potential(double r, double theta) {
     double aux = g_tt(r,theta) + 2.0*angularVel(r, theta)*g_tphi(r, theta) + 
     g_phiphi(r, theta) * angularVel(r, theta) * angularVel(r, theta);
     return (aux < 0.0) ? 0.5 * log(-aux / (g_tt(r, theta)+angularVel(r, theta)*g_tphi(r, theta)) / 
-                                                                (g_tt(r, theta)+angularVel(r, theta)*g_tphi(r, theta))) : 0.0;
+                                                                (g_tt(r, theta)+angularVel(r, theta)*g_tphi(r, theta))) : -1.0;
 }
 
 // NORMALIZED POTENTIAL FUNCTION
@@ -174,7 +174,7 @@ double temp_e(double r, double theta) {
     //Falta definir mu en constantes fundamentales (tambien podría ser mu_e y mu_i)
 
     return (w(r, theta) > 0.0) ? (1.0 - w(r,theta)) * M_0 + w(r,theta) * M_1 *
-                mu_e * ( (1.0-beta)*atomicMassUnit*pressureTot(r,theta) ) / ( boltzmann * energyDensity(r, theta) ) : 0.0;
+                mu_e * ( (1.0-beta)*atomicMassUnit*pressureTot(r,theta) ) / ( boltzmann * energyDensity(r, theta) ) + 2.7 : 2.7;
 }
 
 // Ions
@@ -186,6 +186,6 @@ double temp_i(double r, double theta) {
     static const double beta = GlobalConfig.get<double>("beta");
     
     return (w(r, theta) > 0.0) ? ( (1 - w(r, theta))*M_0 + w(r, theta)*M_1 ) *
-                mu_i * ( (1.0-beta)*atomicMassUnit*pressureTot(r, theta) ) / ( boltzmann * energyDensity(r, theta) ) : 0.0;
+                mu_i * ( (1.0-beta)*atomicMassUnit*pressureTot(r, theta) ) / ( boltzmann * energyDensity(r, theta) ) + 2.7: 2.7;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////

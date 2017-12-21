@@ -32,71 +32,69 @@ void luminosities2(State& st, const std::string& filename) {
           << setw(10) << "Total"
           << std::endl;
 
+    double rg = gravitationalConstant * 1.0e6 * solarMass / cLight2;
+    
     double nT = GlobalConfig.get<double>("model.particle.default.dim.theta.samples");
     double nR = GlobalConfig.get<double>("model.particle.default.dim.radius.samples");
     
-    //nT = 10.0;
-    //nR = 10.0;
-    
-    double thetaMin = 0.0;
-    double thetaMax = pi / 4.0;
+    double thetaMin = GlobalConfig.get<double>("thetamin");
+    double thetaMax = GlobalConfig.get<double>("thetamax");
     double dtheta = (thetaMax - thetaMin) / nT;
     
-    double rMin = GlobalConfig.get<double>("rCusp")*1.1;
-    double rMax = GlobalConfig.get<double>("rCenter")*3.0;
-    
-    rMin = rMin * gravitationalConstant * 1.0e6 * solarMass / cLight2;
-    rMax = rMax * gravitationalConstant * 1.0e6 * solarMass / cLight2;
-    
+    double rMin = GlobalConfig.get<double>("rmin") * rg;
+    double rMax = GlobalConfig.get<double>("rmax") * rg;
+
     double dr = (rMax - rMin) / nR;
 
     st.photon.ps.iterate([&](const SpaceIterator& i) {
-        
-        cout << rMin << "\n" << rMax << "\n" << dr << "\n" << thetaMin << "\n" << thetaMax << "\n" << dtheta << std::endl;
-        
+                
         double energy = i.val(DIM_E);
-        double frecuency = energy / planck;
-        double luminosity = 0.0;
+        
+        double lumTot=0.0;
+        double lumBr=0.0;
+        double lumSy=0.0;
+        double lumIC_Br=0.0;
+        double lumIC_Sy=0.0;
 
         st.photon.ps.iterate([&](const SpaceIterator& j) {
                 
             // double fmtE = log10(energy / 1.6e-12);
 
-            double r = j.val(DIM_R);
-            
-            r = r * gravitationalConstant * 1.0e6 * solarMass / cLight2;
+            double r = j.val(DIM_R) * rg;
             double theta = j.val(DIM_THETA);
         
             double vol = 2.0*pi*dtheta* r*r * dr;
         
             double norm_temp = boltzmann * st.tempElectrons.get(j) / electronMass / cLight2;
 		
-            double jBr = st.tpf1.get(j) * energy*energy;
+            double jBr = st.tpf1.get(j) * 0.25 * energy*energy / pi;
             double jSy = st.tpf2.get(j);
                         
-            double jIC1 = jIC_Bremss(energy, norm_temp, r, theta, j, st.denf_e, jBr, rMax);
-            double jIC2 = jIC_Sync(energy, norm_temp, r, theta, j, st.denf_e, jSy, rMax);
+            double jIC1 = jIC_Bremss(energy, norm_temp, r, theta, j, st.denf_e, jBr);
+            double jIC2 = jIC_Sync(energy, norm_temp, r, theta, j, st.denf_e, jSy);
         
             double jTotal =  jBr + jSy + jIC1 + jIC2;
         
             double emissToLum = 4.0 * pi * vol;
         
-            //double luminosityBr = jBr * emissToLum;
-            //double luminositySync = jSy * emissToLum;
-            //double luminosityIC1 = jIC1 * emissToLum;
-            //double luminosityIC2 = jIC2 * emissToLum;
-            luminosity = luminosity +  jTotal * emissToLum;
+            lumBr += jBr * emissToLum;
+            lumSy += jSy * emissToLum;
+            lumIC_Br = jIC1 * emissToLum;
+            lumIC_Sy = jIC2 * emissToLum;
+            lumTot +=  jTotal * emissToLum;
             
                             
         }, { i.coord[DIM_E], -1, -1 } );
         
+        double frecuency = energy / planck;
+        
         file << "\t" << frecuency << "\t"
-        //                        << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * luminositySync
-        //                        << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * luminosityBr
-        //                        << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * luminosityIC1
-        //                        << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * luminosityIC2
-                                    << frecuency * luminosity
-                                    << std::endl;
+                                << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumBr
+                                << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumSy
+                                << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumIC_Br
+                                << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumIC_Sy
+                                << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumTot
+                                << std::endl;
     
     }, { -1, 0, 0 } );
     
