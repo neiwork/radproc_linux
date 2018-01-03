@@ -110,7 +110,7 @@ double g_phiphi(double r, double theta) {
 /////////////////////////////////////////////////////////////////////////////////////
 
 // ANGULAR VELOCITIY OF THE TORUS
-double angularVel(double r, double theta)  {
+double angularVel(double r, double theta) {
 	
   static const double l_0 = GlobalConfig.get<double>("l_0");
   return - ( g_tphi(r, theta) + l_0 * g_tt(r,theta) ) / ( g_phiphi(r, theta) + l_0 * g_tphi(r, theta) );
@@ -120,7 +120,7 @@ double angularVel(double r, double theta)  {
 double redshiftFactor(double r, double theta) {
     
     double omega = angularVel(r, theta);
-    return sqrt( g_tt(r, theta) + 2.0 * omega * g_tphi(r, theta) + omega*omega * g_phiphi(r, theta) );
+    return sqrt(- (g_tt(r, theta) + 2.0 * omega * g_tphi(r, theta) + omega*omega * g_phiphi(r, theta) ) );
 }
 
 // POTENTIAL FUNCTION
@@ -128,7 +128,7 @@ double potential(double r, double theta) {
     double aux = g_tt(r,theta) + 2.0*angularVel(r, theta)*g_tphi(r, theta) + 
     g_phiphi(r, theta) * angularVel(r, theta) * angularVel(r, theta);
     return (aux < 0.0) ? 0.5 * log(-aux / (g_tt(r, theta)+angularVel(r, theta)*g_tphi(r, theta)) / 
-                                                                (g_tt(r, theta)+angularVel(r, theta)*g_tphi(r, theta))) : -1.0;
+                                                                (g_tt(r, theta)+angularVel(r, theta)*g_tphi(r, theta))) : 0.0;
 }
 
 // NORMALIZED POTENTIAL FUNCTION

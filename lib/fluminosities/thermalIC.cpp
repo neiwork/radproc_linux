@@ -16,11 +16,8 @@ void auxFunction(double& e1, double& e2,  double& e3, double xc, double energy, 
     
 	r = r / rg;
 	double lim_inf = r*1.01;
-    double lim_sup;
-    if ( lim_sup = abs(bisection(lim_inf, lim_inf*10.0, [&theta](double r) { return w(r, theta); } )) < 1.0e-10 ) {
-        lim_sup = r * 3.0;
-    } else {}
-    
+    double lim_sup = r*10.0;
+ 
     double opticalDepth = rg*RungeKuttaSimple(lim_inf, lim_sup, [&](double r){
 		try {
 			return thomson * denf.interpolate({ {DIM_R, r} , {DIM_THETA, theta} }, &distCoord);
@@ -38,24 +35,21 @@ void auxFunction(double& e1, double& e2,  double& e3, double xc, double energy, 
 }
 
 double jIC_Bremss(double energy, double norm_temp, double r,  double theta, const SpaceCoord& distCoord, 
-						ParamSpaceValues& denf, double jBr) {
+						ParamSpaceValues& denf, double jBr, double xc) {
 
     double eta1 = 0.0, eta2 = 0.0, eta3 = 0.0;
 	double jBremss = jBr*energy*energy * 0.25 / pi; //porque el tpf esta /E^2
     
-    double xc = energy / (electronMass*cLight2);
+    double x = energy / (electronMass*cLight2);
 	
-	if (xc <= 3.0*norm_temp)
+	if (x < 3.0 * norm_temp)
 	{
-		auxFunction(eta1, eta2, eta3, xc, energy, norm_temp, r, theta, distCoord, denf);
+		auxFunction(eta1, eta2, eta3, x, energy, norm_temp, r, theta, distCoord, denf);
 		
 		double coeff1 = jBremss*eta1*norm_temp;
 		double coeff2 = ( 1.0 - xc/norm_temp);
-		double coeff3 = (3.0/(eta3+1.0))* ( pow(3.0,-eta3-1.0) - pow(xc/(3.0*norm_temp) , eta3+1.0) ) ;
+		double coeff3 = (3.0/(eta3+1.0))* ( pow(3.0,-eta3-1.0) - pow(x/(3.0*norm_temp) , eta3+1.0) ) ;
 		double result = coeff1* ( coeff2 - coeff3);
-	
-	//if(eta1 == 0 || eta3 == INFINITY)
-	//{return 0.0;}
 	
 		return result;
 		
@@ -66,12 +60,17 @@ double jIC_Bremss(double energy, double norm_temp, double r,  double theta, cons
 }
     
 double jIC_Sync(double energy, double norm_temp, double r, double theta, const SpaceCoord& distCoord,
-                ParamSpaceValues& denf, double jSync) {
-                    
-    double eta1 = 0.0, eta2 = 0.0, eta3 = 0.0, xc = 0.0;
-    auxFunction(eta1, eta2, eta3, xc, energy, norm_temp, r, theta,
-                        distCoord, denf);
+                ParamSpaceValues& denf, double jSync, double xc) {
+     
+    double x = energy / (electronMass * cLight2);
     
-	double result = jSync * ( eta1 - eta2*pow(xc/norm_temp, eta3) );
-   	return result > 0.0 ? result : 0.0;
+    if (x < 3.0 * norm_temp) {
+        double eta1 = 0.0, eta2 = 0.0, eta3 = 0.0, xc = 0.0;
+        auxFunction(eta1, eta2, eta3, x, energy, norm_temp, r, theta,
+                            distCoord, denf);
+    
+        return jSync * ( eta1 - eta2*pow(x/norm_temp, eta3) );
+    } else {
+        return 0.0;
+    }
 }

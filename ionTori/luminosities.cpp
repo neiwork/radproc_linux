@@ -68,10 +68,10 @@ void luminosities(State& st, const std::string& filename) {
         
 		double ic = comptBremss(energy, norm_temp, r, theta, i, st.denf_e, st.tpf1);
                         
-        double jIC1 = jIC_Bremss(energy, norm_temp, r, theta, i, st.denf_e, jBr);
-        double jIC2 = jIC_Sync(energy, norm_temp, r, theta, i, st.denf_e, jSy);
+ //       double jIC1 = jIC_Bremss(energy, norm_temp, r, theta, i, st.denf_e, jBr);
+  //      double jIC2 = jIC_Sync(energy, norm_temp, r, theta, i, st.denf_e, jSy);
         
-        double jIC = jIC1 + jIC2;
+  //      double jIC = jIC1 + jIC2;
 		
 		double ic_2 = luminosityIC(energy, st.electron, i, st.tpf1, temp_e(r, theta)/1.0e3);
 		
@@ -88,7 +88,7 @@ void luminosities(State& st, const std::string& filename) {
                             << "\t" << safeLog10(jBr*emi_to_lumi)
 							<< "\t" << safeLog10(ic*emi_to_lumi)
 							<< "\t" << safeLog10(ic_2*vol_i) 
-                            << "\t" << safeLog10(jIC * emi_to_lumi)
+   //                         << "\t" << safeLog10(jIC * emi_to_lumi)
                             << std::endl;
                             
     }, { -1, -1, -1 });

@@ -34,7 +34,12 @@ void tpfFill_Sync(State& st) {
         const double denf_e{ st.denf_e.get(i) };
         const double temp{ st.tempElectrons.get(i) };
         
-        return jSync(energy, temp, magfield, denf_e);
+        double norm_temp = boltzmann * temp / electronMass / cLight2;
+        if (norm_temp >= 1.e-1) {
+            return jSync(energy, temp, magfield, denf_e);
+        } else {
+            return 0.0;
+        }
     });
 }
 
