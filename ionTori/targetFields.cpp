@@ -36,7 +36,7 @@ void tpfFill_Sync(State& st) {
         
         double norm_temp = boltzmann * temp / electronMass / cLight2;
         if (norm_temp >= 1.e-1) {
-            return jSync(energy, temp, magfield, denf_e);
+            return jSync(energy, temp, magfield, denf_e)*4.0*pi/(energy*energy);
         } else {
             return 0.0;
         }

@@ -39,6 +39,7 @@ int main()
 		thermalDistribution(model.electron, model);
 		writeAllSpaceParam(folder+"\\electronDist.txt", model.electron.distribution);
 		
+		//writeAllSpaceParam(folder+"\\bremss.txt", model.tpf1);
 		
         luminosities2(model, folder+"\\electronLuminosities.txt");
 		
