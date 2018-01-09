@@ -5,49 +5,77 @@
 #include <fmath/RungeKutta.h>
 #include <fmath/physics.h>
 
-double eta_1(double P, double A)
+
+double cICt(double u, double E, double gMin)  //limite inferior
 {
-	return P*(A-1.0)/(1.0-A*P);
-	
+
+	double inf = 0.5*sqrt(E/u);
+
+	return std::max(gMin,inf);  
 }
 
-double eta_3(double P, double A)
-{
-	return -1.0-log(P)/log(A);
-}
-		
-double eta_2(double P, double A)
-{
-	return pow(3.0,-eta_3(P,A))*eta_1(P,A);
+double dICt(double u, double gMax)//double E)         //limite superior   
+{          
+
+	return gMax; //E;  //esta es la condicion epsilon < Ega	                                 
 }
 
 
-double comptBremss(double E, double theta_e, double r, double theta, const SpaceCoord& distCoord, 
-						ParamSpaceValues& denf,const ParamSpaceValues& jBr)
-{
-	
-	double lim_inf = r;
-	double lim_sup = r*10.0; // ver como obtengo el r_out desde aca
-	
-	double tau = RungeKuttaSimple(lim_inf, lim_sup, 
-	[&E,&r,&theta,&denf,&distCoord](double r) 
-		{return thomson*denf.interpolate({{ DIM_R, r},{ DIM_THETA, theta} },&distCoord); } );  
 
-	double P = 1.0-exp(-tau);
+double fICt(double u, double t, double E, const Particle& creator, const SpaceCoord& distCoord, const ParamSpaceValues& tpf)   //funcion a integrar  u=Ee
+{    
 	
-	double A = 1.0+4.0*theta_e+16.0*P2(theta_e);
 	
-	
-	double e1 = eta_1(P,A);
-	double e3 = eta_3(P,A);
-	
-	double xc = E/(electronMass*cLight2);
-	//distCoord.dims;
-	
-	double jBr_i = jBr.get(distCoord)*P2(E); //porque el tpf esta /E^2
-	
-	double res = jBr_i*3.0*e1*theta_e*((1.0/3.0-xc/(3.0*theta_e)) - 1.0/(e3+1.0)*( pow(3.0,-e3-1.0) -pow(xc/(3.0*theta_e) , e3+1.0) ) );
-	
-	return res;
-	
+	double Erest = creator.mass*cLight2;
+	double Eval = t*Erest;
+	double distCreator;
+	if (Eval < creator.emin() || Eval> creator.emax()){
+		distCreator = 0.0;
 	}
+	else{
+		distCreator = creator.distribution.interpolate({ { 0, Eval } }, &distCoord); 
+	}
+	  
+
+	double Nph = tpf.interpolate({ { 0, u*Erest } }, &distCoord);  
+
+	double f = 2.0*E*log(E/(4.0*P2(t)*u)) + E + 4.0*P2(t)*u - P2(E)/(2.0*P2(t)*u);
+
+	double function = (distCreator*Erest/(2.0*pow(t,4.0)))*(Nph*Erest/P2(u))*f*3.0*thomson*cLight;
+
+
+	return function;
+}
+
+
+double thCompton(double E, const Particle& creator, const SpaceCoord& distCoord, const ParamSpaceValues& tpf, double phEmin)
+{
+	
+	double Erest = creator.mass*cLight2;
+	double E_norm = E/Erest;
+	
+	double gMin = creator.emin()/Erest;
+	double gMax = creator.emax()/Erest;
+	double eMin = phEmin/Erest;
+	double eMax = E/Erest;
+	//double mass = creator.mass;
+	
+	//double cte  = 3.0*crossSectionThomson(creator.mass)*P2(creator.mass)*pow(cLight,5)/4;
+
+	double integral = RungeKutta(eMin,eMax,
+		[E_norm,gMin](double u){
+			return cICt(u,E_norm,gMin);
+		}, 
+		[gMax](double u){
+			return dICt(u,gMax);
+		}, 
+		[E_norm,&creator,&distCoord, tpf](double u, double t){
+			return fICt(u, t,E_norm,creator, distCoord, tpf); 
+		});    //le asigno a la variable integral el resultado de la integracion   
+
+	double luminosity = integral*E; //cte*P2(E);
+
+	return luminosity;
+
+	}
+

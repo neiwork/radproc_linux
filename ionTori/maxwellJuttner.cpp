@@ -2,21 +2,35 @@
 
 #include <fmath/mathFunctions.h>
 #include <fmath/physics.h>
+#include <boost/math/special_functions/bessel.hpp>
 
 
-double maxwellRel(double E, double T, double mass)
+double f_norm(double g, double norm_temp)
 {
-	double Erest = mass*cLight2;
+	double beta = sqrt(1.0-1.0/P2(g));
 	
-	double theta = boltzmann*T/Erest;
+	return P2(g)*beta*exp(-g/norm_temp); 
 	
-	double gamma = E/Erest;
-	
+}
+
+double maxwellRel(double gamma, double norm_temp, double norm)
+{
+		
 	double beta = sqrt(1.0-1.0/P2(gamma));
 	
-	double K2 =  bessk(2, 1.0/theta);
+	double K2 =  boost::math::cyl_bessel_k(2, 1.0/norm_temp); //bessk(2, 1.0/norm_temp);
 
-	double dist_g = P2(gamma)*beta/(theta*K2*exp(gamma/theta));
+	//double dist_g = P2(gamma)*beta/(norm_temp*K2*exp(gamma/norm_temp));
+	
+	double dist_g = P2(gamma)*beta*exp(-gamma/norm_temp);
 
-	return dist_g/Erest;  //paso de N(g) -> N(E)  [N(E)] = erg^-1
+	
+//	if( K2 > 0.0 )
+	//{
+		return  norm*dist_g;
+	//}
+	//else
+	//{ 
+	//	return 0.0;
+	//}
 }

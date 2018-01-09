@@ -27,24 +27,24 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":50
+						"samples":60
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":10
+						"samples":6
 					},
 					"theta":{
 						"min":0.0,
 						"max":1.0,
-						"samples":10
+						"samples":6
 					}
 				}
 			},
 			"photon": {
 				"dim":{
 					"energy": {
-						"min":-9.0,
+						"min":-5.0,
 						"max":9.0
 					}
 				}
@@ -54,7 +54,7 @@
 				"dim":{
 					"energy": {
 						"min":6.0,
-						"max":14.0
+						"max":7.0
 					}
 				}
 			}

@@ -29,6 +29,8 @@
     <File Name="distribution.h"/>
     <File Name="luminosities2.cpp"/>
     <File Name="luminosities2.h"/>
+    <File Name="thermalCompton.cpp"/>
+    <File Name="thermalCompton.h"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
     <Project Name="fmath"/>
@@ -47,10 +49,8 @@
     <Project Name="inout"/>
   </Dependencies>
   <VirtualDirectory Name="pruebas">
-    <File Name="thermalCompton.cpp"/>
-    <File Name="thermalCompton.h"/>
-    <File Name="luminosities.cpp"/>
-    <File Name="luminosities.h"/>
+    <File Name="luminosities.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="luminosities.h" ExcludeProjConfig="Debug"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

@@ -36,7 +36,9 @@ int main()
 		
 		// radiativeLosses(model, folder+"\\electronLosses.txt");
 		
-		// thermalDistribution(model.electron, model);
+		thermalDistribution(model.electron, model);
+		writeAllSpaceParam(folder+"\\electronDist.txt", model.electron.distribution);
+		
 		
         luminosities2(model, folder+"\\electronLuminosities.txt");
 		

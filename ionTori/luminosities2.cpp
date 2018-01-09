@@ -1,5 +1,7 @@
 #include "luminosities.h"
 
+#include "thermalCompton.h"
+
 #include "modelParameters.h"
 #include "write.h"
 #include <fmath/bisection.h>
@@ -99,6 +101,7 @@ void luminosities2(State& st, const std::string& filename) {
         double lumSy=0.0;
         double lumIC_Br=0.0;
         double lumIC_Sy=0.0;
+		double icBr = 0.0;
 
         st.photon.ps.iterate([&](const SpaceIterator& j) {
 
@@ -112,9 +115,11 @@ void luminosities2(State& st, const std::string& filename) {
             double jBr = st.tpf1.get(j) * 0.25 * energy*energy / pi;
             double jSy = st.tpf2.get(j);
             
-            double jIC1, jIC2;
+            double jIC1(0.0), jIC2(0.0);
+			
+			icBr = thCompton(energy, st.electron, j, st.tpf1, st.photon.emin());
             
-            if (norm_temp >= 1.e-4) {
+           /* if (norm_temp >= 1.e-4) {
                 const double denf{ st.denf_e.get(j) };
                 const double magfield{ st.magf.get(j) };
                 double xc = xc_root(r, denf, magfield, norm_temp);
@@ -126,7 +131,7 @@ void luminosities2(State& st, const std::string& filename) {
                 jIC2 = jIC_Sync(energy, norm_temp, r, theta, j, st.denf_e, jSy, xc);
             } else {
                 jIC1 = 0.0; jIC2 = 0.0;
-            };
+            };*/
             
             double rf = redshiftFactor(r / rg, theta);
             
@@ -144,6 +149,7 @@ void luminosities2(State& st, const std::string& filename) {
             lumIC_Br += jIC1 * emissToLum;
             lumIC_Sy += jIC2 * emissToLum;
             lumTot +=  jTotal * emissToLum;
+			icBr += icBr;
             
                             
         }, { i.coord[DIM_E], -1, -1 } );
@@ -156,6 +162,7 @@ void luminosities2(State& st, const std::string& filename) {
                                 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumIC_Br
                                 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumIC_Sy
                                 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumTot
+								<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << icBr
                                 << std::endl;
     
     }, { -1, 0, 0 } );
