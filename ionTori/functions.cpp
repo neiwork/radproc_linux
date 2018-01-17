@@ -68,7 +68,8 @@ double g_tt(double r, double theta) {
 	readSpinMbh(massBH, spinBH);
 	
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
-    return - (1.0 - 2.0*massBH*r / sigma);
+    double result = - (1.0 - 2.0*massBH*r / sigma);
+    return result;
 }
 
 double g_rr(double r, double theta) {
@@ -78,14 +79,16 @@ double g_rr(double r, double theta) {
 	
     double delta = r*r - 2.0 * massBH * r + spinBH*spinBH;
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
-    return sigma / delta;
+    double result = sigma / delta;
+    return result;
 }
 
 double g_thetatheta(double r, double theta) {    // = Sigma
 	double massBH, spinBH;
 	readSpinMbh(massBH, spinBH);
 
-    return r*r + spinBH*spinBH*sin(theta)*sin(theta);
+    double result = r*r + spinBH*spinBH*sin(theta)*sin(theta);
+    return result;
 }
 
 double g_tphi(double r, double theta) {
@@ -94,7 +97,8 @@ double g_tphi(double r, double theta) {
 	readSpinMbh(massBH, spinBH);
 	
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
-    return - 2.0*massBH*r*spinBH / sigma * cos(theta)*cos(theta);
+    double result = - 2.0*massBH*r*spinBH / sigma * cos(theta)*cos(theta);
+    return result;
 }
 
 double g_phiphi(double r, double theta) {
@@ -103,8 +107,9 @@ double g_phiphi(double r, double theta) {
 	readSpinMbh(massBH, spinBH);
 	
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
-    return  r*r + spinBH*spinBH + 2.0*massBH*r*spinBH*spinBH*cos(theta)*cos(theta) / sigma
+    double result =  r*r + spinBH*spinBH + 2.0*massBH*r*spinBH*spinBH*cos(theta)*cos(theta) / sigma
     * cos(theta)*cos(theta);
+    return result;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +125,8 @@ double angularVel(double r, double theta) {
 double redshiftFactor(double r, double theta) {
     
     double omega = angularVel(r, theta);
-    return sqrt(- (g_tt(r, theta) + 2.0 * omega * g_tphi(r, theta) + omega*omega * g_phiphi(r, theta) ) );
+    double result = sqrt(- (g_tt(r, theta) + 2.0 * omega * g_tphi(r, theta) + omega*omega * g_phiphi(r, theta) ) );
+    return result;
 }
 
 // POTENTIAL FUNCTION

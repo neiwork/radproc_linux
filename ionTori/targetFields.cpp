@@ -22,7 +22,7 @@ void tpfFill_Bremss(State& st) {
          const double temp{ st.tempElectrons.get(i) };
         
 		 double jBr = jBremss(energy, temp, denf_e, denf_i);  //[jBremss] = erg cm^-3 ster^-1 s^-1 Hz^-1
-		 return jBr*4.0*pi/(energy*energy);
+		 return jBr*4.0*pi/(energy*energy); // el 2 viene de las dos partes del disco.
     });
 }
 
@@ -33,9 +33,7 @@ void tpfFill_Sync(State& st) {
         const double magfield{ st.magf.get(i) };
         const double denf_e{ st.denf_e.get(i) };
         const double temp{ st.tempElectrons.get(i) };
-        
-        double norm_temp = boltzmann * temp / electronMass / cLight2;
-        if (norm_temp >= 1.e-1) {
+        if (temp > 5.e8) {
             return jSync(energy, temp, magfield, denf_e)*4.0*pi/(energy*energy);
         } else {
             return 0.0;

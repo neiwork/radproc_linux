@@ -44,7 +44,9 @@ int main()
         luminosities2(model, folder+"\\electronLuminosities.txt");
 		
 		
-		//writeRandTParamSpace(getFileName(folder, "\\magf"), model.magf, 0);
+		writeRandTParamSpace(getFileName(folder, "\\magf"), model.magf, 0);
+        writeRandTParamSpace(getFileName(folder, "\\denf"), model.denf_e, 0);
+        writeRandTParamSpace(getFileName(folder, "\\tempf"), model.tempElectrons, 0);
        // writeRandTParamSpace("magf.dat", model.magf, 0);
         //writeRandTParamSpace("denf.dat", model.denf_i, 0);
         

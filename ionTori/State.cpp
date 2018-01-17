@@ -7,6 +7,7 @@
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/parameters.h>
 #include <boost/property_tree/ptree.hpp>
+#include <fmath/bisection.h>
 
 State::State(boost::property_tree::ptree& cfg) :
  electron{ "electron" },
@@ -89,14 +90,15 @@ void State::initializeParticle(Particle& p, boost::property_tree::ptree& cfg)
 	// we can't use createDimension because we're multiplying by pc before creating them
 	// add dimension for R
     double rmin = GlobalConfig.get<double>("rCusp") * p.getpar(cfg, "dim.radius.min", 1.1);
-    double rmax = GlobalConfig.get<double>("rCenter") * 5.0;
+    double rcenter = GlobalConfig.get<double>("rCenter");
+    double rmax = bisection(rcenter, 50*rcenter, [&](double r){return w(r,0.0);});
 // p.getpar(cfg, "dim.radius.max", 3.0);
-	int nR = p.getpar(cfg,"dim.radius.samples", 10); // solo por ahora; y no deberia ser usado directamente desde otro lado
+	int nR = p.getpar(cfg,"dim.radius.samples", 20); // solo por ahora; y no deberia ser usado directamente desde otro lado
 	p.ps.add(new Dimension(nR, bind(initializePoints, std::placeholders::_1, rmin, rmax)));
     
     // add dimension for theta
     double thetamin =0.0;                           // los defino aca porque no se si puedo poner pi en el .json
-    double thetamax = pi/4.0 * p.getpar(cfg, "dim.theta.max", 1.0);
+    double thetamax = pi/2.0 * p.getpar(cfg, "dim.theta.max", 0.9);
     int thetaR = p.getpar(cfg, "dim.theta.samples", 10);
     
     GlobalConfig.put("rmin", GlobalConfig.get<double>("rmin", rmin));

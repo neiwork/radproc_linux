@@ -49,7 +49,7 @@ T xc_root(T r, T a, T b, T c) {
    //T guess = 1.e-20;
    //T factor = 1.1;                     // How big steps to take when searching.
    
-   T min = 1.e-1;
+   T min = 1.e-5;
    T max = 1.e3;
 
    const boost::uintmax_t maxit = 5000;  // Limit to maximum iterations.
@@ -96,53 +96,46 @@ void luminosities2(State& st, const std::string& filename) {
                 
         double energy = i.val(DIM_E);
         
-        double lumTot=0.0;
+ //       double lumTot=0.0;
         double lumBr=0.0;
         double lumSy=0.0;
-        double lumIC_Br=0.0;
-        double lumIC_Sy=0.0;
-		double lum_icBr = 0.0;
-		double lum_icSy = 0.0;
+  //      double lumIC_Br=0.0;
+   //     double lumIC_Sy=0.0;
+//		double lum_icBr = 0.0;
+//		double lum_icSy = 0.0;
 
         st.photon.ps.iterate([&](const SpaceIterator& j) {
 
             double r = j.val(DIM_R) * rg;
             double theta = j.val(DIM_THETA);
         
-            double vol = 2.0*pi*dtheta* r*r * dr;
+            double vol = 2.0 * 2.0*pi * dtheta * (r*r*dr + dr*dr*dr/12.0);
         
             double norm_temp = boltzmann * st.tempElectrons.get(j) / electronMass / cLight2;
 		
             double jBr = st.tpf1.get(j) * 0.25 * energy*energy / pi;
             double jSy = st.tpf2.get(j)* 0.25 * energy*energy / pi;
             
-            double jIC1(0.0), jIC2(0.0);
+  //          double jIC1(0.0), jIC2(0.0);
 			
-			double icBr = thCompton(energy, st.electron, j, st.tpf1, st.photon.emin());
-			double icSy = thCompton(energy, st.electron, j, st.tpf2, st.photon.emin());
+	//		double icBr = thCompton(energy, st.electron, j, st.tpf1, st.photon.emin());
+	//		double icSy = thCompton(energy, st.electron, j, st.tpf2, st.photon.emin());
             
-           /* if (norm_temp >= 1.e-4) {
-                const double denf{ st.denf_e.get(j) };
-                const double magfield{ st.magf.get(j) };
-                double xc = xc_root(r, denf, magfield, norm_temp);
-                double nu0 = electronCharge * magfield / (2.0 * pi * electronMass * cLight);
-                double nuc = 1.5 * nu0 * norm_temp*norm_temp * xc;
-                r = r / rg;
+            const double magfield{ st.magf.get(j) };
+            const double denf{ st.denf_e.get(j) };
+            double xc = xc_root(r, denf, magfield, norm_temp);
                 
-                jIC1 = jIC_Bremss(energy, norm_temp, r, theta, j, st.denf_e, jBr, xc);
-                jIC2 = jIC_Sync(energy, norm_temp, r, theta, j, st.denf_e, jSy, xc);
-            } else {
-                jIC1 = 0.0; jIC2 = 0.0;
-            };*/
+  //          jIC1 = jIC_Bremss(energy, norm_temp, r, theta, j, st.denf_e, jBr, xc);
+  //          jIC2 = jIC_Sync(energy, norm_temp, r, theta, j, st.denf_e, jSy, xc);
             
-            double rf = redshiftFactor(r / rg, theta);
+            double rf = redshiftFactor(r/rg, theta);
             
             jBr *= rf;
             jSy *= rf;
-            jIC1 *= rf;
-            jIC2 *= rf;
+   //         jIC1 *= rf;
+   //         jIC2 *= rf;
         
-            double jTotal =  jBr + jSy + jIC1 + jIC2;
+            double jTotal =  jBr + jSy; // + jIC1 + jIC2;
         
             double emissToLum = 4.0 * pi * vol;
         
@@ -151,8 +144,8 @@ void luminosities2(State& st, const std::string& filename) {
             //lumIC_Br += jIC1 * emissToLum;
             //lumIC_Sy += jIC2 * emissToLum;
             //lumTot +=  jTotal * emissToLum;
-			lum_icBr += icBr * emissToLum;
-			lum_icSy += icSy * emissToLum;
+	//		lum_icBr += icBr * emissToLum;
+	//		lum_icSy += icSy * emissToLum;
             
                             
         }, { i.coord[DIM_E], -1, -1 } );
@@ -166,11 +159,85 @@ void luminosities2(State& st, const std::string& filename) {
                   //              << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumIC_Br
                 //                << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumIC_Sy
               //                  << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumTot
-								<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lum_icBr
-								<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lum_icSy
+		//						<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lum_icBr
+		//						<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lum_icSy
                                 << std::endl;
     
     }, { -1, 0, 0 } );
+    
+ /*   st.photon.ps.iterate([&](const SpaceIterator& i) {
+        
+        double r = i.val(DIM_R) * rg;
+        double theta = i.val(DIM_THETA);
+        
+        double vol = 2.0 * 2.0*pi * dtheta * (r*r*dr + dr*dr*dr/12.0);
+        
+        double norm_temp = boltzmann * st.tempElectrons.get(i) / electronMass / cLight2;
+        
+        const double magfield{ st.magf.get(i) };
+        const double denf{ st.denf_e.get(i) };
+        double xc = xc_root(r, denf, magfield, norm_temp);
+        
+        double rf = redshiftFactor(r/rg, theta);
+        
+ //       double lumTot=0.0;
+        double lumBr=0.0;
+        double lumSy=0.0;
+  //      double lumIC_Br=0.0;
+   //     double lumIC_Sy=0.0;
+//		double lum_icBr = 0.0;
+//		double lum_icSy = 0.0;
+
+        st.photon.ps.iterate([&](const SpaceIterator& j) {
+            
+            double energy = j.val(DIM_E);
+            double jBr = st.tpf1.get(j) * 0.25 * energy*energy / pi;
+            double jSy = st.tpf2.get(j)* 0.25 * energy*energy / pi;
+            
+  //          double jIC1(0.0), jIC2(0.0);
+			
+	//		double icBr = thCompton(energy, st.electron, j, st.tpf1, st.photon.emin());
+	//		double icSy = thCompton(energy, st.electron, j, st.tpf2, st.photon.emin());
+            
+                
+  //          jIC1 = jIC_Bremss(energy, norm_temp, r, theta, j, st.denf_e, jBr, xc);
+  //          jIC2 = jIC_Sync(energy, norm_temp, r, theta, j, st.denf_e, jSy, xc);
+            
+            
+            jBr *= rf;
+            jSy *= rf;
+   //         jIC1 *= rf;
+   //         jIC2 *= rf;
+        
+            double jTotal =  jBr + jSy; // + jIC1 + jIC2;
+        
+            double emissToLum = 4.0 * pi * vol;
+        
+            lumBr += jBr * emissToLum;
+            lumSy += jSy * emissToLum;
+            //lumIC_Br += jIC1 * emissToLum;
+            //lumIC_Sy += jIC2 * emissToLum;
+            //lumTot +=  jTotal * emissToLum;
+	//		lum_icBr += icBr * emissToLum;
+	//		lum_icSy += icSy * emissToLum;
+            
+                            
+        }, { -1, i.coord[DIM_R], i.coord[DIM_THETA] } );
+        
+        double frecuency = energy / planck;
+        
+        file << "\t" << log10(energy/1.6e-12) 
+				//"\t" << frecuency << "\t"
+                                << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumBr
+                                << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumSy
+                  //              << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumIC_Br
+                //                << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumIC_Sy
+              //                  << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * lumTot
+		//						<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lum_icBr
+		//						<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lum_icSy
+                                << std::endl;
+    
+    }, { 0, -1, -1 } ); */
     
      file.close();
     

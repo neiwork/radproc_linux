@@ -10,8 +10,6 @@
 #include <boost/property_tree/ptree.hpp>
 
 
-
-
 // Keplerian specific angular momentum
 double keplAngularMom(double r) {
 		
