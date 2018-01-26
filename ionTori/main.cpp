@@ -25,7 +25,6 @@
 int main()
 {
 	
-	double x=0.0;
 	std::string folder{ prepareOutputfolder() };
 
 	try {

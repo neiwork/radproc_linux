@@ -6,5 +6,5 @@ double bb_RJ(double frecuency, double temp) {
 }
 
 double bb(double frecuency, double temp) {	
-	return pi*2.0*planck*frecuency*frecuency*frecuency / cLight2 / (1.0-exp(planck*frecuency/(boltzmann*temp)));
+	return pi*2.0*planck*frecuency*frecuency*frecuency / cLight2 / (exp(planck*frecuency/(boltzmann*temp))-1.0);
 }
