@@ -17,6 +17,7 @@
 #include <fluminosities/thermalSync.h>
 #include <fluminosities/thermalBremss.h>
 #include <fluminosities/thermalIC.h>
+#include <fluminosities/blackBody.h>
 #include <fmath/mathFunctions.h>
 #include <fmath/physics.h>
 #include <boost/math/tools/roots.hpp>
@@ -66,7 +67,8 @@ T xc_root(T r, T a, T b, T c) {
 }
 
 void luminosities2(State& st, const std::string& filename) {
-    
+   
+	/*
     std::ofstream file;
 	file.open(filename.c_str(), std::ios::out);
 
@@ -110,11 +112,15 @@ void luminosities2(State& st, const std::string& filename) {
             double theta = j.val(DIM_THETA);
         
             double vol = 2.0 * 2.0*pi * dtheta * (r*r*dr + dr*dr*dr/12.0);
-        
-            double norm_temp = boltzmann * st.tempElectrons.get(j) / electronMass / cLight2;
+			
+			double temp = st.tempElectrons.get(j);
+            double norm_temp = boltzmann * temp / electronMass / cLight2;
 		
             double jBr = st.tpf1.get(j) * 0.25 * energy*energy / pi;
             double jSy = st.tpf2.get(j)* 0.25 * energy*energy / pi;
+			
+			double fluxBB_RJ = bb_RJ(energy, temp);
+			double fluxBB = bb(energy, temp);
             
   //          double jIC1(0.0), jIC2(0.0);
 			
@@ -132,6 +138,8 @@ void luminosities2(State& st, const std::string& filename) {
             
             jBr *= rf;
             jSy *= rf;
+			fluxBB_RJ *= rf;
+			fluxBB *= rf;
    //         jIC1 *= rf;
    //         jIC2 *= rf;
         
@@ -164,8 +172,12 @@ void luminosities2(State& st, const std::string& filename) {
                                 << std::endl;
     
     }, { -1, 0, 0 } );
+	
+	*/
     
- /*   st.photon.ps.iterate([&](const SpaceIterator& i) {
+ /* INTERCAMBIANDO EL ORDEN DE LAS ITERACIONES
+
+   st.photon.ps.iterate([&](const SpaceIterator& i) {
         
         double r = i.val(DIM_R) * rg;
         double theta = i.val(DIM_THETA);
@@ -238,7 +250,52 @@ void luminosities2(State& st, const std::string& filename) {
                                 << std::endl;
     
     }, { 0, -1, -1 } ); */
-    
-     file.close();
+	
+	// PRUEBAS PARA SYNCROTHRON //////////////////////////
+	
+	std::ofstream file2;
+	file2.open("sync.txt", std::ios::out);
+
+	file2 << setw(10) << "frecuency [Hz]"
+		  << setw(10) << "Synchr"
+		  << setw(10) << "BB_RJ"
+          << setw(10) << "BB"
+          << std::endl;
+	
+	st.photon.ps.iterate([&](const SpaceIterator& i) {
+		
+		double rg = gravitationalConstant * 1.0e6 * solarMass / cLight2;
+		double r = i.val(DIM_R) * rg;
+		double temp = st.tempElectrons.get(i);
+		
+		st.photon.ps.iterate([&](const SpaceIterator& j) {
+			double energy = j.val(DIM_E);
+			double frecuency = energy / planck;
+			
+            double jSy = st.tpf2.get(j)* 0.25 * energy*energy / pi;
+			
+			double fluxBB_RJ = bb_RJ(frecuency, temp);
+			double fluxBB = bb(frecuency, temp);
+			
+			double lumSy = jSy * 4.0 *pi / 3.0 * r*r*r;
+			double lumBB_RJ = fluxBB_RJ * 4.0 * pi * r*r;
+			double lumBB = fluxBB * 4.0 * pi * r*r;
+			
+			
+			file2 << "\t" << log10(frecuency)
+						  << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumSy
+						  << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumBB_RJ
+						  << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumBB
+                          << std::endl;
+			
+			
+		}, {-1, i.coord[DIM_R], i.coord[DIM_THETA]} );
+	}, {0,-1,-1} );
+	
+    file2.close();
+	
+	///////////////////////////////////////////////////////////
+	
+	// file.close();
     
 }

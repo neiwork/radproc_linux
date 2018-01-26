@@ -20,6 +20,8 @@
     <File Name="thermalBremss.h" ExcludeProjConfig=""/>
     <File Name="thermalIC.h"/>
     <File Name="thermalIC.cpp"/>
+    <File Name="blackBody.cpp"/>
+    <File Name="blackBody.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include"/>
   <Dependencies Name="Debug">
