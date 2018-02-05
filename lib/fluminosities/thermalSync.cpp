@@ -4,6 +4,7 @@
 #include <fmath/mathFunctions.h>
 #include <fmath/physics.h>
 #include <boost/math/special_functions/bessel.hpp>
+#include "blackBody.h"
 
 double auxiliaryFunction(double& alpha, double& beta, double& gamma, double temp) {
     
@@ -63,7 +64,6 @@ double jSync(double energy, double temp, double magfield, double dens_e)
 	//double bessel2 = bessk(2, 1.0/norm_temp);
 	
     double result = electronCharge*electronCharge / (sqrt(3.0)*cLight) * dens_e * frecuency / bessel * mAux(xM, temp);
-	
-    //return result;
+    
 	return result;
 }   // esto debería tener unidades de erg cm^-3 ster^-1 s^-1 Hz^-1
