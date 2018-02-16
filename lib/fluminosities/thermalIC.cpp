@@ -74,3 +74,32 @@ double jIC_Sync(double energy, double norm_temp, double r, double theta, const S
         return 0.0;
     }
 }
+
+double jIC(double jSource, double normTemp, double r, double rMax, double theta, const SpaceCoord& distCoord,
+                ParamSpaceValues& denf, int s) {
+    
+    double rg = gravitationalConstant * 1.0e6 * solarMass / cLight2;
+    
+	r = r / rg;
+	double lim_inf = r*1.01;
+    double lim_sup = rMax*0.9;
+ 
+    double opticalDepth = rg*RungeKuttaSimple(lim_inf, lim_sup, [&](double r){
+		try {
+			return thomson * denf.interpolate({ {DIM_R, r} , {DIM_THETA, theta} }, &distCoord);
+		} catch (std::runtime_error& e) {
+			std::cout << "WARNING: " << e.what() << std::endl;
+			return 0.0;
+		}
+	});
+    
+    double probEscape = exp(-opticalDepth);
+    double probScattering = 1.0 - probEscape;
+    
+    double probability = probEscape;
+    for (int i=0; i < s; i++) {
+        probability *= probScattering;
+    }
+    
+    return jSource * probability;
+}

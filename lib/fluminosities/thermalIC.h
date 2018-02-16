@@ -9,3 +9,6 @@ double jIC_Bremss(double energy, double norm_temp, double r, double theta, const
 double jIC_Sync(double energy, double norm_temp, double r, double theta, const SpaceCoord& distCoord, 
                         ParamSpaceValues& denf, double jSy, double xc);
                         
+double jIC(double jSource, double normTemp, double r, double rMax, double theta, 
+                    const SpaceCoord& distCoord, ParamSpaceValues& denf, int s);
+                        
