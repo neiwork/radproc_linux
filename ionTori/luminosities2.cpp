@@ -8,6 +8,11 @@
 
 #include "functions.h"
 
+#include "messages.h"
+
+//#include "coppiBlandford.h"
+//#include "photonEscape.h"
+
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/parameters.h>
 
@@ -71,6 +76,8 @@ T xc_root(T r, T a, T b, T c) {
 void luminosities2(State& st, const string& filename) {
    
 
+	show_message(msgStart, Module_luminosities);
+	
     ofstream file;
 	file.open(filename.c_str(), ios::out);
 
@@ -81,7 +88,7 @@ void luminosities2(State& st, const string& filename) {
           << setw(10) << "IC_Synchr"
           << std::endl;
 
-    double rg = gravitationalConstant * 1.0e6 * solarMass / cLight2;
+	double rg = GlobalConfig.get<double>("rg");
     
     double nT = GlobalConfig.get<double>("model.particle.default.dim.theta.samples");
     double nR = GlobalConfig.get<double>("model.particle.default.dim.radius.samples");
@@ -194,7 +201,11 @@ void luminosities2(State& st, const string& filename) {
     vector<double> lumICB(energyDim, 0.0);
     vector<double> lumICS(energyDim, 0.0);
     
-    st.photon.ps.iterate([&](const SpaceIterator& i) {
+
+	//Vector jIC_Syn(energyDim, 0.0);
+	
+   st.photon.ps.iterate([&](const SpaceIterator& i) {
+
         
         double r = i.val(DIM_R) * rg;
         double theta = i.val(DIM_THETA);
@@ -226,11 +237,12 @@ void luminosities2(State& st, const string& filename) {
             
             lumBr[k] += jBr*emissToLum;
             
-            if (fluxBB_RJ > jSy *4.0 * pi * r / 3.0) {
+           // if (fluxBB_RJ > jSy *4.0 * pi * r / 3.0) {
                 lumSy[k] += (jSy * emissToLum);
-            } else {
-                lumSy[k] += (fluxBB_RJ * fluxToLum);
-            }
+           // } else {
+           //     lumSy[k] += (fluxBB_RJ * fluxToLum);
+            //}
+
             
             // INVERSE COMPTON /////////////////////////////////////////////////
             
@@ -243,22 +255,33 @@ void luminosities2(State& st, const string& filename) {
             for (int s = 1; s < 6; s++) {
                 auxEnergy = auxEnergy / A;
                 
-                jSySource = jSync(auxEnergy, temp, magfield, dens_e) * 0.25*auxEnergy*auxEnergy / pi;
-                jBrSource = jBremss(auxEnergy, temp, dens_i, dens_e) * 0.25*auxEnergy*auxEnergy / pi;
+                //jSySource = jSync(auxEnergy, temp, magfield, dens_e) * 0.25*auxEnergy*auxEnergy / pi;
+                //jBrSource = jBremss(auxEnergy, temp, dens_i, dens_e) * 0.25*auxEnergy*auxEnergy / pi;
+				
+				jSySource = st.tpf2.interpolate({ {DIM_E, auxEnergy}}, &(const SpaceCoord&) j)* 0.25*auxEnergy*auxEnergy / pi;
+				
+				jBrSource = st.tpf1.interpolate({ {DIM_E, auxEnergy}  }, &(const SpaceCoord&) j)* 0.25*auxEnergy*auxEnergy / pi;
             
-                if ( bb_RJ(frecuency[k]/A, temp) > jSySource * 4.0*pi*r/3.0 || auxEnergy > 3.0*boltzmann*temp) {
+                //if ( bb_RJ(frecuency[k]/A, temp) > jSySource * 4.0*pi*r/3.0 || auxEnergy > 3.0*boltzmann*temp) {
+				if ( auxEnergy > 3.0*boltzmann*temp) {
                     jSySource = 0.0;
                     jBrSource = 0.0;
                 }
                 
-                jICB += jIC(jBrSource, normTemp, r, rMax, theta, j, st.denf_e, s);
-                jICS += jIC(jSySource, normTemp, r, rMax, theta, j, st.denf_e, s);
+                jICB += jIC(jBrSource, normTemp, r/rg, rMax/rg, theta, j, st.denf_e, s);
+                jICS += jIC(jSySource, normTemp, r/rg, rMax/rg, theta, j, st.denf_e, s);
             }
 
             lumICB[k] += jICB * emissToLum;
             lumICS[k] += jICS * emissToLum;
             
             ///////////////////////////////////////////////////////////////////
+           
+            lumBr[k] += jBr*emissToLum;
+			
+			//jIC_Syn[k] += thComptonCoppi(energy, st.electron, j, st.tpf1, st.photon.emin())*energy*fluxToLum*cLight*
+			//					escapePhoton(energy, st.electron, st.denf_e, i);
+			
 
             k++;
                             
@@ -271,6 +294,9 @@ void luminosities2(State& st, const string& filename) {
                            << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency[k] * lumSy[k]
                            << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency[k] * lumICB[k]
                            << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency[k] * lumICS[k]
+
+						  // << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << jIC_Syn[k]
+
                            << std::endl;
     };
     
@@ -322,4 +348,6 @@ void luminosities2(State& st, const string& filename) {
 	
 	file.close();
     
+	show_message(msgEnd, Module_luminosities);
+	
 }

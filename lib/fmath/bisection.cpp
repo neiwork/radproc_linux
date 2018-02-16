@@ -25,7 +25,7 @@ double bisection(double A, double B, fun1 fun)
 	double FB = fun(B);
 
 	if ((FA * FB) > 0.0) {
-		std::cout << "F(A) and F(B) have same sign";
+		std::cout << "F(A) and F(B) have same sign" << std::endl;
 	}
 
 	double tol = 1.0e-2;  //Tolerancia

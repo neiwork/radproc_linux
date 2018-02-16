@@ -3,6 +3,9 @@
 
 #include "functions.h"
 #include "modelParameters.h"
+
+#include <fluminosities/blackBody.h>
+
 #include <fluminosities/thermalBremss.h>
 #include <fluminosities/thermalSync.h>
 #include <fparameters/SpaceIterator.h>
@@ -10,7 +13,7 @@
 //#include <fmath/physics.h>
 //#include <fparameters/parameters.h>
 
-//#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 
 void tpfFill_Bremss(State& st) {	  
@@ -26,7 +29,7 @@ void tpfFill_Bremss(State& st) {
     });
 }
 
-void tpfFill_Sync(State& st) {
+/*void tpfFill_Sync(State& st) {
     st.tpf2.fill([&](const SpaceIterator& i) {
         double energy = i.val(DIM_E);
         
@@ -39,7 +42,35 @@ void tpfFill_Sync(State& st) {
             return 0.0;
         }
     });
-}
+}*/
 
 	  
+	  
+void tpfFill_Sync(State& st) {
+	
+	double rg = gravitationalConstant * 1.0e6 * solarMass / cLight2;; //GlobalConfig.get<double>("rg");
+	
+    st.tpf2.fill([&](const SpaceIterator& i) {
+        double energy = i.val(DIM_E);
+		double r = i.val(DIM_R)*rg;
+        
+        const double magfield{ st.magf.get(i) };
+        const double denf_e{ st.denf_e.get(i) };
+        const double temp{ st.tempElectrons.get(i) };
+        if (temp > 5.e8) {
+	
+			double jSy = jSync(energy, temp, magfield, denf_e);
+            double fluxBB_RJ = bb_RJ(energy/planck, temp);
+            
+            if (fluxBB_RJ > jSy *4.0 * pi * r / 3.0) {
+                return jSy*4.0*pi/(energy*energy);
+            } else {
+                return fluxBB_RJ * 3.0/r/(energy*energy);
+            }
+			
+        } else {
+            return 0.0;
+        }
+    });
+}
 

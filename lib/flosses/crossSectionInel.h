@@ -22,6 +22,7 @@ double crossSectionThomson(double mass);
 
 /*Klein-Nishina cross section*/ 
 double crossSectionKN(double Eph, double Ee);
+double angleAveragedKN(double eps); //eps is the normalized photon energy
 
 
 /*Cross section for photon-photon pair production for frontal collision (theta = pi)

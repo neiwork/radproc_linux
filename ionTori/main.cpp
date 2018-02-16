@@ -12,6 +12,7 @@
 
 #include <inout/ioutil.h>
 
+#include "messages.h"
 
 #include <fparticle/Particle.h>
 #include <fparameters/parameters.h>
@@ -30,10 +31,17 @@ int main()
 	try {
 		GlobalConfig = readConfig();
 		prepareGlobalCfg();
-		State model(GlobalConfig.get_child("model"));
 		
+		show_message(msgStart, Module_state);
+		State model(GlobalConfig.get_child("model"));
+		show_message(msgEnd, Module_state);
+		
+		
+		show_message(msgStart, Module_targetField);
 		tpfFill_Bremss(model);  // esto completa la psv con los fotones de Bremsstrahlung
         tpfFill_Sync(model);      // idem Sync
+		show_message(msgEnd, Module_targetField);
+		
 		
 		// radiativeLosses(model, folder+"\\electronLosses.txt");
 		

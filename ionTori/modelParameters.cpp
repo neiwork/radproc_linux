@@ -25,6 +25,13 @@ void prepareGlobalCfg()
     static const double energyC = GlobalConfig.get<double>("energyC");
 	static const double beta = GlobalConfig.get<double>("beta");*/
     
+	static const double Mbh = GlobalConfig.get<double>("massBH")*solarMass*1.0e6;
+	
+	double rg = gravitationalConstant*Mbh/cLight2;
+	
+    GlobalConfig.put("rg", rg);
+	
+	
 	double l_0, rCusp, rCenter;
 
 	torusParameters(l_0, rCusp, rCenter);

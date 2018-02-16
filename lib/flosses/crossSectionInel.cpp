@@ -105,6 +105,28 @@ double crossSectionKN(double Eph, double Ee)
 	return sigmaKN;
 }
 
+
+double angleAveragedKN(double eps)
+{
+	double l = log(1.0+2.0*eps);
+	double sigmaKN = (3.0*thomson/4.0) *
+					( (1.0+eps)* (2.0*eps*(1.0+eps)/(1.0+2.0*eps) - l) / P3(eps) 
+	               + l/(2.0*eps) - (1.0+3.0*eps)/P2(1.0+2.0*eps) );
+		
+	double result = 0.0;
+	
+	if(eps < 1)
+	{
+		result = thomson*(1.0-2.0*eps+26.0*eps*eps/5.0);
+	}
+	else
+	{
+		result = 3.0*thomson*(log(2.0*eps)+0.5)/(8.0*eps);
+	}
+		
+	return result;
+}
+
 double crossSectionGammaGamma(double beta)
 {
 	return  3.0*thomson*(1.0-P2(beta))*

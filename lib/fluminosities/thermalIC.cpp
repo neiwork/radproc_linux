@@ -80,7 +80,7 @@ double jIC(double jSource, double normTemp, double r, double rMax, double theta,
     
     double rg = gravitationalConstant * 1.0e6 * solarMass / cLight2;
     
-	r = r / rg;
+	//r = r / rg;
 	double lim_inf = r*1.01;
     double lim_sup = rMax*0.9;
  
