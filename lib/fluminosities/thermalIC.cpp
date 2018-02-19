@@ -81,14 +81,15 @@ double jIC(double jSource, double normTemp, double r, double rMax, double theta,
     double rg = gravitationalConstant * 1.0e6 * solarMass / cLight2;
     
 	//r = r / rg;
-	double lim_inf = r*1.01;
-    double lim_sup = rMax*0.9;
+	double lim_inf = r;//*1.01;
+    double lim_sup = rMax;//*0.9;
  
     double opticalDepth = rg*RungeKuttaSimple(lim_inf, lim_sup, [&](double r){
 		try {
 			return thomson * denf.interpolate({ {DIM_R, r} , {DIM_THETA, theta} }, &distCoord);
 		} catch (std::runtime_error& e) {
 			std::cout << "WARNING: " << e.what() << std::endl;
+			std::cout << lim_inf << '\t' << lim_sup << '\t' << r << std::endl;
 			return 0.0;
 		}
 	});

@@ -79,7 +79,7 @@ void initializePoints(Vector& v, double min, double max)
 {
 //	double var_int = pow((max / min), (1.0 / (v.size() - 1.0)));
 
-    double var_int = (max-min) / v.size();
+    double var_int = (max-min) / (v.size()-1);
 	v[0] = min;
 
 	for (size_t i = 1; i < v.size(); ++i){
