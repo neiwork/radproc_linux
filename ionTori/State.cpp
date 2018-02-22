@@ -97,8 +97,8 @@ void State::initializeParticle(Particle& p, boost::property_tree::ptree& cfg)
 	p.ps.add(new Dimension(nR, bind(initializePoints, std::placeholders::_1, rmin, rmax)));
     
     // add dimension for theta
-    double thetamin =0.0;                           // los defino aca porque no se si puedo poner pi en el .json
-    double thetamax = pi/2.0 * p.getpar(cfg, "dim.theta.max", 0.9);
+    double thetamin =0.01;                           // los defino aca porque no se si puedo poner pi en el .json
+    double thetamax = pi/2.0 * p.getpar(cfg, "dim.theta.max", 0.8);
     int thetaR = p.getpar(cfg, "dim.theta.samples", 10);
     
     GlobalConfig.put("rmin", GlobalConfig.get<double>("rmin", rmin));

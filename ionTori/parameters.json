@@ -35,7 +35,7 @@
 						"samples":10
 					},
 					"theta":{
-						"min":0.0,
+						"min":0.01,
 						"max":0.8,
 						"samples":10
 					}

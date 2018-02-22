@@ -75,7 +75,6 @@ T xc_root(T r, T a, T b, T c) {
 
 void luminosities2(State& st, const string& filename) {
    
-
 	show_message(msgStart, Module_luminosities);
 	
     ofstream file;
@@ -95,12 +94,12 @@ void luminosities2(State& st, const string& filename) {
     
     double thetaMin = GlobalConfig.get<double>("thetamin");
     double thetaMax = GlobalConfig.get<double>("thetamax");
-    double dtheta = (thetaMax - thetaMin) / nT;
     
     double rMin = GlobalConfig.get<double>("rmin");
     double rMax = GlobalConfig.get<double>("rmax");
-
-    double dr = (rMax - rMin)*rg / nR;
+    
+    double ftheta = pow(thetaMax/thetaMin, 1.0 / double(nT));
+    double fr = pow(rMax/rMin, 1.0 / double(nR));
 
   /*  st.photon.ps.iterate([&](const SpaceIterator& i) {
                 
@@ -206,12 +205,15 @@ void luminosities2(State& st, const string& filename) {
 	
    st.photon.ps.iterate([&](const SpaceIterator& i) {
 
-        
         double r = i.val(DIM_R) * rg;
         double theta = i.val(DIM_THETA);
         
-        double vol = 2.0 * 2.0*pi * dtheta * (r*r*dr + dr*dr*dr/12.0);
-        double area = 2.0 * 2.0*pi * dtheta * (r+dr/2.0)*(r+dr/2.0);
+        double dtheta = theta*(ftheta-1.0);
+        double dr1 = r*(1.0-1.0/fr);
+        double dr2 = r*(fr-1.0);
+        double vol = 2.0 * 2.0*pi * dtheta * 0.5*( r*r*(dr1+dr2) + 0.5*r*(dr2*dr2-dr1*dr1) +
+                                                                                                                (dr1*dr1*dr1 + dr2*dr2*dr2)/12.0 );
+        double area = 2.0 * 2.0*pi * dtheta * (r+dr2/2.0)*(r+dr2/2.0);
         
         double emissToLum = 4.0 * pi * vol;
         double fluxToLum = area;
@@ -256,19 +258,14 @@ void luminosities2(State& st, const string& filename) {
                 auxEnergy = auxEnergy / A;
                 
 				if (temp > 5.e8) {
-					jSySource = jSync(auxEnergy, temp, magfield, dens_e); // * 0.25*auxEnergy*auxEnergy / pi;
-					//jBrSource = jBremss(auxEnergy, temp, dens_i, dens_e) * 0.25*auxEnergy*auxEnergy / pi;
-				
-					//jSySource = st.tpf2.interpolate({ {DIM_E, auxEnergy}}, &(const SpaceCoord&) j)* 0.25*auxEnergy*auxEnergy / pi;
+					jSySource = jSync(auxEnergy, temp, magfield, dens_e);
 				} else {
 					jSySource = 0.0;
 				}
 				
 				jBrSource = st.tpf1.interpolate({ {DIM_E, auxEnergy}  }, &(const SpaceCoord&) j)* 0.25*auxEnergy*auxEnergy / pi;
             
-				//frecuency[k]/A
                 if ( bb_RJ(auxEnergy/planck, temp) < jSySource * 4.0*pi*r/3.0 || auxEnergy > 3.0*boltzmann*temp) {
-				//if ( auxEnergy > 3.0*boltzmann*temp) {
                     jSySource = 0.0;
                     jBrSource = 0.0;
                 }

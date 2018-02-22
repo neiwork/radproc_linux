@@ -19,6 +19,7 @@ void prepareGlobalCfg();
 
 
 void initializePoints(Vector& v, double min, double max);
+void initializeRadiiPoints(Vector& v, double min, double max);
 
 //void torusParameters(double *l_0, double *rCusp, double *rCenter);
 
