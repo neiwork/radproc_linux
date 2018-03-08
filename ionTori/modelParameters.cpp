@@ -75,16 +75,34 @@ void initializeEnergyPoints(Vector& v, double logEmin, double logEmax)
 	}
 }
 
-void initializePoints(Vector& v, double min, double max) 
+void initializeRadiiPoints(Vector& v, double min, double max) 
 {
-	double var_int = pow((max / min), (1.0 / (v.size() - 1.0)));
-	v[0] = min;
-//
-	for (size_t i = 1; i < v.size(); ++i){
-		v[i] = v[i - 1]*var_int;
-	}
+	double var_int = pow(max/min, 1.0/v.size());
+    
+    double l0 = min;
+    double l1 = min*var_int;
+    
+    for (size_t i = 0; i < v.size(); ++i) {
+        v[i] = sqrt(l0 * l1);
+        l0 = l1;
+        l1 *= var_int;
+    }
 }
 
+void initializeThetaPoints(Vector& v, double min, double max)
+{
+    double var_int = (sin(max) - sin(min)) / (v.size()-1);
+    
+    v[0] = min;
+    double sin0 = sin(v[0]);
+    
+    for (size_t i = 1; i < v.size(); ++i) {
+        v[i] = asin( sin0 + var_int );
+        sin0 += var_int;
+    }
+}
+
+/*
 void initializeRadiiPoints(Vector& v, double min, double max)
 {
     int posMax = v.size()-1;
@@ -92,7 +110,7 @@ void initializeRadiiPoints(Vector& v, double min, double max)
     
     double center = GlobalConfig.get<double>("rCenter");
     double varmin_int = pow( center/min , 1.0/(posCenter-1.0));
-    double varmax_int = pow( max/center, (1.0/posCenter));
+    double varmax_int = pow( max/center, 1.0/(posMax-posCenter));
     
     v[posCenter] = center;
     for (size_t i=posCenter; i>0; --i) {
@@ -101,3 +119,4 @@ void initializeRadiiPoints(Vector& v, double min, double max)
     }
     v[posMax] = max;
 }
+*/

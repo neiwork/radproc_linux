@@ -89,17 +89,110 @@ void luminosities2(State& st, const string& filename) {
 
 	double rg = GlobalConfig.get<double>("rg");
     
-    double nT = GlobalConfig.get<double>("model.particle.default.dim.theta.samples");
+    //double nT = GlobalConfig.get<double>("model.particle.default.dim.theta.samples");
     double nR = GlobalConfig.get<double>("model.particle.default.dim.radius.samples");
+    //int nEnergy = GlobalConfig.get<int>("model.particle.default.dim.energy.samples");
     
-    double thetaMin = GlobalConfig.get<double>("thetamin");
-    double thetaMax = GlobalConfig.get<double>("thetamax");
+    //double thetaMin = GlobalConfig.get<double>("thetamin");
+    //double thetaMax = GlobalConfig.get<double>("thetamax");
     
     double rMin = GlobalConfig.get<double>("rmin");
     double rMax = GlobalConfig.get<double>("rmax");
     
-    double ftheta = pow(thetaMax/thetaMin, 1.0 / double(nT));
-    double fr = pow(rMax/rMin, 1.0 / double(nR));
+    /////////////////////////////////////
+    // VECTOR DE FRONTERAS DE LAS CELDAS //
+    /////////////////////////////////////
+    
+    vector<double> rBoundary(nR+1, 0.0);
+    double rVar = pow(rMax/rMin, 1.0/(rBoundary.size()-1.0));
+    rBoundary[0] = rMin;
+    for (size_t i=1; i < rBoundary.size(); i++) {
+        rBoundary[i] = rBoundary[i-1]*rVar;
+    }
+    /////////////////////////////////////
+    /////////////////////////////////////
+    
+    st.photon.ps.iterate([&](const SpaceIterator& k0) {   // loop en las energías
+        
+        double energy = k0.val(DIM_E);
+        double frecuency = energy / planck;
+        
+        vector<double> lumOut(nR+1, 0.0);
+        vector<double> lumBr(nR+1, 0.0);
+        vector<double> lumSy(nR+1, 0.0);
+        vector<double> lumSync(nR+1, 0.0);
+        vector<double> lumIC_in(nR+1, 0.0);
+        vector<double> lumIC_out(nR+1, 0.0);
+        double flux = 0.0;
+        
+        int jR = 1;
+        st.photon.ps.iterate([&](const SpaceIterator& k1) {   // loop en radios
+            
+            double l0 = rBoundary[jR-1] * rg;
+            double l1 = rBoundary[jR] * rg;
+            
+            double lumRJ = 0.0;
+            
+            st.photon.ps.iterate([&](const SpaceIterator& k2) {   // loop en ángulo theta
+                
+                double theta = k2.val(DIM_THETA);
+                double dtheta = k2.its[DIM_THETA].peek(1) - theta;
+                
+                double temp = st.tempElectrons.get(k2);
+                double dens_i = st.denf_i.get(k2);
+                double dens_e = st.denf_e.get(k2);
+                double magfield = st.magf.get(k2);
+                
+                // TENGO QUE VER COMO ARMAR LOS VOLÚMENES
+                double area = 2.0 * 2.0*pi * l1*l1 * dtheta;
+                double vol = 2.0 * 2.0*pi / 3.0 * dtheta * (l1*l1*l1 - l0*l0*l0);
+                double fluxToLum = area;
+                double emissToLum = 4.0*pi*vol;
+                /////////////////////////
+                
+                double jBr = jBremss(energy, temp, dens_i, dens_e);
+                
+                double jSy;
+                if (temp >= 5.0e8) {
+                    jSy = jSync(energy, temp, magfield, dens_e);
+                } else { jSy = 0.0; };
+                
+                lumBr[jR] += jBr * emissToLum;
+                lumSync[jR] += jSy * emissToLum;     // temporalmente
+                lumRJ += bb_RJ(frecuency, temp) * fluxToLum;
+                
+            }, {0, k1.coord[DIM_R], -1} );
+            
+            //lumSync[jR] = min( (1.0- prob[jR, jR+1])*lumSync[jR-1] + lumSync[jR], lumRJ);
+            lumSync[jR] = min(lumSync[jR-1] + lumSync[jR], lumRJ);
+            lumSy[jR] = lumSync[jR] - lumSync[jR-1];
+            
+            //lumIC_out[j] = compton(lumIC_in);
+            lumOut[jR] = lumBr[jR] + lumSy[jR] + lumIC_out[jR];
+            
+      //      for (int kR=0; kR<nR; kR++) {
+       //         lumIC_in[jR] += prob[kR, jR] * lumOut[kR];
+       //     }
+            
+            
+            //flux += escape[jR]*lumOut[jR]; 
+            flux += lumOut[jR];
+            
+            jR++;
+            
+        }, {k0.coord[DIM_E], -1, 0} );
+         
+        double distance = 1.0; 
+        flux *= 0.25 / (pi * distance*distance);
+        
+        file << "\t" << log10(frecuency)
+                           << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency * flux
+                           << std::endl;
+        
+    }, {-1, 0, 0} );
+    
+ //   double ftheta = pow(thetaMax/thetaMin, 1.0 / double(nT));
+ //  double fr = pow(rMax/rMin, 1.0 / double(nR));
 
   /*  st.photon.ps.iterate([&](const SpaceIterator& i) {
                 
@@ -188,38 +281,64 @@ void luminosities2(State& st, const string& filename) {
     
     }, { -1, 0, 0 } ); */
     
+//vector<double> r(nR-1, 0.0);
+//vector<double> thetamax(nR-1, 0.0);
+
+/*
+int h = 0;
+double l0, l3;
+l3 = rMin;
+
+st.photon.ps.iterate([&](const SpaceIterator& i) {
+    
+    if (i.its[DIM_R].canPeek(1)) {
+        l0 = l3;
+        l3 = i.its[DIM_R].peek(1);
+        r[h] = sqrt( l0 * l3 );
+        double radius = r[h];
+        thetamax[h] = bisection(0.0, thetaMax, [&radius](double theta){return w(radius, theta);});
+        h++;
+    }
+    
+}, {0, -1, 0} ); */
+
+/*    
 //INTERCAMBIANDO EL ORDEN DE LAS ITERACIONES
 
-    int energyDim = 50;
-    vector<double> frecuency(energyDim, 0.0);
-    vector<double> frecuency2(energyDim, 0.0);
-    vector<double> lumSy(energyDim, 0.0);
-    vector<double> lumBr(energyDim, 0.0);
-    vector<double> lumBB(energyDim, 0.0);
-    vector<double> lumBB_RJ(energyDim, 0.0);
-    vector<double> lumICB(energyDim, 0.0);
-    vector<double> lumICS(energyDim, 0.0);
-    
-
-	//Vector jIC_Syn(energyDim, 0.0);
+    vector<double> frecuency(nEnergy, 0.0);
+    vector<double> frecuency2(nEnergy, 0.0);
+    vector<double> lumSy(nEnergy, 0.0);
+    vector<double> lumBr(nEnergy, 0.0);
+    vector<double> lumBB(nEnergy, 0.0);
+    vector<double> lumBB_RJ(nEnergy, 0.0);
+    vector<double> lumICB(nEnergy, 0.0);
+    vector<double> lumICS(nEnergy, 0.0);
 	
    st.photon.ps.iterate([&](const SpaceIterator& i) {
 
-        double r = i.val(DIM_R) * rg;
+        double l1 = i.val(DIM_R) * rg;
+        double l2 = i.its[DIM_R].peek(1) * rg;
+        // Acá lo que quiero es seleccionar el punto intermedio entre los dos próximos valores de r (equiespaciado
+        // logaritmicamente, de manera que r1 = sqrt(l1*l2). Si promediamos en theta para compton sólo habrá que
+        // recorrer el espacio de parámetros en r
+        
+        double r = sqrt(l1*l2);
         double theta = i.val(DIM_THETA);
         
         double dtheta = theta*(ftheta-1.0);
-        double dr1 = r*(1.0-1.0/fr);
-        double dr2 = r*(fr-1.0);
+        //double dr1 = r*(1.0-1.0/fr);
+        double dr1 = r-l1;
+        //double dr2 = r*(fr-1.0);
+        double dr2 = l2-r;
         double vol = 2.0 * 2.0*pi * dtheta * 0.5*( r*r*(dr1+dr2) + 0.5*r*(dr2*dr2-dr1*dr1) +
                                                                                                                 (dr1*dr1*dr1 + dr2*dr2*dr2)/12.0 );
-        double area = 2.0 * 2.0*pi * dtheta * (r+dr2/2.0)*(r+dr2/2.0);
+        //double area = 2.0 * 2.0*pi * dtheta * (l2/2.0)*(l2/2.0);
         
         double emissToLum = 4.0 * pi * vol;
-        double fluxToLum = area;
+        //double fluxToLum = area;
         
         const double dens_e{ st.denf_e.get(i) };
-        const double dens_i{ st.denf_i.get(i) };
+        //const double dens_i{ st.denf_i.get(i) };
         const double magfield{ st.magf.get(i) };
         const double temp{ st.tempElectrons.get(i) };
         const double normTemp = boltzmann * temp / electronMass / cLight2;
@@ -230,21 +349,13 @@ void luminosities2(State& st, const string& filename) {
         st.photon.ps.iterate([&](const SpaceIterator& j) {
             
             double energy = j.val(DIM_E);
-
             frecuency[k] = energy / planck;
                         
             double jBr = st.tpf1.get(j) * 0.25 * energy*energy / pi;
-            double jSy = st.tpf2.get(j)* 0.25 * energy*energy / pi;
-            double fluxBB_RJ = bb_RJ(frecuency[k], temp);
-            
+            double jSy = st.tpf2.get(j) * 0.25 * energy*energy / pi;
+                        
             lumBr[k] += jBr*emissToLum;
-            
-           // if (fluxBB_RJ > jSy *4.0 * pi * r / 3.0) {
-			lumSy[k] += (jSy * emissToLum);
-           // } else {
-           //     lumSy[k] += (fluxBB_RJ * fluxToLum);
-            //}
-
+            lumSy[k] += (jSy * emissToLum);
             
             // INVERSE COMPTON /////////////////////////////////////////////////
             
@@ -253,7 +364,6 @@ void luminosities2(State& st, const string& filename) {
             double jBrSource, jSySource;
             
             double auxEnergy = energy;
-
             for (int s = 1; s < 6; s++) {
                 auxEnergy = auxEnergy / A;
                 
@@ -278,19 +388,16 @@ void luminosities2(State& st, const string& filename) {
             lumICS[k] += jICS * emissToLum;
             
             ///////////////////////////////////////////////////////////////////
-           
-            lumBr[k] += jBr*emissToLum;
 			
 			//jIC_Syn[k] += thComptonCoppi(energy, st.electron, j, st.tpf1, st.photon.emin())*energy*fluxToLum*cLight*
 			//					escapePhoton(energy, st.electron, st.denf_e, i);
-			
 
             k++;
                             
         }, { -1, i.coord[DIM_R], i.coord[DIM_THETA] } );
     }, { 0, -1, -1 } );
     
-    for (int k=0; k<energyDim; k++) {
+    for (int k=0; k<nEnergy; k++) {
         file << "\t" << log10(frecuency[k])
                            << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency[k] * lumBr[k]
                            << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency[k] * lumSy[k]
@@ -301,8 +408,8 @@ void luminosities2(State& st, const string& filename) {
 
                            << std::endl;
     };
-    
-	
+     */
+     
 	// PRUEBAS PARA SYNCROTHRON //////////////////////////
 	/*
 	std::ofstream file2;
@@ -345,7 +452,7 @@ void luminosities2(State& st, const string& filename) {
 	}, {0,-1,-1} );
 	
     file2.close(); */
-	
+    
 	///////////////////////////////////////////////////////////
 	
 	file.close();

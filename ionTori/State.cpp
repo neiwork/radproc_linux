@@ -94,10 +94,10 @@ void State::initializeParticle(Particle& p, boost::property_tree::ptree& cfg)
     double rmax = bisection(rcenter, 50*rcenter, [&](double r){return w(r,0.0);});
 // p.getpar(cfg, "dim.radius.max", 3.0);
 	int nR = p.getpar(cfg,"dim.radius.samples", 20); // solo por ahora; y no deberia ser usado directamente desde otro lado
-	p.ps.add(new Dimension(nR, bind(initializePoints, std::placeholders::_1, rmin, rmax)));
+	p.ps.add(new Dimension(nR, bind(initializeRadiiPoints, std::placeholders::_1, rmin, rmax)));
     
     // add dimension for theta
-    double thetamin =0.01;                           // los defino aca porque no se si puedo poner pi en el .json
+    double thetamin = p.getpar(cfg, "dim.theta.min", 0.0);
     double thetamax = pi/2.0 * p.getpar(cfg, "dim.theta.max", 0.8);
     int thetaR = p.getpar(cfg, "dim.theta.samples", 10);
     
@@ -108,7 +108,7 @@ void State::initializeParticle(Particle& p, boost::property_tree::ptree& cfg)
 
     
     
-    p.ps.add(new Dimension(thetaR, bind(initializePoints, std::placeholders::_1, thetamin, thetamax)));
+    p.ps.add(new Dimension(thetaR, bind(initializeThetaPoints, std::placeholders::_1, thetamin, thetamax)));
 
 	// add dimension for T
 	// double tmin = p.getpar(cfg, "dim.time.min", 1.0)*pc;

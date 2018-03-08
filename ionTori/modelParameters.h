@@ -13,12 +13,11 @@ const DimensionCoord
 	DIM_R = 1,
 	DIM_THETA = 2;
 
-
 /* define the inital values of the global parameters*/
 void prepareGlobalCfg();
 
 
-void initializePoints(Vector& v, double min, double max);
+void initializeThetaPoints(Vector& v, double min, double max);
 void initializeRadiiPoints(Vector& v, double min, double max);
 
 //void torusParameters(double *l_0, double *rCusp, double *rCenter);

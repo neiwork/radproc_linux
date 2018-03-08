@@ -107,7 +107,7 @@ double g_phiphi(double r, double theta) {
 	readSpinMbh(massBH, spinBH);
 	
     double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
-    double result =  r*r + spinBH*spinBH + 2.0*massBH*r*spinBH*spinBH*cos(theta)*cos(theta) / sigma
+    double result =  (r*r + spinBH*spinBH + 2.0*massBH*r*spinBH*spinBH*cos(theta)*cos(theta) / sigma )
     * cos(theta)*cos(theta);
     return result;
 }
@@ -145,7 +145,9 @@ double w(double r, double theta) {
     
     double potentialS = potential(rCusp, 0.0);         // potential at the torus surface
     double potentialC = potential(rCenter, 0.0);      // potential at the torus center
-    return (potential(r, theta) - potentialS) / (potentialC - potentialS);
+    double result = (potential(r, theta) - potentialS) / (potentialC - potentialS);
+    
+    return result;
 }
 
 // ENERGY DENSITY

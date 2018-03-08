@@ -9,6 +9,7 @@
 #include "distribution.h"
 //#include "luminosities.h"
 #include "luminosities2.h"
+#include "functions.h"
 
 #include <inout/ioutil.h>
 
@@ -29,6 +30,8 @@ int main()
 	std::string folder{ prepareOutputfolder() };
 
 	try {
+        
+        
 		GlobalConfig = readConfig();
 		prepareGlobalCfg();
 		
