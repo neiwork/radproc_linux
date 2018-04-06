@@ -167,3 +167,42 @@ void writeEnergyFunction(const std::string& filename, const ParamSpaceValues& da
 	generateViewScript(filename);
 }
 
+
+
+
+void writeMatrix(const std::string& filename, Particle& p, Matrix& a)
+{
+	std::ofstream file;
+	file.open(dataName(filename).c_str(), std::ios::out);
+
+	int nR = p.ps[DIM_R].size();  //ver el -1
+
+	file << '\t';
+	
+	for (size_t z_j = 0; z_j < nR; z_j++) { 
+		const double r_j = p.ps[DIM_R][z_j];
+		file << r_j << '\t' ;
+	}
+	
+	file << std::endl; 
+			
+	for (size_t z_i = 0; z_i < nR; z_i++) { 
+		
+		const double r_i = p.ps[DIM_R][z_i];
+				
+		file << r_i << '\t';
+		
+		for (size_t z_j = 0; z_j < nR; z_j++) { 
+			const double r_j = p.ps[DIM_R][z_j];
+	
+			file << a[z_i][z_j] << '\t' ;
+		}
+		
+		
+		
+		file << std::endl;  
+	}
+	
+	file.close();
+	generateViewScript(filename);
+}

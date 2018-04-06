@@ -29,6 +29,8 @@
     <File Name="distribution.h"/>
     <File Name="luminosities2.cpp"/>
     <File Name="luminosities2.h"/>
+    <File Name="probabilityMatrix.cpp"/>
+    <File Name="probabilityMatrix.h"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
     <Project Name="fmath"/>

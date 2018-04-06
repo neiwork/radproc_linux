@@ -69,3 +69,5 @@ void writeEandRParamSpace(const std::string& filename, const ParamSpaceValues& d
 /*It writes data as a function of energy for a given r and t*/
 void writeEnergyFunction(const std::string& filename, const ParamSpaceValues& data, int r, int t);
 
+
+void writeMatrix(const std::string& filename, Particle& p, Matrix& a);
