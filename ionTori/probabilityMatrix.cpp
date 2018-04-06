@@ -77,11 +77,11 @@ void probabilityMatrix(State& st, Matrix& a)
 		theta_prim[t_i] = theta_prim[t_i]*(t_i+1);
 	}
     
-    for(int t_i = 0; t_i < theta_prim.size(); t_i++){
-        if (t_i < theta_prim.size()/2){
-            theta_prim[t_i] = theta_prim[t_i]*(t_i+1);
+    for(int t_i = 0; t_i < phi_prim.size(); t_i++){
+        if (t_i < phi_prim.size()/2){
+            phi_prim[t_i] = phi_prim[t_i]*(t_i+1);
         }else{
-            theta_prim[t_i] = theta_prim[t_i]*(t_i+2);
+            phi_prim[t_i] = phi_prim[t_i]*(t_i+2);
         }
 	}
 
@@ -142,7 +142,7 @@ void probabilityMatrix(State& st, Matrix& a)
                             
                             for (size_t p_i = phi_prim.size()/2; p_i < phi_prim.size(); p_i++) { 
                                 
-                                double r1_sup = dr/(sin(theta_prim[t_i])*sin(phi_prim[p_i]));
+                                double r1_sup = std::abs(dr/(sin(theta_prim[t_i])*sin(phi_prim[p_i])));
                                 
                                 double opticalDepth = rg*optDep(r1_sup,theta_prim[t_i],phi_prim[p_i],y0,z0,st.denf_e,i);
                                 

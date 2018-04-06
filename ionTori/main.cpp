@@ -27,13 +27,7 @@
 
 int main()
 {
-    double x=0;
-    std::cout << 'hola';
-    
-    return 0;
-}
-
-/*	std::string folder{ prepareOutputfolder() };
+	std::string folder{ prepareOutputfolder() };
 
 	try {
         
@@ -88,15 +82,15 @@ int main()
 
 		//processes(model, getFileName(folder, "luminosity"));
     */
-//	}
-//	catch (std::runtime_error& e)
-//	{
-//		std::cout << "ERROR: " << e.what() << std::endl;
+	}
+	catch (std::runtime_error& e)
+	{
+		std::cout << "ERROR: " << e.what() << std::endl;
 //		throw;
-//	}
+	}
 
-//	return 0;
-//}
+	return 0;
+}
 
   
 
