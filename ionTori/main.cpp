@@ -27,8 +27,13 @@
 
 int main()
 {
-	
-	std::string folder{ prepareOutputfolder() };
+    double x=0;
+    std::cout << 'hola';
+    
+    return 0;
+}
+
+/*	std::string folder{ prepareOutputfolder() };
 
 	try {
         
@@ -51,7 +56,7 @@ int main()
 		Matrix a;
 		probabilityMatrix(model, a);
 		writeMatrix("probMatrix", model.electron, a);
-		
+		/*
 		thermalDistribution(model.electron, model);
 		writeAllSpaceParam(folder+"\\electronDist.txt", model.electron.distribution);
 		
@@ -82,18 +87,18 @@ int main()
 		
 
 		//processes(model, getFileName(folder, "luminosity"));
-
-	}
-	catch (std::runtime_error& e)
-	{
-		std::cout << "ERROR: " << e.what() << std::endl;
+    */
+//	}
+//	catch (std::runtime_error& e)
+//	{
+//		std::cout << "ERROR: " << e.what() << std::endl;
 //		throw;
-	}
+//	}
 
-	return 0;
-}
+//	return 0;
+//}
 
-
+  
 
 
 /*int main(int argc, char **argv)
