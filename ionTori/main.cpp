@@ -6,7 +6,7 @@
 #include "State.h"
 #include "write.h"
 #include "radiativeLosses.h"
-#include "probabilityMatrix.h"
+#include "probabilityMatrix2.h"
 #include "distribution.h"
 //#include "luminosities.h"
 #include "luminosities2.h"
@@ -48,8 +48,9 @@ int main()
 		
 		// radiativeLosses(model, folder+"\\electronLosses.txt");
 		Matrix a;
-		probabilityMatrix(model, a);
-		writeMatrix("probMatrix", model.electron, a);
+		//probabilityMatrix(model, a);
+		probabilityMatrix2(model,a);
+        writeMatrix("probMatrix", model.electron, a);
 		/*
 		thermalDistribution(model.electron, model);
 		writeAllSpaceParam(folder+"\\electronDist.txt", model.electron.distribution);

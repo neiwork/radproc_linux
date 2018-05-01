@@ -8,6 +8,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="probabilityMatrix2.h"/>
+    <File Name="probabilityMatrix2.cpp"/>
     <File Name="main.cpp"/>
     <File Name="modelParameters.cpp"/>
     <File Name="modelParameters.h"/>
