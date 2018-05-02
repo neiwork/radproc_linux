@@ -41,7 +41,7 @@ double optDep(double r1_sup,double tprim,double pprim,double y0,double z0, Param
         //	phi2 = pi/2.0;}
         //	else{ double phi2 = atan(y2/x2);}
             
-        double theta2 = acos(z2/r2);  
+        double theta2 = std::abs(asin(z2/r2));  //arcsen
 
 
         double den = 0.0;
@@ -109,7 +109,7 @@ void probabilityMatrix(State& st, Matrix& a)
 				double dr = std::abs(r_i-r_j);  
 
 
-				p.ps.iterate([&](const SpaceIterator& i) {
+				p.ps.iterate([&](const SpaceIterator& i) { //iterate sobre theta nada mas
 
 					const double theta = i.val(DIM_THETA);
 					//nt t_ix = i.coord[DIM_theta]; //posicion en la coordenada theta
@@ -117,8 +117,8 @@ void probabilityMatrix(State& st, Matrix& a)
 
 					//el sistema primado ya esta definido, con origen en O'=(r,theta,phi=pi/2) o (x0,y0,z0)
 					//double x0 = 0.0; //por phi = pi/2
-					double y0 = r_i*sin(theta);
-					double z0 = r_i*cos(theta);
+					double y0 = r_i*cos(theta); //cambiar porque el theta del toro se mide desde el ecuador
+					double z0 = r_i*sin(theta);
 
 					weight = sin(theta)/(4.0*pi);  //el peso para la probabilidad es el angulo solido, ver cual es el theta q debo usar
                     

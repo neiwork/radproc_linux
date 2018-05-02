@@ -10,7 +10,7 @@ double optDep2(double r1_sup,double tprim,double pprim,double y0,double z0, Para
 {
     double suma = 0.0;
     double r1_inf = 0.0;  //limites para la integral sobre r1
-    int nr1 = 100;
+    int nr1 = 10;
     double r1 = r1_inf;
 
     for (int h=0;h<nr1+1;h++) { //aca comienza la integral
@@ -41,10 +41,10 @@ void probabilityMatrix2(State& st, Matrix& a)
 {
 	double rg=GlobalConfig.get<double>("rg");
 	Particle& p=st.electron; 
-	int nR = p.ps[DIM_R].size()-1;  //ver el -1
+	int nR = p.ps[DIM_R].size();  //ver el -1
 	matrixInit(a, nR, nR, 0.0);
 
-    size_t z_i=0;
+    /*size_t z_i=0;
     p.ps.iterate([&](const SpaceIterator& i) {
 		for (size_t z_j=1;z_j<nR;z_j++) { 
 				const double r_i=p.ps[DIM_R][z_i];
@@ -62,5 +62,38 @@ void probabilityMatrix2(State& st, Matrix& a)
                 a[z_i][z_j] = P;
         }
         z_i+=1;
+    }, {0,-1,0});*/
+	
+	
+	//size_t z_i=0;
+	//const double theta = 0.0;
+	
+    p.ps.iterate([&](const SpaceIterator& i) {
+		
+		const double r_i = i.val(DIM_R);
+		const double theta = i.val(DIM_THETA);
+		
+		int z_i = i.coord[DIM_R];
+
+		for (size_t z_j=z_i+1 ; z_j < nR; z_j++) { 
+			
+				const double r_j = p.ps[DIM_R][z_j];
+				
+				double dr=std::abs(r_i-r_j);
+				
+				const double r_jant = p.ps[DIM_R][z_j-1];
+				
+				double dr2=std::abs(r_i-r_jant);
+				
+				double y0 = r_i*cos(theta);
+				double z0 = r_i*sin(theta);
+				double tau_1=rg*optDep2(dr,0.0,pi/2,y0,z0,st.denf_e,i);
+				double tau_2=rg*optDep2(dr2,0.0,pi/2,y0,z0,st.denf_e,i);
+				double P=exp(-tau_2)-exp(-tau_1);
+				P=tau_1-tau_2;
+				a[z_i][z_j] = P;
+				
+        }
+        //z_i+=1;
     }, {0,-1,0});
 }

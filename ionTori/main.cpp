@@ -50,7 +50,7 @@ int main()
 		Matrix a;
 		//probabilityMatrix(model, a);
 		probabilityMatrix2(model,a);
-        writeMatrix("probMatrix", model.electron, a);
+        writeMatrix("probMatrix2", model.electron, a);
 		/*
 		thermalDistribution(model.electron, model);
 		writeAllSpaceParam(folder+"\\electronDist.txt", model.electron.distribution);
