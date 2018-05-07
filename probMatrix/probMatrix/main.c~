@@ -1,0 +1,9 @@
+#include "torusSampling.h"
+
+int main()
+{
+  long idum;
+  idum=0;
+  torusSampling(idum); 
+  return 0;
+}

@@ -1,9 +1,9 @@
 {
 	"id":"Sgr A*",
 	"massBH":"1.0",
-	"spinBH":"0.8",
+	"spinBH":"0.1",
 	"n":"1.5",
-	"temp_ec":"1.0e10",
+	"temp_ec":"1.0e11",
 	"xi":"1.0e-3",
 	"lambda":"0.7",
 	"mu_i":"1.23",
@@ -32,7 +32,7 @@
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":10
+						"samples":50
 					},
 					"theta":{
 						"min":0.0,

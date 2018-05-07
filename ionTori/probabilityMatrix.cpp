@@ -125,7 +125,6 @@ void probabilityMatrix(State& st, Matrix& a)
                     //desde aca se tiran 3x3(para cada lado) fotones en las direcciones de theta_prim,phi_prim
                     for (size_t t_i = 0; t_i < theta_prim.size(); t_i++) { 
                         
-                        
                         double P = 0.0;
                                                 
                         if(z_j > z_i){//hacia r crecientes

@@ -10,11 +10,11 @@ double optDep2(double r1_sup,double tprim,double pprim,double y0,double z0, Para
 {
     double suma = 0.0;
     double r1_inf = 0.0;  //limites para la integral sobre r1
-    int nr1 = 10;
+    int nr1 = 200;
     double r1 = r1_inf;
+    double dr1 = r1_sup/nr1;
 
-    for (int h=0;h<nr1+1;h++) { //aca comienza la integral
-        double dr1 = r1_sup/nr1;
+    while(r1<r1_sup) { //aca comienza la integral
         //coord de P desde O'
         double x1 = r1*sin(tprim)*cos(pprim);
         double y1 = r1*sin(tprim)*sin(pprim);
@@ -86,13 +86,14 @@ void probabilityMatrix2(State& st, Matrix& a)
 				double dr2=std::abs(r_i-r_jant);
 				
 				double y0 = r_i*cos(theta);
+                y0 =r_i;
 				double z0 = r_i*sin(theta);
-				double tau_1=rg*optDep2(dr,0.0,pi/2,y0,z0,st.denf_e,i);
-				double tau_2=rg*optDep2(dr2,0.0,pi/2,y0,z0,st.denf_e,i);
+                z0=0.0;
+				double tau_1=rg*optDep2(dr,pi/2.0,pi/2.0,y0,z0,st.denf_e,i);
+				double tau_2=rg*optDep2(dr2,pi/2.0,pi/2.0,y0,z0,st.denf_e,i);
 				double P=exp(-tau_2)-exp(-tau_1);
 				P=tau_1-tau_2;
 				a[z_i][z_j] = P;
-				
         }
         //z_i+=1;
     }, {0,-1,0});
