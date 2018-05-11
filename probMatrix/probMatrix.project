@@ -77,7 +77,7 @@
       </Completion>
     </Configuration>
     <Configuration Name="Release" CompilerType="GCC ( 4.8 )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-O2;-Wall" C_Options="-O2;-std=c99;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+      <Compiler Options="-O2;-Wall" C_Options="-O1;-O;-O3;-O2;-std=c99;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="/usr/include"/>
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
