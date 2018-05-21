@@ -24,11 +24,6 @@
     <File Name="lossesHadronics.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include"/>
-  <Dependencies Name="Debug">
-    <Project Name="fmath"/>
-    <Project Name="fparameters"/>
-    <Project Name="fparticle"/>
-  </Dependencies>
   <VirtualDirectory Name="falta">
     <File Name="lossesPairAnnihilation.cpp" ExcludeProjConfig="Debug;Release"/>
     <File Name="lossesPairAnnihilation.h" ExcludeProjConfig="Debug;Release"/>
@@ -135,4 +130,10 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug">
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+    <Project Name="fparticle"/>
+  </Dependencies>
+  <Dependencies Name="Release"/>
 </CodeLite_Project>

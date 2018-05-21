@@ -35,23 +35,11 @@
     <File Name="maxwellJuttner.h" ExcludeProjConfig="Debug;"/>
     <File Name="distribution.cpp" ExcludeProjConfig="Debug;"/>
     <File Name="distribution.h" ExcludeProjConfig="Debug;"/>
+    <File Name="probabilityMatrix.cpp"/>
+    <File Name="probabilityMatrix.h"/>
+    <File Name="probabilityMatrix2.cpp"/>
+    <File Name="probabilityMatrix2.h"/>
   </VirtualDirectory>
-  <Dependencies Name="Debug">
-    <Project Name="fmath"/>
-    <Project Name="fparameters"/>
-    <Project Name="fparticle"/>
-    <Project Name="inout"/>
-    <Project Name="flosses"/>
-    <Project Name="fluminosities"/>
-  </Dependencies>
-  <Dependencies Name="Release">
-    <Project Name="fmath"/>
-    <Project Name="fparameters"/>
-    <Project Name="fparticle"/>
-    <Project Name="flosses"/>
-    <Project Name="fluminosities"/>
-    <Project Name="inout"/>
-  </Dependencies>
   <VirtualDirectory Name="pruebas">
     <File Name="luminositiesold.h" ExcludeProjConfig="Debug;"/>
     <File Name="luminositiesold.cpp" ExcludeProjConfig="Debug;"/>
@@ -195,4 +183,20 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug">
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+    <Project Name="fparticle"/>
+    <Project Name="inout"/>
+    <Project Name="flosses"/>
+    <Project Name="fluminosities"/>
+  </Dependencies>
+  <Dependencies Name="Release">
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+    <Project Name="fparticle"/>
+    <Project Name="flosses"/>
+    <Project Name="fluminosities"/>
+    <Project Name="inout"/>
+  </Dependencies>
 </CodeLite_Project>

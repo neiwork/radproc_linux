@@ -24,12 +24,6 @@
     <File Name="blackBody.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include"/>
-  <Dependencies Name="Debug">
-    <Project Name="fmath"/>
-    <Project Name="fparameters"/>
-    <Project Name="fparticle"/>
-    <Project Name="flosses"/>
-  </Dependencies>
   <VirtualDirectory Name="falta">
     <File Name="annihilationLine.cpp" ExcludeProjConfig="Debug;Release"/>
     <File Name="annihilationLine.h" ExcludeProjConfig="Debug;Release"/>
@@ -137,4 +131,11 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug">
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+    <Project Name="fparticle"/>
+    <Project Name="flosses"/>
+  </Dependencies>
+  <Dependencies Name="Release"/>
 </CodeLite_Project>
