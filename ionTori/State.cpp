@@ -1,5 +1,4 @@
 #include "State.h"
-
 #include "functions.h"
 #include "modelParameters.h"
 #include <fparameters/Dimension.h>
@@ -23,100 +22,96 @@ State::State(boost::property_tree::ptree& cfg) :
  {
 	particles.push_back(&electron);
 	particles.push_back(&photon);
-
 	for (auto p : particles) {
 		initializeParticle(*p, cfg);
 	}
-	
 	magf.initialize();
 	magf.fill([&](const SpaceIterator& i){
 		static const double beta = GlobalConfig.get<double>("beta");
-	    double r = i.val(DIM_R);
-	    double theta = i.val(DIM_THETA);
-		return sqrt( beta * 24.0 * pi * pressureTot(r, theta) );
+	    double rB1=i.val(DIM_R);
+        if (i.its[DIM_R].canPeek(1)) { 
+            double rB2=i.its[DIM_R].peek(1);
+            double r= sqrt(rB1*rB2);
+            double theta=i.val(DIM_THETA);
+            return sqrt(beta*24.0*pi*pressureTot(r,theta));
+        }
+        else {
+            return 0.0;
+        }
     });
-      
     denf_i.initialize();
     denf_i.fill([&](const SpaceIterator& i) {
-        static const double mu = GlobalConfig.get<double>("mu_i");
-        double r = i.val(DIM_R);
-        double theta = i.val(DIM_THETA);
-        return energyDensity(r, theta) / (atomicMassUnit*mu);
+        static const double mu=GlobalConfig.get<double>("mu_i");
+        double rB1=i.val(DIM_R);
+        double rB2=i.its[DIM_R].peek(1);
+        double r= sqrt(rB1*rB2);
+        double theta=i.val(DIM_THETA);
+        return energyDensity(r,theta)/(atomicMassUnit*mu);
     });
-      
     denf_e.initialize();
     denf_e.fill([&](const SpaceIterator& i) {
-        static const double mu = GlobalConfig.get<double>("mu_e");
-        double r = i.val(DIM_R);
-        double theta = i.val(DIM_THETA);
-        return energyDensity(r, theta) / (atomicMassUnit*mu);
+        static const double mu=GlobalConfig.get<double>("mu_e");
+        double rB1=i.val(DIM_R);
+        double rB2=i.its[DIM_R].peek(1);
+        double r= sqrt(rB1*rB2);
+        double theta=i.val(DIM_THETA);
+        return energyDensity(r,theta)/(atomicMassUnit*mu);
     });
-    
     tempElectrons.initialize();
     tempElectrons.fill([&](const SpaceIterator& i) {
-        double r = i.val(DIM_R);
-        double theta = i.val(DIM_THETA);
+        double rB1=i.val(DIM_R);
+        double rB2=i.its[DIM_R].peek(1);
+        double r= sqrt(rB1*rB2);
+        double theta=i.val(DIM_THETA);
         return temp_e(r, theta);
     });
-    
     tempIons.initialize();
     tempIons.fill([&](const SpaceIterator& i) {
-        double r = i.val(DIM_R);
-        double theta = i.val(DIM_THETA);
+        double rB1=i.val(DIM_R);
+        double rB2=i.its[DIM_R].peek(1);
+        double r= sqrt(rB1*rB2);
+        double theta=i.val(DIM_THETA);
         return temp_i(r, theta);
     });
-	  
     tpf1.initialize();
     tpf2.initialize();
-	
 }
 
 Dimension* State::createDimension(Particle& p, std::string dimid, std::function<void(Vector&,double,double)> initializer, boost::property_tree::ptree& cfg) {
-	int samples = p.getpar<int>(cfg,"dim." + dimid + ".samples");
-	double min = p.getpar<double>(cfg, "dim." + dimid + ".min");
-	double max = p.getpar<double>(cfg, "dim." + dimid + ".max");
-	return new Dimension(samples, bind(initializer, std::placeholders::_1, min, max));
+	int samples=p.getpar<int>(cfg,"dim."+dimid+".samples");
+	double min=p.getpar<double>(cfg,"dim."+dimid+".min");
+	double max=p.getpar<double>(cfg,"dim."+dimid+".max");
+	return new Dimension(samples,bind(initializer,std::placeholders::_1,min,max));
 }
 
-void State::initializeParticle(Particle& p, boost::property_tree::ptree& cfg)
+void State::initializeParticle(Particle& p,boost::property_tree::ptree& cfg)
 {
 	using std::bind;
 
 	p.configure(cfg.get_child("particle.default"));
 	p.configure(cfg.get_child("particle."+p.id));
-
-	p.ps.add(createDimension(p, "energy", initializeEnergyPoints, cfg));
-
+	p.ps.add(createDimension(p,"energy",initializeEnergyPoints,cfg));
 	// we can't use createDimension because we're multiplying by pc before creating them
-	// add dimension for R
-    double rmin = GlobalConfig.get<double>("rCusp") * p.getpar(cfg, "dim.radius.min", 1.1);
-    double rcenter = GlobalConfig.get<double>("rCenter");
-    double rmax = bisection(rcenter, 50*rcenter, [&](double r){return w(r,0.0);});
-// p.getpar(cfg, "dim.radius.max", 3.0);
-	int nR = p.getpar(cfg,"dim.radius.samples", 20); // solo por ahora; y no deberia ser usado directamente desde otro lado
-	p.ps.add(new Dimension(nR, bind(initializeRadiiPoints, std::placeholders::_1, rmin, rmax)));
+	
+    // add dimension for R
+    double rmin=GlobalConfig.get<double>("rCusp");
+    double rmax=GlobalConfig.get<double>("rEdge");
+	int nR=p.getpar(cfg,"dim.radius.samples",20);
+	p.ps.add(new Dimension(nR,bind(initializeRadiiPoints,std::placeholders::_1,rmin,rmax)));
     
     // add dimension for theta
-    double thetamin = p.getpar(cfg, "dim.theta.min", 0.0);
-    double thetamax = pi/2.0 * p.getpar(cfg, "dim.theta.max", 0.8);
-    int thetaR = p.getpar(cfg, "dim.theta.samples", 10);
-    
-    GlobalConfig.put("rmin", GlobalConfig.get<double>("rmin", rmin));
-    GlobalConfig.put("rmax", GlobalConfig.get<double>("rmax", rmax));
+    double thetamin=p.getpar(cfg,"dim.theta.min",0.0);
+    double thetamax=pi/2.0*p.getpar(cfg,"dim.theta.max",0.8);
+    int nTheta=p.getpar(cfg,"dim.theta.samples",5);
     GlobalConfig.put("thetamin", GlobalConfig.get<double>("thetamin", thetamin));
     GlobalConfig.put("thetamax", GlobalConfig.get<double>("thetamax", thetamax));
-
-    
-    
-    p.ps.add(new Dimension(thetaR, bind(initializeThetaPoints, std::placeholders::_1, thetamin, thetamax)));
+    p.ps.add(new Dimension(nTheta,bind(initializeThetaPoints,std::placeholders::_1,thetamin,thetamax)));
 
 	// add dimension for T
 	// double tmin = p.getpar(cfg, "dim.time.min", 1.0)*pc;
 	// double tmax = p.getpar(cfg, "dim.time.max", 1.0e3)*pc;
 	// int tR = p.getpar(cfg, "dim.time.samples", 5); // solo por ahora; y no deberia ser usado directamente desde otro lado
 	// p.ps.add(new Dimension(tR, bind(initializeCrossingTimePoints, std::placeholders::_1, tmin, tmax)));
-
-
 	//p.ps.addDerivation([](const SpaceIterator& i){
 	//	derive_parameters_r(i.val(DIM_E), i.val(DIM_R), i.val(DIM_T));
 	//});

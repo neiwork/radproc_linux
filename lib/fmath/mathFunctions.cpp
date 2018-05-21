@@ -100,3 +100,19 @@ double bessk(int n, double x)
     }
 	return bk;
 }
+
+double new_min(double x, double y, double z)
+{
+    if (x <= y) {
+        if (x <= z) {
+            return x;
+        }
+    }
+    else {
+        if (y <= z) {
+            return y;
+        } else {
+            return z;
+        }
+    }
+}

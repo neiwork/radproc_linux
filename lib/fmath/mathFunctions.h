@@ -7,3 +7,4 @@
 //double bessk1(double x);
 
 double bessk(int n, double x);
+double new_min(double,double,double);

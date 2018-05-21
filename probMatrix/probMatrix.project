@@ -8,21 +8,21 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="random.h"/>
-    <File Name="torusSampling.h"/>
-    <File Name="torusSampling.c"/>
-    <File Name="bisection.h"/>
-    <File Name="bisection.c"/>
-    <File Name="metric.h"/>
-    <File Name="auxFunctions.c"/>
-    <File Name="auxFunctions.h"/>
-    <File Name="torusParameters.c"/>
-    <File Name="metric.c"/>
-    <File Name="nrutil.h"/>
-    <File Name="nrutil.c"/>
-    <File Name="nr.h"/>
-    <File Name="torusParameters.h"/>
-    <File Name="main.c"/>
+    <File Name="random.h" ExcludeProjConfig="Debug;"/>
+    <File Name="torusSampling.h" ExcludeProjConfig="Debug;"/>
+    <File Name="torusSampling.c" ExcludeProjConfig="Debug;"/>
+    <File Name="bisection.h" ExcludeProjConfig="Debug;"/>
+    <File Name="bisection.c" ExcludeProjConfig="Debug;"/>
+    <File Name="metric.h" ExcludeProjConfig="Debug;"/>
+    <File Name="auxFunctions.c" ExcludeProjConfig="Debug;"/>
+    <File Name="auxFunctions.h" ExcludeProjConfig="Debug;"/>
+    <File Name="torusParameters.c" ExcludeProjConfig="Debug;"/>
+    <File Name="metric.c" ExcludeProjConfig="Debug;"/>
+    <File Name="nrutil.h" ExcludeProjConfig="Debug;"/>
+    <File Name="nrutil.c" ExcludeProjConfig="Debug;"/>
+    <File Name="nr.h" ExcludeProjConfig="Debug;"/>
+    <File Name="torusParameters.h" ExcludeProjConfig="Debug;"/>
+    <File Name="main.c" ExcludeProjConfig="Debug;"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

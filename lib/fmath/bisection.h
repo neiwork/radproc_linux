@@ -1,6 +1,7 @@
 #pragma once
-
+#include <stdio.h>
 #include <iostream>
 #include "physics.h"
+#include <math.h>
 
-double bisection(double A, double B, fun1 fun);
+double bisection(fun1,double,double,double);

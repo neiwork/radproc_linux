@@ -8,31 +8,33 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="probabilityMatrix2.h"/>
-    <File Name="probabilityMatrix2.cpp"/>
+    <File Name="probCompton.h"/>
+    <File Name="probCompton.cpp"/>
+    <File Name="coppiProbDist.cpp"/>
+    <File Name="compton.h"/>
+    <File Name="torusParam.cpp"/>
+    <File Name="torusParam.h"/>
+    <File Name="luminosities.h"/>
+    <File Name="luminosities.cpp"/>
+    <File Name="coppiProbDist.h"/>
+    <File Name="compton.cpp"/>
     <File Name="main.cpp"/>
     <File Name="modelParameters.cpp"/>
     <File Name="modelParameters.h"/>
-    <File Name="radiativeLosses.cpp"/>
-    <File Name="radiativeLosses.h"/>
+    <File Name="radiativeLosses.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="radiativeLosses.h" ExcludeProjConfig="Debug;"/>
     <File Name="State.cpp"/>
     <File Name="State.h"/>
-    <File Name="targetFields.cpp" ExcludeProjConfig=""/>
-    <File Name="targetFields.h" ExcludeProjConfig=""/>
+    <File Name="targetFields.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="targetFields.h" ExcludeProjConfig="Debug;Release;"/>
     <File Name="write.cpp"/>
     <File Name="write.h"/>
     <File Name="functions.cpp" ExcludeProjConfig=""/>
     <File Name="functions.h" ExcludeProjConfig=""/>
-    <File Name="toroParam.cpp"/>
-    <File Name="toroParam.h"/>
-    <File Name="maxwellJuttner.cpp"/>
-    <File Name="maxwellJuttner.h"/>
-    <File Name="distribution.cpp"/>
-    <File Name="distribution.h"/>
-    <File Name="luminosities2.cpp"/>
-    <File Name="luminosities2.h"/>
-    <File Name="probabilityMatrix.cpp"/>
-    <File Name="probabilityMatrix.h"/>
+    <File Name="maxwellJuttner.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="maxwellJuttner.h" ExcludeProjConfig="Debug;"/>
+    <File Name="distribution.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="distribution.h" ExcludeProjConfig="Debug;"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
     <Project Name="fmath"/>
@@ -51,8 +53,8 @@
     <Project Name="inout"/>
   </Dependencies>
   <VirtualDirectory Name="pruebas">
-    <File Name="luminosities.cpp" ExcludeProjConfig="Debug;Release"/>
-    <File Name="luminosities.h" ExcludeProjConfig="Debug;Release"/>
+    <File Name="luminositiesold.h" ExcludeProjConfig="Debug;"/>
+    <File Name="luminositiesold.cpp" ExcludeProjConfig="Debug;"/>
     <File Name="coppiBlandford.cpp" ExcludeProjConfig="Debug;Release"/>
     <File Name="coppiBlandford.h" ExcludeProjConfig="Debug;Release"/>
     <File Name="photonEscape.cpp" ExcludeProjConfig="Debug;Release"/>
@@ -75,7 +77,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="prepend" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g;-O0;-Wall" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+      <Compiler Options="-Wfatal-errors;-g;-O0;-W;-Wall" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <IncludePath Value="../lib"/>
         <IncludePath Value="../external/include"/>

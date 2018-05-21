@@ -1,19 +1,10 @@
 #include "modelParameters.h"
-
-//#include "State.h"
-
-//#include "targetFields.h"
-#include "toroParam.h"
-
-
+#include "torusParam.h"
 #include <fparameters/parameters.h>
 #include <fmath/physics.h>
 #include <fmath/configure.h>
-
 #include <iostream>
 #include <algorithm>
-
-
 
 void prepareGlobalCfg()
 {
@@ -25,37 +16,30 @@ void prepareGlobalCfg()
     static const double energyC = GlobalConfig.get<double>("energyC");
 	static const double beta = GlobalConfig.get<double>("beta");*/
     
-	static const double Mbh = GlobalConfig.get<double>("massBH")*solarMass*1.0e6;
-	
-	double rg = gravitationalConstant*Mbh/cLight2;
-	
+	static const double Mbh=GlobalConfig.get<double>("massBH")*solarMass*1.0e6;
+	double rg=gravitationalConstant*Mbh/cLight2;
     GlobalConfig.put("rg", rg);
 	
+	double l_0,rCusp,rCenter,rEdge;
+	torusParameters(l_0,rCusp,rCenter,rEdge);
 	
-	double l_0, rCusp, rCenter;
-
-	torusParameters(l_0, rCusp, rCenter);
-	
-	GlobalConfig.put("l_0", GlobalConfig.get<double>("l_0", l_0));
-    GlobalConfig.put("rCusp", GlobalConfig.get<double>("rCusp", rCusp));
-    GlobalConfig.put("rCenter", GlobalConfig.get<double>("rCenter", rCenter));
+	GlobalConfig.put("l_0",GlobalConfig.get<double>("l_0",l_0));
+    GlobalConfig.put("rCusp",GlobalConfig.get<double>("rCusp",rCusp));
+    GlobalConfig.put("rCenter",GlobalConfig.get<double>("rCenter",rCenter));
+    GlobalConfig.put("rEdge",GlobalConfig.get<double>("rEdge",rEdge));
     
-    static const double mu_i = GlobalConfig.get<double>("mu_i");
-    static const double mu_e = GlobalConfig.get<double>("mu_e");
-    static const double xi = GlobalConfig.get<double>("xi");
-    
-    double M_0 = mu_i / (mu_e + mu_i);
-    double M_1 = mu_i * xi / (mu_e + mu_i * xi);
-    
-    GlobalConfig.put("M_0", GlobalConfig.get<double>("M_0", M_0));
-    GlobalConfig.put("M_1", GlobalConfig.get<double>("M_1", M_1));
-    
-    static const double temp_ec = GlobalConfig.get<double>("temp_ec");
-    static const double beta = GlobalConfig.get<double>("beta");
-    static const double energyC = GlobalConfig.get<double>("energyC");
-    
-    double pK = boltzmann * temp_ec / ( (1.0 - beta) * atomicMassUnit * pow(energyC, 2.0/3.0) * mu_e * M_1 );
-    GlobalConfig.put("pK", GlobalConfig.get<double>("pK", pK));
+    static const double mu_i=GlobalConfig.get<double>("mu_i");
+    static const double mu_e=GlobalConfig.get<double>("mu_e");
+    static const double xi=GlobalConfig.get<double>("xi");
+    double M_0=mu_i/(mu_e + mu_i);
+    double M_1=mu_i*xi/(mu_e+mu_i*xi);
+    GlobalConfig.put("M_0",GlobalConfig.get<double>("M_0",M_0));
+    GlobalConfig.put("M_1",GlobalConfig.get<double>("M_1",M_1));
+    static const double temp_ec=GlobalConfig.get<double>("temp_ec");
+    static const double beta=GlobalConfig.get<double>("beta");
+    static const double energyC=GlobalConfig.get<double>("energyC");
+    double pK=boltzmann*temp_ec/((1.0-beta)*atomicMassUnit*pow(energyC,2.0/3.0)*mu_e*M_1);
+    GlobalConfig.put("pK",GlobalConfig.get<double>("pK",pK));
     
 	//GlobalConfig.put("Dlorentz", GlobalConfig.get<double>("Dlorentz", computeDlorentz(Gamma)));
 	//DefOpt_IntLosses.samples_x = GlobalConfig.get<int>("integrate-losses.samples.x", DefOpt_IntLosses.samples_x);
@@ -66,57 +50,32 @@ void prepareGlobalCfg()
 
 void initializeEnergyPoints(Vector& v, double logEmin, double logEmax)
 {
-	double Emax = 1.6e-12*pow(10, logEmax);
-	double Emin = 1.6e-12*pow(10, logEmin);
-	double E_int = pow((50 * Emax / Emin), (1.0 / (v.size() - 1)));
-	v[0] = Emin;
-	for (size_t i = 1; i < v.size(); ++i){
-		v[i] = v[i - 1] * E_int;
+	double Emax=1.6e-12*pow(10,logEmax);
+	double Emin=1.6e-12*pow(10,logEmin);
+	//double E_int=pow((50*Emax/Emin),1.0/(v.size()-1));
+	double E_int=pow(Emax/Emin,1.0/(v.size()-1));
+    v[0]=Emin;
+	for (size_t i=1;i<v.size();++i) {
+		v[i]=v[i-1]*E_int;
 	}
 }
 
-void initializeRadiiPoints(Vector& v, double min, double max) 
+void initializeRadiiPoints(Vector& v,double min,double max) 
 {
-	double var_int = pow(max/min, 1.0/v.size());
-    
-    double l0 = min;
-    double l1 = min*var_int;
-    
-    for (size_t i = 0; i < v.size(); ++i) {
-        v[i] = sqrt(l0 * l1);
-        l0 = l1;
-        l1 *= var_int;
+    double var_int=pow(max/min,1.0/(v.size()-1));
+    v[0]=min;
+    for (size_t i=1;i<v.size();++i) {
+        v[i]=v[i-1]*var_int;
     }
 }
 
-void initializeThetaPoints(Vector& v, double min, double max)
+void initializeThetaPoints(Vector& v,double min,double max)
 {
-    double var_int = (sin(max) - sin(min)) / (v.size()-1);
-    
-    v[0] = min;
-    double sin0 = sin(v[0]);
-    
-    for (size_t i = 1; i < v.size(); ++i) {
-        v[i] = asin( sin0 + var_int );
-        sin0 += var_int;
+    double var_int=(sin(max)-sin(min))/(v.size()-1);
+    v[0]=min;
+    double sin0=sin(v[0]);
+    for (size_t i=1;i<v.size();++i) {
+        v[i]=asin(sin0+var_int);
+        sin0+=var_int;
     }
 }
-
-/*
-void initializeRadiiPoints(Vector& v, double min, double max)
-{
-    int posMax = v.size()-1;
-    int posCenter = v.size()/2 - 1;
-    
-    double center = GlobalConfig.get<double>("rCenter");
-    double varmin_int = pow( center/min , 1.0/(posCenter-1.0));
-    double varmax_int = pow( max/center, 1.0/(posMax-posCenter));
-    
-    v[posCenter] = center;
-    for (size_t i=posCenter; i>0; --i) {
-        v[i-1] = v[i] / varmin_int;
-        v[posMax-i] = v[posMax-(i+1)] * varmax_int;
-    }
-    v[posMax] = max;
-}
-*/

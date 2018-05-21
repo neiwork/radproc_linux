@@ -1,27 +1,20 @@
 #include <stdio.h>
-
-
 #include "modelParameters.h"
-#include "targetFields.h"
+//#include "targetFields.h"
 #include "State.h"
 #include "write.h"
 #include "radiativeLosses.h"
 #include "probabilityMatrix2.h"
 #include "distribution.h"
-//#include "luminosities.h"
-#include "luminosities2.h"
+#include "luminosities.h"
 #include "functions.h"
-
 #include <inout/ioutil.h>
-
 #include "messages.h"
-
 #include <fparticle/Particle.h>
 #include <fparameters/parameters.h>
 #include <fparameters/Dimension.h>
 #include <fparameters/SpaceIterator.h>
 #include <fmath/physics.h>
-
 #include <boost/property_tree/ptree.hpp>
 #include <stdexcept>
 
@@ -31,33 +24,28 @@ int main()
 
 	try {
         
-        
+        //lag();
 		GlobalConfig = readConfig();
 		prepareGlobalCfg();
-		
 		show_message(msgStart, Module_state);
 		State model(GlobalConfig.get_child("model"));
 		show_message(msgEnd, Module_state);
-		
-		
 		show_message(msgStart, Module_targetField);
-		tpfFill_Bremss(model);  // esto completa la psv con los fotones de Bremsstrahlung
-        tpfFill_Sync(model);      // idem Sync
-		show_message(msgEnd, Module_targetField);
+        
+		//tpfFill_Bremss(model);  // esto completa la psv con los fotones de Bremsstrahlung
+        //tpfFill_Sync(model);      // idem Sync
+		//show_message(msgEnd, Module_targetField);
 		
-		
-		// radiativeLosses(model, folder+"\\electronLosses.txt");
-		Matrix a;
-		//probabilityMatrix(model, a);
-		probabilityMatrix2(model,a);
-        writeMatrix("probMatrix2", model.electron, a);
+		//Matrix a;
+		//probabilityMatrix2(model,a);
+        //writeMatrix("probMatrix2", model.electron, a);
 		/*
 		thermalDistribution(model.electron, model);
 		writeAllSpaceParam(folder+"\\electronDist.txt", model.electron.distribution);
 		
 		//writeAllSpaceParam(folder+"\\bremss.txt", model.tpf1);
 		
-        luminosities2(model, folder+"\\electronLuminosities.txt");
+        luminosities(model, folder+"\\electronLuminosities.txt");
 		
 		
 		writeRandTParamSpace(getFileName(folder, "\\magf"), model.magf, 0);

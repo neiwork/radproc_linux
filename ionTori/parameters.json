@@ -9,7 +9,7 @@
 	"mu_i":"1.23",
 	"mu_e":"1.14",
 
-	"energyC":"1.e-15",
+	"energyC":"1.e-13",
 	"beta":"0.5",
 
 	"file": {
@@ -32,7 +32,7 @@
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":50
+						"samples":10
 					},
 					"theta":{
 						"min":0.0,

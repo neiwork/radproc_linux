@@ -19,7 +19,7 @@ extern double spinBH, lambda;
 void torusSampling()
 {
     criticalRadii(&rMin, &rCenter);
-    l_0 = specificAngularMom();
+    l_0=specificAngularMom();
     double rMax=edge();
     int nR=10,nTheta=3;
     long nPhot=1000;
@@ -92,9 +92,9 @@ void torusSampling()
                         count++;
                     } while((control > 1.0e-2) && (drprim-drprimmin > 1.0e-9));
                     double psc=ne*thomson*(drprim*RG);    // Probability of scattering.
-                    double pescant=1.0-accumulatedp;           // Probability that a photon reaches the previous position.
+                    double pescap=1.0-accumulatedp;           // Probability that a photon reaches the previous position.
                     for(int j=1;j<=nR;j++) {
-                        if(r1 > rCells[j-1] && r1 < rCells[j]) prob[i][j] += psc*pescant;            // Add the probability of
+                        if(r1 > rCells[j-1] && r1 < rCells[j]) prob[i][j] += psc*pescap;            // Add the probability of
                                                                                                                                                       // interaction in the matrix
                                                                                                                                                       // element.
                     }

@@ -2,18 +2,18 @@
 ## Auto Generated makefile by CodeLite IDE
 ## any manual changes will be erased      
 ##
-## Release
+## Debug
 ProjectName            :=probMatrix
-ConfigurationName      :=Release
-WorkspacePath          :=/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/probMatrix
+ConfigurationName      :=Debug
+WorkspacePath          :=/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori
 ProjectPath            :=/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/probMatrix
-IntermediateDirectory  :=./Release
+IntermediateDirectory  :=./Debug
 OutDir                 := $(IntermediateDirectory)
 CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=Eduardo Mario Gutiérrez
-Date                   :=11/05/18
+Date                   :=21/05/18
 CodeLitePath           :=/home/eduardog/.codelite
 LinkerName             :=/usr/bin/g++-4.8
 SharedObjectLinkerName :=/usr/bin/g++-4.8 -shared -fPIC
@@ -28,7 +28,7 @@ LibraryPathSwitch      :=-L
 PreprocessorSwitch     :=-D
 SourceSwitch           :=-c 
 OutputFile             :=$(IntermediateDirectory)/$(ProjectName)
-Preprocessors          :=$(PreprocessorSwitch)NDEBUG 
+Preprocessors          :=
 ObjectSwitch           :=-o 
 ArchiveOutputSwitch    := 
 PreprocessOnlySwitch   :=-E
@@ -50,8 +50,8 @@ LibPath                := $(LibraryPathSwitch). $(LibraryPathSwitch)/home/eduard
 AR       := /usr/bin/ar rcu
 CXX      := /usr/bin/g++-4.8
 CC       := /usr/bin/gcc-4.8
-CXXFLAGS :=  -O2 -Wall $(Preprocessors)
-CFLAGS   :=  -O1 -O -O3 -O2 -std=c99 -Wall $(Preprocessors)
+CXXFLAGS :=  -g -O0 -std=c++11 -Wall $(Preprocessors)
+CFLAGS   :=  -g -O0 -std=c99 -Wall $(Preprocessors)
 ASFLAGS  := 
 AS       := /usr/bin/as
 
@@ -60,7 +60,7 @@ AS       := /usr/bin/as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/main.c$(ObjectSuffix) $(IntermediateDirectory)/nrutil.c$(ObjectSuffix) $(IntermediateDirectory)/metric.c$(ObjectSuffix) $(IntermediateDirectory)/torusParameters.c$(ObjectSuffix) $(IntermediateDirectory)/auxFunctions.c$(ObjectSuffix) $(IntermediateDirectory)/torusSampling.c$(ObjectSuffix) $(IntermediateDirectory)/bisection.c$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/main.c$(ObjectSuffix) $(IntermediateDirectory)/nrutil.c$(ObjectSuffix) $(IntermediateDirectory)/metric.c$(ObjectSuffix) $(IntermediateDirectory)/torusParameters.c$(ObjectSuffix) $(IntermediateDirectory)/up_ionTori_coppiProbDist.cpp$(ObjectSuffix) $(IntermediateDirectory)/bisection.c$(ObjectSuffix) $(IntermediateDirectory)/auxFunctions.c$(ObjectSuffix) $(IntermediateDirectory)/torusSampling.c$(ObjectSuffix) 
 
 
 
@@ -79,11 +79,11 @@ $(OutputFile): $(IntermediateDirectory)/.d $(Objects)
 	$(LinkerName) $(OutputSwitch)$(OutputFile) @$(ObjectsFileList) $(LibPath) $(Libs) $(LinkOptions)
 
 MakeIntermediateDirs:
-	@test -d ./Release || $(MakeDirCommand) ./Release
+	@test -d ./Debug || $(MakeDirCommand) ./Debug
 
 
 $(IntermediateDirectory)/.d:
-	@test -d ./Release || $(MakeDirCommand) ./Release
+	@test -d ./Debug || $(MakeDirCommand) ./Debug
 
 PreBuild:
 
@@ -123,6 +123,22 @@ $(IntermediateDirectory)/torusParameters.c$(DependSuffix): torusParameters.c
 $(IntermediateDirectory)/torusParameters.c$(PreprocessSuffix): torusParameters.c
 	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/torusParameters.c$(PreprocessSuffix) torusParameters.c
 
+$(IntermediateDirectory)/up_ionTori_coppiProbDist.cpp$(ObjectSuffix): ../ionTori/coppiProbDist.cpp $(IntermediateDirectory)/up_ionTori_coppiProbDist.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/ionTori/coppiProbDist.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/up_ionTori_coppiProbDist.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/up_ionTori_coppiProbDist.cpp$(DependSuffix): ../ionTori/coppiProbDist.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/up_ionTori_coppiProbDist.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/up_ionTori_coppiProbDist.cpp$(DependSuffix) -MM ../ionTori/coppiProbDist.cpp
+
+$(IntermediateDirectory)/up_ionTori_coppiProbDist.cpp$(PreprocessSuffix): ../ionTori/coppiProbDist.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/up_ionTori_coppiProbDist.cpp$(PreprocessSuffix) ../ionTori/coppiProbDist.cpp
+
+$(IntermediateDirectory)/bisection.c$(ObjectSuffix): bisection.c $(IntermediateDirectory)/bisection.c$(DependSuffix)
+	$(CC) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/probMatrix/bisection.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/bisection.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/bisection.c$(DependSuffix): bisection.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/bisection.c$(ObjectSuffix) -MF$(IntermediateDirectory)/bisection.c$(DependSuffix) -MM bisection.c
+
+$(IntermediateDirectory)/bisection.c$(PreprocessSuffix): bisection.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/bisection.c$(PreprocessSuffix) bisection.c
+
 $(IntermediateDirectory)/auxFunctions.c$(ObjectSuffix): auxFunctions.c $(IntermediateDirectory)/auxFunctions.c$(DependSuffix)
 	$(CC) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/probMatrix/auxFunctions.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/auxFunctions.c$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/auxFunctions.c$(DependSuffix): auxFunctions.c
@@ -139,20 +155,12 @@ $(IntermediateDirectory)/torusSampling.c$(DependSuffix): torusSampling.c
 $(IntermediateDirectory)/torusSampling.c$(PreprocessSuffix): torusSampling.c
 	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/torusSampling.c$(PreprocessSuffix) torusSampling.c
 
-$(IntermediateDirectory)/bisection.c$(ObjectSuffix): bisection.c $(IntermediateDirectory)/bisection.c$(DependSuffix)
-	$(CC) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/probMatrix/bisection.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/bisection.c$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/bisection.c$(DependSuffix): bisection.c
-	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/bisection.c$(ObjectSuffix) -MF$(IntermediateDirectory)/bisection.c$(DependSuffix) -MM bisection.c
-
-$(IntermediateDirectory)/bisection.c$(PreprocessSuffix): bisection.c
-	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/bisection.c$(PreprocessSuffix) bisection.c
-
 
 -include $(IntermediateDirectory)/*$(DependSuffix)
 ##
 ## Clean
 ##
 clean:
-	$(RM) -r ./Release/
+	$(RM) -r ./Debug/
 
 

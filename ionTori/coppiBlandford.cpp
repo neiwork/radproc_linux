@@ -43,7 +43,7 @@ double w_ave(double wp, double g)  //<w>
 
 	double min = -1.0;
 	double max = 1.0;
-	int nMu = 10;
+	int nMu = 100;
 
 	double sum = 0.0;
 	double mu_int = (max-min)/nMu;

@@ -1,75 +1,47 @@
-//C***********************************************************************
-//C                                                                      *
-//C                        BISECTION ALGORITHM 2.1                       *
-//C                                                                      *
-//C***********************************************************************
-//C
-//C     TO FIND A SOLUTION TO F(X) = 0 GIVEN THE CONTINOUS FUNCTION
-//C     F ON THE INTERVAL <A, B>, WHERE F(A) AND F(B) HAVE
-//C     OPPOSITE SIGNS :
-//C
-//C     INPUT : ENDPOINTS A, B; TOLERANCE TOL;
-//C              MAXIMUM INTERATIONS N0.
-//C
-//C     OUTPUT : APPROXIMATE SOLUTION P OR A
-//C              MESSAGE THAT THE ALGORITHM FAILS.
-//C
-
 #include "bisection.h"
+#define NTRY 100
+#define FACTOR 1.6
 
-#define ZERO 1.0E-10
-
-double bisection(double A, double B, fun1 fun)
+int zbrac(fun1 func,double& x1,double& x2)
+    /* Given a function func and an initial guessed range x1 to x2, the routine expands the range
+    geometrically until a root is bracketed by the returned values x1 and x2 (in which case zbrac
+    returns 1) or until the range becomes unacceptably large (in which case zbrac returns 0). */
 {
-	double FA = fun(A);
-	double FB = fun(B);
+    void nrerror(char error_text[]);
+    int j;
+    float f1,f2;
+    if (x1 == x2) nrerror("Bad initial range in zbrac");
+    f1=func(x1);
+    f2=func(x2);
+    for (j=1;j<=NTRY;j++) {
+        if (f1*f2 < 0.0) return 1;
+        if (fabs(f1) < fabs(f2))
+            f1=func(x1 += FACTOR*(x1-x2));
+        else
+            f2=func(x2 += FACTOR*(x2-x1));
+    }
+    return 0;
+}
+#define JMAX 40
 
-	if ((FA * FB) > 0.0) {
-		std::cout << "F(A) and F(B) have same sign" << std::endl;
-        return B;
-	}
-
-	double tol = 1.0e-2;  //Tolerancia
-	int n0 = 20; // 'Input maximum number of iterations '
-
-	double P;
-//     STEP 1
-	int i = 1;
-
-	//     STEP 2
-
-	while (i <= n0) {
-		//STEP 3
-		// COMPUTE P(I)
-		P = A + (B - A) / 2.0;
-		double FP = fun(P);
-
-		//          STEP 4
-				//if((ABS(FP) <= 1.0E-20 && (B - A) / 2 < TOL)) {
-					// PROCEDURE COMPLETED SUCCESSFULLY
-					//deberia salir
-				//}
-		if ( ! ( abs(FP) <= ZERO && (B - A) / 2.0 < tol) ) {
-			//          STEP 5
-			i = i + 1;
-			//          STEP 6
-			//          COMPUTE A(I) AND B(I)
-			if (FA*FP > 0.0) {
-				A = P;
-				FA = FP;
-			}
-			else {
-				B = P;
-				FB = FP;
-			}
-		}
-		else
-		  return P;
-            
-		//020   CONTINUE cierro el do while
-	}
-
-	//     STEP 7
-	//     PROCEDURE COMPLETED UNSUCCESSFULLY
-	return 0.0;
+double bisection(fun1 func,double x1,double x2,double xacc)
+    /* Using bisection, find the root of a function func known to lie between x1 and x2. The root,
+    returned as rtbis, will be refined until its accuracy is ±xacc. */
+{
+    void nrerror(char error_text[]);
+    int j;
+    double dx,f,fmid,xmid,rtb;
+    
+    zbrac(func,x1,x2);
+    f=func(x1);
+    fmid=func(x2);
+    if (f*fmid >= 0.0) nrerror("Root must be bracketed for bisection in rtbis");
+    rtb = f < 0.0 ? (dx=x2-x1,x1) : (dx=x1-x2,x2);            // Orient the search so that f>0
+    for (j=1;j<=JMAX;j++) {                                                   // lies at x+dx.
+        fmid=func(xmid=rtb+(dx *= 0.5));                             // Bisection loop.
+        if (fmid <= 0.0) rtb=xmid;
+        if (fabs(dx) < xacc || fmid == 0.0) return rtb;
+    }
+    nrerror("Too many bisections in rtbis");
+    return 0.0;                                                                              // Never get here.
 }
