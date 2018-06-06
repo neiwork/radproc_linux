@@ -1,0 +1,25 @@
+#include <stdio.h>
+#include "nr.h"
+#include "ssfunctions.h"
+#define TOL 1.0e-3
+#define SOLARMASS 1.998e33
+#define PI 3.14159265359
+
+float const m,mdot,RS,beta,gamma,rmin,rmax,step;
+int const mgrid;
+float r,radius;
+
+int main()
+{
+  constants();
+
+  for (i=1;i<=mgrid;i++) {
+    r=r*step;
+    radius=r*RS;
+    eDensity=ne(r,f);
+    eTemp=eTempinit;
+    magField=magf(f);
+    
+  } 
+  return 0;
+}
