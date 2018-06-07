@@ -32,8 +32,8 @@ int main()
         radius=r*RS;
         x[1]=0.1*rmin/r;              // Initial conditions
         x[2]=0.1;
-        x[3]=0.9;
-        newt(x,N,&check,vecfunc);
+        x[3]=0.99;
+        broydn(x,N,&check,vecfunc);
         double realtempi=PROTONMASS*CLIGHT2*x[1]/BOLTZMANN;
         double realtempe=ELECTRONMASS*CLIGHT2*x[2]/BOLTZMANN;
         fprintf(ftemps,"%f %f %f %f\n",log10(r),log10(realtempi),log10(realtempe),log10(mdot));

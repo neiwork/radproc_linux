@@ -8,6 +8,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="broydn.c"/>
     <File Name="rates.h"/>
     <File Name="rates.c"/>
     <File Name="nrutil.h"/>
