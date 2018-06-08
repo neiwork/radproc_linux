@@ -82,8 +82,8 @@ void bksub(int ne, int nb, int jf, int k1, int k2, float ***c);
 float bnldev(float pp, int n, long *idum);
 float brent(float ax, float bx, float cx,
 	    float (*f)(float), float tol, float *xmin);
-void broydn(float x[], int n, int *check,
-	    void (*vecfunc)(int, float [], float []));
+void broydn(double x[], int n, int *check,
+	    void (*vecfunc)(int, double [], double []));
 void bsstep(float y[], float dydx[], int nv, float *xx, float htry,
 	    float eps, float yscal[], float *hdid, float *hnext,
 	    void (*derivs)(float, float [], float []));

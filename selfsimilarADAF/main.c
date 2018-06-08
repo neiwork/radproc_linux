@@ -3,8 +3,9 @@
 #include "nr.h"
 #include "ssfunctions.h"
 #include "nrutil.h"
+#include "rates.h"
 #include "vecfunc.h"
-#define TOL 1.0e-5
+#define TOL 1.0e-20
 #define SOLARMASS 1.998e33
 #define PI 3.14159265359
 #define BOLTZMANN 1.38e-16
@@ -27,13 +28,16 @@ int main()
     r=rmin;
     FILE *ftemps;
     ftemps=fopen("temperatures.txt","w");
+    x[1]=0.1;
+    x[2]=0.1;
+    x[3]=0.99;
     for (int i=1;i<=mgrid;i++) {
         r=r*step;
         radius=r*RS;
-        x[1]=0.1*rmin/r;              // Initial conditions
-        x[2]=0.1;
-        x[3]=0.99;
-        broydn(x,N,&check,vecfunc);
+        newt(x,N,&check,vecfunc);
+        double qie=qiefunc(x[1],x[2],x[3]);
+        double qemi=qem(x[2],x[3]);
+        double qplus=qp(x[3])*(1.0-x[3]);
         double realtempi=PROTONMASS*CLIGHT2*x[1]/BOLTZMANN;
         double realtempe=ELECTRONMASS*CLIGHT2*x[2]/BOLTZMANN;
         fprintf(ftemps,"%f %f %f %f\n",log10(r),log10(realtempi),log10(realtempe),log10(mdot));
