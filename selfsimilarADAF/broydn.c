@@ -1,11 +1,11 @@
 #include <math.h>
 #include "nrutil.h"
 #define MAXITS 2000
-#define EPS 1.0e-20
-#define TOLF 1.0e-20
+#define EPS 1.0e-10
+#define TOLF 1.0e-10
 #define TOLX EPS
 #define STPMX 100.0
-#define TOLMIN 1.0e-20
+#define TOLMIN 1.0e-10
 #define float double
 /* Here MAXITS is the maximum number of iterations; EPS is a number close to the machine
 precision; TOLF is the convergence criterion on function values; TOLX is the convergence criterion

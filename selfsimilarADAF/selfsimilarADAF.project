@@ -8,9 +8,15 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="rates2.h"/>
+    <File Name="rates2.c"/>
+    <File Name="vecfunc2.h"/>
+    <File Name="vecfunc2.c"/>
+    <File Name="ssfunctions2.h"/>
+    <File Name="ssfunctions2.c"/>
     <File Name="broydn.c"/>
-    <File Name="rates.h"/>
-    <File Name="rates.c"/>
+    <File Name="rates.h" ExcludeProjConfig="Debug;"/>
+    <File Name="rates.c" ExcludeProjConfig="Debug;"/>
     <File Name="nrutil.h"/>
     <File Name="nrutil.c"/>
     <File Name="nr.h"/>
@@ -22,10 +28,10 @@
     <File Name="bessel.c"/>
     <File Name="zbrent.c"/>
     <File Name="zbrac.c"/>
-    <File Name="vecfunc.h"/>
-    <File Name="vecfunc.c"/>
-    <File Name="ssfunctions.h"/>
-    <File Name="ssfunctions.c"/>
+    <File Name="vecfunc.h" ExcludeProjConfig="Debug;"/>
+    <File Name="vecfunc.c" ExcludeProjConfig="Debug;"/>
+    <File Name="ssfunctions.h" ExcludeProjConfig="Debug;"/>
+    <File Name="ssfunctions.c" ExcludeProjConfig="Debug;"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

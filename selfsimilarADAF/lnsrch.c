@@ -2,7 +2,7 @@
 #include "nr.h"
 #include "nrutil.h"
 #define ALF 1.0e-4               // Ensures sufficient decrease in function value.
-#define TOLX 1.0e-7              // Convergence criterion on delta x.
+#define TOLX 1.0e-20              // Convergence criterion on delta x.
 #define float double
 
 void lnsrch(int n, float xold[], float fold, float g[], float p[], float x[],

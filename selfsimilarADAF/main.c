@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <math.h>
 #include "nr.h"
-#include "ssfunctions.h"
+#include "ssfunctions2.h"
 #include "nrutil.h"
-#include "rates.h"
-#include "vecfunc.h"
+#include "rates2.h"
+#include "vecfunc2.h"
 #define TOL 1.0e-20
 #define SOLARMASS 1.998e33
 #define PI 3.14159265359
@@ -24,23 +24,24 @@ int main()
     int check=0;
   
     x=dvector(1,N);
-    constants();
+    constants2();
     r=rmin;
     FILE *ftemps;
     ftemps=fopen("temperatures.txt","w");
-    x[1]=0.1;
-    x[2]=0.1;
-    x[3]=0.99;
+    x[1]=1.0e12;
+    x[2]=1.0e9;
+    x[3]=0.9;
     for (int i=1;i<=mgrid;i++) {
         r=r*step;
         radius=r*RS;
-        newt(x,N,&check,vecfunc);
-        double qie=qiefunc(x[1],x[2],x[3]);
-        double qemi=qem(x[2],x[3]);
-        double qplus=qp(x[3])*(1.0-x[3]);
-        double realtempi=PROTONMASS*CLIGHT2*x[1]/BOLTZMANN;
-        double realtempe=ELECTRONMASS*CLIGHT2*x[2]/BOLTZMANN;
-        fprintf(ftemps,"%f %f %f %f\n",log10(r),log10(realtempi),log10(realtempe),log10(mdot));
+        newt(x,N,&check,vecfunc2);
+        double f=x[3];
+        double qie=qiefunc2(x[1],x[2],x[3]);
+        double qemi=qem2(x[2],x[3]);
+        double qplus=qp2(x[3])*(1.0-f);
+        //double realtempi=PROTONMASS*CLIGHT2*x[1]/BOLTZMANN;
+        //double realtempe=ELECTRONMASS*CLIGHT2*x[2]/BOLTZMANN;
+        fprintf(ftemps,"%f %f %f %f\n",log10(r),log10(x[1]),log10(x[2]),x[3]);
     }
     fclose(ftemps);
     return 0;

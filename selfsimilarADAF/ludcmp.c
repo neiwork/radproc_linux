@@ -1,7 +1,7 @@
 #include <math.h>
 #include "nr.h"
 #include "nrutil.h"
-#define TINY 1.0e-20;              // A small number.
+#define TINY 1.0e-40;              // A small number.
 #define float double
 
 void ludcmp(float **a, int n, int *indx, float *d)

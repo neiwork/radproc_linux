@@ -2,10 +2,10 @@
 #include "nr.h"
 #include "nrutil.h"
 #define MAXITS 3000
-#define TOLF 1.0e-8
-#define TOLMIN 1.0e-10
-#define TOLX 1.0e-10
-#define STPMX 100.0
+#define TOLF 1.0e-20
+#define TOLMIN 1.0e-20
+#define TOLX 1.0e-20
+#define STPMX 10000.0
 #define float double
 /* Here MAXITS is the maximum number of iterations; TOLF sets the convergence criterion on
    function values; TOLMIN sets the criterion for deciding whether spurious convergence to a
