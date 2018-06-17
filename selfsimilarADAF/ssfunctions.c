@@ -78,7 +78,7 @@ double magf(double mdot)   {
 }
 
 double qp(double mdot) {
-    extern double r,m,m;
+    extern double r,m;
     return 1.84e21*epsp()*sqrt(c3())*mdot/(m*m*r*r*r*r);            // [erg cm^-3 s^-1]
 }
 
@@ -99,4 +99,18 @@ double taues(double mdot) {
 double height() {
     extern double radius;
     return radius*sqrt(2.5*c3());
+}
+
+double mdotcrit() {
+	extern double r,f,alphapar,betapar;
+	double m,b;
+	//return 1.32e3*(1.0-f)*epsp()*alphapar*alphapar*c1()*c1()*c3()/sqrt(betapar*r);
+	if (r < 1.0e3) {
+		m=7.0/30.0;
+		b=-1.7;
+	} else {
+		m=-0.7;
+		b=1.1;
+	}
+	return pow(10.0,b)*pow(r,m);
 }

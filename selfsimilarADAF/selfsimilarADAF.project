@@ -8,12 +8,12 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="rates2.h"/>
-    <File Name="rates2.c"/>
-    <File Name="vecfunc2.h"/>
-    <File Name="vecfunc2.c"/>
-    <File Name="ssfunctions2.h"/>
-    <File Name="ssfunctions2.c"/>
+    <File Name="rates2.h" ExcludeProjConfig=""/>
+    <File Name="rates2.c" ExcludeProjConfig=""/>
+    <File Name="vecfunc2.h" ExcludeProjConfig=""/>
+    <File Name="vecfunc2.c" ExcludeProjConfig=""/>
+    <File Name="ssfunctions2.h" ExcludeProjConfig=""/>
+    <File Name="ssfunctions2.c" ExcludeProjConfig=""/>
     <File Name="broydn.c"/>
     <File Name="rates.h" ExcludeProjConfig="Debug;"/>
     <File Name="rates.c" ExcludeProjConfig="Debug;"/>

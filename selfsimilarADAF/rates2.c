@@ -11,12 +11,11 @@
 #define CLIGHT2 8.9875518e20
 #define SIGMASB 5.6704e-5
 
-double qbremss(double temp)
+double qbremss2(double tempe)
 {
     extern double eDensity,iDensity;
     double fei,fee,qei,qee;
-  
-    double tempe=(BOLTZMANN*temp)/(ELECTRONMASS*CLIGHT2);
+	
     if (tempe <= 1.0) {
         fei=1.0159*sqrt(tempe)*(1.0+1.781*pow(tempe,1.34));
         fee=pow(tempe,1.5)*(1.0+1.1*tempe+tempe*tempe-1.25*pow(tempe,2.5));
@@ -37,30 +36,28 @@ double auxf1(double x)
 }
 
 #include "nr.h"
-void qsync(double *qSy, double *nucrit, double tempe)
+void qsync2(double *qSy, double *nucrit, double tempe)
 {
     int zbrac(double (*func)(double),double *x1, double *x2);
     double zbrent(double (*func)(double), double x1, double x2, double tol);
     extern double radius,magField;
   
-    double normtempe=(BOLTZMANN*tempe)/(ELECTRONMASS*CLIGHT2);
     double x1=1.0e-5;
     double x2=1.0e3;
     zbrac(auxf1,&x1,&x2);
     double xcrit=zbrent(auxf1,x1,x2,TOL);
     double nu0=2.8e6*magField;                                                        // [Hz]
-    double auxnucrit=1.5*nu0*normtempe*normtempe*xcrit;
+    double auxnucrit=1.5*nu0*tempe*tempe*xcrit;
     *nucrit=auxnucrit;
     //printf("nu0 = %f, nuc = %f, r = %f\n",nu0,nucrit,r);
-    double auxqSy=2.0*PI/3.0/CLIGHT2*BOLTZMANN*tempe*(*nucrit)*(*nucrit)*(*nucrit)/radius;
+    double auxqSy=2.0*PI*BOLTZMANN*ELECTRONMASS/3.0 *tempe*(*nucrit)*(*nucrit)*(*nucrit)/radius;
     *qSy=auxqSy;
 }
 
-void qC(double qbr, double qsy, double nuc, double temp, double *qCbr, double *qCsy, double f)
+void qC2(double qbr, double qsy, double nuc, double tempe, double *qCbr, double *qCsy, double f)
 {
     double prob,a,eta1,eta2,eta3;
     double xc=PLANCK*nuc/(ELECTRONMASS*CLIGHT2);
-    double tempe=(BOLTZMANN*temp)/(ELECTRONMASS*CLIGHT2);
     prob=1.0-exp(-taues(f));
     a=1.0+4.0*tempe*(1.0+4.0*tempe);
     eta1=prob*(a-1.0)/(1.0-prob*a);
@@ -73,42 +70,45 @@ void qC(double qbr, double qsy, double nuc, double temp, double *qCbr, double *q
     *qCsy=auxqCsy;
 }
 
-double qiefunc2(double tempions, double tempelectrons, double f)
+double qiefunc2(double tempi, double tempe, double f)
 {
-    extern double r;
+	extern double r;
     double rad=r;
-    double tempi=(BOLTZMANN*tempions)/(PROTONMASS*CLIGHT2);
-    double tempe=(BOLTZMANN*tempelectrons)/(ELECTRONMASS*CLIGHT2);
-    double aux1=(tempi+tempe);
-    double aux3=1.0/tempi;
-    double aux4=1.0/tempe;
-    double aux2=aux3+aux4;
+	double sumtemps=tempi+tempe;
+    double xe=1.0/tempe;
+    double xi=1.0/tempi;
+    double xm=xe+xi;
     double besselk1,besselk0,besselk2e,besselk2i,result;
-    if (aux2 > 200.0) {
-        if (aux3 > 100.0) {
-            besselk2e=bessk(2,aux4);
-            //result=3.328e-22*ne(f)*ni(f)*(1836.15*tempi-tempe)*sqrt(aux3/aux2)
-            //    * ((2.0*aux1*aux1+1.0)/aux1 + 2.0) * exp(-(aux2+aux3))/besselk2e;
-            result=5.61e-32*ne(f)*ni(f)*(tempions-tempelectrons)*sqrt(aux3/aux2)
-                * ((2.0*aux1*aux1+1.0)/aux1 + 2.0) * exp(-(aux2-aux3))/besselk2e;
+    if (xm > 400.0) {
+        if (xi > 200.0) {
+			if (xe > 200.0) {
+				result=3.326668e-22*ne(f)*ni(f)*(1836.15*tempi-tempe)*sqrt(2.0*xm/(PI*xe*xi))*
+					((2.0*sumtemps*sumtemps+1.0)/sumtemps+2.0);
+			} else {
+				besselk2e=bessk(2,xe);
+				//result=3.328e-22*ne(f)*ni(f)*(1836.15*tempi-tempe)*sqrt(aux3/aux2)
+				//    * ((2.0*aux1*aux1+1.0)/aux1 + 2.0) * exp(-(aux2+aux3))/besselk2e;
+				result=3.326668e-22*ne(f)*ni(f)*(1836.15*tempi-tempe)*sqrt(xi/xm)*
+					((2.0*sumtemps*sumtemps+1.0)/sumtemps+2.0)*exp(-xe)/besselk2e;
+			}
         } else {
-            besselk2i=bessk(2,aux3);
+            besselk2i=bessk(2,xi);
             //result=3.328e-22*ne(f)*ni(f)*(1836.15*tempi-tempe)*sqrt(aux4/aux2)
             //       * ((2.0*aux1*aux1+1.0)/aux1 + 2.0) * exp(-(aux2+aux4))/besselk2i;
-            result=5.61e-32*ne(f)*ni(f)*(tempions-tempelectrons)*sqrt(aux4/aux2)
-                   * ((2.0*aux1*aux1+1.0)/aux1 + 2.0) * exp(-(aux2-aux4))/besselk2i;
+            result=3.326668e-22*ne(f)*ni(f)*(1836.15*tempi-tempe)*sqrt(xe/xm)*
+                   ((2.0*sumtemps*sumtemps+1.0)/sumtemps+2.0)*exp(-xi)/besselk2i;
         }
     } else {
-        besselk1=bessk1(aux2);
-        besselk0=bessk0(aux2);
-        besselk2i=bessk(2,aux3);
-        besselk2e=bessk(2,aux4);
+        besselk1=bessk1(xm);
+        besselk0=bessk0(xm);
+        besselk2i=bessk(2,xi);
+        besselk2e=bessk(2,xe);
         //result=3.328e-22*ne(f)*ni(f)*(1836.15*tempi-tempe)*
         //    ((2.0*aux1*aux1+1.0)/aux1 * besselk1/besselk2i + 2.0*besselk0/besselk2i) / besselk2e;
-        result=5.61e-32*ne(f)*ni(f)*(tempions-tempelectrons)*
-            ((2.0*aux1*aux1+1.0)/aux1 * besselk1/besselk2i + 2.0*besselk0/besselk2i) / besselk2e;
+        result=3.326668e-22*ne(f)*ni(f)*(1836.15*tempi-tempe)*
+            ((2.0*sumtemps*sumtemps+1.0)/sumtemps * besselk1/besselk2i + 2.0*besselk0/besselk2i)/
+			besselk2e;
     }
-    
     return result;
 }
 
@@ -119,15 +119,16 @@ double qem2(double tempe, double f)
     eDensity=ne(f);
     iDensity=ni(f);
     magField=magf(f);
-    eTemp=(BOLTZMANN*tempe)/(ELECTRONMASS*CLIGHT2);
-    qsync(&qSy,&nucrit,tempe);
-    qBr=qbremss(tempe);
-    qC(qBr,qSy,nucrit,tempe,&qCbr,&qCsy,f);
+    eTemp=tempe;
+	double auxtemp=eTemp;
+    qsync2(&qSy,&nucrit,tempe);
+    qBr=qbremss2(tempe);
+    qC2(qBr,qSy,nucrit,tempe,&qCbr,&qCsy,f);
     double qemi=qBr+qSy+qCbr+qCsy;
-    double aux=4.0*SIGMASB*pow(tempe,4)/height(f);
+    double aux=4.0*SIGMASB*pow(ELECTRONMASS*CLIGHT2*tempe/BOLTZMANN,4)/height(f);
     double tauabs=qemi/aux;
     double tau=tauabs+taues(f);
     double result=aux*pow(1.5*tau+sqrt(3.0)+aux*pow(qemi,-1.0),-1.0);
     
-    return qemi;
+    return result;
 }

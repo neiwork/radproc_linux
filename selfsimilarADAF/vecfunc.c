@@ -6,18 +6,19 @@
 void vecfunc(int n, double x[], double fvec[])
 {
     extern double r,betapar,f;
-    double mdot=x[3];
+    double mdot=mdotcrit();
     double tempi=x[1];
     double tempe=x[2];
     double rad=log10(r);
     double qie=qiefunc(tempi,tempe,mdot);
     double qemi=qem(tempe,mdot);
     double qplus=qp(mdot);
-  
-    fvec[1]=qie/qplus-(1.0-f);
-    fvec[2]=qie/qemi-1.0;
-    //fvec[3]=1700.14*tempi-(1039.44*betapar*c3(f)/r+tempe);
-    fvec[3]=tempi-(1.08*tempe+6.66e12*betapar*c3()/r);
+	
+    //fvec[1]=qie/qplus-(1.0-f);
+    //fvec[2]=qie/qemi-1.0;
+	fvec[1]=qemi/qplus-(1.0-f);
+    fvec[2]=1700.14*tempi-(1039.44*betapar*c3()/r+tempe);
+    //fvec[3]=tempi-(1.08*tempe+6.66e12*betapar*c3()/r);
 }
   
 

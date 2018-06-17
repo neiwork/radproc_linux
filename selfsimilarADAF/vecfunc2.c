@@ -16,6 +16,6 @@ void vecfunc2(int n, double x[], double fvec[])
   
     fvec[1]=qie/qplus-(1.0-f);
     fvec[2]=qie/qemi-1.0;
-    //fvec[3]=1700.14*tempi-(1039.44*betapar*c3(f)/r+tempe);
-    fvec[3]=tempi-(1.08*tempe+6.66e12*betapar*c3(f)/r);
+    //fvec[3]=tempi-(1.08*tempe+6.66e12*betapar*c3(f)/r);
+    fvec[3]=1700.14*tempi-(1039.44*betapar*c3(f)/r+tempe);
 }
