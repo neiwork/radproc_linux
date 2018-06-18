@@ -8,7 +8,7 @@ void constants()
   
     m=1.0e8;                                        // [Solar masses]
     //mdot=1.0e-4;                                // [Eddington luminosities]
-    f=0.9;
+    f=0.9999;
     alphapar=0.3;
     RS=m*2.9675e5;                          // Schwarzschild radius
     betapar=0.5;

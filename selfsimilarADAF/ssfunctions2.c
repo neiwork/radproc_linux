@@ -7,8 +7,8 @@ void constants2()
     extern int mgrid;
   
     m=1.0e8;                                        // [Solar masses]
-    mdot=1.0e-4;                                // [Eddington luminosities]
-    alphapar=0.3;
+    mdot=1.0e-6;                                // [Eddington luminosities]
+    alphapar=0.03;
     RS=m*2.9675e5;                          // Schwarzschild radius
     betapar=0.5;
     gammapar=(32.0-24.0*betapar-3.0*betapar*betapar)/(24.0-21.0*betapar);

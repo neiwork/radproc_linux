@@ -50,7 +50,7 @@ void qsync2(double *qSy, double *nucrit, double tempe)
     double auxnucrit=1.5*nu0*tempe*tempe*xcrit;
     *nucrit=auxnucrit;
     //printf("nu0 = %f, nuc = %f, r = %f\n",nu0,nucrit,r);
-    double auxqSy=2.0*PI*BOLTZMANN*ELECTRONMASS/3.0 *tempe*(*nucrit)*(*nucrit)*(*nucrit)/radius;
+    double auxqSy=2.0*PI*ELECTRONMASS/3.0 *tempe*(*nucrit)*(*nucrit)*(*nucrit)/radius;
     *qSy=auxqSy;
 }
 
