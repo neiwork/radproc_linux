@@ -18,29 +18,36 @@ extern double spinBH, lambda;
 
 void torusSampling()
 {
-    criticalRadii(&rMin, &rCenter);
-    l_0=specificAngularMom();
-    double rMax=edge();
-    int nR=10,nTheta=3;
+    //criticalRadii(&rMin, &rCenter);
+	rMin=1.0;
+    //l_0=specificAngularMom();
+    //double rMax=edge();
+	double rMax=1.0e4;
+    int nR=100,nTheta=10;
     long nPhot=1000;
     FILE *fp1, *fp2;
     
     fp1=fopen("torus.txt","w");
     fp2=fopen("prob.txt","w");
     
-    double dr=(rMax-rMin)/nR;                                // Cells' radial size.
-    double *rCells,*r,**prob;
+    //double dr=(rMax-rMin)/nR;                                // Cells' radial size.
+	double paso=pow(rMax/rMin,1.0/nR);
+	double *rCells,*r,**prob;
     
     rCells=dvector(0,nR);                                          // Cells' boundaries.
     r=dvector(1,nR);                                                   // Cells' central position.
     prob=dmatrix(1,nR,1,nR);
     rCells[0]=rMin;
-    for(int i=1;i<=nR;i++) {
+    /*for(int i=1;i<=nR;i++) {
         rCells[i]=rCells[i-1]+dr;
         r[i]=rCells[i-1]+dr/2.0;
-    }
+    }*/
+	for(int=1;i<=nR;i++) {
+		rCells[i]=rMin*paso;
+		r[i]=sqrt(rCells[i]*rCells[i-1]);
+	}
     double thetaMin=0.0;
-    double thetaMax=PI/6.0;
+    double thetaMax=PI/4.0;
     
     InitialiseRandom(RANDOM_GENERATOR);
     for(int i=1;i<=nR;i++) {
@@ -50,13 +57,13 @@ void torusSampling()
             double theta0=asin(yaux);
             double y0=r[i]*cos(theta0);
             double z0=r[i]*sin(theta0);
-            if (w(r[i],theta0) > 0) {
+            /*if (w(r[i],theta0) > 0) {
                 fprintf(fp1,"%f   %f\n",y0,z0);
                 fprintf(fp1,"%f   %f\n",y0,-z0);
                 fprintf(fp1,"%f   %f\n",-y0,z0);
                 fprintf(fp1,"%f   %f\n",-y0,-z0);
-            }
-            double drprim=dr/100.0;                                       // Initial step for the photon path.
+            }*/
+            double drprim=dr/100.0;                                   // Initial step for the photon path.
             double drprimmin=dr/1.0e6;                                // Minimum step.
             double drprimmax=dr/10.0;                                 // Maximum step.
             for(int j=1;j<=nPhot;j++) {

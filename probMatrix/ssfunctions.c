@@ -6,16 +6,16 @@ void constants()
     extern double alphapar,m,f,RS,betapar,gammapar,rmin,rmax,step;
     extern int mgrid;
   
-    m=1.0e8;                                     // [Solar masses]
-    //mdot=1.0e-4;                               // [Eddington luminosities]
+    m=1.0e8;                                        // [Solar masses]
+    //mdot=1.0e-4;                                // [Eddington luminosities]
     f=0.9;
     alphapar=0.3;
-    RS=m*2.9675e5;                          	 // Schwarzschild radius
+    RS=m*2.9675e5;                          // Schwarzschild radius
     betapar=0.5;
     gammapar=(32.0-24.0*betapar-3.0*betapar*betapar)/(24.0-21.0*betapar);
-    mgrid=10;
-    rmin=1.0;                                    // [Schwwarzschild radii]
-    rmax=1.0e4;                                  //                     "
+    mgrid=100;
+    rmin=1.0;                                        // [Schwwarzschild radii]
+    rmax=1.0e6;                                  //                     "
     step=pow(rmax/rmin,1.0/mgrid);
 }
 

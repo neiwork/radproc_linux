@@ -28,8 +28,9 @@ int main()
     x=dvector(1,N);
     constants();
     r=rmin;
-    FILE *ftemps, *fmdots, *fqs;
+    FILE *ftemps, *fmdots, *fqs,*fne;
     ftemps=fopen("temperatures.txt","w");
+	fne=fopen("ne.txt","w");
 	fmdots=fopen("mdots.txt","w");
 	fqs=fopen("qrates.txt","w");
 	
@@ -37,12 +38,12 @@ int main()
 	double inittempe=1.0e9;
 	x[1]=(BOLTZMANN*inittempi)/(PROTONMASS*CLIGHT2);
     x[2]=(BOLTZMANN*inittempe)/(ELECTRONMASS*CLIGHT2);
-    x[3]=1.0e-6;
+    x[3]=1.0e-3;
     for (int i=1;i<=mgrid;i++) {
         r=r*step;
         radius=r*RS;
-		//x[1]=BOLTZMANN*inittempi*pow(r,-1.11732)/(ELECTRONMASS*CLIGHT2);
-        newt(x,N,&check,vecfunc);
+		double rad=r;
+		broydn(x,N,&check,vecfunc);
 		double mdot=x[3];
 		//double f=x[3];
         double qie=qiefunc(x[1],x[2],mdot);
@@ -60,7 +61,9 @@ int main()
         //double qplus=qp2(f);
         double realtempi=PROTONMASS*CLIGHT2*x[1]/BOLTZMANN;
         double realtempe=ELECTRONMASS*CLIGHT2*x[2]/BOLTZMANN;
-        fprintf(ftemps,"%f %f %f\n",log10(r),log10(realtempi),log10(realtempe));
+        fprintf(ftemps,"%f %f %f %f %f %f\n",log10(r),log10(realtempi),log10(realtempe),
+			log10(ne(f)),log10(ni(f)),log10(magf(f)));
+		fprintf(fne,"%f\n",ne(f));
 		fprintf(fmdots,"%f %f %f\n",log10(r),log10(mdot),log10(mdotcrit()));
 		fprintf(fqs,"%f %f %f %f\n",log10(r),log10(qplus),log10(qie),log10(qemi));
     }

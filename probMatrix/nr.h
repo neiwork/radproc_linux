@@ -58,22 +58,22 @@ void bcuint(float y[], float y1[], float y2[], float y12[],
 	    float x2, float *ansy, float *ansy1, float *ansy2);
 void beschb(double x, double *gam1, double *gam2, double *gampl,
 	    double *gammi);
-float bessi(int n, float x);
-float bessi0(float x);
-float bessi1(float x);
-void bessik(float x, float xnu, float *ri, float *rk, float *rip,
-	    float *rkp);
-float bessj(int n, float x);
-float bessj0(float x);
-float bessj1(float x);
-void bessjy(float x, float xnu, float *rj, float *ry, float *rjp,
-	    float *ryp);
-float bessk(int n, float x);
-float bessk0(float x);
-float bessk1(float x);
-float bessy(int n, float x);
-float bessy0(float x);
-float bessy1(float x);
+double bessi(int n, double x);
+double bessi0(double x);
+double bessi1(double x);
+void bessik(double x, double xnu, double *ri, double *rk, double *rip,
+	    double *rkp);
+double bessj(int n, double x);
+double bessj0(double x);
+double bessj1(double x);
+void bessjy(double x, double xnu, double *rj, double *ry, double *rjp,
+	    double *ryp);
+double bessk(int n, double x);
+double bessk0(double x);
+double bessk1(double x);
+double bessy(int n, double x);
+double bessy0(double x);
+double bessy1(double x);
 float beta(float z, float w);
 float betacf(float a, float b, float x);
 float betai(float a, float b, float x);
@@ -82,8 +82,8 @@ void bksub(int ne, int nb, int jf, int k1, int k2, float ***c);
 float bnldev(float pp, int n, long *idum);
 float brent(float ax, float bx, float cx,
 	    float (*f)(float), float tol, float *xmin);
-void broydn(float x[], int n, int *check,
-	    void (*vecfunc)(int, float [], float []));
+void broydn(double x[], int n, int *check,
+	    void (*vecfunc)(int, double [], double []));
 void bsstep(float y[], float dydx[], int nv, float *xx, float htry,
 	    float eps, float yscal[], float *hdid, float *hnext,
 	    void (*derivs)(float, float [], float []));
@@ -169,8 +169,8 @@ float factrl(int n);
 void fasper(float x[], float y[], unsigned long n, float ofac, float hifac,
 	    float wk1[], float wk2[], unsigned long nwk, unsigned long *nout,
 	    unsigned long *jmax, float *prob);
-void fdjac(int n, float x[], float fvec[], float **df,
-	   void (*vecfunc)(int, float [], float []));
+void fdjac(int n, double x[], double fvec[], double **df,
+	   void (*vecfunc)(int, double [], double []));
 void fgauss(float x, float a[], float *y, float dyda[], int na);
 void fill0(double **u, int n);
 void fit(float x[], float y[], int ndata, float sig[], int mwt,
@@ -180,7 +180,7 @@ void fitexy(float x[], float y[], int ndat, float sigx[], float sigy[],
 void fixrts(float d[], int m);
 void fleg(float x, float pl[], int nl);
 void flmoon(int n, int nph, long *jd, float *frac);
-float fmin1(float x[]);
+double fmin1(double x[]);
 void four1(float data[], unsigned long nn, int isign);
 void fourew(FILE *file[5], int *na, int *nb, int *nc, int *nd);
 void fourfs(FILE *file[5], unsigned long nn[], int ndim, int isign);
@@ -205,8 +205,8 @@ void gauher(float x[], float w[], int n);
 void gaujac(float x[], float w[], int n, float alf, float bet);
 void gaulag(float x[], float w[], int n, float alf);
 void gauleg(float x1, float x2, float x[], float w[], int n);
-void gaussj(float **a, int n, float **b, int m);
-void gcf(float *gammcf, float a, float x, float *gln);
+void gaussj(double **a, double n, double **b, int m);
+void gcf(double *gammcf, double a, double x, double *gln);
 float golden(float ax, float bx, float cx, float (*f)(float), float tol,
 	     float *xmin);
 void gser(float *gamser, float a, float x, float *gln);
@@ -258,15 +258,15 @@ void linbcg(unsigned long n, double b[], double x[], int itol, double tol,
 	    int itmax, int *iter, double *err);
 void linmin(float p[], float xi[], int n, float *fret,
 	    float (*func)(float []));
-void lnsrch(int n, float xold[], float fold, float g[], float p[], float x[],
-	    float *f, float stpmax, int *check, float (*func)(float []));
+void lnsrch(int n, double xold[], double fold, double g[], double p[], double x[],
+	    double *f, double stpmax, int *check, double (*func)(double []));
 void load(float x1, float v[], float y[]);
 void load1(float x1, float v1[], float y[]);
 void load2(float x2, float v2[], float y[]);
 void locate(float xx[], unsigned long n, float x, unsigned long *j);
 void lop(double **out, double **u, int n);
-void lubksb(float **a, int n, int *indx, float b[]);
-void ludcmp(float **a, int n, int *indx, float *d);
+void lubksb(double **a, int n, int *indx, double b[]);
+void ludcmp(double **a, int n, int *indx, double *d);
 void machar(int *ibeta, int *it, int *irnd, int *ngrd,
 	    int *machep, int *negep, int *iexp, int *minexp, int *maxexp,
 	    float *eps, float *epsneg, float *xmin, float *xmax);
@@ -317,8 +317,8 @@ void mrqcof(float x[], float y[], float sig[], int ndata, float a[],
 void mrqmin(float x[], float y[], float sig[], int ndata, float a[],
 	    int ia[], int ma, float **covar, float **alpha, float *chisq,
 	    void (*funcs)(float, float [], float *, float [], int), float *alamda);
-void newt(float x[], int n, int *check,
-	  void (*vecfunc)(int, float [], float []));
+void newt(double x[], int n, int *check,
+	  void (*vecfunc)(int, double [], double []));
 void odeint(float ystart[], int nvar, float x1, float x2,
 	    float eps, float h1, float hmin, int *nok, int *nbad,
 	    void (*derivs)(float, float [], float []),
@@ -377,7 +377,7 @@ float ran3(long *idum);
 float ran4(long *idum);
 void rank(unsigned long n, unsigned long indx[], unsigned long irank[]);
 void ranpt(float pt[], float regn[], int n);
-void ratint(float xa[], float ya[], int n, float x, float *y, float *dy);
+void ratint(double xa[], double ya[], int n, double x, double *y, double *dy);
 void ratlsq(double (*fn)(double), double a, double b, int mm, int kk,
 	    double cof[], double *dev);
 double ratval(double x, double cof[], int mm, int kk);
@@ -511,10 +511,10 @@ void wtn(float a[], unsigned long nn[], int ndim, int isign,
 	 void (*wtstep)(float [], unsigned long, int));
 void wwghts(float wghts[], int n, float h,
 	    void (*kermom)(double [], double ,int));
-int zbrac(float (*func)(float), float *x1, float *x2);
-void zbrak(float (*fx)(float), float x1, float x2, int n, float xb1[],
-	   float xb2[], int *nb);
-float zbrent(float (*func)(float), float x1, float x2, float tol);
+int zbrac(double (*func)(double), double *x1, double *x2);
+void zbrak(double (*fx)(double), double x1, double x2, int n, double xb1[],
+	   double xb2[], int *nb);
+double zbrent(double (*func)(double), double x1, double x2, double tol);
 void zrhqr(float a[], int m, float rtr[], float rti[]);
 float zriddr(float (*func)(float), float x1, float x2, float xacc);
 void zroots(fcomplex a[], int m, fcomplex roots[], int polish);

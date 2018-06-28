@@ -1,12 +1,5 @@
-Debug/main.c.o: main.c torusSampling.h torusParameters.h bisection.h \
- metric.h auxFunctions.h
+Debug/main.c.o: main.c functions.h torusSampling2.h
 
-torusSampling.h:
+functions.h:
 
-torusParameters.h:
-
-bisection.h:
-
-metric.h:
-
-auxFunctions.h:
+torusSampling2.h:

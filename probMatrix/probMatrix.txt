@@ -1,1 +1,1 @@
-./Release/main.c.o ./Release/nrutil.c.o ./Release/metric.c.o ./Release/torusParameters.c.o ./Release/auxFunctions.c.o ./Release/torusSampling.c.o ./Release/bisection.c.o
+./Debug/torusSampling2.c.o ./Debug/interpol.c.o ./Debug/functions.c.o ./Debug/nrutil.c.o ./Debug/main.c.o

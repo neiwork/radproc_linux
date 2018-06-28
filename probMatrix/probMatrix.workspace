@@ -2,11 +2,11 @@
 <CodeLite_Workspace Name="probMatrix" Database="" Version="10.0.0">
   <Project Name="probMatrix" Path="probMatrix.project" Active="Yes"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="no">
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
       <Project Name="probMatrix" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="yes">
+    <WorkspaceConfiguration Name="Release" Selected="no">
       <Environment/>
       <Project Name="probMatrix" ConfigName="Release"/>
     </WorkspaceConfiguration>
