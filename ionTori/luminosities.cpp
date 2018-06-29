@@ -116,38 +116,40 @@ void luminosities(State& st, const string& filename) {
     probCompton(prob,nR);
     st.photon.ps.iterate([&](const SpaceIterator& itR) {                                // loop en radios
         double rB1=itR.val(DIM_R);
-        double rB2=itR.its[DIM_R].peek(1);
-        st.photon.ps.iterate([&](const SpaceIterator& itTh) {                           // loop en angulo polar
-            double theta=itTh.val(DIM_THETA);
-            double dth=itTh.its[DIM_THETA].peek(1)-theta;
-            double area=2.0*pi*rB2*rB2*dth*rg*rg;
-            double vol=2.0*pi/3.0*dth*(rB2*rB2*rB2-rB1*rB1*rB1)*rg*rg*rg;
-            double fluxToLum=area;
-            double emissToLum=4.0*pi*vol;
-            double dens_e=st.denf_e.get(itTh);
-            double dens_i=st.denf_i.get(itTh);
-            double temp=st.tempElectrons.get(itTh);
-            double magf=st.magf.get(itTh);
-            Vector lumBr(nE+1,0.0);
-            Vector lumSync(nE+1,0.0);
-            Vector lumSy(nE+1,0.0);
-            Vector energies(nE+1,0.0);
-            int jE=0;
-            st.photon.ps.iterate([&](const SpaceIterator& itE) {
-                energies[jE]=itE.val(DIM_E);
-                double frec=energies[jE]/planck;
-                double jBr=jBremss(energies[jE],temp,dens_i,dens_e);
-                lumBr[jE]+=jBr*emissToLum;
-                double jSy=(temp >= 5.0e8 ? jSync(energies[jE],temp,magf,dens_e) : 0.0);
-                double auxSync=lumSync[jE];
-                double lumRJ=bb_RJ(frec,temp)*fluxToLum;
-                lumSync[jE]=min((1.0-prob[jR][jR+1])*jSy*emissToLum+auxSync,lumRJ);
-                lumSy[jE]=lumSync[jE]-auxSync;
-                lumOut[jR][jE]=lumBr[jE]+lumSy[jE];
-                jE++;
-            },{-1,itR.coord[DIM_R],itTh.coord[DIM_THETA]});
-        },{0,itR.coord[DIM_R],-1});
-        jR++;
+        if (itR.its[DIM_R].canPeek(1)) {
+            double rB2=itR.its[DIM_R].peek(1);
+            st.photon.ps.iterate([&](const SpaceIterator& itTh) {                           // loop en angulo polar
+                double theta=itTh.val(DIM_THETA);
+                double dth=itTh.its[DIM_THETA].peek(1)-theta;
+                double area=2.0*pi*rB2*rB2*dth*rg*rg;
+                double vol=2.0*pi/3.0*dth*(rB2*rB2*rB2-rB1*rB1*rB1)*rg*rg*rg;
+                double fluxToLum=area;
+                double emissToLum=4.0*pi*vol;
+                double dens_e=st.denf_e.get(itTh);
+                double dens_i=st.denf_i.get(itTh);
+                double temp=st.tempElectrons.get(itTh);
+                double magf=st.magf.get(itTh);
+                Vector lumBr(nE+1,0.0);
+                Vector lumSync(nE+1,0.0);
+                Vector lumSy(nE+1,0.0);
+                Vector energies(nE+1,0.0);
+                int jE=0;
+                st.photon.ps.iterate([&](const SpaceIterator& itE) {
+                    energies[jE]=itE.val(DIM_E);
+                    double frec=energies[jE]/planck;
+                    double jBr=jBremss(energies[jE],temp,dens_i,dens_e);
+                    lumBr[jE]+=jBr*emissToLum;
+                    double jSy=(temp >= 5.0e8 ? jSync(energies[jE],temp,magf,dens_e) : 0.0);
+                    double auxSync=lumSync[jE];
+                    double lumRJ=bb_RJ(frec,temp)*fluxToLum;
+                    lumSync[jE]=min((1.0-prob[jR][jR+1])*jSy*emissToLum+auxSync,lumRJ);
+                    lumSy[jE]=lumSync[jE]-auxSync;
+                    lumOut[jR][jE]=lumBr[jE]+lumSy[jE];
+                    jE++;
+                },{-1,itR.coord[DIM_R],itTh.coord[DIM_THETA]});
+            },{0,itR.coord[DIM_R],-1});
+            jR++;
+        }
     },{0,-1,0});
     
     jR=0;

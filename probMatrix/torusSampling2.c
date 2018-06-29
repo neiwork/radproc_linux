@@ -29,7 +29,7 @@ void torusSampling2()
     
     InitialiseRandom(RANDOM_GENERATOR);
     for(int i=1;i<=nR;i++) {
-		double dr=r[i]*(paso-1.0);
+		double dr=rCells[i-1]*(paso-1.0);
         double dyaux=(sin(thetaMax)-sin(thetaMin))/nTheta;
         for(int k=1;k<=nTheta+1;k++) {
             double yaux=sin(thetaMin)+(k-1)*dyaux;                  // Theta distributed uniformly in sin(theta).
@@ -37,10 +37,10 @@ void torusSampling2()
             double y0=r[i]*cos(theta0);
             double z0=r[i]*sin(theta0);
 
-			double pasoprim=pow((r[i]+dr)/r[i],1.0e-2);
-			double pasoprimmin=pow((r[i]+dr)/r[i],1.0e-6);
-			double pasoprimmax=pow((r[i]+dr)/r[i],1.0e-1);
-            double drprim=r[i]*(pasoprim-1.0);                        // Initial step for the photon path.
+			double pasoprim=pow(rCells[i]/rCells[i-1],1.0e-2);
+			double pasoprimmin=pow(rCells[i]/rCells[i-1],1.0e-6);
+			double pasoprimmax=pow(rCells[i]/rCells[i-1],1.0e-1);
+            double drprim=r[i]*(pasoprim-1.0);                                    // Initial step for the photon path.
             double drprimmin=r[i]*(pasoprimmin-1.0);                  // Minimum step.
             for(int j=1;j<=nPhot;j++) {
                 double random_number;
@@ -60,8 +60,8 @@ void torusSampling2()
                     do {
                         if(count >= 1) {                                 // Control of the step.
                             pasoprim = new_max(sqrt(pasoprim),pasoprimmin);
-							drprim = rprimant*(pasoprim-1.0);
-                            rprim = rprimant*pasoprim;
+                            drprim = r[i]*(pasoprim-1.0);
+                            rprim = rprimant+drprim;
                         }
                         double xprim=rprim*sin(thetaprim)*cos(phiprim);
                         double yprim=rprim*sin(thetaprim)*sin(phiprim);
@@ -74,7 +74,7 @@ void torusSampling2()
                         ne=eDensity(r1,theta1);  //definir las funciones
                         control = new_abs(ne,neant)/(0.5*(ne+neant));                 // dn/n
                         count++;
-                    } while((control > 1.0) && (drprim-drprimmin > 1.0));
+                    } while((control > 1.0) && (drprim-drprimmin > 1.0e-5));
                     double psc=ne*thomson*(drprim*RG);    // Probability of scattering.
                     double pescap=1.0-accumulatedp;       // Probability that a photon reaches the previous position.
                     for(int j=1;j<=nR;j++) {
@@ -89,7 +89,7 @@ void torusSampling2()
                     neant=ne;
                     rprimant=rprim;
 					pasoprim=new_min(pasoprim*pasoprim,pasoprimmax);
-                    drprim=rprimant*(pasoprim-1.0);
+                    drprim=r1*(pasoprim-1.0);
                     rprim *= pasoprim;
                 } while(ne > 1.0);               // Escape from the torus.
             }

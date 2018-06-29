@@ -43,35 +43,55 @@ State::State(boost::property_tree::ptree& cfg) :
     denf_i.fill([&](const SpaceIterator& i) {
         static const double mu=GlobalConfig.get<double>("mu_i");
         double rB1=i.val(DIM_R);
-        double rB2=i.its[DIM_R].peek(1);
-        double r= sqrt(rB1*rB2);
-        double theta=i.val(DIM_THETA);
-        return energyDensity(r,theta)/(atomicMassUnit*mu);
+         if (i.its[DIM_R].canPeek(1)) {
+            double rB2=i.its[DIM_R].peek(1);
+            double r= sqrt(rB1*rB2);
+            double theta=i.val(DIM_THETA);
+            return energyDensity(r,theta)/(atomicMassUnit*mu);
+         }
+         else {
+             return 0.0;
+         }
     });
     denf_e.initialize();
     denf_e.fill([&](const SpaceIterator& i) {
         static const double mu=GlobalConfig.get<double>("mu_e");
         double rB1=i.val(DIM_R);
-        double rB2=i.its[DIM_R].peek(1);
-        double r= sqrt(rB1*rB2);
-        double theta=i.val(DIM_THETA);
-        return energyDensity(r,theta)/(atomicMassUnit*mu);
+        if (i.its[DIM_R].canPeek(1)) {
+            double rB2=i.its[DIM_R].peek(1);
+            double r= sqrt(rB1*rB2);
+            double theta=i.val(DIM_THETA);
+            return energyDensity(r,theta)/(atomicMassUnit*mu);
+        }
+        else {
+            return 0.0;
+        }
     });
     tempElectrons.initialize();
     tempElectrons.fill([&](const SpaceIterator& i) {
         double rB1=i.val(DIM_R);
-        double rB2=i.its[DIM_R].peek(1);
-        double r= sqrt(rB1*rB2);
-        double theta=i.val(DIM_THETA);
-        return temp_e(r, theta);
+        if (i.its[DIM_R].canPeek(1)) {
+            double rB2=i.its[DIM_R].peek(1);
+            double r= sqrt(rB1*rB2);
+            double theta=i.val(DIM_THETA);
+            return temp_e(r, theta);
+        }
+        else {
+            return 0.0;
+        }
     });
     tempIons.initialize();
     tempIons.fill([&](const SpaceIterator& i) {
         double rB1=i.val(DIM_R);
-        double rB2=i.its[DIM_R].peek(1);
-        double r= sqrt(rB1*rB2);
-        double theta=i.val(DIM_THETA);
-        return temp_i(r, theta);
+        if (i.its[DIM_R].canPeek(1)) {
+            double rB2=i.its[DIM_R].peek(1);
+            double r= sqrt(rB1*rB2);
+            double theta=i.val(DIM_THETA);
+            return temp_i(r, theta);
+        }
+        else {
+            return 0.0;
+        }
     });
     tpf1.initialize();
     tpf2.initialize();
