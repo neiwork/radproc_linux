@@ -1,1 +1,1 @@
-./Debug/main.c.o ./Debug/nrutil.c.o ./Debug/functions.c.o ./Debug/interpol.c.o ./Debug/torusSampling2.c.o
+./Debug/torusSampling2.c.o ./Debug/interpol.c.o ./Debug/functions.c.o ./Debug/nrutil.c.o ./Debug/main.c.o

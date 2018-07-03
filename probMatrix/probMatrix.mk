@@ -5,18 +5,18 @@
 ## Debug
 ProjectName            :=probMatrix
 ConfigurationName      :=Debug
-WorkspacePath          :=/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/probMatrix
-ProjectPath            :=/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/probMatrix
+WorkspacePath          :=/home/luciano/Doctorado/Accretion/radproc_linux/probMatrix
+ProjectPath            :=/home/luciano/Doctorado/Accretion/radproc_linux/probMatrix
 IntermediateDirectory  :=./Debug
 OutDir                 := $(IntermediateDirectory)
 CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
-User                   :=Eduardo Mario Gutiérrez
-Date                   :=28/06/18
-CodeLitePath           :=/home/eduardog/.codelite
-LinkerName             :=/usr/bin/g++-4.8
-SharedObjectLinkerName :=/usr/bin/g++-4.8 -shared -fPIC
+User                   :=Luciano
+Date                   :=29/06/18
+CodeLitePath           :=/home/luciano/.codelite
+LinkerName             :=/usr/bin/x86_64-linux-gnu-g++
+SharedObjectLinkerName :=/usr/bin/x86_64-linux-gnu-g++ -shared -fPIC
 ObjectSuffix           :=.o
 DependSuffix           :=.o.d
 PreprocessSuffix       :=.i
@@ -47,20 +47,20 @@ LibPath                := $(LibraryPathSwitch)/home/luciano/gsl/lib $(LibraryPat
 ## Common variables
 ## AR, CXX, CC, AS, CXXFLAGS and CFLAGS can be overriden using an environment variables
 ##
-AR       := /usr/bin/ar rcu
-CXX      := /usr/bin/g++-4.8
-CC       := /usr/bin/gcc-4.8
+AR       := /usr/bin/x86_64-linux-gnu-ar rcu
+CXX      := /usr/bin/x86_64-linux-gnu-g++
+CC       := /usr/bin/x86_64-linux-gnu-gcc
 CXXFLAGS :=  -g -O0 -std=c++11 -Wall $(Preprocessors)
 CFLAGS   := -fPIC -g -O0 -std=c99 -Wall $(Preprocessors)
 ASFLAGS  := 
-AS       := /usr/bin/as
+AS       := /usr/bin/x86_64-linux-gnu-as
 
 
 ##
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/main.c$(ObjectSuffix) $(IntermediateDirectory)/nrutil.c$(ObjectSuffix) $(IntermediateDirectory)/functions.c$(ObjectSuffix) $(IntermediateDirectory)/interpol.c$(ObjectSuffix) $(IntermediateDirectory)/torusSampling2.c$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/torusSampling2.c$(ObjectSuffix) $(IntermediateDirectory)/interpol.c$(ObjectSuffix) $(IntermediateDirectory)/functions.c$(ObjectSuffix) $(IntermediateDirectory)/nrutil.c$(ObjectSuffix) $(IntermediateDirectory)/main.c$(ObjectSuffix) 
 
 
 
@@ -91,45 +91,45 @@ PreBuild:
 ##
 ## Objects
 ##
-$(IntermediateDirectory)/main.c$(ObjectSuffix): main.c $(IntermediateDirectory)/main.c$(DependSuffix)
-	$(CC) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/probMatrix/main.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/main.c$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/main.c$(DependSuffix): main.c
-	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/main.c$(ObjectSuffix) -MF$(IntermediateDirectory)/main.c$(DependSuffix) -MM main.c
+$(IntermediateDirectory)/torusSampling2.c$(ObjectSuffix): torusSampling2.c $(IntermediateDirectory)/torusSampling2.c$(DependSuffix)
+	$(CC) $(SourceSwitch) "/home/luciano/Doctorado/Accretion/radproc_linux/probMatrix/torusSampling2.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/torusSampling2.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/torusSampling2.c$(DependSuffix): torusSampling2.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/torusSampling2.c$(ObjectSuffix) -MF$(IntermediateDirectory)/torusSampling2.c$(DependSuffix) -MM torusSampling2.c
 
-$(IntermediateDirectory)/main.c$(PreprocessSuffix): main.c
-	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/main.c$(PreprocessSuffix) main.c
-
-$(IntermediateDirectory)/nrutil.c$(ObjectSuffix): nrutil.c $(IntermediateDirectory)/nrutil.c$(DependSuffix)
-	$(CC) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/probMatrix/nrutil.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/nrutil.c$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/nrutil.c$(DependSuffix): nrutil.c
-	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/nrutil.c$(ObjectSuffix) -MF$(IntermediateDirectory)/nrutil.c$(DependSuffix) -MM nrutil.c
-
-$(IntermediateDirectory)/nrutil.c$(PreprocessSuffix): nrutil.c
-	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/nrutil.c$(PreprocessSuffix) nrutil.c
-
-$(IntermediateDirectory)/functions.c$(ObjectSuffix): functions.c $(IntermediateDirectory)/functions.c$(DependSuffix)
-	$(CC) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/probMatrix/functions.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/functions.c$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/functions.c$(DependSuffix): functions.c
-	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/functions.c$(ObjectSuffix) -MF$(IntermediateDirectory)/functions.c$(DependSuffix) -MM functions.c
-
-$(IntermediateDirectory)/functions.c$(PreprocessSuffix): functions.c
-	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/functions.c$(PreprocessSuffix) functions.c
+$(IntermediateDirectory)/torusSampling2.c$(PreprocessSuffix): torusSampling2.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/torusSampling2.c$(PreprocessSuffix) torusSampling2.c
 
 $(IntermediateDirectory)/interpol.c$(ObjectSuffix): interpol.c $(IntermediateDirectory)/interpol.c$(DependSuffix)
-	$(CC) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/probMatrix/interpol.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/interpol.c$(ObjectSuffix) $(IncludePath)
+	$(CC) $(SourceSwitch) "/home/luciano/Doctorado/Accretion/radproc_linux/probMatrix/interpol.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/interpol.c$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/interpol.c$(DependSuffix): interpol.c
 	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/interpol.c$(ObjectSuffix) -MF$(IntermediateDirectory)/interpol.c$(DependSuffix) -MM interpol.c
 
 $(IntermediateDirectory)/interpol.c$(PreprocessSuffix): interpol.c
 	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/interpol.c$(PreprocessSuffix) interpol.c
 
-$(IntermediateDirectory)/torusSampling2.c$(ObjectSuffix): torusSampling2.c $(IntermediateDirectory)/torusSampling2.c$(DependSuffix)
-	$(CC) $(SourceSwitch) "/home/eduardog/FACULTAD/DOCTORADO/Tori/neiwork/radproc_linux/probMatrix/torusSampling2.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/torusSampling2.c$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/torusSampling2.c$(DependSuffix): torusSampling2.c
-	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/torusSampling2.c$(ObjectSuffix) -MF$(IntermediateDirectory)/torusSampling2.c$(DependSuffix) -MM torusSampling2.c
+$(IntermediateDirectory)/functions.c$(ObjectSuffix): functions.c $(IntermediateDirectory)/functions.c$(DependSuffix)
+	$(CC) $(SourceSwitch) "/home/luciano/Doctorado/Accretion/radproc_linux/probMatrix/functions.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/functions.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/functions.c$(DependSuffix): functions.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/functions.c$(ObjectSuffix) -MF$(IntermediateDirectory)/functions.c$(DependSuffix) -MM functions.c
 
-$(IntermediateDirectory)/torusSampling2.c$(PreprocessSuffix): torusSampling2.c
-	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/torusSampling2.c$(PreprocessSuffix) torusSampling2.c
+$(IntermediateDirectory)/functions.c$(PreprocessSuffix): functions.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/functions.c$(PreprocessSuffix) functions.c
+
+$(IntermediateDirectory)/nrutil.c$(ObjectSuffix): nrutil.c $(IntermediateDirectory)/nrutil.c$(DependSuffix)
+	$(CC) $(SourceSwitch) "/home/luciano/Doctorado/Accretion/radproc_linux/probMatrix/nrutil.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/nrutil.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/nrutil.c$(DependSuffix): nrutil.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/nrutil.c$(ObjectSuffix) -MF$(IntermediateDirectory)/nrutil.c$(DependSuffix) -MM nrutil.c
+
+$(IntermediateDirectory)/nrutil.c$(PreprocessSuffix): nrutil.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/nrutil.c$(PreprocessSuffix) nrutil.c
+
+$(IntermediateDirectory)/main.c$(ObjectSuffix): main.c $(IntermediateDirectory)/main.c$(DependSuffix)
+	$(CC) $(SourceSwitch) "/home/luciano/Doctorado/Accretion/radproc_linux/probMatrix/main.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/main.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/main.c$(DependSuffix): main.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/main.c$(ObjectSuffix) -MF$(IntermediateDirectory)/main.c$(DependSuffix) -MM main.c
+
+$(IntermediateDirectory)/main.c$(PreprocessSuffix): main.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/main.c$(PreprocessSuffix) main.c
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)
