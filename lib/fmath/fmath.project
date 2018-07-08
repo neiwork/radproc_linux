@@ -2,7 +2,7 @@
 <CodeLite_Project Name="fmath" Version="10.0.0" InternalType="Library">
   <Plugins>
     <Plugin Name="qmake">
-      <![CDATA[00010001N0007Release000000000000]]>
+      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
     </Plugin>
   </Plugins>
   <Description/>
@@ -16,8 +16,8 @@
     <File Name="constants.h"/>
     <File Name="elimiGaussiana.cpp"/>
     <File Name="elimiGaussiana.h"/>
-    <File Name="gaussianScaledPivoting.cpp"/>
-    <File Name="gaussianScaledPivoting.h"/>
+    <File Name="gaussianScaledPivoting.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="gaussianScaledPivoting.h" ExcludeProjConfig="Debug;"/>
     <File Name="interpolation.cpp"/>
     <File Name="interpolation.h"/>
     <File Name="mathematics.h"/>
@@ -30,6 +30,8 @@
     <File Name="mathFunctions.h" ExcludeProjConfig=""/>
   </VirtualDirectory>
   <VirtualDirectory Name="include"/>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
   <Settings Type="Static Library">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -124,6 +126,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug"/>
-  <Dependencies Name="Release"/>
 </CodeLite_Project>

@@ -11,7 +11,7 @@
 ///Fundamental constants
 
 const double cLight    = 2.9979e10;                   //speed of light (cm/s)
-const double cLight2   = P2(cLight); 
+const double cLight2   = 8.9875518e20; 
 
 const double planck    = 6.6261e-27;                  //Planck's constant (erg s)
 

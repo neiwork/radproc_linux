@@ -7,6 +7,7 @@
   <Project Name="fluminosities" Path="../lib/fluminosities/fluminosities.project" Active="No"/>
   <Project Name="inout" Path="../lib/inout/inout.project" Active="No"/>
   <Project Name="ionTori" Path="ionTori.project" Active="Yes"/>
+  <Project Name="nrMath" Path="../lib/nrMath/nrMath.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
@@ -17,6 +18,7 @@
       <Project Name="fluminosities" ConfigName="Debug"/>
       <Project Name="inout" ConfigName="Debug"/>
       <Project Name="ionTori" ConfigName="Debug"/>
+      <Project Name="nrMath" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
@@ -27,6 +29,7 @@
       <Project Name="fluminosities" ConfigName="Release"/>
       <Project Name="inout" ConfigName="Release"/>
       <Project Name="ionTori" ConfigName="Release"/>
+      <Project Name="nrMath" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

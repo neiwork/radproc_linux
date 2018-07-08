@@ -1,6 +1,13 @@
 #include <stdio.h>
 #include "modelParameters.h"
 //#include "targetFields.h"
+
+extern "C" {
+#include "torusSampling2.h"
+}
+
+
+
 #include "State.h"
 #include "write.h"
 #include "radiativeLosses.h"
@@ -32,6 +39,9 @@ int main()
 		show_message(msgEnd, Module_state);
 		show_message(msgStart, Module_targetField);
         
+		torusSampling2();
+			
+			
 		//tpfFill_Bremss(model);  // esto completa la psv con los fotones de Bremsstrahlung
         //tpfFill_Sync(model);      // idem Sync
 		//show_message(msgEnd, Module_targetField);

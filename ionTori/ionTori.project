@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="ionTori" Version="10.0.0" InternalType="Console">
+  <VirtualDirectory Name="torusStruct">
+    <File Name="torusParameters.h"/>
+    <File Name="torusParameters.cpp"/>
+    <File Name="metric.h"/>
+    <File Name="metric.cpp"/>
+    <File Name="torusParam.h"/>
+    <File Name="torusParam.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="probMatrix">
+    <File Name="torusSampling2.h"/>
+    <File Name="torusSampling2.c"/>
+    <File Name="torusSampling.h" ExcludeProjConfig="Debug;"/>
+    <File Name="torusSampling.c" ExcludeProjConfig="Debug;"/>
+  </VirtualDirectory>
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -12,8 +26,6 @@
     <File Name="probCompton.cpp"/>
     <File Name="coppiProbDist.cpp"/>
     <File Name="compton.h"/>
-    <File Name="torusParam.cpp"/>
-    <File Name="torusParam.h"/>
     <File Name="luminosities.h"/>
     <File Name="luminosities.cpp"/>
     <File Name="coppiProbDist.h"/>
@@ -27,8 +39,6 @@
     <File Name="State.h"/>
     <File Name="targetFields.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="targetFields.h" ExcludeProjConfig="Debug;Release;"/>
-    <File Name="write.cpp"/>
-    <File Name="write.h"/>
     <File Name="functions.cpp" ExcludeProjConfig=""/>
     <File Name="functions.h" ExcludeProjConfig=""/>
     <File Name="maxwellJuttner.cpp" ExcludeProjConfig="Debug;"/>
@@ -51,6 +61,8 @@
     <File Name="thermalCompton.h" ExcludeProjConfig="Debug;Release"/>
   </VirtualDirectory>
   <VirtualDirectory Name="extras">
+    <File Name="write.h"/>
+    <File Name="write.cpp"/>
     <File Name="messages.cpp"/>
     <File Name="messages.h"/>
   </VirtualDirectory>
@@ -91,6 +103,7 @@
       <Linker Options="" Required="yes">
         <LibraryPath Value="../external/lib"/>
         <LibraryPath Value="../lib/fmath/Debug"/>
+        <LibraryPath Value="../lib/nrMath/Debug"/>
         <LibraryPath Value="../lib/fparameters/Debug"/>
         <LibraryPath Value="../lib/fparticle/Debug"/>
         <LibraryPath Value="../lib/flosses/Debug"/>
@@ -102,6 +115,7 @@
         <Library Value="flosses"/>
         <Library Value="inout"/>
         <Library Value="fmath"/>
+        <Library Value="nrMath"/>
         <Library Value="boost_filesystem"/>
         <Library Value="boost_system"/>
       </Linker>

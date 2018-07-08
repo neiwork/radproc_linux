@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="selfsimilarADAF" Database="" Version="10.0.0">
-  <Project Name="selfsimilarADAF" Path="selfsimilarADAF.project" Active="Yes"/>
+  <Project Name="ADAF" Path="selfsimilarADAF.project" Active="Yes"/>
+  <Project Name="nrMath" Path="../lib/nrMath/nrMath.project" Active="No"/>
+  <Project Name="fmath" Path="../lib/fmath/fmath.project" Active="No"/>
+  <Project Name="ssADAF" Path="../lib/ssADAF/ssADAF.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
+      <Project Name="ADAF" ConfigName="Debug"/>
       <Project Name="selfsimilarADAF" ConfigName="Debug"/>
+      <Project Name="nrMath" ConfigName="Debug"/>
+      <Project Name="fmath" ConfigName="Debug"/>
+      <Project Name="ssADAF" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
+      <Project Name="ADAF" ConfigName="Release"/>
       <Project Name="selfsimilarADAF" ConfigName="Release"/>
+      <Project Name="nrMath" ConfigName="Release"/>
+      <Project Name="fmath" ConfigName="Release"/>
+      <Project Name="ssADAF" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

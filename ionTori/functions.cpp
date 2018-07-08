@@ -112,6 +112,10 @@ double g_phiphi(double r, double theta) {
     return result;
 }
 
+
+
+
+/*
 /////////////////////////////////////////////////////////////////////////////////////
 
 // ANGULAR VELOCITIY OF THE TORUS
@@ -197,3 +201,4 @@ double temp_i(double r, double theta) {
                 mu_i * ( (1.0-beta)*atomicMassUnit*pressureTot(r, theta) ) / ( boltzmann * energyDensity(r, theta) ) + 2.7: 2.7;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
+*/ 

@@ -2,6 +2,7 @@
 
 #include <math.h>
 
+/*
 double bessi0(double x)
 // Returns  the  modified  Bessel function I_0(x) for any real x.
 {
@@ -100,7 +101,7 @@ double bessk(int n, double x)
     }
 	return bk;
 }
-
+*/
 double new_min(double x, double y, double z)
 {
     if (x <= y) {
