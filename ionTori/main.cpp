@@ -11,7 +11,9 @@ extern "C" {
 #include "State.h"
 #include "write.h"
 #include "radiativeLosses.h"
-#include "probabilityMatrix2.h"
+//#include "probabilityMatrix2.h"
+#include "torusSampling.h"
+
 #include "distribution.h"
 #include "luminosities.h"
 #include "functions.h"
@@ -39,7 +41,7 @@ int main()
 		show_message(msgEnd, Module_state);
 		show_message(msgStart, Module_targetField);
         
-		torusSampling2();
+		torusSampling(model.electron);
 			
 			
 		//tpfFill_Bremss(model);  // esto completa la psv con los fotones de Bremsstrahlung

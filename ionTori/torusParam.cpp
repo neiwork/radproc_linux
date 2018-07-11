@@ -31,7 +31,7 @@ void torusParameters(double& l_0,double& rCusp,double& rCenter,double& rEdge) {
     double r_ms=massBH*(3.0+z2-sqrt((3.0-z1)*(3.0+z1+2.0*z2)));
     // marginally bound circular orbit
     double r_mb=2.0*massBH-spinBH+2.0*sqrt(massBH)*sqrt(massBH-spinBH);
-    double l_ms=keplAngularMom(r_ms);              // Keplerian specific angular momentum at r = r_ms
+    double l_ms=keplAngularMom(r_ms);             // Keplerian specific angular momentum at r = r_ms
     double l_mb=keplAngularMom(r_mb);             // Keplerian specific angular momentum at r = r_mb
     
     l_0=(1.0-lambda)*l_ms+lambda*l_mb;

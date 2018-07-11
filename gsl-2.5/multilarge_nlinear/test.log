@@ -1,0 +1,7 @@
+trs = levenberg-marquardt
+trs = levenberg-marquardt+accel
+trs = dogleg
+trs = double-dogleg
+trs = 2D-subspace
+trs = steihaug-toint
+Completed [12936/12936]

@@ -20,13 +20,13 @@ void prepareGlobalCfg()
 	double rg=gravitationalConstant*Mbh/cLight2;
     GlobalConfig.put("rg", rg);
 	
-	double l_0,rCusp,rCenter,rEdge;
-	torusParameters(l_0,rCusp,rCenter,rEdge);
+	//double rCusp,rCenter,rEdge;
+	torusParameters();
 	
-	GlobalConfig.put("l_0",GlobalConfig.get<double>("l_0",l_0));
-    GlobalConfig.put("rCusp",GlobalConfig.get<double>("rCusp",rCusp));
-    GlobalConfig.put("rCenter",GlobalConfig.get<double>("rCenter",rCenter));
-    GlobalConfig.put("rEdge",GlobalConfig.get<double>("rEdge",rEdge));
+	//GlobalConfig.put("l_0",GlobalConfig.get<double>("l_0",l_0));
+    //GlobalConfig.put("rCusp",GlobalConfig.get<double>("rCusp",rCusp));
+    //GlobalConfig.put("rCenter",GlobalConfig.get<double>("rCenter",rCenter));
+    //GlobalConfig.put("rEdge",GlobalConfig.get<double>("rEdge",rEdge));
     
     static const double mu_i=GlobalConfig.get<double>("mu_i");
     static const double mu_e=GlobalConfig.get<double>("mu_e");
