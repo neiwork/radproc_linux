@@ -1,3 +1,3 @@
 #pragma once
 
-void adafSol();
+void adafSol(double *);

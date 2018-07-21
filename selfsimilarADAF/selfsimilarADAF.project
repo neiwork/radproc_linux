@@ -8,6 +8,10 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="State.h"/>
+    <File Name="State.cpp"/>
+    <File Name="modelParameters.h"/>
+    <File Name="modelParameters.cpp"/>
     <File Name="main.cpp"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">

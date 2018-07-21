@@ -4,6 +4,8 @@
   <Project Name="nrMath" Path="../lib/nrMath/nrMath.project" Active="No"/>
   <Project Name="fmath" Path="../lib/fmath/fmath.project" Active="No"/>
   <Project Name="ssADAF" Path="../lib/ssADAF/ssADAF.project" Active="No"/>
+  <Project Name="fparameters" Path="../lib/fparameters/fparameters.project" Active="No"/>
+  <Project Name="fluminosities" Path="../lib/fluminosities/fluminosities.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
@@ -12,6 +14,8 @@
       <Project Name="nrMath" ConfigName="Debug"/>
       <Project Name="fmath" ConfigName="Debug"/>
       <Project Name="ssADAF" ConfigName="Debug"/>
+      <Project Name="fparameters" ConfigName="Debug"/>
+      <Project Name="fluminosities" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
@@ -20,6 +24,8 @@
       <Project Name="nrMath" ConfigName="Release"/>
       <Project Name="fmath" ConfigName="Release"/>
       <Project Name="ssADAF" ConfigName="Release"/>
+      <Project Name="fparameters" ConfigName="Release"/>
+      <Project Name="fluminosities" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>
