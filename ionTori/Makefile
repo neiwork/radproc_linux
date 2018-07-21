@@ -1,6 +1,8 @@
 .PHONY: clean All
 
 All:
+	@echo "----------Building project:[ nrMath - Debug ]----------"
+	@cd "/home/flor/projects/github/radproc_linux/lib/nrMath" && "$(MAKE)" -f  "nrMath.mk"
 	@echo "----------Building project:[ fmath - Debug ]----------"
 	@cd "/home/flor/projects/github/radproc_linux/lib/fmath" && "$(MAKE)" -f  "fmath.mk"
 	@echo "----------Building project:[ fparameters - Debug ]----------"
@@ -16,6 +18,8 @@ All:
 	@echo "----------Building project:[ ionTori - Debug ]----------"
 	@"$(MAKE)" -f  "ionTori.mk"
 clean:
+	@echo "----------Cleaning project:[ nrMath - Debug ]----------"
+	@cd "/home/flor/projects/github/radproc_linux/lib/nrMath" && "$(MAKE)" -f  "nrMath.mk"  clean
 	@echo "----------Cleaning project:[ fmath - Debug ]----------"
 	@cd "/home/flor/projects/github/radproc_linux/lib/fmath" && "$(MAKE)" -f  "fmath.mk"  clean
 	@echo "----------Cleaning project:[ fparameters - Debug ]----------"

@@ -1,3 +1,5 @@
+#pragma once
+
 double g_tt(double, double);
 double g_rr(double, double);
 double g_thetatheta(double, double);

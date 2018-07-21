@@ -1,0 +1,21 @@
+trs = levenberg-marquardt
+solver = cholesky
+solver = qr
+solver = svd
+trs = levenberg-marquardt+accel
+solver = cholesky
+solver = qr
+solver = svd
+trs = dogleg
+solver = cholesky
+solver = qr
+solver = svd
+trs = double-dogleg
+solver = cholesky
+solver = qr
+solver = svd
+trs = 2D-subspace
+solver = cholesky
+solver = qr
+solver = svd
+Completed [92904/92904]

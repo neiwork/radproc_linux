@@ -1,12 +1,13 @@
 #include "State.h"
-#include "functions.h"
+//#include "functions.h"
+#include "torusParameters.h"
 #include "modelParameters.h"
 #include <fparameters/Dimension.h>
 #include <fmath/physics.h>
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/parameters.h>
 #include <boost/property_tree/ptree.hpp>
-#include <fmath/bisection.h>
+//#include <fmath/bisection.h>
 
 State::State(boost::property_tree::ptree& cfg) :
  electron{ "electron" },
@@ -127,14 +128,6 @@ void State::initializeParticle(Particle& p,boost::property_tree::ptree& cfg)
     GlobalConfig.put("thetamax", GlobalConfig.get<double>("thetamax", thetamax));
     p.ps.add(new Dimension(nTheta,bind(initializeThetaPoints,std::placeholders::_1,thetamin,thetamax)));
 
-	// add dimension for T
-	// double tmin = p.getpar(cfg, "dim.time.min", 1.0)*pc;
-	// double tmax = p.getpar(cfg, "dim.time.max", 1.0e3)*pc;
-	// int tR = p.getpar(cfg, "dim.time.samples", 5); // solo por ahora; y no deberia ser usado directamente desde otro lado
-	// p.ps.add(new Dimension(tR, bind(initializeCrossingTimePoints, std::placeholders::_1, tmin, tmax)));
-	//p.ps.addDerivation([](const SpaceIterator& i){
-	//	derive_parameters_r(i.val(DIM_E), i.val(DIM_R), i.val(DIM_T));
-	//});
 
 	p.initialize();
 }

@@ -1,24 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="ionTori" Version="10.0.0" InternalType="Console">
-  <VirtualDirectory Name="torusStruct">
-    <File Name="torusParameters.h"/>
-    <File Name="torusParameters.cpp"/>
-    <File Name="metric.h"/>
-    <File Name="metric.cpp"/>
-    <File Name="torusParam.h"/>
-    <File Name="torusParam.cpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="probMatrix">
-    <File Name="torusSampling2.h"/>
-    <File Name="torusSampling2.c"/>
-    <File Name="torusSampling.h" ExcludeProjConfig="Debug;"/>
-    <File Name="torusSampling.c" ExcludeProjConfig="Debug;"/>
-  </VirtualDirectory>
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
     </Plugin>
   </Plugins>
+  <VirtualDirectory Name="torusStruct">
+    <File Name="torusParameters.h"/>
+    <File Name="functions.h" ExcludeProjConfig="Debug;"/>
+    <File Name="functions.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="torusParameters.cpp"/>
+    <File Name="metric.h"/>
+    <File Name="metric.cpp"/>
+    <File Name="torusParam.h" ExcludeProjConfig="Debug;"/>
+    <File Name="torusParam.cpp" ExcludeProjConfig="Debug;"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="probMatrix">
+    <File Name="initVectors.h" ExcludeProjConfig="Debug;"/>
+    <File Name="initVectors.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="torusSampling.cpp"/>
+    <File Name="torusSampling2.h" ExcludeProjConfig="Debug;"/>
+    <File Name="torusSampling2.c" ExcludeProjConfig="Debug;"/>
+    <File Name="torusSampling.h" ExcludeProjConfig=""/>
+  </VirtualDirectory>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
@@ -39,8 +43,6 @@
     <File Name="State.h"/>
     <File Name="targetFields.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="targetFields.h" ExcludeProjConfig="Debug;Release;"/>
-    <File Name="functions.cpp" ExcludeProjConfig=""/>
-    <File Name="functions.h" ExcludeProjConfig=""/>
     <File Name="maxwellJuttner.cpp" ExcludeProjConfig="Debug;"/>
     <File Name="maxwellJuttner.h" ExcludeProjConfig="Debug;"/>
     <File Name="distribution.cpp" ExcludeProjConfig="Debug;"/>
@@ -66,14 +68,6 @@
     <File Name="messages.cpp"/>
     <File Name="messages.h"/>
   </VirtualDirectory>
-  <Dependencies Name="Debug">
-    <Project Name="fmath"/>
-    <Project Name="fparameters"/>
-    <Project Name="fparticle"/>
-    <Project Name="inout"/>
-    <Project Name="flosses"/>
-    <Project Name="fluminosities"/>
-  </Dependencies>
   <Dependencies Name="Release">
     <Project Name="fmath"/>
     <Project Name="fparameters"/>
@@ -81,6 +75,15 @@
     <Project Name="flosses"/>
     <Project Name="fluminosities"/>
     <Project Name="inout"/>
+  </Dependencies>
+  <Dependencies Name="Debug">
+    <Project Name="nrMath"/>
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+    <Project Name="fparticle"/>
+    <Project Name="inout"/>
+    <Project Name="flosses"/>
+    <Project Name="fluminosities"/>
   </Dependencies>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -97,10 +100,12 @@
         <IncludePath Value="."/>
         <IncludePath Value="../lib"/>
         <IncludePath Value="../external/include"/>
+        <IncludePath Value="../gsl/include"/>
         <Preprocessor Value="BOOST_SYSTEM_NO_DEPRECATED"/>
         <Preprocessor Value="BOOST_NO_CXX11_SCOPED_ENUMS"/>
       </Compiler>
       <Linker Options="" Required="yes">
+        <LibraryPath Value="../gsl/lib"/>
         <LibraryPath Value="../external/lib"/>
         <LibraryPath Value="../lib/fmath/Debug"/>
         <LibraryPath Value="../lib/nrMath/Debug"/>
@@ -118,6 +123,8 @@
         <Library Value="nrMath"/>
         <Library Value="boost_filesystem"/>
         <Library Value="boost_system"/>
+        <Library Value="gsl"/>
+        <Library Value="gslcblas"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="./$(IntermediateDirectory)/$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>

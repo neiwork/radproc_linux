@@ -104,3 +104,8 @@ git push -u origin master
 
 git remote add origin https://github.com/neiwork/radproc_linux.git
 git push -u origin master
+
+
+**********************************
+gsl library
+https://coral.ise.lehigh.edu/jild13/2016/07/11/hello/
