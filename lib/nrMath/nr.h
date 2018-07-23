@@ -169,9 +169,11 @@ float elle(float phi, float ak);
 float ellf(float phi, float ak);
 float ellpi(float phi, float en, float ak);
 void elmhes(float **a, int n);
-float erfcc(float x);
-float erff(float x);
-float erffc(float x);
+float erfcc(float x); */
+
+double erff(double x);
+
+/* float erffc(float x);
 void eulsum(float *sum, float term, int jterm, float wksp[]);
 float evlmem(float fdt, float d[], int m, float xms);
 float expdev(long *idum);
@@ -212,9 +214,11 @@ void frprmn(float p[], int n, float ftol, int *iter, float *fret,
 void ftest(float data1[], unsigned long n1, float data2[], unsigned long n2,
 	   float *f, float *prob);
 float gamdev(int ia, long *idum);
-float gammln(float xx);
-float gammp(float a, float x);
-float gammq(float a, float x);
+float gammln(float xx); */
+
+double gammp(double a, double x);
+
+/* float gammq(float a, float x);
 float gasdev(long *idum);
 void gaucof(int n, float a[], float b[], float amu0, float x[], float w[]);
 void gauher(float x[], float w[], int n);

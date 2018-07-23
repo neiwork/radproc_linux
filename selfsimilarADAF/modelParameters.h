@@ -10,6 +10,8 @@ double betapar;               // Magnetic parameter
 double gammapar;              // Polytropic index
 double rmin;                  // Inner edge of the ADAF
 double rmax;                  // Outer edge of the ADAF
+double thetamin;
+double thetamax;
 double f;                     // Advection parameter
 double r;                     // Radius
 

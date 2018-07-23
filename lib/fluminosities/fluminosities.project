@@ -8,6 +8,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="probMatrix.cpp"/>
     <File Name="compton.cpp"/>
     <File Name="probMatrix.h"/>
     <File Name="luminosityIC.cpp"/>

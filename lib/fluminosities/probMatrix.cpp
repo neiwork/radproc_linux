@@ -1,6 +1,8 @@
-#include "torusSampling.h"
-#include "nrutil.h"
-#include "random.h"
+#include "probMatrix.h"
+extern "C" {
+	#include <nrMath/nrutil.h>
+	#include <nrMath/random.h>
+}
 #include <stdio.h>
 #include <math.h>
 
@@ -10,10 +12,9 @@
 #define new_min(x,y) ((x) <= (y)) ? (x) : (y)
 #define new_abs(x,y) ((x) >= (y)) ?(x-y) : (y-x)
 
-void torusSampling(double **prob)
+void torusSampling(double **prob, double rMax, double rMin, 
+					double thetaMax, double thetaMin, int nR, int nTheta)
 {
-	extern double rMax,rMin;
-	extern int nR,nTheta;
 	int nPhot=100;
 	
 	double pasoprim=pow(rMax/rMin,1.0/(nR*10.0));
@@ -24,14 +25,14 @@ void torusSampling(double **prob)
     for(int i=1;i<=nR;i++) {
         double dyaux=(sin(thetaMax)-sin(thetaMin))/nTheta;
         for(int k=1;k<=nTheta+1;k++) {
-            double yaux=sin(thetaMin)+(k-1)*dyaux;                  // Theta distributed uniformly in sin(theta).
+            double yaux=sin(thetaMin)+(k-1)*dyaux;                // Theta distributed uniformly in sin(theta).
             //double theta0=asin(yaux);
             double theta0=0.0;
 			double y0=r[i]*cos(theta0);
             double z0=r[i]*sin(theta0);
 
             double drprim=r[i]*(pasoprim-1.0);                    // Initial step for the photon path.
-			double drprimmin=r[i]*(pasoprimmin-1.0);                 // Minimum step.
+			double drprimmin=r[i]*(pasoprimmin-1.0);              // Minimum step.
             double drprimmax=r[i]*(pasoprimmax-1.0);
 			for(int j=1;j<=nPhot;j++) {
                 double random_number;

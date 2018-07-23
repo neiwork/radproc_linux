@@ -8,18 +8,14 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="luminosities.h"/>
+    <File Name="luminosities.cpp"/>
     <File Name="State.h"/>
     <File Name="State.cpp"/>
     <File Name="modelParameters.h"/>
     <File Name="modelParameters.cpp"/>
     <File Name="main.cpp"/>
   </VirtualDirectory>
-  <Dependencies Name="Debug">
-    <Project Name="fmath"/>
-    <Project Name="nrMath"/>
-    <Project Name="ssADAF"/>
-    <Project Name="selfsimilarADAF"/>
-  </Dependencies>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -35,14 +31,26 @@
         <IncludePath Value="."/>
         <IncludePath Value="../lib"/>
         <IncludePath Value="../external/include"/>
+        <IncludePath Value="../gsl/include"/>
       </Compiler>
       <Linker Options="" Required="yes">
+        <LibraryPath Value="../gsl/lib"/>
+        <LibraryPath Value="../external/lib"/>
         <LibraryPath Value="../lib/ssADAF/Debug"/>
         <LibraryPath Value="../lib/nrMath/Debug"/>
         <LibraryPath Value="../lib/fmath/Debug"/>
+        <LibraryPath Value="../lib/fparameters/Debug"/>
+        <LibraryPath Value="../lib/fluminosities/Debug"/>
+        <LibraryPath Value="../lib/inout/Debug"/>
         <Library Value="ssADAF"/>
         <Library Value="fmath"/>
+        <Library Value="fparameters"/>
+        <Library Value="fluminosities"/>
         <Library Value="nrMath"/>
+        <Library Value="boost_filesystem"/>
+        <Library Value="boost_system"/>
+        <Library Value="gsl"/>
+        <Library Value="gslcblas"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="./$(IntermediateDirectory)/$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -119,4 +127,12 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug">
+    <Project Name="fmath"/>
+    <Project Name="ssADAF"/>
+    <Project Name="selfsimilarADAF"/>
+    <Project Name="fparameters"/>
+    <Project Name="fluminosities"/>
+    <Project Name="nrMath"/>
+  </Dependencies>
 </CodeLite_Project>

@@ -8,6 +8,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="erff.c"/>
     <File Name="random.h"/>
     <File Name="ran1.h"/>
     <File Name="ran1.c"/>
