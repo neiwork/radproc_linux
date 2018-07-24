@@ -7,9 +7,9 @@
 #include "messages.h"
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/parameters.h>
-#include <fparameters/nrutil.h>
+
 #include <boost/property_tree/ptree.hpp>
-#include <boost/math/special_functions/bessel.hpp>
+//#include <boost/math/special_functions/bessel.hpp>
 #include <fluminosities/thermalSync.h>
 #include <fluminosities/thermalBremss.h>
 #include <fluminosities/thermalIC.h>
@@ -17,6 +17,10 @@
 #include <fmath/mathFunctions.h>
 #include <fmath/physics.h>
 #include <boost/math/tools/roots.hpp>
+
+extern "C" {
+#include <nrMath/nrutil.h>
+}
 #include <iomanip>
 
 using namespace std;

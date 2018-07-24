@@ -1,9 +1,14 @@
-#include <math.h>
-#include "ssfunctions.h"
-#include <fmath/configure.h>
-#include <fparameters/parameters.h>
-#include <fmath/configure.h>
 
+#include "ssfunctions.h"
+#include <boost/property_tree/ptree.hpp>
+#include <fparameters/parameters.h>
+//#include <fmath/configure.h>
+//#include <fparameters/parameters.h>
+//#include <fmath/configure.h>
+#include <math.h>
+
+//static double alphapar,massBH,f,betapar,gammapar,rmin,rmax;
+ 
 void constants()
 {
     extern double alphapar,massBH,f,betapar,gammapar,rmin,rmax;

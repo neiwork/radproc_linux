@@ -1,7 +1,11 @@
 #include <math.h>
-#include <fmath/laguerre.h>
+
 #include <fmath/mathFunctions.h>
-#include <fparameters/nrutil.h>
+extern "C" {
+#include <nrMath/nrutil.h>
+#include <nrMath/laguerre.h>
+}
+
 #include <fmath/physics.h>
 #include "coppiProbDist.h"
 

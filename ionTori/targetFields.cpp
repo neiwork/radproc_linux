@@ -1,7 +1,6 @@
 #include "targetFields.h"
 
 
-#include "functions.h"
 #include "modelParameters.h"
 
 #include <fluminosities/blackBody.h>
@@ -9,10 +8,7 @@
 #include <fluminosities/thermalBremss.h>
 #include <fluminosities/thermalSync.h>
 #include <fparameters/SpaceIterator.h>
-
-//#include <fmath/physics.h>
-//#include <fparameters/parameters.h>
-
+#include <fparameters/parameters.h>
 #include <boost/property_tree/ptree.hpp>
 
 void tpfFill_Bremss(State& st) {	  
@@ -27,7 +23,7 @@ void tpfFill_Bremss(State& st) {
 }
 	  
 void tpfFill_Sync(State& st) {
-	double rg=GlobalConfig.get<double>("rg");
+	static const double rg = GlobalConfig.get<double>("rg");
     st.tpf2.fill([&](const SpaceIterator& i) {
         double energy=i.val(DIM_E);
 		double r=i.val(DIM_R)*rg;

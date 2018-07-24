@@ -41,26 +41,16 @@
     <File Name="radiativeLosses.h" ExcludeProjConfig="Debug;"/>
     <File Name="State.cpp"/>
     <File Name="State.h"/>
-    <File Name="targetFields.cpp" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="targetFields.h" ExcludeProjConfig="Debug;Release;"/>
+    <File Name="targetFields.cpp" ExcludeProjConfig="Release;"/>
+    <File Name="targetFields.h" ExcludeProjConfig="Release;"/>
     <File Name="maxwellJuttner.cpp" ExcludeProjConfig="Debug;"/>
     <File Name="maxwellJuttner.h" ExcludeProjConfig="Debug;"/>
     <File Name="distribution.cpp" ExcludeProjConfig="Debug;"/>
     <File Name="distribution.h" ExcludeProjConfig="Debug;"/>
-    <File Name="probabilityMatrix.cpp"/>
-    <File Name="probabilityMatrix.h"/>
-    <File Name="probabilityMatrix2.cpp"/>
-    <File Name="probabilityMatrix2.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="pruebas">
-    <File Name="luminositiesold.h" ExcludeProjConfig="Debug;"/>
-    <File Name="luminositiesold.cpp" ExcludeProjConfig="Debug;"/>
     <File Name="coppiBlandford.cpp" ExcludeProjConfig="Debug;Release"/>
     <File Name="coppiBlandford.h" ExcludeProjConfig="Debug;Release"/>
-    <File Name="photonEscape.cpp" ExcludeProjConfig="Debug;Release"/>
-    <File Name="photonEscape.h" ExcludeProjConfig="Debug;Release"/>
-    <File Name="thermalCompton.cpp" ExcludeProjConfig="Debug;Release"/>
-    <File Name="thermalCompton.h" ExcludeProjConfig="Debug;Release"/>
   </VirtualDirectory>
   <VirtualDirectory Name="extras">
     <File Name="write.h"/>

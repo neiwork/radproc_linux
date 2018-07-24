@@ -12,6 +12,7 @@ embedded in a globally convergent strategy*/
 void broydn(double x[], int n, int *check,
 	    void (*vecfunc)(int, double [], double []));
 		
+double erff_(double x);
 /*
 #ifndef _NR_H_
 #define _NR_H_
@@ -171,7 +172,7 @@ float ellpi(float phi, float en, float ak);
 void elmhes(float **a, int n);
 float erfcc(float x); */
 
-double erff(double x);
+
 
 /* float erffc(float x);
 void eulsum(float *sum, float term, int jterm, float wksp[]);

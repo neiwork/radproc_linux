@@ -1,4 +1,4 @@
 #pragma once
-#include <fmath/bisection.h>
+#include <fmath/fbisection.h>
 
 void torusParameters();

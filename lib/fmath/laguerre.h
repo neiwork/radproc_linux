@@ -1,1 +1,0 @@
-void gaulag(double *, double *,int, double);

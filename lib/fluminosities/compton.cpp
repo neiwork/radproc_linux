@@ -1,8 +1,13 @@
-#include "compton.h"
+//#include "compton.h"
 #include <math.h>
-#include <fmath/laguerre.h>
 #include <fmath/mathFunctions.h>
-#include <fparameters/nrutil.h>
+//#include <fmath/laguerre.h>
+
+//#include <fparameters/nrutil.h>
+extern "C" {
+#include <nrMath/nrutil.h>
+#include <nrMath/laguerre.h>
+}
 #include <fmath/physics.h>
 
 double rate(double frec, double gamma)

@@ -7,4 +7,5 @@
 #include <fparticle/Particle.h>
 
 
-void torusSampling(Particle& p);
+//void torusSampling(Particle& p, double **prob);
+void torusSampling(Particle& p, Matrix& prob);

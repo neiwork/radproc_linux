@@ -27,6 +27,7 @@
   <Dependencies Name="Debug">
     <Project Name="nrMath"/>
     <Project Name="fmath"/>
+    <Project Name="fparameters"/>
   </Dependencies>
   <Settings Type="Static Library">
     <GlobalSettings>
@@ -42,6 +43,7 @@
       <Compiler Options="-g;-O0;-Wall" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <IncludePath Value="../../lib"/>
+        <IncludePath Value="../../external/include"/>
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../lib/"/>

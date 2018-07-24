@@ -28,8 +28,10 @@ extern "C" {
 //extern double rMin, rCenter, l_0;
 //extern double spinBH, lambda;
 
-void torusSampling(Particle& p)
+void torusSampling(Particle& p, Matrix& prob)
 {
+	
+	
     //criticalRadii(&rMin, &rCenter);
 	double rMin= GlobalConfig.get<double>("rCusp"); //1.0;
     //l_0=specificAngularMom();
@@ -41,28 +43,30 @@ void torusSampling(Particle& p)
     int nR = GlobalConfig.get<double>("model.particle.default.dim.radius.samples");//100
 	int nTheta= GlobalConfig.get<double>("model.particle.default.dim.theta.samples");//10;
     long nPhot=1000;
-    FILE *fp1, *fp2;
+   
+	// FILE *fp1, *fp2;
+    //fp1=fopen("torus.txt","w");
+    //fp2=fopen("prob.txt","w");
     
-    fp1=fopen("torus.txt","w");
-    fp2=fopen("prob.txt","w");
+    double dr=(rMax-rMin)/nR;                                // Cells' radial size.
+	//double paso=pow(rMax/rMin,1.0/nR);
+	double *rCells,*r; //,**prob;
     
-    //double dr=(rMax-rMin)/nR;                                // Cells' radial size.
-	double paso=pow(rMax/rMin,1.0/nR);
-	double *rCells,*r,**prob;
-    
-	double dr = paso;//XXX es solo para compilar, no se cuanto vale dr
+	//double dr = paso;//XXX es solo para compilar, no se cuanto vale dr
     rCells=dvector(0,nR);                                          // Cells' boundaries.
     r=dvector(1,nR);                                                   // Cells' central position.
-    prob=dmatrix(1,nR,1,nR);
+    //prob=dmatrix(1,nR,1,nR);
+	matrixInit(prob, nR, nR, 0.0);
     rCells[0]=rMin;
-    /*for(int i=1;i<=nR;i++) {
+    for(int i=1;i<=nR;i++) {
         rCells[i]=rCells[i-1]+dr;
         r[i]=rCells[i-1]+dr/2.0;
-    }*/
-	for(int i=1;i<=nR;i++) {
-		rCells[i]=rMin*paso;
-		r[i]=sqrt(rCells[i]*rCells[i-1]);
-	}
+    }
+	//for(int i=1;i<=nR;i++) {
+	//	rCells[i]=rMin*paso;
+	//	r[i]=sqrt(rCells[i]*rCells[i-1]);
+	//}
+	
     //double thetaMin=0.0;
     //double thetaMax=pi/4.0;
 	double thetaMin=GlobalConfig.get<double>("model.particle.default.dim.theta.min");
@@ -137,11 +141,11 @@ void torusSampling(Particle& p)
         }
         for(int j=1;j<=nR;j++) {
             prob[i][j] /= (nPhot*(nTheta+1));         // Dividing by the number of photons launched.
-            fprintf(fp2,"%8.5e  ",prob[i][j]);
+//            fprintf(fp2,"%8.5e  ",prob[i][j]);
         }
-        fprintf(fp2,"\n");
+ //       fprintf(fp2,"\n");
     }
     FinaliseRandom();
-    fclose(fp1);
-    fclose(fp2);
+//    fclose(fp1);
+//    fclose(fp2);
 }

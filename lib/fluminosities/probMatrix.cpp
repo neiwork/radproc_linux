@@ -1,8 +1,11 @@
 #include "probMatrix.h"
+
 extern "C" {
-	#include <nrMath/nrutil.h>
 	#include <nrMath/random.h>
+	#include <nrMath/nrutil.h>	
 }
+
+#include <fmath/constants.h>
 #include <stdio.h>
 #include <math.h>
 
@@ -37,9 +40,9 @@ void torusSampling(double **prob, double rMax, double rMin,
 			for(int j=1;j<=nPhot;j++) {
                 double random_number;
                 random_number=gsl_rng_uniform(RandomNumberGenerator);
-                double phiprim=2.0*PI*random_number;
+                double phiprim=2.0*pi*random_number;
                 random_number=gsl_rng_uniform(RandomNumberGenerator);
-                double thetaprim=acos((PI/2.0-random_number*PI)/(PI/2.0));        // Photon directions distributed
+                double thetaprim=acos((pi/2.0-random_number*pi)/(pi/2.0));        // Photon directions distributed
                 double rprim=drprim;                                                                                       // isotropically.
                 double rprimant=0.0;
                 double accumulatedp=0.0;

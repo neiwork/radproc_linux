@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include "modelParameters.h"
-//#include "targetFields.h"
+#include "targetFields.h"
 
-extern "C" {
-#include "torusSampling2.h"
-}
+//extern "C" {
+//#include "torusSampling2.h"
+//}
 
 
 
@@ -27,7 +27,11 @@ extern "C" {
 #include <boost/property_tree/ptree.hpp>
 #include <stdexcept>
 
-int main()
+int main() {
+	printf("hello world");
+	return 0;
+}
+int main2()
 {
 	std::string folder{ prepareOutputfolder() };
 
@@ -41,17 +45,15 @@ int main()
 		show_message(msgEnd, Module_state);
 		show_message(msgStart, Module_targetField);
         
-		torusSampling(model.electron);
+		Matrix a;
+		torusSampling(model.electron, a);
+		writeMatrix("probMatrix2", model.electron, a);
 			
-			
-		//tpfFill_Bremss(model);  // esto completa la psv con los fotones de Bremsstrahlung
-        //tpfFill_Sync(model);      // idem Sync
-		//show_message(msgEnd, Module_targetField);
+		tpfFill_Bremss(model);  // esto completa la psv con los fotones de Bremsstrahlung
+        tpfFill_Sync(model);      // idem Sync
+		show_message(msgEnd, Module_targetField);
 		
-		//Matrix a;
-		//probabilityMatrix2(model,a);
-        //writeMatrix("probMatrix2", model.electron, a);
-		/*
+/*
 		thermalDistribution(model.electron, model);
 		writeAllSpaceParam(folder+"\\electronDist.txt", model.electron.distribution);
 		

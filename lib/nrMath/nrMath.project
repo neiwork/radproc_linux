@@ -8,6 +8,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="laguerre.c"/>
+    <File Name="laguerre.h"/>
     <File Name="erff.c"/>
     <File Name="random.h"/>
     <File Name="ran1.h"/>
@@ -43,11 +45,11 @@
       <Compiler Options="-g;-O0;-std=c99;-Wall" C_Options="-g;-O0;-std=c99;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <IncludePath Value="../../lib"/>
-        <IncludePath Value="/../../gsl/lib"/>
+        <IncludePath Value="/../../gsl/include/"/>
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="/../../lib/"/>
-        <LibraryPath Value="/../../gsl/lib"/>
+        <LibraryPath Value="/../../gsl/include/"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/lib$(ProjectName).a" IntermediateDirectory="./Debug" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>

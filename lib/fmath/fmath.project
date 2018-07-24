@@ -8,10 +8,10 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="bisection.cpp"/>
-    <File Name="bisection.h"/>
-    <File Name="laguerre.h"/>
-    <File Name="laguerre.cpp"/>
+    <File Name="fbisection.h"/>
+    <File Name="fbisection.cpp"/>
+    <File Name="laguerre.h" ExcludeProjConfig="Debug;"/>
+    <File Name="laguerre.cpp" ExcludeProjConfig="Debug;"/>
     <File Name="configure.h"/>
     <File Name="constants.h"/>
     <File Name="elimiGaussiana.cpp"/>
@@ -43,7 +43,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g" C_Options="-g" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+      <Compiler Options="-Wfatal-errors;-g;-O0;-W" C_Options="-g" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="" Required="yes"/>
