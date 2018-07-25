@@ -188,7 +188,7 @@ void torusParameters()
 double energyDensity(double r, double theta)  // = mass density (c=1)
 {
 	static const double M_1 =GlobalConfig.get<double>("M_1");
-    static const double pK  = GlobalConfig.get<double>("pk");
+    static const double pK  = GlobalConfig.get<double>("pK");
 	static const double energyC = GlobalConfig.get<double>("energyC");
 	static const double n = GlobalConfig.get<double>("n");
 	

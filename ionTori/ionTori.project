@@ -6,19 +6,15 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="torusStruct">
-    <File Name="torusParameters.h"/>
-    <File Name="functions.h" ExcludeProjConfig="Debug;"/>
-    <File Name="functions.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="torusParameters.cpp"/>
-    <File Name="metric.h"/>
-    <File Name="metric.cpp"/>
-    <File Name="torusParam.h" ExcludeProjConfig="Debug;"/>
-    <File Name="torusParam.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="torusParameters.h" ExcludeProjConfig=""/>
+    <File Name="torusParameters.cpp" ExcludeProjConfig=""/>
+    <File Name="metric.h" ExcludeProjConfig=""/>
+    <File Name="metric.cpp" ExcludeProjConfig=""/>
   </VirtualDirectory>
   <VirtualDirectory Name="probMatrix">
     <File Name="initVectors.h" ExcludeProjConfig="Debug;"/>
     <File Name="initVectors.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="torusSampling.cpp"/>
+    <File Name="torusSampling.cpp" ExcludeProjConfig=""/>
     <File Name="torusSampling2.h" ExcludeProjConfig="Debug;"/>
     <File Name="torusSampling2.c" ExcludeProjConfig="Debug;"/>
     <File Name="torusSampling.h" ExcludeProjConfig=""/>
@@ -26,31 +22,32 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="probCompton.h"/>
-    <File Name="probCompton.cpp"/>
-    <File Name="coppiProbDist.cpp"/>
-    <File Name="compton.h"/>
-    <File Name="luminosities.h"/>
+    <File Name="probCompton.h" ExcludeProjConfig="Debug"/>
+    <File Name="probCompton.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="luminosities.h" ExcludeProjConfig=""/>
+    <File Name="main.cpp" ExcludeProjConfig=""/>
+    <File Name="modelParameters.cpp" ExcludeProjConfig=""/>
+    <File Name="modelParameters.h" ExcludeProjConfig=""/>
+    <File Name="radiativeLosses.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="radiativeLosses.h" ExcludeProjConfig="Debug"/>
+    <File Name="State.cpp" ExcludeProjConfig=""/>
+    <File Name="State.h" ExcludeProjConfig=""/>
+    <File Name="targetFields.cpp" ExcludeProjConfig="Release"/>
+    <File Name="targetFields.h" ExcludeProjConfig="Release"/>
+    <File Name="maxwellJuttner.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="maxwellJuttner.h" ExcludeProjConfig="Debug"/>
+    <File Name="distribution.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="distribution.h" ExcludeProjConfig="Debug"/>
+    <File Name="luminosities2.cpp" ExcludeProjConfig="Debug"/>
     <File Name="luminosities.cpp"/>
-    <File Name="coppiProbDist.h"/>
-    <File Name="compton.cpp"/>
-    <File Name="main.cpp"/>
-    <File Name="modelParameters.cpp"/>
-    <File Name="modelParameters.h"/>
-    <File Name="radiativeLosses.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="radiativeLosses.h" ExcludeProjConfig="Debug;"/>
-    <File Name="State.cpp"/>
-    <File Name="State.h"/>
-    <File Name="targetFields.cpp" ExcludeProjConfig="Release;"/>
-    <File Name="targetFields.h" ExcludeProjConfig="Release;"/>
-    <File Name="maxwellJuttner.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="maxwellJuttner.h" ExcludeProjConfig="Debug;"/>
-    <File Name="distribution.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="distribution.h" ExcludeProjConfig="Debug;"/>
   </VirtualDirectory>
   <VirtualDirectory Name="pruebas">
     <File Name="coppiBlandford.cpp" ExcludeProjConfig="Debug;Release"/>
     <File Name="coppiBlandford.h" ExcludeProjConfig="Debug;Release"/>
+    <File Name="compton.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="compton.h" ExcludeProjConfig="Debug"/>
+    <File Name="coppiProbDist.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="coppiProbDist.h" ExcludeProjConfig="Debug"/>
   </VirtualDirectory>
   <VirtualDirectory Name="extras">
     <File Name="write.h"/>

@@ -42,7 +42,7 @@ void torusSampling(Particle& p, Matrix& prob)
 	
     int nR = GlobalConfig.get<double>("model.particle.default.dim.radius.samples");//100
 	int nTheta= GlobalConfig.get<double>("model.particle.default.dim.theta.samples");//10;
-    long nPhot=1000;
+    long nPhot=100;
    
 	// FILE *fp1, *fp2;
     //fp1=fopen("torus.txt","w");
@@ -124,7 +124,7 @@ void torusSampling(Particle& p, Matrix& prob)
                     double psc=ne*thomson*(drprim*RG);    // Probability of scattering.
                     double pescap=1.0-accumulatedp;           // Probability that a photon reaches the previous position.
                     for(int j=1;j<=nR;j++) {
-                        if(r1 > rCells[j-1] && r1 < rCells[j]) prob[i][j] += psc*pescap;            // Add the probability of
+                        if(r1 > rCells[j-1] && r1 < rCells[j]) prob[i-1][j-1] += psc*pescap;            // Add the probability of
                                                                                                                                                       // interaction in the matrix
                                                                                                                                                       // element.
                     }
@@ -140,7 +140,9 @@ void torusSampling(Particle& p, Matrix& prob)
             }
         }
         for(int j=1;j<=nR;j++) {
-            prob[i][j] /= (nPhot*(nTheta+1));         // Dividing by the number of photons launched.
+			//corrijo los indices para que arrranquen de 0
+            prob[i-1][j-1] /= (nPhot*(nTheta+1));         // Dividing by the number of photons launched.
+			//prob[i][j] /= (nPhot*(nTheta+1)); 
 //            fprintf(fp2,"%8.5e  ",prob[i][j]);
         }
  //       fprintf(fp2,"\n");

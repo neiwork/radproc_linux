@@ -1,4 +1,5 @@
 #pragma once
+
 #include <fmath/mathematics.h>
 #include <fparticle/Particle.h>
 #include <boost/property_tree/ptree_fwd.hpp>

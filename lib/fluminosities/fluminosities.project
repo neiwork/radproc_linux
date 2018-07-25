@@ -21,10 +21,11 @@
     <File Name="thermalSync.cpp" ExcludeProjConfig=""/>
     <File Name="thermalSync.h" ExcludeProjConfig=""/>
     <File Name="thermalBremss.h" ExcludeProjConfig=""/>
-    <File Name="thermalIC.h"/>
-    <File Name="thermalIC.cpp"/>
+    <File Name="thermalIC.h" ExcludeProjConfig="Debug"/>
+    <File Name="thermalIC.cpp" ExcludeProjConfig="Debug"/>
     <File Name="blackBody.cpp"/>
     <File Name="blackBody.h"/>
+    <File Name="compton.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include"/>
   <VirtualDirectory Name="falta">
@@ -35,12 +36,6 @@
     <File Name="luminosityPhotoHadronic.cpp" ExcludeProjConfig="Debug;Release"/>
     <File Name="luminosityPhotoHadronic.h" ExcludeProjConfig="Debug;Release"/>
   </VirtualDirectory>
-  <Dependencies Name="Debug">
-    <Project Name="fmath"/>
-    <Project Name="fparameters"/>
-    <Project Name="fparticle"/>
-    <Project Name="flosses"/>
-  </Dependencies>
   <Dependencies Name="Release"/>
   <Settings Type="Static Library">
     <GlobalSettings>
@@ -142,4 +137,11 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug">
+    <Project Name="nrMath"/>
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+    <Project Name="fparticle"/>
+    <Project Name="flosses"/>
+  </Dependencies>
 </CodeLite_Project>

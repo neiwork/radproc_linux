@@ -1,5 +1,5 @@
 #include "modelParameters.h"
-#include "torusParam.h"
+#include "torusParameters.h"
 #include <fparameters/parameters.h>
 #include <fmath/physics.h>
 #include <fmath/configure.h>
