@@ -7,4 +7,4 @@
 
 
 
-double bisection(fun1,double,double,double);
+double fbisection(fun1,double,double,double);

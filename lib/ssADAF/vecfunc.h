@@ -1,3 +1,6 @@
 #pragma once
 
-void vecfunc(int, double [], double []);
+#include "packageData.h"
+
+void vecfunc(int n, double x[], double fvec[] //)
+		, double r, dataADAF data);

@@ -171,7 +171,7 @@ float ellpi(float phi, float en, float ak);
 void elmhes(float **a, int n);
 float erfcc(float x); */
 
-double erff(double x);
+double erff_(double x);
 
 /* float erffc(float x);
 void eulsum(float *sum, float term, int jterm, float wksp[]);

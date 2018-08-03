@@ -6,7 +6,7 @@
 #include <algorithm>
 
 // Global variables
-double massBH;                // Black hole mass
+/*double massBH;                // Black hole mass
 double RS;                    // Schwarzschild Radius
 double alphapar;              // Viscosity parameter
 double betapar;               // Magnetic parameter
@@ -14,7 +14,7 @@ double gammapar;              // Polytropic index
 double rmin;                  // Inner edge of the ADAF
 double rmax;                  // Outer edge of the ADAF
 double f;                     // Advection parameter
-double r;                     // Radius
+double r;                     // Radius*/
 
 void prepareGlobalCfg()
 {

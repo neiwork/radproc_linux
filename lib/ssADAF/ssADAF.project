@@ -22,6 +22,7 @@
     <File Name="rates2.h" ExcludeProjConfig="Debug;"/>
     <File Name="rates2.c" ExcludeProjConfig="Debug;"/>
     <File Name="rates.h"/>
+    <File Name="packageData.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include"/>
   <Dependencies Name="Debug">
@@ -42,6 +43,7 @@
       <Compiler Options="-g;-O0;-Wall" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <IncludePath Value="../../lib"/>
+        <IncludePath Value="../../external/include"/>
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../lib/"/>

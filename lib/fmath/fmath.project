@@ -8,8 +8,6 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="bisection.cpp"/>
-    <File Name="bisection.h"/>
     <File Name="laguerre.h"/>
     <File Name="laguerre.cpp"/>
     <File Name="configure.h"/>
@@ -28,6 +26,8 @@
     <File Name="RungeKutta.h"/>
     <File Name="mathFunctions.cpp" ExcludeProjConfig=""/>
     <File Name="mathFunctions.h" ExcludeProjConfig=""/>
+    <File Name="fbisection.cpp"/>
+    <File Name="fbisection.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include"/>
   <Dependencies Name="Debug"/>

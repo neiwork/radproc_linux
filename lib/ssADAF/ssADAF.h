@@ -1,3 +1,5 @@
 #pragma once
 
-void adafSol(double *);
+#include "packageData.h"
+
+void adafSol(double *x, double r, dataADAF data);
