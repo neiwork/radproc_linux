@@ -29,73 +29,36 @@ State::State(boost::property_tree::ptree& cfg) :
 	magf.initialize();
 	magf.fill([&](const SpaceIterator& i){
 		static const double beta = GlobalConfig.get<double>("beta");
-	    double rB1=i.val(DIM_R);
-        if (i.its[DIM_R].canPeek(1)) { 
-            double rB2=i.its[DIM_R].peek(1);
-            double r= sqrt(rB1*rB2);
-            double theta=i.val(DIM_THETA);
-            return sqrt(beta*24.0*pi*pressureTot(r,theta));
-        }
-        else {
-            return 0.0;
-        }
+	    double r=i.val(DIM_R);
+		double theta=i.val(DIM_THETA);
+		return sqrt(beta*24.0*pi*pressureTot(r,theta));
     });
     denf_i.initialize();
     denf_i.fill([&](const SpaceIterator& i) {
         static const double mu=GlobalConfig.get<double>("mu_i");
-        double rB1=i.val(DIM_R);
-         if (i.its[DIM_R].canPeek(1)) {
-            double rB2=i.its[DIM_R].peek(1);
-            double r= sqrt(rB1*rB2);
-            double theta=i.val(DIM_THETA);
-            return energyDensity(r,theta)/(atomicMassUnit*mu);
-         }
-         else {
-             return 0.0;
-         }
+        double r=i.val(DIM_R);
+		double theta=i.val(DIM_THETA); 
+		return energyDensity(r,theta)/(atomicMassUnit*mu);
     });
     denf_e.initialize();
     denf_e.fill([&](const SpaceIterator& i) {
         static const double mu=GlobalConfig.get<double>("mu_e");
-        double rB1=i.val(DIM_R);
-        if (i.its[DIM_R].canPeek(1)) {
-            double rB2=i.its[DIM_R].peek(1);
-            double r= sqrt(rB1*rB2);
-            double theta=i.val(DIM_THETA);
-            return energyDensity(r,theta)/(atomicMassUnit*mu);
-        }
-        else {
-            return 0.0;
-        }
+        double r=i.val(DIM_R);
+		double theta=i.val(DIM_THETA);
+		return energyDensity(r,theta)/(atomicMassUnit*mu);
     });
     tempElectrons.initialize();
     tempElectrons.fill([&](const SpaceIterator& i) {
-        double rB1=i.val(DIM_R);
-        if (i.its[DIM_R].canPeek(1)) {
-            double rB2=i.its[DIM_R].peek(1);
-            double r= sqrt(rB1*rB2);
-            double theta=i.val(DIM_THETA);
-            return temp_e(r, theta);
-        }
-        else {
-            return 0.0;
-        }
+        double r=i.val(DIM_R);
+		double theta=i.val(DIM_THETA);
+		return temp_e(r, theta);
     });
     tempIons.initialize();
     tempIons.fill([&](const SpaceIterator& i) {
-        double rB1=i.val(DIM_R);
-        if (i.its[DIM_R].canPeek(1)) {
-            double rB2=i.its[DIM_R].peek(1);
-            double r= sqrt(rB1*rB2);
-            double theta=i.val(DIM_THETA);
-            return temp_i(r, theta);
-        }
-        else {
-            return 0.0;
-        }
+        double r=i.val(DIM_R);
+		double theta=i.val(DIM_THETA);
+		return temp_i(r, theta);
     });
-    tpf1.initialize();
-    tpf2.initialize();
 }
 
 Dimension* State::createDimension(Particle& p, std::string dimid, std::function<void(Vector&,double,double)> initializer, boost::property_tree::ptree& cfg) {
@@ -127,7 +90,6 @@ void State::initializeParticle(Particle& p,boost::property_tree::ptree& cfg)
     GlobalConfig.put("thetamin", GlobalConfig.get<double>("thetamin", thetamin));
     GlobalConfig.put("thetamax", GlobalConfig.get<double>("thetamax", thetamax));
     p.ps.add(new Dimension(nTheta,bind(initializeThetaPoints,std::placeholders::_1,thetamin,thetamax)));
-
 
 	p.initialize();
 }

@@ -1,14 +1,10 @@
 #include <stdio.h>
 #include "write.h"
 #include "messages.h"
-
 #include "modelParameters.h"
-
 #include "State.h"
 #include "torusSampling.h"
-
 #include "targetFields.h"
-
 #include "luminosities.h"
 
 /*
@@ -24,11 +20,6 @@
 */
 //#include <stdexcept>
 
-//int main() {
-//	printf("hello world");
-//	return 0;
-//}
-
 #include <fparameters/parameters.h>
 #include <inout/ioutil.h>
 #include <boost/property_tree/ptree.hpp>
@@ -37,34 +28,31 @@ int main()
 {
 	std::string folder{ prepareOutputfolder() };
 
-	try {
-        
+	try {        
         //lag();
-		GlobalConfig = readConfig();
 		
+		GlobalConfig = readConfig();
 		prepareGlobalCfg();
 		show_message(msgStart, Module_state);
 
 		State model(GlobalConfig.get_child("model"));
 		show_message(msgEnd, Module_state);
 		
-        
 		Matrix a;
-		torusSampling(model.electron, a);
+		torusSampling(model, a);
 		writeMatrix("probMatrix2", model.electron, a);
 			
-		show_message(msgStart, Module_targetField);
+/*		show_message(msgStart, Module_targetField);
 		tpfFill_Bremss(model);  // esto completa la psv con los fotones de Bremsstrahlung
-        tpfFill_Sync(model);      // idem Sync
+        tpfFill_Sync(model);    // idem Sync
 		show_message(msgEnd, Module_targetField);
-		
-
-		//thermalDistribution(model.electron, model);
+*/ 		//thermalDistribution(model.electron, model);
 		//writeAllSpaceParam(folder+"\\electronDist.txt", model.electron.distribution);
 		
-		//writeAllSpaceParam(folder+"\\bremss.txt", model.tpf1);
+		writeAllSpaceParam(folder+"\\temp.txt", model.tempElectrons);
 		
         luminosities(model, folder+"\\electronLuminosities.txt", a);
+		
 /*		
 		
 		writeRandTParamSpace(getFileName(folder, "\\magf"), model.magf, 0);
@@ -94,7 +82,6 @@ int main()
 		std::cout << "ERROR: " << e.what() << std::endl;
 //		throw;
 	}
-
 	return 0;
 }
 

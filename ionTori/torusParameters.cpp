@@ -61,15 +61,15 @@ double modfKepl(double r)
   return keplAngularMom(r) - l_0;
 }
 
-void criticalRadii(double &rCusp, double &rCenter, double &r_ms, double &r_mb, double lambda)
+void criticalRadii(double &rCusp, double &rCenter, double r_ms, double r_mb, double lambda)
 {
   //double r_ms, r_mb;
-  marginalOrbits(r_ms, r_mb);
+  //marginalOrbits(r_ms, r_mb);
 
   int maxmitr = 1000;
   double allerr = 1.0e-3;
   rCusp = bisection(r_mb, r_ms, allerr, maxmitr, modfKepl);
-  rCenter = bisection(r_ms, 500.0, allerr, maxmitr, modfKepl);
+  rCenter = bisection(r_ms, 100.0*r_ms, allerr, maxmitr, modfKepl);
 }
 ///////////////////////
 
@@ -93,7 +93,7 @@ double potential(double r, double theta) {
 // NORMALIZED POTENTIAL FUNCTION
 double w(double r, double theta)
 { 
-	static const double rMin=GlobalConfig.get<double>("model.particle.default.dim.radius.min");
+	static const double rMin=GlobalConfig.get<double>("rCusp");
 	static const double rCenter=GlobalConfig.get<double>("rCenter");
 	
 	double potentialS = potential(rMin, 0.0);         // potential at the torus surface
@@ -107,11 +107,11 @@ double modfw(double r)
   return w(r,0.0);
 }
 
-double edge(double &rCenter)
+double edge(double rCenter)
 {
   int maxmitr = 100000;
   double allerr = 1.0e-5;
-  return bisection(rCenter, 500.0*rCenter, allerr, maxmitr, modfw);
+  return bisection(rCenter, 20.0*rCenter, allerr, maxmitr, modfw);
 }
 
 
@@ -120,7 +120,7 @@ double edge(double &rCenter)
 double specificAngularMom(double r_ms, double r_mb, double lambda)
 {
   //double r_ms, r_mb;
-  marginalOrbits(r_ms, r_mb);
+  //marginalOrbits(r_ms, r_mb);
   
   double l_ms = keplAngularMom(r_ms);             // Keplerian specific angular momentum at r = r_ms
   double l_mb = keplAngularMom(r_mb);             // Keplerian specific angular momentum at r = r_mb
@@ -156,11 +156,8 @@ void torusParameters()
 	GlobalConfig.put("rCusp",GlobalConfig.get<double>("rCusp",rCusp));
     GlobalConfig.put("rCenter",GlobalConfig.get<double>("rCenter",rCenter));
 	
-	
     double rEdge=edge(rCenter);
 	GlobalConfig.put("rEdge",GlobalConfig.get<double>("rEdge",rEdge));
-	
-	
 	
 	/*
 	// Auxiliary variables

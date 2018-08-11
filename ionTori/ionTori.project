@@ -87,12 +87,12 @@
         <IncludePath Value="."/>
         <IncludePath Value="../lib"/>
         <IncludePath Value="../external/include"/>
-        <IncludePath Value="../gsl/include"/>
+        <IncludePath Value="/home/luciano/gsl/include"/>
         <Preprocessor Value="BOOST_SYSTEM_NO_DEPRECATED"/>
         <Preprocessor Value="BOOST_NO_CXX11_SCOPED_ENUMS"/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="../gsl/lib"/>
+        <LibraryPath Value="/home/luciano/gsl/lib"/>
         <LibraryPath Value="../external/lib"/>
         <LibraryPath Value="../lib/fmath/Debug"/>
         <LibraryPath Value="../lib/nrMath/Debug"/>

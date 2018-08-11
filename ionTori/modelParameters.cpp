@@ -16,7 +16,7 @@ void prepareGlobalCfg()
     static const double energyC = GlobalConfig.get<double>("energyC");
 	static const double beta = GlobalConfig.get<double>("beta");*/
     
-	static const double Mbh=GlobalConfig.get<double>("massBH")*solarMass*1.0e6;
+	static const double Mbh=GlobalConfig.get<double>("massBH")*solarMass*4.0e6;
 	double rg=gravitationalConstant*Mbh/cLight2;
     GlobalConfig.put("rg", rg);
 	
@@ -62,20 +62,26 @@ void initializeEnergyPoints(Vector& v, double logEmin, double logEmax)
 
 void initializeRadiiPoints(Vector& v,double min,double max) 
 {
-    double var_int=pow(max/min,1.0/(v.size()-1));
-    v[0]=min;
+    double dv=(max-min)/v.size();
+    v[0]=min+dv/2.0;
     for (size_t i=1;i<v.size();++i) {
-        v[i]=v[i-1]*var_int;
+        v[i]=v[i-1]+dv;
     }
 }
 
 void initializeThetaPoints(Vector& v,double min,double max)
 {
-    double var_int=(sin(max)-sin(min))/(v.size()-1);
+/*    double var_int=(sin(max)-sin(min))/(v.size()-1);
     v[0]=min;
     double sin0=sin(v[0]);
     for (size_t i=1;i<v.size();++i) {
         v[i]=asin(sin0+var_int);
         sin0+=var_int;
     }
+*/
+	double dv=(max-min)/v.size();
+	v[0]=min+dv/2.0;
+	for (size_t i=1;i<v.size();++i) {
+		v[i]=v[i-1]+dv;
+	}
 }
