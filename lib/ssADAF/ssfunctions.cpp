@@ -89,6 +89,7 @@ double press(double mdot, double r, double massBH, double alphapar, double gamma
 //double magf(double mdot)   {
 //    extern double r,alphapar,betapar,massBH;
 double magf(double mdot, double r, double massBH, double betapar, double alphapar, double gammapar, double f) {
+	double m = massBH/solarMass;  //VER
     return 6.55e8*sqrt((1.0-betapar)*sqrt(c3(alphapar,gammapar,f))*mdot/(c1(alphapar,gammapar,f)*m*alphapar))/pow(r,1.25);    // [G]
 }
 

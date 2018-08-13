@@ -43,7 +43,9 @@ double auxf1(double x,
     //extern double radius,eDensity,magField,eTemp;
     return exp(1.8899*pow(x,1.0/3.0))-2.49e-10*4.0*pi*eDensity*radius/magField/
         (eTemp*eTemp*eTemp*bessk(2,1.0/eTemp)*pow(x,5.0/3.0))*(0.5316+0.4*pow(x,0.25)+sqrt(x));
-}																
+}
+
+																
 
 void qsync(double *qSy, double *nucrit, double tempe,
 			double radius, double eDensity, double magField, double eTemp)
