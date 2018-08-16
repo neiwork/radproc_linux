@@ -1,4 +1,4 @@
-#include "bisection.h"
+#include "fbisection.h"
 #define NTRY 100
 #define FACTOR 1.6
 
@@ -24,7 +24,7 @@ int zbrac2(fun1 func,double& x1,double& x2)
 }
 #define JMAX 40
 
-double bisection(fun1 func,double x1,double x2,double xacc)
+double fbisection(fun1 func,double x1,double x2,double xacc)
     /* Using bisection, find the root of a function func known to lie between x1 and x2. The root,
     returned as rtbis, will be refined until its accuracy is ±xacc. */
 {

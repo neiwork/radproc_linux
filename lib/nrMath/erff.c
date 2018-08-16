@@ -104,7 +104,7 @@ double gammp(double a, double x)
 	}
 }
 
-double erff(double x)
+double erff_(double x)
 // Returns the error function erf(x).
 {
 	double gammp(double a, double x);

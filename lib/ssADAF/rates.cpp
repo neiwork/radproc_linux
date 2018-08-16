@@ -17,9 +17,9 @@ extern "C" {
 
 
 //Eq 3.4-3.8
-double qbremss(double tempe)
+double qbremss(double tempe, double eDensity, double iDensity)
 {
-    extern double eDensity,iDensity;
+    //extern double eDensity,iDensity;
     double fei,fee,qei,qee;
   
     if (tempe <= 1.0) {
@@ -37,23 +37,38 @@ double qbremss(double tempe)
 }
 
 //Eq. 3.14 
-double auxf1(double x)
+double auxf1(double x, 
+			double radius, double eDensity, double magField, double eTemp)
 {
-    extern double radius,eDensity,magField,eTemp;
+    //extern double radius,eDensity,magField,eTemp;
     return exp(1.8899*pow(x,1.0/3.0))-2.49e-10*4.0*pi*eDensity*radius/magField/
         (eTemp*eTemp*eTemp*bessk(2,1.0/eTemp)*pow(x,5.0/3.0))*(0.5316+0.4*pow(x,0.25)+sqrt(x));
-}																
+}
 
-void qsync(double *qSy, double *nucrit, double tempe)
+																
+
+void qsync(double *qSy, double *nucrit, double tempe,
+			double radius, double eDensity, double magField, double eTemp)
 {
+	
+	//extern double radius,magField;
+	
     //int zbrac(double (*func)(double),double *x1, double *x2);
     //double zbrent(double (*func)(double), double x1, double x2, double tol);
-    extern double radius,magField;
-  
+   
     double x1=1.0e-5;
     double x2=1.0e3;
-    zbrac(auxf1,&x1,&x2);
-    double xcrit=zbrent(auxf1,x1,x2,TOL);
+	
+    //zbrac(auxf1,&x1,&x2);
+	zbrac([&radius, &eDensity, &magField, &eTemp](double x) { return auxf1(x, radius, eDensity, magField, eTemp); }
+			,&x1,&x2);  
+    
+	//double xcrit=zbrent(auxf1,x1,x2,TOL);
+	double xcrit=zbrent([&radius, &eDensity, &magField, &eTemp](double x) { return auxf1(x, radius, eDensity, magField, eTemp); }
+						,x1,x2,TOL);
+	
+	
+	
     double nu0=2.8e6*magField;                                                        // [Hz]
     double auxnucrit=1.5*nu0*tempe*tempe*xcrit;  //Eq. 3.15
     *nucrit=auxnucrit;
@@ -63,11 +78,14 @@ void qsync(double *qSy, double *nucrit, double tempe)
 }
 
 //Eq. 3.23; 3.24
-void qC(double qbr, double qsy, double nuc, double tempe, double *qCbr, double *qCsy, double mdot) 
+void qC(double qbr, double qsy, double nuc, double tempe, double *qCbr, double *qCsy, double mdot,
+		double r, double alphapar, double gammapar, double f) 
 {
     double prob,a,eta1,eta2,eta3;
     double xc=planck*nuc/(electronMass*cLight2);
-    prob=1.0-exp(-taues(mdot));
+	
+	double tau = taues(mdot, r, alphapar, gammapar, f);
+    prob=1.0-exp(-tau); //taues(mdot));
     a=1.0+4.0*tempe*(1.0+4.0*tempe);
     eta1=prob*(a-1.0)/(1.0-prob*a);
     eta3=-1.0-log(prob)/log(a);
@@ -80,32 +98,37 @@ void qC(double qbr, double qsy, double nuc, double tempe, double *qCbr, double *
 }
 
 //Eq 3.1 o 3.3
-double qiefunc(double tempi, double tempe, double mdot)  
+double qiefunc(double tempi, double tempe, double mdot,
+				double r, double massBH, double alphapar, double gammapar, double f)  
 {
-    extern double r;
+    //extern double r;
     double rad=r;
 	double sumtemps=tempi+tempe;
     double xe=1.0/tempe;
     double xi=1.0/tempi;
     double xm=xe+xi;
     double besselk1,besselk0,besselk2e,besselk2i,result;
+	
+	double n_e = ne(mdot, r, massBH, alphapar, gammapar, f);
+	double n_i = ni(mdot, r, massBH, alphapar, gammapar, f);
+	
     if (xm > 400.0) {
         if (xi > 200.0) {
 			if (xe > 200.0) {
-				result=3.326668e-22*ne(mdot)*ni(mdot)*(1836.15*tempi-tempe)*sqrt(2.0*xm/(pi*xe*xi))*
+				result=3.326668e-22*n_e*n_i*(1836.15*tempi-tempe)*sqrt(2.0*xm/(pi*xe*xi))*
 					((2.0*sumtemps*sumtemps+1.0)/sumtemps+2.0);
 			} else {
 				besselk2e=bessk(2,xe);
 				//result=3.328e-22*ne(f)*ni(f)*(1836.15*tempi-tempe)*sqrt(aux3/aux2)
 				//    * ((2.0*aux1*aux1+1.0)/aux1 + 2.0) * exp(-(aux2+aux3))/besselk2e;
-				result=3.326668e-22*ne(mdot)*ni(mdot)*(1836.15*tempi-tempe)*sqrt(xi/xm)*
+				result=3.326668e-22*n_e*n_i*(1836.15*tempi-tempe)*sqrt(xi/xm)*
 					((2.0*sumtemps*sumtemps+1.0)/sumtemps+2.0)*exp(-xe)/besselk2e;
 			}
         } else {
             besselk2i=bessk(2,xi);
             //result=3.328e-22*ne(f)*ni(f)*(1836.15*tempi-tempe)*sqrt(aux4/aux2)
             //       * ((2.0*aux1*aux1+1.0)/aux1 + 2.0) * exp(-(aux2+aux4))/besselk2i;
-            result=3.326668e-22*ne(mdot)*ni(mdot)*(1836.15*tempi-tempe)*sqrt(xe/xm)*
+            result=3.326668e-22*n_e*n_i*(1836.15*tempi-tempe)*sqrt(xe/xm)*
                    ((2.0*sumtemps*sumtemps+1.0)/sumtemps+2.0)*exp(-xi)/besselk2i;
         }
     } else {
@@ -115,7 +138,7 @@ double qiefunc(double tempi, double tempe, double mdot)
         besselk2e=bessk(2,xe);
         //result=3.328e-22*ne(f)*ni(f)*(1836.15*tempi-tempe)*
         //    ((2.0*aux1*aux1+1.0)/aux1 * besselk1/besselk2i + 2.0*besselk0/besselk2i) / besselk2e;
-        result=3.326668e-22*ne(mdot)*ni(mdot)*(1836.15*tempi-tempe)*
+        result=3.326668e-22*n_e*n_i*(1836.15*tempi-tempe)*
             ((2.0*sumtemps*sumtemps+1.0)/sumtemps * besselk1/besselk2i + 2.0*besselk0/besselk2i)/
 			besselk2e;
     }
@@ -124,21 +147,31 @@ double qiefunc(double tempi, double tempe, double mdot)
 }
 
 //Eq. 3.33
-double qem(double tempe, double mdot) 
+double qem(double tempe, double mdot,
+			double eDensity, double iDensity, double magField, double eTemp,
+			double r, double massBH, double betapar, double alphapar, double gammapar, double f) 
 {
-    extern double eDensity,iDensity,magField,eTemp;
+    //extern double eDensity,iDensity,magField,eTemp;
     double qBr,qSy,qCbr,qCsy,nucrit;
-    eDensity=ne(mdot);
-    iDensity=ni(mdot);
-    magField=magf(mdot);
+    eDensity=ne(mdot, r, massBH, alphapar, gammapar, f);
+    iDensity=ni(mdot, r, massBH, alphapar, gammapar, f);
+    magField=magf(mdot,r, massBH, betapar, alphapar, gammapar, f);
     eTemp=tempe;
-    qsync(&qSy,&nucrit,tempe);
-    qBr=qbremss(tempe);
-    qC(qBr,qSy,nucrit,tempe,&qCbr,&qCsy,mdot);
-    double qemi=qBr+qSy+qCbr+qCsy;
-    double aux=4.0*stefanBoltzmann*pow(electronMass*cLight2*tempe/boltzmann,4)/height();
+    
+	double radius = r; //VER si es la misma variable
+	qsync(&qSy,&nucrit,tempe,radius, eDensity, magField, eTemp);
+	//qsync(&qSy,&nucrit,tempe);
+    
+	qBr=qbremss(tempe, eDensity, iDensity); //(tempe);
+    
+	qC(qBr,qSy,nucrit,tempe,&qCbr,&qCsy,mdot,r,alphapar,gammapar,f);
+	//qC(qBr,qSy,nucrit,tempe,&qCbr,&qCsy,mdot);
+    
+	
+	double qemi=qBr+qSy+qCbr+qCsy;
+    double aux=4.0*stefanBoltzmann*pow(electronMass*cLight2*tempe/boltzmann,4)/height(radius,alphapar,gammapar,f);
     double tauabs=qemi/aux;
-    double tau=tauabs+taues(mdot);
+    double tau=tauabs+ taues(mdot,r,alphapar,gammapar,f);    //taues(mdot);
     double result=aux*pow(1.5*tau+sqrt(3.0)+aux*pow(qemi,-1.0),-1.0);
     
     return result;
