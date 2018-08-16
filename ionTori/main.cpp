@@ -39,8 +39,8 @@ int main()
 		show_message(msgEnd, Module_state);
 		
 		Matrix a;
-		torusSampling(model, a);
-		writeMatrix("probMatrix2", model.electron, a);
+//		torusSampling(model, a);
+//		writeMatrix("probMatrix2", model.electron, a);
 			
 /*		show_message(msgStart, Module_targetField);
 		tpfFill_Bremss(model);  // esto completa la psv con los fotones de Bremsstrahlung

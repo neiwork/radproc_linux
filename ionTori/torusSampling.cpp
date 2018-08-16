@@ -36,7 +36,7 @@ void torusSampling(State& st, Matrix& prob)
 
     int nR = GlobalConfig.get<double>("model.particle.default.dim.radius.samples");//100
 	int nTheta= GlobalConfig.get<double>("model.particle.default.dim.theta.samples");//10;
-    long nPhot=30;
+    long nPhot=1000;
    
 	// FILE *fp1, *fp2;
     //fp1=fopen("torus.txt","w");
@@ -135,7 +135,7 @@ void torusSampling(State& st, Matrix& prob)
                     rprimant=rprim;
                     drprim=new_min(drprim*2,drprimmax);
                     rprim+=drprim;
-                } while(ne > 1.0e-10);                          // Escape from the torus.
+                } while(ne > 1.0e-1);                          // Escape from the torus.
             }
         }
         for(int jR=0;jR<nR;jR++) {

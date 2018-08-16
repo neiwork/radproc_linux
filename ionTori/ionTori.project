@@ -12,42 +12,42 @@
     <File Name="metric.cpp" ExcludeProjConfig=""/>
   </VirtualDirectory>
   <VirtualDirectory Name="probMatrix">
-    <File Name="initVectors.h" ExcludeProjConfig="Debug;"/>
-    <File Name="initVectors.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="initVectors.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="initVectors.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="torusSampling.cpp" ExcludeProjConfig=""/>
-    <File Name="torusSampling2.h" ExcludeProjConfig="Debug;"/>
-    <File Name="torusSampling2.c" ExcludeProjConfig="Debug;"/>
+    <File Name="torusSampling2.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="torusSampling2.c" ExcludeProjConfig="Release;Debug;"/>
     <File Name="torusSampling.h" ExcludeProjConfig=""/>
   </VirtualDirectory>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="probCompton.h" ExcludeProjConfig="Debug"/>
-    <File Name="probCompton.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="probCompton.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="probCompton.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="luminosities.h" ExcludeProjConfig=""/>
     <File Name="main.cpp" ExcludeProjConfig=""/>
     <File Name="modelParameters.cpp" ExcludeProjConfig=""/>
     <File Name="modelParameters.h" ExcludeProjConfig=""/>
-    <File Name="radiativeLosses.cpp" ExcludeProjConfig="Debug"/>
-    <File Name="radiativeLosses.h" ExcludeProjConfig="Debug"/>
+    <File Name="radiativeLosses.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="radiativeLosses.h" ExcludeProjConfig="Release;Debug;"/>
     <File Name="State.cpp" ExcludeProjConfig=""/>
     <File Name="State.h" ExcludeProjConfig=""/>
-    <File Name="targetFields.cpp" ExcludeProjConfig="Release"/>
-    <File Name="targetFields.h" ExcludeProjConfig="Release"/>
-    <File Name="maxwellJuttner.cpp" ExcludeProjConfig="Debug"/>
-    <File Name="maxwellJuttner.h" ExcludeProjConfig="Debug"/>
-    <File Name="distribution.cpp" ExcludeProjConfig="Debug"/>
-    <File Name="distribution.h" ExcludeProjConfig="Debug"/>
-    <File Name="luminosities2.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="targetFields.cpp" ExcludeProjConfig=""/>
+    <File Name="targetFields.h" ExcludeProjConfig=""/>
+    <File Name="maxwellJuttner.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="maxwellJuttner.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="distribution.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="distribution.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="luminosities2.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="luminosities.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="pruebas">
     <File Name="coppiBlandford.cpp" ExcludeProjConfig="Debug;Release"/>
     <File Name="coppiBlandford.h" ExcludeProjConfig="Debug;Release"/>
-    <File Name="compton.cpp" ExcludeProjConfig="Debug"/>
-    <File Name="compton.h" ExcludeProjConfig="Debug"/>
-    <File Name="coppiProbDist.cpp" ExcludeProjConfig="Debug"/>
-    <File Name="coppiProbDist.h" ExcludeProjConfig="Debug"/>
+    <File Name="compton.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="compton.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="coppiProbDist.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="coppiProbDist.h" ExcludeProjConfig="Release;Debug;"/>
   </VirtualDirectory>
   <VirtualDirectory Name="extras">
     <File Name="write.h"/>
@@ -55,14 +55,6 @@
     <File Name="messages.cpp"/>
     <File Name="messages.h"/>
   </VirtualDirectory>
-  <Dependencies Name="Release">
-    <Project Name="fmath"/>
-    <Project Name="fparameters"/>
-    <Project Name="fparticle"/>
-    <Project Name="flosses"/>
-    <Project Name="fluminosities"/>
-    <Project Name="inout"/>
-  </Dependencies>
   <Dependencies Name="Debug">
     <Project Name="nrMath"/>
     <Project Name="fmath"/>
@@ -152,25 +144,30 @@
         <IncludePath Value="."/>
         <IncludePath Value="../lib"/>
         <IncludePath Value="../external/include"/>
+        <IncludePath Value="/home/luciano/gsl/include"/>
         <Preprocessor Value="BOOST_SYSTEM_NO_DEPRECATED"/>
         <Preprocessor Value="BOOST_NO_CXX11_SCOPED_ENUMS"/>
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../external/lib"/>
         <LibraryPath Value="../lib/fmath/Release"/>
+        <LibraryPath Value="../lib/nrMath/Release"/>
         <LibraryPath Value="../lib/fparameters/Release"/>
         <LibraryPath Value="../lib/fparticle/Release"/>
         <LibraryPath Value="../lib/flosses/Release"/>
         <LibraryPath Value="../lib/fluminosities/Release"/>
-        <LibraryPath Value="../lib/inout/Release"/>
+        <LibraryPath Value="../lib/inout/"/>
         <Library Value="fparameters"/>
         <Library Value="fparticle"/>
         <Library Value="fluminosities"/>
         <Library Value="flosses"/>
         <Library Value="inout"/>
         <Library Value="fmath"/>
+        <Library Value="nrMath"/>
         <Library Value="boost_filesystem"/>
         <Library Value="boost_system"/>
+        <Library Value="gsl"/>
+        <Library Value="gslcblas"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="./$(IntermediateDirectory)/$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -207,4 +204,13 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Release">
+    <Project Name="nrMath"/>
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+    <Project Name="fparticle"/>
+    <Project Name="flosses"/>
+    <Project Name="fluminosities"/>
+    <Project Name="inout"/>
+  </Dependencies>
 </CodeLite_Project>
