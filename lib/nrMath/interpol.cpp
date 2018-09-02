@@ -1,9 +1,10 @@
 #include "nr.h"
 #include <math.h>
-#include "nrutil.h"
+
 #define TINY 1.0e-25                // A small number.
 #define FREERETURN {free_vector(d,1,n);free_vector(c,1,n);return;}
 #define float double
+#include "nrutil.h"
 
 void ratint(float xa[], float ya[], int n, float x, float *y, float *dy)
 /* Given arrays xa[1..n] and ya[1..n], and given a value of x, this routine returns a value of

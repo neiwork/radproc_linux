@@ -1,5 +1,6 @@
 #include <math.h>
 #include "nrutil.h"
+#include <functional>
 #define MAXITS 20000
 #define EPS 1.0e-30
 #define TOLF 1.0e-30
@@ -19,10 +20,14 @@ decide whether spurious convergence to a minimum of fmin has occurred. */
     
 int nn;                                                                                       // Global variables to communicate with fmin.
 float *fvec;
-void (*nrfuncv)(int n, float v[], float f[]);
+//void (*nrfuncv)(int n, float v[], float f[]);
+
+std::function<void(int, float [], float [])> nrfuncv;
 
 void broydn(float x[], int n, int *check,
-    void (*vecfunc)(int, float [], float []))
+    std::function<void(int, float [], float [])> vecfunc
+	//void (*vecfunc)(int, float [], float [])
+	)
 /* Given an initial guess x[1..n] for a root in n dimensions, find the root by Broyden’s method
 embedded in a globally convergent strategy. The vector of functions to be zeroed, called
 fvec[1..n] in the routine below, is returned by the user-supplied routine vecfunc(n,x,fvec) .
@@ -32,7 +37,7 @@ of the function fmin or if Broyden’s method can make no further progress. In t
 restarting from a different initial guess. */
 {
     void fdjac(int n, float x[], float fvec[], float **df,
-        void (*vecfunc)(int, float [], float []));
+	std::function<void(int, float [], float [])> vecfunc);
     double fmin1(double x[]);
     void lnsrch(int n, float xold[], float fold, float g[], float p[], float x[],
         float *f, float stpmax, int *check, float (*func)(float []));

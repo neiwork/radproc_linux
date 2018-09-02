@@ -8,9 +8,7 @@
 #include <fparameters/parameters.h>
 #include <boost/property_tree/ptree.hpp>
 #include <fmath/bisection.h>
-extern "C" {
-	#include <nrMath/nrutil.h>
-}
+#include <nrMath/nrutil.h>
 
 State::State(boost::property_tree::ptree& cfg) :
  electron{ "electron" },

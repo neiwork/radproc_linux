@@ -1,8 +1,6 @@
 #include "probMatrix.h"
-extern "C" {
-	#include <nrMath/nrutil.h>
-	#include <nrMath/random.h>
-}
+#include <nrMath/nrutil.h>
+#include <nrMath/random.h>
 #include <stdio.h>
 #include <math.h>
 

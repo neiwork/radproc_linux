@@ -1,16 +1,17 @@
 #pragma once
 
 #include "bessel.h"
+#include <functional>
 
-int zbrac(double (*func)(double), double *x1, double *x2);
+int zbrac(std::function<double(double)> func, double *x1, double *x2);
 
-double zbrent(double (*func)(double), double x1, double x2, double tol);
+double zbrent(std::function<double(double)> func, double x1, double x2, double tol);
 
 
 /* Given an initial guess x[1..n] for a root in n dimensions, find the root by Broyden’s method
 embedded in a globally convergent strategy*/ 
 void broydn(double x[], int n, int *check,
-	    void (*vecfunc)(int, double [], double []));
+	    std::function<void(int, double [], double [])>);
 		
 /*
 #ifndef _NR_H_

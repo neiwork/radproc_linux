@@ -8,24 +8,24 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="erff.c"/>
+    <File Name="zbrent.cpp"/>
+    <File Name="zbrac.cpp"/>
+    <File Name="ran1.cpp"/>
+    <File Name="nrutil.cpp"/>
+    <File Name="erff.cpp"/>
+    <File Name="lnsrch.cpp"/>
+    <File Name="ludcmp.cpp"/>
+    <File Name="newt.cpp"/>
+    <File Name="broydn.cpp"/>
+    <File Name="bisection.cpp"/>
+    <File Name="lubksb.cpp"/>
+    <File Name="interpol.cpp"/>
+    <File Name="bessel.cpp"/>
     <File Name="random.h"/>
     <File Name="ran1.h"/>
-    <File Name="ran1.c"/>
     <File Name="mathematics.h"/>
-    <File Name="interpol.c"/>
     <File Name="bisection.h"/>
-    <File Name="bisection.c"/>
     <File Name="bessel.h"/>
-    <File Name="zbrent.c"/>
-    <File Name="nrutil.c"/>
-    <File Name="zbrac.c"/>
-    <File Name="newt.c"/>
-    <File Name="ludcmp.c"/>
-    <File Name="lubksb.c"/>
-    <File Name="lnsrch.c"/>
-    <File Name="broydn.c"/>
-    <File Name="bessel.c"/>
     <File Name="nr.h"/>
     <File Name="nrutil.h"/>
   </VirtualDirectory>

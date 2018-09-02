@@ -1,7 +1,7 @@
-#define float double
 #include <math.h>
 #define ITMAX 100
 #define EPS 3.0e-7
+#define float double
 
 float gammln(float xx)
 // Returns the value ln[Γ(xx)] for xx>0.

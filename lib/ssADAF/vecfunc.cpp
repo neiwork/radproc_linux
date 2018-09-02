@@ -21,7 +21,7 @@ void vecfunc(int n, double x[], double fvec[] //)
 	double eDensity = data.eDensity;
 	double iDensity = data.iDensity;
 	double magField = data.magField;
-	double eTemp data.eTemp= 
+	double eTemp = data.eTemp; 
 	
 	
 /*	static const double massBH=GlobalConfig.get<double>("massBH")*solarMass;

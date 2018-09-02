@@ -7,7 +7,7 @@
 #include <fparameters/ParamSpaceValues.h>
 #include <iostream>
 #include <../ionTori/functions.h>
-#include <fmath/bisection.h>
+#include <fmath/fbisection.h>
 
 void auxFunction(double& e1, double& e2,  double& e3, double xc, double energy, double norm_temp, 
                                 double r, double theta, const SpaceCoord& distCoord, ParamSpaceValues& denf) {

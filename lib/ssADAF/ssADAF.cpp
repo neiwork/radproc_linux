@@ -3,9 +3,7 @@
 
 
 #include <fmath/constants.h>
-extern "C" {
-	#include <nrMath/nr.h>
-}
+#include <nrMath/nr.h>
 
 void adafSol(double *x, double r, dataADAF data)
 {	

@@ -1,10 +1,10 @@
 #include "ssfunctions.h"
 #include <fmath/constants.h>
 #include <math.h>
-extern "C" {
+//extern "C" {
 #include <nrMath/bessel.h>
 #include <nrMath/nr.h>
-}
+//}
 #define TOL 1.0e-3
 
 /*#define pi 3.14159265359
