@@ -1,9 +1,11 @@
 #pragma once
+
 #include <fmath/mathematics.h>
+#include <fparticle/Particle.h>
 #include <boost/property_tree/ptree_fwd.hpp>
 
 // Global variables
-double massBH;                // Black hole mass
+/*double massBH;                // Black hole mass
 double RS;                    // Schwarzschild Radius
 double alphapar;              // Viscosity parameter
 double betapar;               // Magnetic parameter
@@ -13,7 +15,7 @@ double rmax;                  // Outer edge of the ADAF
 double thetamin;
 double thetamax;
 double f;                     // Advection parameter
-double r;                     // Radius
+double r;                     // Radius*/
 
 const DimensionCoord
 	DIM_E = 0,

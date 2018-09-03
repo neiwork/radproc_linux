@@ -1,13 +1,14 @@
 #include "State.h"
 #include <ssADAF/ssfunctions.h>
 #include <ssADAF/ssADAF.h>
+#include <ssADAF/packageData.h>
 #include "modelParameters.h"
 #include <fparameters/Dimension.h>
 #include <fmath/physics.h>
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/parameters.h>
 #include <boost/property_tree/ptree.hpp>
-#include <fmath/bisection.h>
+#include <fmath/fbisection.h>
 #include <nrMath/nrutil.h>
 
 State::State(boost::property_tree::ptree& cfg) :
@@ -33,7 +34,12 @@ State::State(boost::property_tree::ptree& cfg) :
 	double *x;
 	x=dvector(1,3);
 	
-	constants();
+	//constants();
+	dataADAF data;
+
+	data = (dataADAF){.massBH = massBH, .f = f, alphapar = alphapar, .betapar  = betapar, .rmin = rmin
+	.rmax = rmax, .eDensity = eDensity, .iDensity = iDensity, .magField = magField, .eTemp = eTemp}; 
+
 	
 	x[1]=(boltzmann*1.0e12)/(protonMass*cLight2);
 	x[2]=(boltzmann*1.0e9)/(electronMass*cLight2);
@@ -43,8 +49,8 @@ State::State(boost::property_tree::ptree& cfg) :
 		if(iR.its[DIM_R].canPeek(1)) {
 			
 			double rB2=iR.its[DIM_R].peek(1);
-			r=sqrt(rB1*rB2);
-			adafSol(x);
+			double r=sqrt(rB1*rB2);
+			adafSol(x, r, data);
 			photon.ps.iterate([&](const SpaceIterator& iTh)  {
 				magfield.set(iTh,magf(x[3]));
 				denf_e.set(iTh,ne(x[3]));

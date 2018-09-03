@@ -15,6 +15,14 @@
     <File Name="modelParameters.h"/>
     <File Name="modelParameters.cpp"/>
     <File Name="main.cpp"/>
+    <File Name="probMatrix.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="probMatrix.h" ExcludeProjConfig="Debug"/>
+    <File Name="messages.cpp"/>
+    <File Name="messages.h"/>
+    <File Name="torusSampling.cpp"/>
+    <File Name="torusSampling.h"/>
+    <File Name="torusSampling2.h" ExcludeProjConfig="Debug"/>
+    <File Name="torusSampling2.cpp" ExcludeProjConfig="Debug"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
     <Project Name="fmath"/>

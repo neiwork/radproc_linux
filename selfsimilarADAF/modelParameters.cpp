@@ -19,7 +19,7 @@ double r;                     // Radius*/
 void prepareGlobalCfg()
 {
 	static const double massBH=GlobalConfig.get<double>("massBH")*solarMass;
-	double rg=gravitationalConstant*Mbh/cLight2;
+	double rg=gravitationalConstant*massBH/cLight2;
     GlobalConfig.put("rg", rg);
 	fmath_configure(GlobalConfig);
 }

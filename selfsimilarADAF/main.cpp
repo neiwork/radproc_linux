@@ -1,5 +1,35 @@
 #include <ssADAF/ssADAF.h>
 
+#include <stdio.h>
+#include "modelParameters.h"
+#include "messages.h"
+//#include "targetFields.h"
+
+
+#include "probMatrix.h"
+
+#include "State.h"
+//#include "write.h"
+//#include "radiativeLosses.h"
+
+//#include "torusSampling.h"
+
+//#include "distribution.h"
+//#include "luminosities.h"
+//#include "functions.h"
+
+
+
+#include <fparticle/Particle.h>
+#include <fparameters/parameters.h>
+#include <fparameters/Dimension.h>
+#include <fparameters/SpaceIterator.h>
+#include <fmath/physics.h>
+#include <boost/property_tree/ptree.hpp>
+#include <stdexcept>
+
+
+		
 int main()
 {	
 	std::string folder{ prepareOutputfolder() };
@@ -12,7 +42,7 @@ int main()
 		show_message(msgEnd, Module_state);
 		show_message(msgStart, Module_targetField);
 		
-
+		
         
 	}
 	
