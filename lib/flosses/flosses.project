@@ -8,20 +8,20 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="crossSectionInel.cpp"/>
-    <File Name="crossSectionInel.h"/>
-    <File Name="lossesBrem.cpp"/>
-    <File Name="lossesBrem.h"/>
-    <File Name="lossesIC.cpp"/>
-    <File Name="lossesIC.h"/>
-    <File Name="lossesPhotoHadronic.cpp" ExcludeProjConfig=""/>
-    <File Name="lossesPhotoHadronic.h" ExcludeProjConfig=""/>
-    <File Name="lossesSyn.cpp"/>
-    <File Name="lossesSyn.h"/>
-    <File Name="nonThermalLosses.cpp"/>
-    <File Name="nonThermalLosses.h"/>
-    <File Name="lossesHadronics.cpp"/>
-    <File Name="lossesHadronics.h"/>
+    <File Name="crossSectionInel.cpp" ExcludeProjConfig="Release;"/>
+    <File Name="crossSectionInel.h" ExcludeProjConfig="Release;"/>
+    <File Name="lossesBrem.cpp" ExcludeProjConfig="Release;"/>
+    <File Name="lossesBrem.h" ExcludeProjConfig="Release;"/>
+    <File Name="lossesIC.cpp" ExcludeProjConfig="Release;"/>
+    <File Name="lossesIC.h" ExcludeProjConfig="Release;"/>
+    <File Name="lossesPhotoHadronic.cpp" ExcludeProjConfig="Release;"/>
+    <File Name="lossesPhotoHadronic.h" ExcludeProjConfig="Release;"/>
+    <File Name="lossesSyn.cpp" ExcludeProjConfig="Release;"/>
+    <File Name="lossesSyn.h" ExcludeProjConfig="Release;"/>
+    <File Name="nonThermalLosses.cpp" ExcludeProjConfig="Release;"/>
+    <File Name="nonThermalLosses.h" ExcludeProjConfig="Release;"/>
+    <File Name="lossesHadronics.cpp" ExcludeProjConfig="Release;"/>
+    <File Name="lossesHadronics.h" ExcludeProjConfig="Release;"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include"/>
   <VirtualDirectory Name="falta">

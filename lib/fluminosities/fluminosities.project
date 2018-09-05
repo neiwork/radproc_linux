@@ -8,21 +8,25 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="probMatrix.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="probaprox.h"/>
+    <File Name="probaprox.cpp"/>
+    <File Name="probexact.cpp"/>
+    <File Name="probexact.h"/>
+    <File Name="probMatrix.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="compton.cpp"/>
-    <File Name="probMatrix.h" ExcludeProjConfig="Debug;"/>
-    <File Name="luminosityIC.cpp"/>
-    <File Name="luminosityIC.h"/>
-    <File Name="luminositySynchrotron.cpp"/>
-    <File Name="luminositySynchrotron.h"/>
-    <File Name="opticalDepthSSA.cpp"/>
-    <File Name="opticalDepthSSA.h"/>
+    <File Name="probMatrix.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="luminosityIC.cpp" ExcludeProjConfig="Release;"/>
+    <File Name="luminosityIC.h" ExcludeProjConfig="Release;"/>
+    <File Name="luminositySynchrotron.cpp" ExcludeProjConfig="Release;"/>
+    <File Name="luminositySynchrotron.h" ExcludeProjConfig="Release;"/>
+    <File Name="opticalDepthSSA.cpp" ExcludeProjConfig="Release;"/>
+    <File Name="opticalDepthSSA.h" ExcludeProjConfig="Release;"/>
     <File Name="thermalBremss.cpp" ExcludeProjConfig=""/>
     <File Name="thermalSync.cpp" ExcludeProjConfig=""/>
     <File Name="thermalSync.h" ExcludeProjConfig=""/>
     <File Name="thermalBremss.h" ExcludeProjConfig=""/>
-    <File Name="thermalIC.h" ExcludeProjConfig="Debug"/>
-    <File Name="thermalIC.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="thermalIC.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="thermalIC.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="blackBody.cpp"/>
     <File Name="blackBody.h"/>
     <File Name="compton.h"/>

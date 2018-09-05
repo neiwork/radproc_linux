@@ -1,13 +1,14 @@
 {
 	"id":"Sgr A*",
 	"massBH":"1.0",
-	"spinBH":"0.5",
+	"spinBH":"0.99",
 	"n":"1.5",
-	"temp_ec":"1.0e10",
+	"temp_ec":"1.0e11",
 	"xi":"1.0e-3",
 	"lambda":"0.7",
 	"mu_i":"1.23",
-	"mu_e":"1.14",
+        "mu_e":"1.14",
+        "zgap":"2.0",
 
 	"energyC":"1.0e-17",
 	"beta":"0.5",
@@ -27,7 +28,7 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":50
+						"samples":150
 					},
 					"radius":{
 						"min":1.0,

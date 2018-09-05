@@ -36,7 +36,7 @@ void torusSampling(State& st, Matrix& prob)
 
     int nR = GlobalConfig.get<double>("model.particle.default.dim.radius.samples");//100
 	int nTheta= GlobalConfig.get<double>("model.particle.default.dim.theta.samples");//10;
-    long nPhot=1000;
+    long nPhot=100;
    
 	// FILE *fp1, *fp2;
     //fp1=fopen("torus.txt","w");
@@ -84,9 +84,9 @@ void torusSampling(State& st, Matrix& prob)
                 fprintf(fp1,"%f   %f\n",-y0,z0);
                 fprintf(fp1,"%f   %f\n",-y0,-z0);
             }*/
-            double drprim=dr/100.0;                        // Initial step for the photon path.
+            double drprim=dr/10.0;                        // Initial step for the photon path.
             double drprimmin=dr/1.0e6;                     // Minimum step.
-            double drprimmax=dr/10.0;                      // Maximum step.
+            double drprimmax=dr/2.0;                      // Maximum step.
             for(int jPh=1;jPh<=nPhot;jPh++) {
                 double random_number;
                 random_number=gsl_rng_uniform(RandomNumberGenerator);
@@ -127,7 +127,7 @@ void torusSampling(State& st, Matrix& prob)
 																										// interaction in the matrix
 																										// element.
                     }
-                    printf("r1 = %f, drprim=%6.3e, j = %d, i = %d\n",r1,drprim,jPh,iR);
+                    //printf("r1 = %f, drprim=%6.3e, j = %d, i = %d\n",r1,drprim,jPh,iR);
                     accumulatedp+=psc;    // The product of (1-p_k) gives the probability for a photon to reach the
                                                               // previous position. To first order, this is 1-sum(p_k). Hence, we accumulate
                                                               // the sum of the p_k.
@@ -135,7 +135,7 @@ void torusSampling(State& st, Matrix& prob)
                     rprimant=rprim;
                     drprim=new_min(drprim*2,drprimmax);
                     rprim+=drprim;
-                } while(ne > 1.0e-1);                          // Escape from the torus.
+                } while(ne > 1.0e3);                          // Escape from the torus.
             }
         }
         for(int jR=0;jR<nR;jR++) {

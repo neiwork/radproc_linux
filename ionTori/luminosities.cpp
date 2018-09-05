@@ -11,6 +11,7 @@
 #include <fluminosities/thermalBremss.h>
 #include <fluminosities/thermalIC.h>
 #include <fluminosities/blackBody.h>
+#include "metric.h"
 #include <fmath/mathFunctions.h>
 #include <fmath/physics.h>
 #include <boost/math/tools/roots.hpp>
@@ -27,10 +28,10 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
 	show_message(msgStart, Module_luminosities);
     ofstream file;
 	file.open(filename.c_str(), ios::out);
-	file  << setw(10) << "frecuency [Hz]"
+	/*file  << setw(10) << "frecuency [Hz]"
           << setw(10) << "Flux [erg s^-1 cm^-2]"
           << std::endl;
-		  
+	*/	  
 	double rg=GlobalConfig.get<double>("rg");
 	int nE=GlobalConfig.get<int>("model.particle.default.dim.energy.samples");
     int nR=GlobalConfig.get<int>("model.particle.default.dim.radius.samples");
@@ -41,6 +42,8 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
     double thetamax = GlobalConfig.get<double>("thetamax");
 	double dr=(rmax-rmin)/nR;
 	double dtheta=(thetamax-thetamin)/nTheta;
+    
+    double zgap=GlobalConfig.get<double>("zgap");
 	
     /* int nT = GlobalConfig.get<int>("model.particle.default.dim.theta.samples");
     int nR = GlobalConfig.get<int>("model.particle.default.dim.radius.samples");
@@ -75,12 +78,13 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
 				
     //double **lumOut;//,**prob;
 	Matrix lumOut;
-	Matrix lumOut1;
+	Matrix lumOutSy;
+    Matrix lumOutBr;
 	matrixInit(lumOut,nE,nR,0.0);
-	matrixInit(lumOut1,nE,nR,0.0);
-    
-    matrixInit(prob,nR,nR,0.0);
-    matrixRead(prob,nR,nR);
+	matrixInit(lumOutSy,nE,nR,0.0);
+    matrixInit(lumOutBr,nE,nR,0.0);
+    //matrixInit(prob,nR,nR,0.0);
+    //matrixRead(prob,nR,nR);
 
 	int jE=0;
 	st.photon.ps.iterate([&](const SpaceIterator& it1) { // LOOP EN ENERGÍAS
@@ -123,8 +127,9 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
             //lumSy=lumSync2-lumSync1;
 			lumSync1=lumSync2;
             if (lumBr > lumSy && frecuency < 1.0e8) lumBr=lumSy;
-			lumOut1[jE][jR]=lumSy+lumBr;
-			lumOut[jE][jR]=lumOut1[jE][jR];
+			lumOutSy[jE][jR]=lumSy;
+            lumOutBr[jE][jR]=lumBr;
+			lumOut[jE][jR]=lumOutSy[jE][jR]+lumOutBr[jE][jR];
 			lumSyTot[jE] += lumSy;
 			lumBrTot[jE] += lumBr;
 		jR++;
@@ -178,37 +183,52 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
 	},{0,-1,0}); ////iterate en r
 */	
 	
-	Vector lumICin(nE,0.0);
-	double lumICout;
-	Vector lumICoutvec(nE,0.0);
+    Vector lumICinBr(nE,0.0);
+	double lumICoutSy, lumICoutBr;
+	Vector lumICoutvecSy(nE,0.0);
+    Vector lumICoutvecBr(nE,0.0);
 	
-	//for (int it=1;it<=5;it++) {                    // ITERACIONES PARA CONVERGENCIA DEL COMPTON
-		for (int jE=0;jE<nE;jE++) {                // LOOP EN ENERGÍAS
-			double frec = energies[jE]/planck;
-			int jR=0;
-			st.photon.ps.iterate([&](const SpaceIterator& it1) {
-				for (int jjE=0;jjE<nE;jjE++) {
-					double sum=0.0;
-					for (int jjR=0;jjR<nR;jjR++) {
-						sum += prob[jjR][jR]*lumOut[jjE][jjR];
-					}
-					lumICin[jjE]+=sum;
-				}
-				double dens_e=0.0;
-				double temp=0.0;
-				st.photon.ps.iterate([&](const SpaceIterator& it2) {
-					dens_e += st.denf_e.get(it2);
-					temp += st.tempElectrons.get(it2);
-				},{0,it1.coord[DIM_R],-1});
-				dens_e /= nTheta;
-				temp /= nTheta;
-				lumICout = compton(lumICin,energies,energies[jE],temp,nE,energies[nE-1],energies[0]);
-				lumICoutvec[jE] += lumICout;
-				lumOut[jE][jR] = lumOut1[jE][jR]+lumICout;
-				jR++;
-			},{0,-1,0});
-		}
-	//}
+	for (int it=1;it<=2;it++) {                    // ITERACIONES PARA CONVERGENCIA DEL COMPTON
+        int jR=0;
+        Vector lumICinSy(nE,0.0);
+        st.photon.ps.iterate([&](const SpaceIterator& it1) {
+            for (int jjE=0;jjE<nE;jjE++) {
+                double sumSy=0.0;
+                double sumBr=0.0;
+                double sumIC=0.0;
+                for (int jjR=0;jjR<nR;jjR++) {
+                    sumSy += prob[jjR][jR]*lumOut[jjE][jjR];
+                    //sumBr += prob[jjR][jR]*lumOutBr[jjE][jjR];
+                }
+                lumICinSy[jjE] += sumSy;
+                //lumICinBr[jjE] += sumBr;
+            }
+            double temp=0.0;
+            double temp1=0.0;
+            st.photon.ps.iterate([&](const SpaceIterator& it2) {
+                temp1 = st.tempElectrons.get(it2);
+                temp = (temp > temp1 ? temp : temp1);
+            },{0,it1.coord[DIM_R],-1});
+/*            for (int jE=0;jE<nE;jE++) {
+                double om=energies[jE]/(electronMass*cLight2);
+                lumICout1 = compton(lumICin1,energies,temp,nE,jE);
+                lumICoutvec1[jE] += lumICout1;
+                lumICout2 = compton(lumICin2,energies,temp,nE,jE);
+                lumICoutvec2[jE] += lumICout2;
+                lumOut[jE][jR] += lumICout1+lumICout2;
+            } */
+            
+            if ( temp > 1.0e3) {
+                for (int jE=0;jE<nE;jE++) {
+                    if ( lumICinSy[jE] > 1.0e10 ) compton2(lumICoutvecSy,lumICinSy[jE],energies,temp,nE,jE);
+                    //if (lumICinBr[jE] > 1.0e10) compton2(lumICoutvecBr,lumICinBr[jE],energies,temp,nE,jE);
+                    lumOut[jE][jR] += lumICoutvecSy[jE];//+lumICoutvecBr[jE];
+                }
+            }
+                
+            jR++;
+        },{0,-1,0});
+    }
 			
 /*		st.photon.ps.iterate([&](const SpaceIterator& itR) {
 			st.photon.ps.iterate([&](const SpaceIterator& itTh) {
@@ -239,14 +259,21 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
 	
 	double distance = 100.0*rg;
 	Vector flux(nE,0.0);
+    Vector nph(nE,0.0);
     double lum=0.0;
 	for (int jjE=0;jjE<nE-1;jjE++) {
 		double sum=0.0;
         double denergy=energies[jjE+1]-energies[jjE];
-		for (int jjR=0;jjR<nR;jjR++) {
+        int jjR=0.0;
+		st.photon.ps.iterate([&](const SpaceIterator& itR) {
 			sum += lumOut[jjE][jjR];
             lum += lumOut[jjE][jjR]*(denergy/planck);
-		}
+            double r=itR.val(DIM_R);
+            double d = sqrt(r*r+zgap*zgap)*rg;
+            double redshifted = energies[jjE] / sqrt(-g_tt(zgap,pi/2.01));
+            nph[jjE] += lumOut[jjE][jjR]/planck/(cLight*pi*d*d*redshifted);
+            jjR++;
+		},{0,-1,0});
 		flux[jjE] = sum * 0.25 / pi / (distance*distance);
 	}
 	printf("lumtot = %5.5e\n",lum);
@@ -283,12 +310,14 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
 */	
 	for(jE=0;jE<nE;jE++) {
 		double frecuency = energies[jE]/planck;
-        file << "\t" << frecuency
+        file << "\t" << frecuency //energies[jE] / 1.6021e-12 / sqrt(-g_tt(zgap,pi/2.01))
 			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumSyTot[jE]*frecuency
 			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumBrTot[jE]*frecuency
-			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumICin[jE]*frecuency
-			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumICoutvec[jE]*frecuency
-			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << flux[jE]*frecuency
+//			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumICinSy[jE]*frecuency
+			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumICinBr[jE]*frecuency
+			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumICoutvecSy[jE]*frecuency
+			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumICoutvecBr[jE]*frecuency
+			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency*nph[jE]
 			 << std::endl;
 	};
 		

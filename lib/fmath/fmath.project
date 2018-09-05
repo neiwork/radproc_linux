@@ -10,14 +10,14 @@
   <VirtualDirectory Name="src">
     <File Name="fbisection.h"/>
     <File Name="fbisection.cpp"/>
-    <File Name="laguerre.h" ExcludeProjConfig="Debug;"/>
-    <File Name="laguerre.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="laguerre.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="laguerre.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="configure.h"/>
     <File Name="constants.h"/>
     <File Name="elimiGaussiana.cpp"/>
     <File Name="elimiGaussiana.h"/>
-    <File Name="gaussianScaledPivoting.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="gaussianScaledPivoting.h" ExcludeProjConfig="Debug;"/>
+    <File Name="gaussianScaledPivoting.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="gaussianScaledPivoting.h" ExcludeProjConfig="Release;Debug;"/>
     <File Name="interpolation.cpp"/>
     <File Name="interpolation.h"/>
     <File Name="mathematics.h"/>

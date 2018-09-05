@@ -39,7 +39,7 @@ int main()
 		show_message(msgEnd, Module_state);
 		
 		Matrix a;
-//		torusSampling(model, a);
+		torusSampling(model, a);
 //		writeMatrix("probMatrix2", model.electron, a);
 			
 /*		show_message(msgStart, Module_targetField);
@@ -51,14 +51,14 @@ int main()
 		
 		writeAllSpaceParam(folder+"\\temp.txt", model.tempElectrons);
 		
-        luminosities(model, folder+"\\electronLuminosities.txt", a);
+        //luminosities(model, folder+"\\electronLuminosities.txt", a);
+		luminosities(model,"lum.txt",a);
 		
-/*		
 		
-		writeRandTParamSpace(getFileName(folder, "\\magf"), model.magf, 0);
-        writeRandTParamSpace(getFileName(folder, "\\denf"), model.denf_e, 0);
-        writeRandTParamSpace(getFileName(folder, "\\tempf"), model.tempElectrons, 0);
-       // writeRandTParamSpace("magf.dat", model.magf, 0);
+		//writeRandTParamSpace(getFileName(folder, "\\magf"), model.magf, 0);
+        //writeRandTParamSpace(getFileName(folder, "\\denf"), model.denf_e, 0);
+        //writeRandTParamSpace(getFileName(folder, "\\tempf"), model.tempElectrons, 0);
+        writeRandTParamSpace("magf.dat", model.magf, 0);
         //writeRandTParamSpace("denf.dat", model.denf_i, 0);
         
 		//ParamSpaceValues psv(model.electron.ps);
@@ -73,9 +73,7 @@ int main()
 		//injection(model.electron, model);
 		
 		//distribution(model.electron, model);
-
-		
-*/
+    
 	}
 	catch (std::runtime_error& e)
 	{

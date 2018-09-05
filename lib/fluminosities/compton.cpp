@@ -1,95 +1,17 @@
 #include "compton.h"
+#include "probexact.h"
+#include "probaprox.h"
 #include <math.h>
 #include <fmath/mathFunctions.h>
 //#include <fmath/laguerre.h>
-
 //#include <fparameters/nrutil.h>
 extern "C" {
-#include <nrMath/nrutil.h>
-#include <nrMath/laguerre.h>
+    #include <nrMath/nrutil.h>
+    #include <nrMath/laguerre.h>
 }
 #include <fmath/physics.h>
 
-double rate(double frec, double gamma)
-{
-	double beta=sqrt(1.0-1.0/(gamma*gamma));
-	double cte=3.0*cLight*thomson/(32.0*(gamma*frec)*(gamma*frec)*beta);
-	double min=2.0*gamma*frec*(1.0-beta);
-	double max=2.0*gamma*frec*(1.0+beta);
-	int nX=100;
-	double sum=0.0;
-	double x_int=pow(max/min,1.0/nX);
-	double x = min;
-	for (int i=0;i<nX;++i)   
-	{
-		double dx = x*(x_int-1.0);
-		double f=(1.0-4.0/x-8.0/(x*x))*log(1.0+x)+0.5+8.0/x-0.5/((1.0+x)*(1.0+x));
-		sum = sum + f*dx;
-		x = x*x_int;
-	}
-	return cte*sum;
-}
-
-double frecprom(double frecprim, double gamma)  //<w>
-{
-	double beta=sqrt(1.0-1.0/(gamma*gamma));
-	double min = -1.0;
-	double max = 1.0;
-	int nMu = 100;
-
-	double sum = 0.0;
-	double mu_int = (max-min)/nMu;
-	double mu = min;
-	for (int i=0; i<nMu;++i)
-	{
-		double x = gamma*frecprim*(1.0-beta*mu);
-		double a = gamma*gamma*beta*frecprim*(mu-beta);
-		double factor1=3.0*cLight*thomson*x/(8.0*gamma*frecprim*rate(frecprim,gamma));
-		double factor2=2.0*(a+gamma*(x-2.0)-(2.0*gamma+a)/x-a*(6.0/(x*x)+3.0/(x*x*x)))/(1.0+2.0*x);
-		double factor3=log(1.0+2.0*x)*(gamma-a+3.0*a*(1.0/x+1.0/(x*x)))/(x*x);
-		double factor4=(1.0 - 1.0/((1.0+2.0*x)*(1.0+2.0*x)))*(a*(3.0/(x*x)+1.0/(x*x*x))
-                                    +(a+gamma)/x +2.0*gamma)/(2.0*x);
-		double factor5=(1.0-1.0/P3(1.0+2.0*x))/3.0 *(gamma+a*(1.0/x+1.0/(x*x)))/3.0-2.0*a/(x*x*x);
-		double f=factor1*(factor2+factor3+factor4+factor5);
-		sum+=f*mu_int/2.0;
-		mu+=mu_int;
-	}
-    return sum;
-}
-
-double sqrdfrecprom(double frecprim, double gamma)  //<w^2>
-{
-	double beta = sqrt(1.0-1.0/(gamma*gamma));
-    double gamma2=gamma*gamma;
-    double frecprim2=frecprim*frecprim;
-	if(frecprim*gamma < 1.0)
-	{
-		return 14.0*frecprim2*(gamma2*gamma2)*(1.0-176.0*gamma*frecprim/35.0)/5.0; 
-	}
-	else
-	{
-		double a1 = 64.0*beta*(gamma2*frecprim2);
-		double a2 = (6.0*gamma*frecprim*(1.0+beta)*(2.0*gamma2+1.0)+6.0*gamma2+3.0)*
-                                log(2.0*gamma*frecprim*(1.0+beta)+1.0);
-		double a3 = (6.0*gamma*frecprim*(1.0-beta)*(2.0*gamma2+1.0)+6.0*gamma2+3.0)*
-                                log(2.0*gamma*frecprim*(1.0-beta)+1.0);
-		double a4 = 9.0*(1.0-beta*beta)*(1.0-beta*beta)*gamma*gamma2*frecprim/32.0- 
-                            (58.0*gamma2+1.0)/(64.0*gamma*frecprim)+7.0*(2.0*gamma2*(1.0-beta*beta)+1.0)/32.0;
-
-		return (a2 - a3 + a4)/rate(frecprim,gamma)/a1;
-	}
-}
-
-double probability(double frec, double frecprim, double gamma)
-{
-    double frecave=frecprom(frecprim,gamma);
-    double varfrec=sqrdfrecprom(frecprim,gamma)-frecave*frecave;
-    double d=new_min(sqrt(3.0*varfrec),frecave,varfrec);
-    double x=d-abs(frec- frecave);
-    return (x >= 0.0 ? 0.5/d : 0.0);
-}
-
-double k(double frec,double frecprim,double normtemp)
+/*double k(double om,double omprim,double normtemp,double ommin,double ommax)
 {
     int N=6;
     double alf=0.0;
@@ -103,24 +25,168 @@ double k(double frec,double frecprim,double normtemp)
     gaulag(abscissas, weights,N,alf);
     for (int i=1;i<=N;i++) {
         gamma[i]=abscissas[i]*normtemp+1.0;
+        double beta=sqrt(1.0-1.0/(gamma[i]*gamma[i]));
         c[i]=weights[i]*gamma[i]*sqrt(gamma[i]*gamma[i]-1.0);
-        sum1+=c[i]*probability(frec,frecprim,gamma[i])*rate(frecprim,gamma[i]);
-        sum2+=c[i];
+        if (om/omprim > (1.0-beta)/(1.0+2.0*beta*omprim/gamma[i]) && om/omprim < (1.0+beta)
+        /(1.0-beta+2.0*omprim/gamma[i])) {
+            //sum1+=c[i]*probaprox(om,omprim,gamma[i],ommin,ommax);//*rate(frecprim,gamma[i]);
+            sum1 += c[i]*probexact(om,omprim,gamma[i]);
+        } else {
+            sum1 += 0.0;
+        }
+        sum2 += c[i];
+    }
+    return sum1/sum2;
+} */
+
+#include <iostream>
+using namespace std;
+
+double lumICin(Vector lumIn, Vector energies, double omprim, int nE) {
+    double energy = electronMass*cLight2*omprim;
+    int j=0;
+    while (energy > energies[j] && j < nE-1) {
+            j++;
+    }
+    if (j==nE-1) return 0.0;
+    else {
+        if (lumIn[j-1] > 0.0 && lumIn[j] > 0.0) {
+            double alpha = log10(lumIn[j]/lumIn[j-1])*(log10(energy/energies[j])/log10(energies[j]/energies[j-1]));
+            double lum = lumIn[j-1]*pow(10.0,alpha);
+            return lum;
+        } else {
+            return 0.0;
+        }
+    }
+}
+
+double compton(Vector lumIn,Vector energies,double temp,int nE, int jE) {
+    
+    double om=energies[jE]/(electronMass*cLight2);
+    double normtemp=boltzmann*temp/electronMass/cLight2;
+    int nom=50;
+    int N=6;
+    double alf=0.0;
+    void gaulag(double *x, double *w, int n, double alf);
+    double *abscissas,*weights,*gamma,*c;
+    abscissas=dvector(1,N);
+    weights=dvector(1,N);
+    gamma=dvector(1,N);
+    c=dvector(1,N);
+    double sum1,sum2;
+    sum1=sum2=0.0;
+    gaulag(abscissas, weights,N,alf);
+    for (int i=1;i<=N;i++) {
+        gamma[i]=abscissas[i]*normtemp+1.0;
+        double beta=sqrt(1.0-1.0/(gamma[i]*gamma[i]));
+        c[i]=weights[i]*gamma[i]*sqrt(gamma[i]*gamma[i]-1.0);
+        double omprimmax = om/(1.0-beta*(1.0+2.0*om/gamma[i]));
+        double omprimmin = om*(1.0-beta)/(1.0+beta-2.0*om/gamma[i]);
+        if (omprimmin > 0.0 && omprimmax > omprimmin) {
+            double omratio = omprimmax/omprimmin;
+            //if (omratio < 1.0) return 0.0;
+            double var_int=pow(omratio,1.0/nom);
+            double omprim=omprimmin;//(omprimmin>0.0 ? omprimmin : 0.1);
+            double ka=0.0;
+            for (int j=1;j<nom;j++) {
+                omprim=omprim*var_int;
+                double domprim=omprim*(var_int-1.0);
+                double lumICin_v = lumICin(lumIn,energies,omprim,nE);
+                ka += lumICin_v*probexact(om,omprim,gamma[i])*domprim;
+            }
+            sum1 += c[i]*ka;
+            sum2 += c[i];
+        } else {
+            sum1 = 0.0;
+            sum2 = 1.0;
+        }
     }
     return sum1/sum2;
 }
 
-double compton(Vector lumIn,Vector energyprim,double frec,double temp,int nE,double Emax,double Emin) {
-    double frecprim,dfrecprim;
+void compton2(Vector& lumOut, double lumIn, Vector energies, double temp, int nE, int jE) {
+    
+    double omprim=energies[jE]/(electronMass*cLight2);
+    double var_int=pow(energies[nE-1]/energies[0],1.0/nE);
+    double dnuprim=energies[jE]/planck * (var_int-1.0);
+    double normtemp=boltzmann*temp/(electronMass*cLight2);
+    int nom=100;
+    int N=6;
+    double alf=0.0;
+    void gaulag(double *x, double *w, int n, double alf);
+    double *abscissas,*weights,*gamma,*c;
+    abscissas=dvector(1,N);
+    weights=dvector(1,N);
+    gamma=dvector(1,N);
+    c=dvector(1,N);
+    double sum2=0.0;
+    gaulag(abscissas, weights,N,alf);
+    Vector lumOut1(nE,0.0);
+    for (int i=1;i<=N;i++) {
+        gamma[i]=abscissas[i]*normtemp+1.0;
+        double beta=sqrt(1.0-1.0/(gamma[i]*gamma[i]));
+        c[i]=weights[i]*gamma[i]*sqrt(gamma[i]*gamma[i]-1.0);
+        double ommin = omprim*(1.0-beta)/(1.0+2.0*beta*omprim/gamma[i]);
+        double eps = omprim/gamma[i];
+        double aux = beta/(1.0+gamma[i]*(1.0+beta));
+        double ommax = (eps < aux ? omprim*(1.0+beta)/(1.0-beta+2.0*omprim/gamma[i]) 
+                                        : omprim+(gamma[i]-1.0));
+        double var_int_om=pow(ommax/ommin,1.0/nom);
+        double om=ommin;
+        for (int jjE=1;jjE<nom;jjE++) {
+            double lumOutAux=0.0;
+            om = om*var_int_om;
+            double dom=om*(var_int_om-1.0);
+            double lim1=sqrt(energies[1]*energies[0]);
+            double lim2;
+            double energy = om*(electronMass*cLight2);
+            int count=0;
+            lumOutAux = lumIn * probexact(om,omprim,gamma[i]) * c[i];
+            int jjjE=1;
+            while(count == 0 && jjjE < nE-2) {
+                lim2=sqrt(energies[jjjE]*energies[jjjE+1]);
+                if ( energy < lim2 && energy > lim1) {
+                    double dnu=energies[jjjE]/planck * (var_int-1.0);
+                    lumOut1[jjjE] += lumOutAux * dom/dnu;
+                    count=1;
+                } else {
+                    lim1=lim2;
+                    jjjE++;
+                }
+            }
+        }
+        sum2 += c[i];
+    }
+    
+    for (int jjE=0;jjE<nE;jjE++) {
+        lumOut1[jjE] *= dnuprim/sum2;
+        lumOut[jjE] += lumOut1[jjE];
+    }
+}
+
+
+/* double compton2(Vector lumIn,Vector energyprim,double energy,double temp,int nE) {
+    double omprim,domprim;
+    double om=energy/(electronMass*cLight2);
     double normtemp=boltzmann*temp/electronMass/cLight2;
-    double frecmax=Emax/planck;
-    double frecmin=Emin/planck;
-    double var_int=pow(frecmax/frecmin,1.0/(nE-1));
+    double ommax=energyprim[nE-1]/(electronMass*cLight2);
+    double ommin=energyprim[0]/(electronMass*cLight2);
+    double var_int=pow(ommax/ommin,1.0/(nE-1));
     double sum=0.0;
-    for (int i=0;i<nE;i++) {
-        frecprim=energyprim[i]/planck;
-        dfrecprim=frecprim*(var_int-1.0);
-        sum+=lumIn[i]*k(frec,frecprim,normtemp)*dfrecprim;
+    double omaux;
+    omprim=ommin;
+    for (int i=0;i<nE-1;i++) {
+        omprim=energyprim[i]/(electronMass*cLight2);
+        domprim=omprim*(var_int-1.0);
+        double ka=k(om,omprim,normtemp,ommin,ommax);
+        sum += lumIn[i]*ka*domprim;
+        double sum2=0.0;
+        for (int j=0;j<nE;j++) {
+            omaux=energyprim[j]/(electronMass*cLight2);
+            double dom=omaux*(var_int-1.0);
+            sum2 += probability(omaux,omprim,3.0,ommin,ommax)*dom;
+        }
+        cout << sum2 << endl;
     }
     return sum;
-}
+} */

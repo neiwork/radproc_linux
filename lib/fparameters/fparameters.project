@@ -8,8 +8,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="nrutil.h" ExcludeProjConfig="Debug;"/>
-    <File Name="nrutil.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="nrutil.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="nrutil.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="Dimension.h"/>
     <File Name="DimensionCoord.h"/>
     <File Name="DimensionIterator.h"/>
