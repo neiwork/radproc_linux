@@ -3,23 +3,16 @@
 #include <stdio.h>
 #include "modelParameters.h"
 #include "messages.h"
-//#include "targetFields.h"
-
-
-#include "probMatrix.h"
-
 #include "State.h"
-//#include "write.h"
+#include "write.h"
 //#include "radiativeLosses.h"
-
-//#include "torusSampling.h"
+#include "torusSampling2.h"
 
 //#include "distribution.h"
 //#include "luminosities.h"
 //#include "functions.h"
 
-
-
+#include <inout/ioutil.h>
 #include <fparticle/Particle.h>
 #include <fparameters/parameters.h>
 #include <fparameters/Dimension.h>
@@ -42,7 +35,7 @@ int main()
 		show_message(msgEnd, Module_state);
 		show_message(msgStart, Module_targetField);
 		
-		
+		torusSampling2();
         
 	}
 	

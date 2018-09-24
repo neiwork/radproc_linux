@@ -8,9 +8,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="probMatrix.cpp"/>
     <File Name="compton.cpp"/>
-    <File Name="probMatrix.h"/>
     <File Name="luminosityIC.cpp"/>
     <File Name="luminosityIC.h"/>
     <File Name="luminositySynchrotron.cpp"/>
@@ -57,6 +55,7 @@
         <IncludePath Value="."/>
         <IncludePath Value="../../lib"/>
         <IncludePath Value="../../external/include"/>
+        <IncludePath Value="../../gsl/include"/>
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../../lib/"/>

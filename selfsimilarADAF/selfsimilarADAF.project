@@ -8,21 +8,19 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="luminosities.h"/>
-    <File Name="luminosities.cpp"/>
+    <File Name="luminosities.h" ExcludeProjConfig="Debug"/>
+    <File Name="luminosities.cpp" ExcludeProjConfig="Debug"/>
     <File Name="State.h"/>
     <File Name="State.cpp"/>
     <File Name="modelParameters.h"/>
     <File Name="modelParameters.cpp"/>
     <File Name="main.cpp"/>
-    <File Name="probMatrix.cpp" ExcludeProjConfig="Debug"/>
-    <File Name="probMatrix.h" ExcludeProjConfig="Debug"/>
     <File Name="messages.cpp"/>
     <File Name="messages.h"/>
-    <File Name="torusSampling.cpp"/>
-    <File Name="torusSampling.h"/>
-    <File Name="torusSampling2.h" ExcludeProjConfig="Debug"/>
-    <File Name="torusSampling2.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="torusSampling2.h" ExcludeProjConfig=""/>
+    <File Name="torusSampling2.cpp" ExcludeProjConfig=""/>
+    <File Name="write.cpp"/>
+    <File Name="write.h"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
     <Project Name="fmath"/>
@@ -61,6 +59,7 @@
         <Library Value="ssADAF"/>
         <Library Value="fmath"/>
         <Library Value="fparameters"/>
+        <Library Value="inout"/>
         <Library Value="fluminosities"/>
         <Library Value="nrMath"/>
         <Library Value="boost_filesystem"/>

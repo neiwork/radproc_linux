@@ -1,8 +1,10 @@
 #include "State.h"
+#include "modelParameters.h"
+
 #include <ssADAF/ssfunctions.h>
 #include <ssADAF/ssADAF.h>
 #include <ssADAF/packageData.h>
-#include "modelParameters.h"
+
 #include <fparameters/Dimension.h>
 #include <fmath/physics.h>
 #include <fparameters/SpaceIterator.h>
@@ -36,25 +38,46 @@ State::State(boost::property_tree::ptree& cfg) :
 	
 	//constants();
 	dataADAF data;
+	
+	static const double massBH=GlobalConfig.get<double>("massBH")*solarMass;
+	static const double f=GlobalConfig.get<double>("f");
+	static const double alphapar=GlobalConfig.get<double>("alpha");
+	static const double betapar=GlobalConfig.get<double>("beta");
+	static const double rmin   = GlobalConfig.get<double>("rMin");
+	static const double rmax   = GlobalConfig.get<double>("rMax");
+	
+	static const double mdot=GlobalConfig.get<double>("mdot");
+	
+	double gammapar=(32.0-24.0*betapar-3.0*betapar*betapar)/(24.0-21.0*betapar);
+	
+	GlobalConfig.put("gammapar", gammapar);
 
-	data = (dataADAF){.massBH = massBH, .f = f, alphapar = alphapar, .betapar  = betapar, .rmin = rmin
-	.rmax = rmax, .eDensity = eDensity, .iDensity = iDensity, .magField = magField, .eTemp = eTemp}; 
+	data = (dataADAF){.massBH = massBH, .f = f, .alphapar = alphapar, .betapar  = betapar, .rmin = rmin, .rmax = rmax}; 
+	//, .eDensity = eDensity, .iDensity = iDensity, .magField = magField, .eTemp = eTemp}; 
 
 	
 	x[1]=(boltzmann*1.0e12)/(protonMass*cLight2);
 	x[2]=(boltzmann*1.0e9)/(electronMass*cLight2);
-	x[3]=1.0e-3;
+	x[3]=1.0e-3; //= mdot
 	photon.ps.iterate([&](const SpaceIterator& iR) {
 		double rB1=iR.val(DIM_R);
 		if(iR.its[DIM_R].canPeek(1)) {
 			
 			double rB2=iR.its[DIM_R].peek(1);
 			double r=sqrt(rB1*rB2);
+			
+			
+			data.eDensity = ne(x[3], r, massBH, alphapar, gammapar, f);
+			data.iDensity = ni(x[3], r, massBH, alphapar, gammapar, f);
+			data.magField = magf(x[3], r, massBH, betapar, alphapar, gammapar, f);
+			data.eTemp = x[1];
+
+	
 			adafSol(x, r, data);
-			photon.ps.iterate([&](const SpaceIterator& iTh)  {
-				magfield.set(iTh,magf(x[3]));
-				denf_e.set(iTh,ne(x[3]));
-				denf_i.set(iTh,ni(x[3]));
+			photon.ps.iterate([&](const SpaceIterator& iTh)  {  
+				magfield.set(iTh,magf(x[3], r, massBH, betapar, alphapar, gammapar, f));
+				denf_e.set(iTh,ne(x[3], r, massBH, alphapar, gammapar, f));
+				denf_i.set(iTh,ni(x[3], r, massBH, alphapar, gammapar, f));
 				tempElectrons.set(iTh,x[1]);
 				tempIons.set(iTh,x[2]);
 			},{0,iR.coord[DIM_R],-1});

@@ -3,6 +3,7 @@
 #include "modelParameters.h"
 #include "luminosities.h"
 #include "messages.h"
+#include "write.h"
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/parameters.h>
 #include <fparameters/nrutil.h>
@@ -22,7 +23,7 @@ using namespace std;
 void luminosities(State& st, const string& filename) {
    
 	show_message(msgStart, Module_luminosities);
-    ofstream file;
+    std::ofstream file;
 	file.open(filename.c_str(), ios::out);
 	file  << setw(10) << "frecuency [Hz]"
           << setw(10) << "Bremss"

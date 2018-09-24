@@ -6,6 +6,7 @@
   <Project Name="ssADAF" Path="../lib/ssADAF/ssADAF.project" Active="No"/>
   <Project Name="fparameters" Path="../lib/fparameters/fparameters.project" Active="No"/>
   <Project Name="fluminosities" Path="../lib/fluminosities/fluminosities.project" Active="No"/>
+  <Project Name="inout" Path="../lib/inout/inout.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
@@ -16,6 +17,7 @@
       <Project Name="ssADAF" ConfigName="Debug"/>
       <Project Name="fparameters" ConfigName="Debug"/>
       <Project Name="fluminosities" ConfigName="Debug"/>
+      <Project Name="inout" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
@@ -26,6 +28,7 @@
       <Project Name="ssADAF" ConfigName="Release"/>
       <Project Name="fparameters" ConfigName="Release"/>
       <Project Name="fluminosities" ConfigName="Release"/>
+      <Project Name="inout" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

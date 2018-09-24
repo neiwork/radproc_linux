@@ -1,16 +1,34 @@
 #include "torusSampling2.h"
 
-#include "functions.h"
 
-#include <nrMath/nrutil.h>
-#include <nrMath/random.h>
 
 #include <stdio.h>
-#include <math.h>
+//#include <math.h>
+//#include "torusSampling.h"
+//#include "auxFunctions.h"
+//#include "torusParameters.h"
 
-#define PI 3.14159265359
-#define thomson 6.652458734e-25
-#define RG 1.5e11
+#include <ssADAF/packageData.h>
+#include <ssADAF/ssfunctions.h>
+
+#include <boost/property_tree/ptree.hpp>
+#include <fparameters/Dimension.h>
+#include <fparameters/parameters.h>
+
+extern "C" {
+#include <nrMath/nrutil.h>
+//#include <nrMath/nr.h>
+#include <nrMath/random.h>
+}
+
+#include <fmath/constants.h>
+
+#include <stdio.h>
+
+
+//#define pi 3.14159265359
+//#define thomson 6.652458734e-25
+//#define RG 1.5e11
 #define RANDOM_GENERATOR gsl_rng_r250 /* R250 random number generator from GNU Scientific Library. */
 
 #define new_max(x,y) ((x) >= (y)) ? (x) : (y)
@@ -22,11 +40,32 @@ void torusSampling2()
 	FILE *fp2;
     fp2=fopen("prob.txt","w");
     
-	extern double *rCells, *r,paso,rMax,rMin;
-	extern int nR,nPhot,nTheta;
-    double thetaMin=0.0;
-    double thetaMax=PI/4.0;
+	//extern double *rCells, *r,paso,rMax,rMin;
+	//extern int nR,nPhot,nTheta;
+	
+	static const double massBH=GlobalConfig.get<double>("massBH")*solarMass;
+	static const double f=GlobalConfig.get<double>("f");
+	static const double alphapar=GlobalConfig.get<double>("alpha");
+	static const double gammapar=GlobalConfig.get<double>("gammapar");
+	static const double mdot=GlobalConfig.get<double>("mdot");
+	
+	
+	double RG= GlobalConfig.get<double>("rg");
+	
+	double rMin= GlobalConfig.get<double>("rMin"); //ver estos nombres
+	double rMax=GlobalConfig.get<double>("rMax"); //1.0e4;
+	int nR = GlobalConfig.get<double>("model.particle.default.dim.radius.samples");//100
+
+
+    long nPhot=1000;
+	
+	
+	double thetaMin=0.0;
+    double thetaMax=pi/4.0;
+	int nTheta= GlobalConfig.get<double>("model.particle.default.dim.theta.samples");//sale de aca o a mano?;
+	
 	double **prob;
+	double *rCells,*r;
 	
 	prob=dmatrix(1,nR,1,nR);
 	double pasoprim=pow(rMax/rMin,1.0/(nR*10.0));
@@ -49,15 +88,16 @@ void torusSampling2()
 			for(int j=1;j<=nPhot;j++) {
                 double random_number;
                 random_number=gsl_rng_uniform(RandomNumberGenerator);
-                double phiprim=2.0*PI*random_number;
+                double phiprim=2.0*pi*random_number;
                 random_number=gsl_rng_uniform(RandomNumberGenerator);
-                double thetaprim=acos((PI/2.0-random_number*PI)/(PI/2.0));        // Photon directions distributed
+                double thetaprim=acos((pi/2.0-random_number*pi)/(pi/2.0));        // Photon directions distributed
                 double rprim=drprim;                                                                                       // isotropically.
                 double rprimant=0.0;
                 double accumulatedp=0.0;
-                double ne;
+                double eDen;//este era ne pero lo reemplaze porque la funcion se llama ne
                 double r1,theta1;
-                double neant=eDensity(r[i],theta0);
+                
+				double neant = ne(mdot, r[i], massBH, alphapar, gammapar, f);  //double neant=eDensity(r[i],theta0); 
                 do {
                     int count=0;
                     double control;
@@ -75,11 +115,11 @@ void torusSampling2()
                         double z1=z0+zprim;
                         r1=sqrt(x1*x1+y1*y1+z1*z1);
                         theta1=atan(abs(z1)/sqrt(x1*x1+y1*y1));
-                        ne=eDensity(r1,theta1);  //definir las funciones
-                        control = new_abs(ne,neant)/(0.5*(ne+neant));                 // dn/n
+                        eDen=ne(mdot, r1, massBH, alphapar, gammapar, f); //eDensity(r1,theta1);  
+                        control = new_abs(eDen,neant)/(0.5*(eDen+neant));                 // dn/n
                         count++;
                     } while((control > 1.0e-2) && (drprim-drprimmin > 1.0e-10));
-                    double psc=ne*thomson*(drprim*RG);    // Probability of scattering.
+                    double psc=eDen*thomson*(drprim*RG);    // Probability of scattering.
                     double pescap=1.0-accumulatedp;       // Probability that a photon reaches the previous position.
                     for(int j=1;j<=nR;j++) {
                         if(r1 > rCells[j-1] && r1 < rCells[j]) prob[i][j] += psc*pescap; // Add the probability of
@@ -90,12 +130,12 @@ void torusSampling2()
                     accumulatedp+=psc;    // The product of (1-p_k) gives the probability for a photon to reach the
 										  // previous position. To first order, this is 1-sum(p_k). Hence, we accumulate
 										  // the sum of the p_k.
-                    neant=ne;
+                    neant=eDen;
                     rprimant=rprim;
 					pasoprim=new_min(pasoprim*pasoprim,pasoprimmax);
                     drprim=r1*(pasoprim-1.0);
                     rprim += drprim;
-                } while(ne > 1.0);               // Escape from the torus.
+                } while(eDen > 1.0);               // Escape from the torus.
             }
         }
         for(int j=1;j<=nR;j++) {
