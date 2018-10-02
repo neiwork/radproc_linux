@@ -5,13 +5,15 @@
 #define EPS 3.0e-8            // Machine doubleing-point precision.
 //#define float double
 
-double zbrent(double (*func)(double),double x1,double x2,double tol)
+//double zbrent(double (*func)(double),double x1,double x2,double tol)
+double zbrent(std::function<double(double)> func, double x1, double x2, double tol)
 /* Using Brent’s method, find the root of a function func known to lie between x1 and x2. The 
    root, returned as zbrent , will be refined until its accuracy is tol. */
 {
   int iter;
   double a=x1,b=x2,c=x2,d,e,min1,min2;
-  double fa=(*func)(a),fb=(*func)(b),fc,p,q,r,s,tol1,xm;
+  //double fa=(*func)(a),fb=(*func)(b),fc,p,q,r,s,tol1,xm;
+  double fa=func(a),fb=func(b),fc,p,q,r,s,tol1,xm;
 
   if ((fa > 0.0 && fb > 0.0) || (fa < 0.0 && fb < 0.0))
     nrerror("Root must be bracketed in zbrent");
@@ -65,7 +67,8 @@ double zbrent(double (*func)(double),double x1,double x2,double tol)
       b += d;
     else
       b += SIGN(tol1,xm);
-    fb=(*func)(b);
+    //fb=(*func)(b);
+	fb=func(b);
   }
   nrerror("Maximum number of iterations exceeded in zbrent");
   return 0.0;                 // Never get here.

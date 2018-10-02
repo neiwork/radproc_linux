@@ -54,12 +54,14 @@
         <LibraryPath Value="../lib/nrMath/Debug"/>
         <LibraryPath Value="../lib/fmath/Debug"/>
         <LibraryPath Value="../lib/fparameters/Debug"/>
+        <LibraryPath Value="../lib/fparticle/Debug"/>
         <LibraryPath Value="../lib/fluminosities/Debug"/>
         <LibraryPath Value="../lib/inout/Debug"/>
         <Library Value="ssADAF"/>
         <Library Value="fmath"/>
         <Library Value="fparameters"/>
         <Library Value="inout"/>
+        <Library Value="fparticle"/>
         <Library Value="fluminosities"/>
         <Library Value="nrMath"/>
         <Library Value="boost_filesystem"/>

@@ -14,8 +14,7 @@ public:
 	Particle photon;
 
 	ParamSpaceValues magfield;
-	ParamSpaceValues denf_i;
-    ParamSpaceValues denf_e;
+	ParamSpaceValues denf_i, denf_e;
     ParamSpaceValues tempElectrons, tempIons;
 
 	State(boost::property_tree::ptree& cfg);

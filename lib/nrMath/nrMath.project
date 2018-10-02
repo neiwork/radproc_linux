@@ -15,7 +15,7 @@
     <File Name="erff.cpp"/>
     <File Name="lnsrch.cpp"/>
     <File Name="ludcmp.cpp"/>
-    <File Name="newt.cpp"/>
+    <File Name="newt.cpp" ExcludeProjConfig=""/>
     <File Name="broydn.cpp"/>
     <File Name="bisection.cpp"/>
     <File Name="lubksb.cpp"/>

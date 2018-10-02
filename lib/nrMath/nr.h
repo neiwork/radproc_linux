@@ -13,6 +13,12 @@ embedded in a globally convergent strategy*/
 void broydn(double x[], int n, int *check,
 	    std::function<void(int, double [], double [])>);
 		
+
+void fdjac(int n, double x[], double fvec[], double **df,
+	std::function<void(int, double [], double [])> vecfunc);
+	
+//void fdjac(int n, float x[], float fvec2[], float **df,
+	//   void (*vecfunc)(int, float [], float []));
 /*
 #ifndef _NR_H_
 #define _NR_H_
@@ -188,8 +194,10 @@ float factrl(int n);
 void fasper(float x[], float y[], unsigned long n, float ofac, float hifac,
 	    float wk1[], float wk2[], unsigned long nwk, unsigned long *nout,
 	    unsigned long *jmax, float *prob);
-void fdjac(int n, double x[], double fvec[], double **df,
-	   void (*vecfunc)(int, double [], double []));
+
+
+//void fdjac(int n, double x[], double fvec[], double **df,
+	//   void (*vecfunc)(int, double [], double []));
 void fgauss(float x, float a[], float *y, float dyda[], int na);
 void fill0(double **u, int n);
 void fit(float x[], float y[], int ndata, float sig[], int mwt,

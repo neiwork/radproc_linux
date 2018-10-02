@@ -1,5 +1,6 @@
 #include <math.h>
 #include "nrutil.h"
+#include "nr.h"
 #include <functional>
 #define MAXITS 20000
 #define EPS 1.0e-30
@@ -7,7 +8,7 @@
 #define TOLX EPS
 #define STPMX 100.0
 #define TOLMIN 1.0e-30
-#define float double
+//#define float double
 /* Here MAXITS is the maximum number of iterations; EPS is a number close to the machine
 precision; TOLF is the convergence criterion on function values; TOLX is the convergence criterion
 on δx; STPMX is the scaled maximum step length allowed in line searches; TOLMIN is used to
@@ -18,15 +19,15 @@ decide whether spurious convergence to a minimum of fmin has occurred. */
     free_dvector(g,1,n);free_dvector(fvcold,1,n);free_dvector(d,1,n);\
     free_dvector(c,1,n);return;}
     
-int nn;                                                                                       // Global variables to communicate with fmin.
-float *fvec;
-//void (*nrfuncv)(int n, float v[], float f[]);
+int nn;                                                                                      // Global variables to communicate with fmin.
+double *fvec;
+//void (*nrfuncv)(int n, double v[], double f[]);
 
-std::function<void(int, float [], float [])> nrfuncv;
+std::function<void(int, double [], double [])> nrfuncv;
 
-void broydn(float x[], int n, int *check,
-    std::function<void(int, float [], float [])> vecfunc
-	//void (*vecfunc)(int, float [], float [])
+void broydn(double x[], int n, int *check,
+    std::function<void(int, double [], double [])> vecfunc
+	//void (*vecfunc)(int, double [], double [])
 	)
 /* Given an initial guess x[1..n] for a root in n dimensions, find the root by Broyden’s method
 embedded in a globally convergent strategy. The vector of functions to be zeroed, called
@@ -36,17 +37,17 @@ is false (0) on a normal return and true (1) if the routine has converged to a l
 of the function fmin or if Broyden’s method can make no further progress. In this case try
 restarting from a different initial guess. */
 {
-    void fdjac(int n, float x[], float fvec[], float **df,
-	std::function<void(int, float [], float [])> vecfunc);
+    //void fdjac(int n, double x[], double fvec[], double **df,
+	//std::function<void(int, double [], double [])> vecfunc);
     double fmin1(double x[]);
-    void lnsrch(int n, float xold[], float fold, float g[], float p[], float x[],
-        float *f, float stpmax, int *check, float (*func)(float []));
-    void qrdcmp(float **a, int n, float *c, float *d, int *sing);
-    void qrupdt(float **r, float **qt, int n, float u[], float v[]);
-    void rsolv(float **a, int n, float d[], float b[]);
+    void lnsrch(int n, double xold[], double fold, double g[], double p[], double x[],
+        double *f, double stpmax, int *check, double (*func)(double []));
+    void qrdcmp(double **a, int n, double *c, double *d, int *sing);
+    void qrupdt(double **r, double **qt, int n, double u[], double v[]);
+    void rsolv(double **a, int n, double d[], double b[]);
     int i,its,j,k,restrt,sing,skip;
-    float den,f,fold,stpmax,sum,temp,test,*c,*d,*fvcold;
-    float *g,*p,**qt,**r,*s,*t,*w,*xold;
+    double den,f,fold,stpmax,sum,temp,test,*c,*d,*fvcold;
+    double *g,*p,**qt,**r,*s,*t,*w,*xold;
     
     c=dvector(1,n);
     d=dvector(1,n);
@@ -71,7 +72,7 @@ restarting from a different initial guess. */
         FREERETURN
     }
     for (sum=0.0,i=1;i<=n;i++) sum += SQR(x[i]);               // Calculate stpmax for line searches.
-    stpmax=STPMX*FMAX(sqrt(sum),(float)n);
+    stpmax=STPMX*FMAX(sqrt(sum),(double)n);
     restrt=1;                                                                                     // Ensure initial Jacobian gets computed.
     for (its=1;its<=MAXITS;its++) {                                           // Start of iteration loop.
         if (restrt) {
@@ -179,14 +180,14 @@ restarting from a different initial guess. */
     FREERETURN
 }
 
-void rsolv(float **a, int n, float d[], float b[])
+void rsolv(double **a, int n, double d[], double b[])
 /* Solves the set of n linear equations R · x = b, where R is an upper triangular matrix stored in
      a and d . a[1..n][1..n] and d[1..n] are input as the output of the routine qrdcmp and
      are not modified. b[1..n] is input as the right-hand side vector, and is overwritten with the
      solution vector on output. */
 {
     int i,j;
-    float sum;
+    double sum;
     
     b[n] /= d[n];
     for (i=n-1;i>=1;i--) {
@@ -195,7 +196,7 @@ void rsolv(float **a, int n, float d[], float b[])
     }
 }
 
-void qrdcmp(float **a, int n, float *c, float *d, int *sing)
+void qrdcmp(double **a, int n, double *c, double *d, int *sing)
 /* Constructs the QR decomposition of a[1..n][1..n] . The upper triangular matrix R is re-
      turned in the upper triangle of a , except for the diagonal elements of R which are returned in
      d[1..n] . The orthogonal matrix Q is represented as a product of n − 1 Householder matrices
@@ -205,7 +206,7 @@ void qrdcmp(float **a, int n, float *c, float *d, int *sing)
      completed in this case; otherwise it returns false ( 0 ). */
 {
     int i,j,k;
-    float scale,sigma,sum,tau;
+    double scale,sigma,sum,tau;
 
     *sing=0;
     for (k=1;k<n;k++) {
@@ -232,12 +233,12 @@ void qrdcmp(float **a, int n, float *c, float *d, int *sing)
     if (d[n] == 0.0) *sing=1;
 }
 
-void qrupdt(float **r, float **qt, int n, float u[], float v[])
+void qrupdt(double **r, double **qt, int n, double u[], double v[])
 /* Given the QR decomposition of some n × n matrix, calculates the QR decomposition of the
      matrix Q · (R+ u ⊗ v). The quantities are dimensioned as r[1..n][1..n] , qt[1..n][1..n] ,
      u[1..n] , and v[1..n] . Note that Q T is input and returned in qt. */
 {
-    void rotate(float **r, float **qt, int n, int i, float a, float b);
+    void rotate(double **r, double **qt, int n, int i, double a, double b);
     int i,j,k;
     for (k=n;k>=1;k--) {                            // Find largest k such that u[k]  = 0.
         if (u[k]) break;
@@ -257,14 +258,14 @@ void qrupdt(float **r, float **qt, int n, float u[], float v[])
 
 #include <math.h>
 #include "nrutil.h"
-void rotate(float **r, float **qt, int n, int i, float a, float b)
+void rotate(double **r, double **qt, int n, int i, double a, double b)
 /* Given matrices r[1..n][1..n] and qt[1..n][1..n] , carry out a Jacobi rotation
      √ on rows 
      i and i + 1 √ of each matrix. a and b are the parameters of the rotation: cos θ = a/ a 2 + b 2 ,
      sin θ = b/ a 2 + b 2. */
 {
     int j;
-    float c,fact,s,w,y;
+    double c,fact,s,w,y;
     if (a == 0.0) {                             // Avoid unnecessary overflow or underflow.
         c=0.0;
         s=(b >= 0.0 ? 1.0 : -1.0);

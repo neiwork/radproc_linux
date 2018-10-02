@@ -15,11 +15,11 @@
 #include <fparameters/Dimension.h>
 #include <fparameters/parameters.h>
 
-extern "C" {
+//extern "C" {
 #include <nrMath/nrutil.h>
 //#include <nrMath/nr.h>
 #include <nrMath/random.h>
-}
+//}
 
 #include <fmath/constants.h>
 

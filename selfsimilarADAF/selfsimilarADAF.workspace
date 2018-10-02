@@ -7,6 +7,7 @@
   <Project Name="fparameters" Path="../lib/fparameters/fparameters.project" Active="No"/>
   <Project Name="fluminosities" Path="../lib/fluminosities/fluminosities.project" Active="No"/>
   <Project Name="inout" Path="../lib/inout/inout.project" Active="No"/>
+  <Project Name="fparticle" Path="../lib/fparticle/fparticle.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
@@ -18,6 +19,7 @@
       <Project Name="fparameters" ConfigName="Debug"/>
       <Project Name="fluminosities" ConfigName="Debug"/>
       <Project Name="inout" ConfigName="Debug"/>
+      <Project Name="fparticle" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
@@ -29,6 +31,7 @@
       <Project Name="fparameters" ConfigName="Release"/>
       <Project Name="fluminosities" ConfigName="Release"/>
       <Project Name="inout" ConfigName="Release"/>
+      <Project Name="fparticle" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>
