@@ -8,6 +8,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="luminosityHadronic.h" ExcludeProjConfig=""/>
+    <File Name="luminosityHadronic.cpp" ExcludeProjConfig=""/>
     <File Name="probaprox.h"/>
     <File Name="probaprox.cpp"/>
     <File Name="probexact.cpp"/>
@@ -35,8 +37,6 @@
   <VirtualDirectory Name="falta">
     <File Name="annihilationLine.cpp" ExcludeProjConfig="Debug;Release"/>
     <File Name="annihilationLine.h" ExcludeProjConfig="Debug;Release"/>
-    <File Name="luminosityHadronic.cpp" ExcludeProjConfig="Debug;Release"/>
-    <File Name="luminosityHadronic.h" ExcludeProjConfig="Debug;Release"/>
     <File Name="luminosityPhotoHadronic.cpp" ExcludeProjConfig="Debug;Release"/>
     <File Name="luminosityPhotoHadronic.h" ExcludeProjConfig="Debug;Release"/>
   </VirtualDirectory>

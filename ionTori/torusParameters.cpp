@@ -231,10 +231,11 @@ double temp_i(double r, double theta) {
     
     static const double M_0 = GlobalConfig.get<double>("M_0");
     static const double M_1 = GlobalConfig.get<double>("M_1");
+	static const double mu_e = GlobalConfig.get<double>("mu_e");
     static const double mu_i = GlobalConfig.get<double>("mu_i");
     static const double beta = GlobalConfig.get<double>("beta");
     
-    return (w(r, theta) > 0.0) ? ( (1 - w(r, theta))*M_0 + w(r, theta)*M_1 ) *
+    return (w(r, theta) > 0.0) ? (mu_e/mu_i * M_0 + w(r,theta)*(M_0-M_1)) *
                 mu_i * ( (1.0-beta)*atomicMassUnit*pressureTot(r, theta) ) / ( boltzmann * energyDensity(r, theta) ) + 2.7: 2.7;
 }
 

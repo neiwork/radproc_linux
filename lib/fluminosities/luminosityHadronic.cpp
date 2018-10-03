@@ -1,86 +1,55 @@
 #include "luminosityHadronic.h"
 
 
-#include <fparameters\parameters.h>
-#include <fmath\RungeKutta.h>
-#include <fmath\interpolation.h>
-#include <flosses\crossSectionInel.h>
-#include <fmath\physics.h>
+#include <fparameters/parameters.h>
+#include <fmath/RungeKutta.h>
+#include <fmath/interpolation.h>
+#include <flosses/crossSectionInel.h>
+#include <fmath/physics.h>
 #include <algorithm>
 
-double fHadron(double x, Particle& creator)         //funcion a integrar   x=Ecreator; L=L(Ega)
-{
-
+double fHadron(double x, const Particle& p,
+	const double density, const SpaceCoord& psc) //funcion a integrar   x=Ecreator; L=L(Ega)
+{	
 	double Kpi = 0.17;
-
-	double eval = creator.mass*cLight2+x/Kpi;
-
+	double eval = p.mass*cLight2+x/Kpi;
 	double Ekin = x/Kpi;
-
-	//distCreator = creator.distribution.interpolate({ { 0, eval } }, &psc); 
-	double distCreator = creator.dist(eval);
-
+	double distCreator=0.0;
+	if (x < p.emax() && x < p.emin()) {
+		distCreator = p.distribution.interpolate({ { 0, x } }, &psc);
+	}
+	
 	double thr = 0.0016; //1GeV
+	//double sigma = 30e-27*(0.95+0.06*log(Ekin/thr));
+	
+	double l = log10((protonMass*cLight2+x/Kpi)/1.6);
+	double sigma = 1.e-27 * (34.3+1.88*l+0.25*l*l);
 
-	double sigma = 30e-27*(0.95+0.06*log(Ekin/thr));
+	//const double density = denfdensity.get(psc);
 
 	double pionEmiss = cLight*density*sigma*distCreator/Kpi;  //sigma = crossSectionHadronicDelta(Ekin)
-															  //lo saco asi pongo la condicion Ekin > Ethr en el limite de la int
-
-	double result = pionEmiss/(pow(P2(x)-P2(chargedPionMass*cLight2),0.5));
-
+							//lo saco asi pongo la condicion Ekin > Ethr en el limite de la int
+	double result = pionEmiss/sqrt(P2(x)-P2(neutralPionMass*cLight2));
 	return result;
 }
 
 
-double luminosityHadronic(double E, Particle& creator)
+double luminosityHadronic(double E, const Particle& creator,
+	const double density, const SpaceCoord& psc)
 {
 	double Kpi = 0.17;
 	double thr = 0.0016; //1GeV
 
 	double Max  = 1.6e-12*pow(10.0,17.0);   //esto es un infinito 
-	double Min  = std::max(E+P2(chargedPionMass*cLight2)/(4*E),thr*Kpi); //aca pongo la condicion Ekin > Ethr
+	double Min  = std::max(E+P2(neutralPionMass*cLight2)/(4*E),thr*Kpi); //== Ekin > Ethr
 
-	//Data data;
+	double integral = RungeKuttaSimple(Min, Max, 
+		[&](double x) {return fHadron(x, creator, density, psc); }
+	);    //integra entre Emin y Emax
 
-	//data.E = E;
-	//data.mass = creator.mass;
-	//data.Ncreator = Ncreator;
-	//data.Ecreator = creator.energyPoints;
- //
-	double integral = RungeKuttaSimple(Min, Max, [&creator](double x){
-		return fHadron(x,creator);
-	});    //integra entre Emin y Emax
-
-	double luminosity = integral*P2(E)*volume; //multiplico por E asi obtengo luminosidad
-
+	double luminosity = integral*E*planck*0.25/pi; // [erg s^-1 Hz^-1 cm^-3]
 	return luminosity; //P2(Dlorentz);  
 
 	//Dlorentz es el factor que transforma las distribuciones en el caso de jets
 	// con /P2(Dlorentz) paso del sist de lab al sist comoving con el jet ;   
 }
-
-
-
-/* 	if (x > 0.1e12*1.6e-12){
-
-		double distCreator = interpolMod(x,Ecreator,Ncreator,Ncreator.size()-1);
-
-		double L = log(E/1.6);  //el 1.6 son TeV en erg
-
-		double equis = E/x;
-
-		double Bga  = 1.30+0.14*L+0.011*P2(L);
-
-		double beta = pow(1.79+0.11*L+0.008*P2(L),-1);
-
-		double factor = pow(equis,beta);
-
-		double kga  = pow(0.801+0.049*L+0.014*P2(L),-1); 
-
-		double f = Bga*(log(equis)/equis)*pow((1-factor)/(1+kga*factor*(1-factor)),4)*
-				   (1/log(x)-4*beta*factor/(1-factor)-4*kga*beta*factor*(1-2*factor)/(1+kga*factor*(1-factor)));
- 
-		result = cLight*density*crossSectionHadronic(x)*distCreator*f/x;
-	}
-	else {*/

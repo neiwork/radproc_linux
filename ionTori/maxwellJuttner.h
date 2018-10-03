@@ -4,4 +4,4 @@
 double f_norm(double g, double norm_temp);
 
 
-double maxwellRel(double E, double T, double mass);
+double maxwellRel(double g, double temp, double norm);

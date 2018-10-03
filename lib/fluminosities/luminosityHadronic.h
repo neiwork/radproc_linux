@@ -1,6 +1,10 @@
 #pragma once
 
-#include <fparticle\particle.h>
+#include <fparticle/Particle.h>
 
+/*[erg s^-1 cm^-3 ]*/
+double luminosityHadronic(double E, const Particle& creator,
+	const double density, const SpaceCoord& psc);
 
-double luminosityHadronic(double E, Particle& creator);
+//double luminosityHadronic(double E, const Particle& creator,
+//	const ParamSpaceValues& denf, const SpaceCoord& psc);

@@ -1,18 +1,41 @@
 #include "probexact.h"
 #include <math.h>
 #include <fmath/physics.h>
+#include <fmath/RungeKutta.h>
+
+double f(double x)
+{
+	return (1.0-4.0/x-8.0/(x*x))*log(1.0+x)+0.5+8.0/x-0.5/((1.0+x)*(1.0+x));
+}
 
 double rate(double om, double gamma)
 {
+	double f(double);
 	double beta=sqrt(1.0-1.0/(gamma*gamma));
-    
-    if (beta < 1.0e-2 && om < 1.0e-2) {
-        return cLight*thomson*(1.0-2.0*gamma*om);
+	double y=gamma*om;
+    double cte = 3.0*cLight*thomson/(8.0*y);
+	
+    if (beta < 1.0e-3 && om < 1.0e-3) {
+        return cLight*thomson*(1.0-2.0*y);
     } else {
-        double cte=3.0*cLight*thomson/(32.0*(gamma*om)*(gamma*om)*beta);
-        double min=2.0*gamma*om*(1.0-beta);
-        double max=2.0*gamma*om*(1.0+beta);
-        int nX=100;
+		if (om < 1.0/(2.0*gamma*(1.0+beta))) {
+			return cLight*thomson*(1.0-2.0*y/3.0 * (3.0 +beta*beta));
+		} else {
+			if (2.0 < gamma < 30.0 && 0.01 < om < 30.0) {
+				return cte*( (1.0-2.0/y-2.0/(y*y))*log(1.0+2.0*y)+0.5+4.0/y-0.5/P2(1.0+2.0*y) );
+			} else {
+				if (om > 1.0e2/(4.0*gamma) && gamma > 1.0e2) {
+					return cte*log(4.0*y);
+				} else {
+					double min=2.0*y*(1.0-beta);
+					double max=2.0*y*(1.0+beta);
+					return cte/(3.0*beta*y) * RungeKuttaSimple(min,max,f);
+				}
+			}
+		}
+	}
+
+/*        int nX=100;
         double sum=0.0;
         double x_int=pow(max/min,1.0/nX);
         double x = min;
@@ -24,15 +47,15 @@ double rate(double om, double gamma)
             x = x*x_int;
         }
         double result = cte*sum;
-        return result;
-    }
+*/		
+
+  //  }
 }
 
 double dPdz(double om,double omprim,double gamma,double z) {
     
     double beta=sqrt(1.0-1.0/(gamma*gamma));
     double rho=om/omprim;
-    rho=10.0;
     double epsi=omprim/gamma;
     double ka=gamma/om;
     double aux=rho*(beta*beta+epsi*epsi+2.0*beta*epsi*z);
@@ -67,16 +90,20 @@ double probexact(double om,double omprim,double gamma)
     double aux1=sqrt(d*d-1.0/(gamma*gamma));
     double auxmax= (1.0 - rho*(d-aux1))/beta;
     double auxmin=(1.0-rho*(d+aux1))/beta;
-    double zmax= (0.99 > auxmax ? auxmax : 1.0);
-    double zmin= (-0.99 < auxmin ? auxmin : -1.0);
-    int nZ=100;
-    double dz=(zmax-zmin)/nZ;
+    double zmax= (1.0 > auxmax ? auxmax : 0.99999);
+    double zmin= (-1.0 < auxmin ? auxmin : -0.99999);
+
+/*    int nZ=100;
+    double dz=(zmax-zmin)/(nZ-1.0);
     double sum=0.0;
     double z=zmin;
+	
     for (int i=0;i<nZ;i++) {
         double dprob=dPdz(om,omprim,gamma,z);
         sum += dprob * dz;
         z += dz;
-    }
-    return (sum > 0.0 ? sum : 0.1);
+    }*/    	
+	
+	double result = RungeKuttaSimple(zmin,zmax,[&](double z){return dPdz(om,omprim,gamma,z);});
+	return (result > 0.0 ? result : 0.0);
 }

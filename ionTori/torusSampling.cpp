@@ -34,9 +34,9 @@ void torusSampling(State& st, Matrix& prob)
     //double rMax=edge();
 	double rMax=GlobalConfig.get<double>("rEdge");
 
-    int nR = GlobalConfig.get<double>("model.particle.default.dim.radius.samples");//100
-	int nTheta= GlobalConfig.get<double>("model.particle.default.dim.theta.samples");//10;
-    long nPhot=100;
+    int nR = GlobalConfig.get<int>("model.particle.default.dim.radius.samples");//100
+	int nTheta= GlobalConfig.get<int>("model.particle.default.dim.theta.samples");//10;
+    long nPhot=GlobalConfig.get<long>("nPhotMatrix");
    
 	// FILE *fp1, *fp2;
     //fp1=fopen("torus.txt","w");

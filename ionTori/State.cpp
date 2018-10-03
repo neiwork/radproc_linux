@@ -12,17 +12,16 @@
 State::State(boost::property_tree::ptree& cfg) :
  electron{ "electron" },
  photon{ "photon" },
- //proton("proton"),
+ proton("proton"),
  magf(photon.ps, false),
  tempElectrons(photon.ps, false),
  tempIons(photon.ps, false),
- tpf1(photon.ps, false),
- tpf2(photon.ps, false),
  denf_i(photon.ps, false),
  denf_e(photon.ps, false)
  {
 	particles.push_back(&electron);
 	particles.push_back(&photon);
+	particles.push_back(&proton);
 	for (auto p : particles) {
 		initializeParticle(*p, cfg);
 	}

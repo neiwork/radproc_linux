@@ -98,6 +98,10 @@ void show_module(ProgramModule module)
 		case Module_electronInjection:
             printf("Injection of electrons");
             break;
+			
+		case Module_torusSampling:
+			printf("Scattering Matrix");
+			break;
       
         case Module_Message:
             printf("message ");

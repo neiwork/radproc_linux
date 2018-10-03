@@ -3,6 +3,7 @@
 #include "probaprox.h"
 #include <math.h>
 #include <fmath/mathFunctions.h>
+#include <fmath/RungeKutta.h>
 //#include <fmath/laguerre.h>
 //#include <fparameters/nrutil.h>
 extern "C" {
@@ -64,7 +65,7 @@ double compton(Vector lumIn,Vector energies,double temp,int nE, int jE) {
     
     double om=energies[jE]/(electronMass*cLight2);
     double normtemp=boltzmann*temp/electronMass/cLight2;
-    int nom=50;
+    int nOm=100;
     int N=6;
     double alf=0.0;
     void gaulag(double *x, double *w, int n, double alf);
@@ -76,41 +77,40 @@ double compton(Vector lumIn,Vector energies,double temp,int nE, int jE) {
     double sum1,sum2;
     sum1=sum2=0.0;
     gaulag(abscissas, weights,N,alf);
+	
     for (int i=1;i<=N;i++) {
         gamma[i]=abscissas[i]*normtemp+1.0;
         double beta=sqrt(1.0-1.0/(gamma[i]*gamma[i]));
         c[i]=weights[i]*gamma[i]*sqrt(gamma[i]*gamma[i]-1.0);
-        double omprimmax = om/(1.0-beta*(1.0+2.0*om/gamma[i]));
-        double omprimmin = om*(1.0-beta)/(1.0+beta-2.0*om/gamma[i]);
-        if (omprimmin > 0.0 && omprimmax > omprimmin) {
-            double omratio = omprimmax/omprimmin;
+        double omPrimMax = om/(1.0-beta*(1.0+2.0*om/gamma[i]));
+        double omPrimMin = om*(1.0-beta)/(1.0+beta-2.0*om/gamma[i]);
+        if (omPrimMin > 0.0 && omPrimMax > omPrimMin) {
+            double omRatio = omPrimMax/omPrimMin;
             //if (omratio < 1.0) return 0.0;
-            double var_int=pow(omratio,1.0/nom);
-            double omprim=omprimmin;//(omprimmin>0.0 ? omprimmin : 0.1);
+            double var_int=pow(omRatio,1.0/nOm);
+            double omPrim=omPrimMin;//(omprimmin>0.0 ? omprimmin : 0.1);
             double ka=0.0;
-            for (int j=1;j<nom;j++) {
-                omprim=omprim*var_int;
-                double domprim=omprim*(var_int-1.0);
-                double lumICin_v = lumICin(lumIn,energies,omprim,nE);
-                ka += lumICin_v*probexact(om,omprim,gamma[i])*domprim;
+            for (int jOm=1;jOm<nOm;jOm++) {
+                omPrim=omPrim*var_int;
+                double dOmPrim=omPrim*(var_int-1.0);
+                double lumICin_v = lumICin(lumIn,energies,omPrim,nE);
+                ka += lumICin_v*probexact(om,omPrim,gamma[i])*dOmPrim;
             }
             sum1 += c[i]*ka;
-            sum2 += c[i];
-        } else {
-            sum1 = 0.0;
-            sum2 = 1.0;
         }
+		sum2 += c[i];
     }
     return sum1/sum2;
 }
 
-void compton2(Vector& lumOut, double lumIn, Vector energies, double temp, int nE, int jE) {
-    
-    double omprim=energies[jE]/(electronMass*cLight2);
+void compton2(Matrix& lumOut, double lumIn, Vector energies, 
+				double temp, int nE, int jEprim, int jR) 
+{    
+    double omPrim=energies[jEprim]/(electronMass*cLight2);
     double var_int=pow(energies[nE-1]/energies[0],1.0/nE);
-    double dnuprim=energies[jE]/planck * (var_int-1.0);
+    double dnuprim=energies[jEprim]/planck * (var_int-1.0);
     double normtemp=boltzmann*temp/(electronMass*cLight2);
-    int nom=100;
+    int nOm=100;
     int N=6;
     double alf=0.0;
     void gaulag(double *x, double *w, int n, double alf);
@@ -126,41 +126,93 @@ void compton2(Vector& lumOut, double lumIn, Vector energies, double temp, int nE
         gamma[i]=abscissas[i]*normtemp+1.0;
         double beta=sqrt(1.0-1.0/(gamma[i]*gamma[i]));
         c[i]=weights[i]*gamma[i]*sqrt(gamma[i]*gamma[i]-1.0);
-        double ommin = omprim*(1.0-beta)/(1.0+2.0*beta*omprim/gamma[i]);
-        double eps = omprim/gamma[i];
+        double omMin = omPrim*(1.0-beta)/(1.0+2.0*beta*omPrim/gamma[i]);
+        double eps = omPrim/gamma[i];
         double aux = beta/(1.0+gamma[i]*(1.0+beta));
-        double ommax = (eps < aux ? omprim*(1.0+beta)/(1.0-beta+2.0*omprim/gamma[i]) 
-                                        : omprim+(gamma[i]-1.0));
-        double var_int_om=pow(ommax/ommin,1.0/nom);
-        double om=ommin;
-        for (int jjE=1;jjE<nom;jjE++) {
+        double omMax = (eps < aux ? omPrim*(1.0+beta)/(1.0-beta+2.0*omPrim/gamma[i]) 
+                                        : omPrim+(gamma[i]-1.0));
+		Vector probab(nOm,0.0);
+		
+		double probtotexact = RungeKuttaSimple(omMin,omMax,[&](double om)
+						{return probexact(om,omPrim,gamma[i]);});    // DEBERÍAN DAR 1
+		
+/*		for (int jOm=1;jOm<nOm;jOm++) {
+			om *= var_int_om;
+			double dOm=om*(var_int_om-1.0);
+			probab[jOm]=probexact(om,omprim,gamma[i])/probtotexact;
+			//probab[jOm]=probaprox(om,omprim,gamma[i],omMin,omMax);
+			if (probab[jOm] < 0.0) cout << "ERROR" << endl;
+			//lumOutAux2 += probab[jOm] * dOm;
+		}*/
+		
+		// POR AHORA PROBAMOS CON ESTO
+		
+		
+		double var_int_om=pow(omMax/omMin,1.0/nOm);
+		//double var_int_om_aprox=pow(omMax_aprox/omMin_aprox,1.0/nOm);
+		
+		if (probtotexact > 0.0) {
+		
+		double om=omMin;
+		int jE=1;
+		for (int jOm=1;jOm<nOm;jOm++) {
+			om *= var_int_om;
+			double dOm=om*(var_int_om-1.0);
+			probab[jOm]=probexact(om,omPrim,gamma[i])/probtotexact;
+			if (probab[jOm] < 0.0) cout << "ERROR" << endl;
+			
+			double lim1=sqrt(energies[1]*energies[0]);
+			double lim2;
+			double energy = om * (electronMass*cLight2);
+			double lumOutAux = lumIn * (om/omPrim) * probab[jOm];
+			int count=0;
+			while (count == 0 && jE < nE-2) {
+				lim2 = sqrt(energies[jE]*energies[jE+1]);
+				if ( energy < lim2 && energy > lim1) {
+					double dnu = (lim2-lim1)/planck;
+					lumOut1[jE] += lumOutAux * c[i] * dOm/dnu;
+					count++;
+				} else {
+					lim1=lim2;
+					jE++;
+				}
+			}
+		}
+		
+		}
+		
+		sum2 += c[i];
+	}
+
+/*		om=omMin;
+        for (int jOm=1;jOm<nOm;jOm++) {
             double lumOutAux=0.0;
             om = om*var_int_om;
-            double dom=om*(var_int_om-1.0);
+            double dOm=om*(var_int_om-1.0);
             double lim1=sqrt(energies[1]*energies[0]);
             double lim2;
             double energy = om*(electronMass*cLight2);
             int count=0;
-            lumOutAux = lumIn * probexact(om,omprim,gamma[i]) * c[i];
-            int jjjE=1;
-            while(count == 0 && jjjE < nE-2) {
-                lim2=sqrt(energies[jjjE]*energies[jjjE+1]);
+            lumOutAux = lumIn * probab[jOm] * c[i] * dOm;
+			if (lumOutAux2 > 0.0) lumOutAux /= lumOutAux2;
+            int jE=1;
+            while(count == 0 && jE < nE-2) {
+                lim2=sqrt(energies[jE]*energies[jE+1]);
                 if ( energy < lim2 && energy > lim1) {
-                    double dnu=energies[jjjE]/planck * (var_int-1.0);
-                    lumOut1[jjjE] += lumOutAux * dom/dnu;
-                    count=1;
+                    double dnu=(lim2-lim1)/planck;
+                    lumOut1[jE] += lumOutAux /dnu;
+                    count++;
                 } else {
                     lim1=lim2;
-                    jjjE++;
+                    jE++;
                 }
             }
         }
         sum2 += c[i];
-    }
-    
-    for (int jjE=0;jjE<nE;jjE++) {
-        lumOut1[jjE] *= dnuprim/sum2;
-        lumOut[jjE] += lumOut1[jjE];
+    }*/
+	
+    for (int jE=0;jE<nE;jE++) {
+        lumOut[jE][jR] += lumOut1[jE] * dnuprim /sum2;
     }
 }
 

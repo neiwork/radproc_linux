@@ -16,7 +16,7 @@ void prepareGlobalCfg()
     static const double energyC = GlobalConfig.get<double>("energyC");
 	static const double beta = GlobalConfig.get<double>("beta");*/
     
-	static const double Mbh=GlobalConfig.get<double>("massBH")*solarMass*4.0e8;
+	static const double Mbh=GlobalConfig.get<double>("realMassBH")*solarMass;
 	double rg=gravitationalConstant*Mbh/cLight2;
     GlobalConfig.put("rg", rg);
 	
@@ -80,7 +80,7 @@ void initializeThetaPoints(Vector& v,double min,double max)
     }
 */
 	double dv=(max-min)/v.size();
-	v[0]=min+dv/2.0;
+	v[0]=min;
 	for (size_t i=1;i<v.size();++i) {
 		v[i]=v[i-1]+dv;
 	}

@@ -1,17 +1,20 @@
 {
 	"id":"Sgr A*",
 	"massBH":"1.0",
-	"spinBH":"0.99",
+	"realMassBH":"4.0e8",
+	"spinBH":"0.97",
 	"n":"1.5",
-	"temp_ec":"1.0e11",
+	"temp_ec":"1.0e9",
 	"xi":"1.0e-3",
 	"lambda":"0.7",
 	"mu_i":"1.23",
         "mu_e":"1.14",
         "zgap":"2.0",
 
-	"energyC":"1.0e-17",
+	"energyC":"1.0e-15",
 	"beta":"0.5",
+
+	"nPhotMatrix":"1000",
 
 	"file": {
 		"luminosity":"ntLuminosity.txt",
@@ -28,25 +31,25 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":150
+						"samples":300
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":20
+						"samples":50
 					},
 					"theta":{
 						"min":0.0,
-						"max":0.2,
-						"samples":4
+						"max":0.8,
+						"samples":10
 					}
 				}
 			},
 			"photon": {
 				"dim":{
 					"energy": {
-						"min":-10.0,
-						"max":9.0
+						"min":-8.0,
+						"max":14.0
 					}
 				}
 			},
@@ -58,6 +61,15 @@
 						"max":7.0
 					}
 				}
+			},
+			"proton": {
+				"mass":1.67262e-24,
+				"dim":{
+					"energy": {
+						"min":8.98,
+						"max":15.0
+					}
+				}
 			}
 		}
 	},
@@ -65,7 +77,7 @@
 	"math": {
 		"runge-kutta-1": {
 			"samples": {
-				"x": 50
+				"x": 100
 			}
 		},
 

@@ -3,7 +3,7 @@
 #include <fmath/physics.h>
 #include <fmath/mathFunctions.h>
 
-double rate(double om, double gamma)
+double rate1(double om, double gamma)
 {
 	double beta=sqrt(1.0-1.0/(gamma*gamma));
     
@@ -54,7 +54,7 @@ double omprom(double omprim, double gamma)  //<w>
         double sum = 0.0;
         double dmu = (max-min)/nMu;
         double mu = min;
-        double r=rate(omprim,gamma);
+        double r=rate1(omprim,gamma);
         for (int i=0; i<nMu;++i)
         {
             double x = gamma*omprim*(1.0-beta*mu);
@@ -89,7 +89,7 @@ double pmualpha(double omprim, double gamma, double beta, double alpha, double m
     double xprim = x/(1.0+(1.0-alpha)*x);
     double y=xprim/x;
     double dom_da = 3.0/8.0 * thomson * y*y * (1.0/y + y - 1.0 + alpha*alpha);
-    double result=cLight*(1.0-beta*mu)*dom_da/rate(omprim,gamma);
+    double result=cLight*(1.0-beta*mu)*dom_da/rate1(omprim,gamma);
     return result;
 }
 

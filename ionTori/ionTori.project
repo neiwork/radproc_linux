@@ -22,6 +22,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="luminosities3.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="luminosities3.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="probCompton.h" ExcludeProjConfig="Release;Debug;"/>
     <File Name="probCompton.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="luminosities.h" ExcludeProjConfig=""/>
@@ -32,14 +34,14 @@
     <File Name="radiativeLosses.h" ExcludeProjConfig="Release;Debug;"/>
     <File Name="State.cpp" ExcludeProjConfig=""/>
     <File Name="State.h" ExcludeProjConfig=""/>
-    <File Name="targetFields.cpp" ExcludeProjConfig=""/>
-    <File Name="targetFields.h" ExcludeProjConfig=""/>
-    <File Name="maxwellJuttner.cpp" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="maxwellJuttner.h" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="distribution.cpp" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="distribution.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="targetFields.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="targetFields.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="maxwellJuttner.cpp" ExcludeProjConfig=""/>
+    <File Name="maxwellJuttner.h" ExcludeProjConfig=""/>
+    <File Name="distribution.cpp" ExcludeProjConfig=""/>
+    <File Name="distribution.h" ExcludeProjConfig=""/>
     <File Name="luminosities2.cpp" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="luminosities.cpp"/>
+    <File Name="luminosities.cpp" ExcludeProjConfig=""/>
   </VirtualDirectory>
   <VirtualDirectory Name="pruebas">
     <File Name="coppiBlandford.cpp" ExcludeProjConfig="Debug;Release"/>
@@ -56,6 +58,15 @@
     <File Name="messages.h"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
+    <Project Name="nrMath"/>
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+    <Project Name="fparticle"/>
+    <Project Name="inout"/>
+    <Project Name="flosses"/>
+    <Project Name="fluminosities"/>
+  </Dependencies>
+  <Dependencies Name="Release">
     <Project Name="nrMath"/>
     <Project Name="fmath"/>
     <Project Name="fparameters"/>
@@ -149,6 +160,7 @@
         <Preprocessor Value="BOOST_NO_CXX11_SCOPED_ENUMS"/>
       </Compiler>
       <Linker Options="" Required="yes">
+        <LibraryPath Value="/home/luciano/gsl/lib"/>
         <LibraryPath Value="../external/lib"/>
         <LibraryPath Value="../lib/fmath/Release"/>
         <LibraryPath Value="../lib/nrMath/Release"/>
@@ -156,7 +168,7 @@
         <LibraryPath Value="../lib/fparticle/Release"/>
         <LibraryPath Value="../lib/flosses/Release"/>
         <LibraryPath Value="../lib/fluminosities/Release"/>
-        <LibraryPath Value="../lib/inout/"/>
+        <LibraryPath Value="../lib/inout/Release"/>
         <Library Value="fparameters"/>
         <Library Value="fparticle"/>
         <Library Value="fluminosities"/>
@@ -204,13 +216,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Release">
-    <Project Name="nrMath"/>
-    <Project Name="fmath"/>
-    <Project Name="fparameters"/>
-    <Project Name="fparticle"/>
-    <Project Name="flosses"/>
-    <Project Name="fluminosities"/>
-    <Project Name="inout"/>
-  </Dependencies>
 </CodeLite_Project>

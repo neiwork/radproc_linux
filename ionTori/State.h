@@ -10,11 +10,10 @@ public:
 	std::vector<Particle*> particles;
 
 	Particle electron;
-    //Particle proton;
+    Particle proton;
 	Particle photon;
 
 	ParamSpaceValues magf;
-	ParamSpaceValues tpf1, tpf2;
 	ParamSpaceValues denf_i;
     ParamSpaceValues denf_e;
     ParamSpaceValues tempElectrons, tempIons;

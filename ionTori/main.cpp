@@ -7,9 +7,9 @@
 #include "targetFields.h"
 #include "luminosities.h"
 
+#include "distribution.h"
 /*
 #include "radiativeLosses.h"
-#include "distribution.h"
 
 
 #include <fparticle/Particle.h>
@@ -38,18 +38,23 @@ int main()
 		State model(GlobalConfig.get_child("model"));
 		show_message(msgEnd, Module_state);
 		
+		thermalDistribution(model.proton, model);
+		
 		Matrix a;
+		show_message(msgStart, Module_torusSampling);
 		torusSampling(model, a);
+		show_message(msgEnd, Module_torusSampling);
+
 //		writeMatrix("probMatrix2", model.electron, a);
 			
 /*		show_message(msgStart, Module_targetField);
 		tpfFill_Bremss(model);  // esto completa la psv con los fotones de Bremsstrahlung
         tpfFill_Sync(model);    // idem Sync
 		show_message(msgEnd, Module_targetField);
-*/ 		//thermalDistribution(model.electron, model);
+*/ 		
 		//writeAllSpaceParam(folder+"\\electronDist.txt", model.electron.distribution);
 		
-		writeAllSpaceParam(folder+"\\temp.txt", model.tempElectrons);
+		//writeAllSpaceParam(folder+"\\temp.txt", model.tempElectrons);
 		
         //luminosities(model, folder+"\\electronLuminosities.txt", a);
 		luminosities(model,"lum.txt",a);
@@ -58,7 +63,7 @@ int main()
 		//writeRandTParamSpace(getFileName(folder, "\\magf"), model.magf, 0);
         //writeRandTParamSpace(getFileName(folder, "\\denf"), model.denf_e, 0);
         //writeRandTParamSpace(getFileName(folder, "\\tempf"), model.tempElectrons, 0);
-        writeRandTParamSpace("magf.dat", model.magf, 0);
+        //writeRandTParamSpace("magf.dat", model.magf, 0);
         //writeRandTParamSpace("denf.dat", model.denf_i, 0);
         
 		//ParamSpaceValues psv(model.electron.ps);
