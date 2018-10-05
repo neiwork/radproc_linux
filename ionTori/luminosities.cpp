@@ -81,8 +81,10 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
 			double lumSy=0.0;
 			double lumRJ=0.0;
 			double lumpp=0.0;
+			double tempmax=0.0;
 			st.photon.ps.iterate([&](const SpaceIterator& itERT) {
 				double temp=st.tempElectrons.get(itERT);
+				double temp_i=st.tempIons.get(itERT);
 				double magf=st.magf.get(itERT);
 				double dens_i=st.denf_i.get(itERT);
 				double dens_e=st.denf_e.get(itERT);
@@ -91,11 +93,18 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
 				if (temp >= 1.0e8) {
 					jSy = jSync(energies[jE],temp,magf,dens_e);
 				}
-				double jpp = luminosityHadronic(energies[jE],st.proton,dens_i,itERT);
+				double jpp=0.0;
+				if (temp_i > 1.0e11 && frecuency > 1.0e21 && frecuency < 1.0e24) {
+					jpp = luminosityHadronic(energies[jE],st.proton,dens_i,itERT,temp_i);
+					
+					double a=0.0;
+				}
 				lumpp += jpp*emissToLum;
 				lumSy += jSy*emissToLum;
-				lumRJ += bb(frecuency,temp)*fluxToLum;
+				//lumRJ += bb(frecuency,temp)*fluxToLum;
+				tempmax = (temp > tempmax ? temp : tempmax);
 			},{itE.coord[DIM_E],itER.coord[DIM_R],-1});
+			lumRJ=fluxToLum*nTheta*bb(frecuency,tempmax);
             if (jR>0) {
 				double a=1.0-prob[jR-1][jR];
 				double b=a*lumSync1;
@@ -117,6 +126,7 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
 			lumSyTot[jE] += lumSy;
 			lumBrTot[jE] += lumBr;
 		jR++;
+		cout << "energia = " << jE << ", radio = " << jR << endl;
 		},{itE.coord[DIM_E],-1,0});
 	jE++;	
 	},{-1,0,0});
@@ -132,7 +142,7 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
 	
 	double res;
 	int it=1;     // ITERACIONES PARA CONVERGENCIA DEL COMPTON
-	do {
+/*	do {
 		cout << "Iteration number = " << it << endl;
 		
 		res=0.0;
@@ -192,17 +202,6 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
 					res += P2(log10(lumNew) - log10(lumOut1[jE][jR]));
 				lumOut[jE][jR] = lumNew;
 			}
-            
-/*			if (temp > 1.0e6) {
-			for (int jE=0;jE<nE;jE++) {
-				lumICout[jE][jR] = compton(lumICinCell,energies,temp,nE,jE);
-				lumICout_vec[jE] += lumICout[jE][jR];
-				double lumNew = lumOutSy[jE][jR] + lumOutBr[jE][jR] + lumICout[jE][jR];
-				if (lumNew > 0.0 && lumOut1[jE][jR] > 0.0)
-					res += P2(log10(lumNew) - log10(lumOut1[jE][jR]));
-				lumOut[jE][jR] = lumNew;
-			}
-			}*/
 			
 			jR++;
         },{0,-1,0});
@@ -218,7 +217,7 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
 		cout << "Residuo = " << res << endl;
 	
 	++it;	
-	} while (res > 1.0e-3);
+	} while (res > 1.0e-3);*/
 			
 /*		st.photon.ps.iterate([&](const SpaceIterator& itR) {
 			st.photon.ps.iterate([&](const SpaceIterator& itTh) {
@@ -251,6 +250,7 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
 	Vector flux(nE,0.0);
     Vector nph(nE,0.0);
     double lum=0.0;
+	double lumpp2=0.0;
 	for (int jjE=0;jjE<nE;jjE++) {
 		double sum=0.0;
         double denergy=energies[jjE+1]-energies[jjE];
@@ -264,9 +264,10 @@ void luminosities(State& st, const string& filename, Matrix &prob) {
             nph[jjE] += lumOut[jjE][jjR]/planck/(cLight*pi*d*d*redshifted);
             jjR++;
 		},{0,-1,0});
+		lumpp2 += lumOutpp[jjE]*(denergy/planck);
 		flux[jjE] = sum;// * 0.25 / pi / (distance*distance);
 	}
-	printf("lumtot = %5.5e\n",lum);
+	cout << "lumpp = " << lumpp2 << endl;
 	
 /*	Vector flux(nE,0.0);		
 	jR=0;

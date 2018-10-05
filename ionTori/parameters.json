@@ -11,10 +11,10 @@
         "mu_e":"1.14",
         "zgap":"2.0",
 
-	"energyC":"1.0e-15",
+	"energyC":"1.0e-17",
 	"beta":"0.5",
 
-	"nPhotMatrix":"1000",
+	"nPhotMatrix":"100",
 
 	"file": {
 		"luminosity":"ntLuminosity.txt",
@@ -31,17 +31,17 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":300
+						"samples":100
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":50
+						"samples":20
 					},
 					"theta":{
 						"min":0.0,
 						"max":0.8,
-						"samples":10
+						"samples":5
 					}
 				}
 			},
@@ -49,7 +49,7 @@
 				"dim":{
 					"energy": {
 						"min":-8.0,
-						"max":14.0
+						"max":11.0
 					}
 				}
 			},
@@ -67,7 +67,7 @@
 				"dim":{
 					"energy": {
 						"min":8.98,
-						"max":15.0
+						"max":13.0
 					}
 				}
 			}
