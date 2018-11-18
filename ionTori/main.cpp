@@ -4,33 +4,21 @@
 #include "modelParameters.h"
 #include "State.h"
 #include "torusSampling.h"
-#include "targetFields.h"
-#include "luminosities.h"
-
+#include "thermalLuminosities.h"
+#include "globalVariables.h"
 #include "distribution.h"
-/*
-#include "radiativeLosses.h"
-
-
-#include <fparticle/Particle.h>
-
-#include <fparameters/Dimension.h>
-#include <fparameters/SpaceIterator.h>
-#include <fmath/physics.h>
-*/
-//#include <stdexcept>
 
 #include <fparameters/parameters.h>
 #include <inout/ioutil.h>
 #include <boost/property_tree/ptree.hpp>
 
+using namespace std;
 int main()
 {
-	std::string folder{ prepareOutputfolder() };
-
-	try {        
-        //lag();
-		
+	Matrix a;
+	Vector e;
+	string folder{prepareOutputfolder()};
+	try {
 		GlobalConfig = readConfig();
 		prepareGlobalCfg();
 		show_message(msgStart, Module_state);
@@ -40,9 +28,8 @@ int main()
 		
 		thermalDistribution(model.proton, model);
 		
-		Matrix a;
 		show_message(msgStart, Module_torusSampling);
-		torusSampling(model, a);
+		torusSampling(model, a, e);
 		show_message(msgEnd, Module_torusSampling);
 
 //		writeMatrix("probMatrix2", model.electron, a);
@@ -57,7 +44,7 @@ int main()
 		//writeAllSpaceParam(folder+"\\temp.txt", model.tempElectrons);
 		
         //luminosities(model, folder+"\\electronLuminosities.txt", a);
-		luminosities(model,"lum.txt",a);
+		thermalLuminosities(model,"lum.txt",a,e);
 		
 		
 		//writeRandTParamSpace(getFileName(folder, "\\magf"), model.magf, 0);

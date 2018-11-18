@@ -6,6 +6,8 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="torusStruct">
+    <File Name="torusFunctions.h"/>
+    <File Name="torusFunctions.cpp"/>
     <File Name="torusParameters.h" ExcludeProjConfig=""/>
     <File Name="torusParameters.cpp" ExcludeProjConfig=""/>
     <File Name="metric.h" ExcludeProjConfig=""/>
@@ -22,11 +24,15 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="globalVariables.h"/>
+    <File Name="read.h"/>
+    <File Name="read.cpp"/>
+    <File Name="thermalLuminosities.h"/>
+    <File Name="thermalLuminosities.cpp"/>
     <File Name="luminosities3.h" ExcludeProjConfig="Release;Debug;"/>
     <File Name="luminosities3.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="probCompton.h" ExcludeProjConfig="Release;Debug;"/>
     <File Name="probCompton.cpp" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="luminosities.h" ExcludeProjConfig=""/>
     <File Name="main.cpp" ExcludeProjConfig=""/>
     <File Name="modelParameters.cpp" ExcludeProjConfig=""/>
     <File Name="modelParameters.h" ExcludeProjConfig=""/>
@@ -41,7 +47,6 @@
     <File Name="distribution.cpp" ExcludeProjConfig=""/>
     <File Name="distribution.h" ExcludeProjConfig=""/>
     <File Name="luminosities2.cpp" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="luminosities.cpp" ExcludeProjConfig=""/>
   </VirtualDirectory>
   <VirtualDirectory Name="pruebas">
     <File Name="coppiBlandford.cpp" ExcludeProjConfig="Debug;Release"/>

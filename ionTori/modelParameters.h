@@ -12,9 +12,11 @@ const DimensionCoord
 	DIM_THETA = 2;
 /* define the inital values of the global parameters*/
 void prepareGlobalCfg();
-void initializeThetaPoints(Vector& v, double min, double max);
-void initializeRadiiPoints(Vector& v, double min, double max);
-void initializeEnergyPoints(Vector& v, double logEmin, double logEmax);
+void initThetaPoints(Vector& v, double min, double max);
+void initRadiiPoints(Vector& v, double min, double max);
+void initEnergyPoints(Vector& v, double logEmin, double logEmax);
+void initGridLinearly(Vector& v, double min, double max);
+void initGridLogarithmically(Vector& v, double min, double max);
 
 
 

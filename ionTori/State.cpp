@@ -1,6 +1,6 @@
 #include "State.h"
-//#include "functions.h"
-#include "torusParameters.h"
+#include "globalVariables.h"
+#include "torusFunctions.h"
 #include "modelParameters.h"
 #include <fparameters/Dimension.h>
 #include <fmath/physics.h>
@@ -8,6 +8,8 @@
 #include <fparameters/parameters.h>
 #include <boost/property_tree/ptree.hpp>
 //#include <fmath/bisection.h>
+
+using namespace std;
 
 State::State(boost::property_tree::ptree& cfg) :
  electron{ "electron" },
@@ -27,69 +29,63 @@ State::State(boost::property_tree::ptree& cfg) :
 	}
 	magf.initialize();
 	magf.fill([&](const SpaceIterator& i){
-		static const double beta = GlobalConfig.get<double>("beta");
 	    double r=i.val(DIM_R);
 		double theta=i.val(DIM_THETA);
-		return sqrt(beta*24.0*pi*pressureTot(r,theta));
+		return sqrt(magFieldPar*24.0*pi*totalPressure(r,theta));
     });
     denf_i.initialize();
     denf_i.fill([&](const SpaceIterator& i) {
-        static const double mu=GlobalConfig.get<double>("mu_i");
         double r=i.val(DIM_R);
 		double theta=i.val(DIM_THETA); 
-		return energyDensity(r,theta)/(atomicMassUnit*mu);
+		return massDensity(r,theta)/(atomicMassUnit*iMeanMolecularWeight);
     });
     denf_e.initialize();
     denf_e.fill([&](const SpaceIterator& i) {
-        static const double mu=GlobalConfig.get<double>("mu_e");
         double r=i.val(DIM_R);
 		double theta=i.val(DIM_THETA);
-		return energyDensity(r,theta)/(atomicMassUnit*mu);
+		return massDensity(r,theta)/(atomicMassUnit*eMeanMolecularWeight);
     });
     tempElectrons.initialize();
     tempElectrons.fill([&](const SpaceIterator& i) {
         double r=i.val(DIM_R);
 		double theta=i.val(DIM_THETA);
-		return temp_e(r, theta);
+		return electronTemp(r,theta);
     });
     tempIons.initialize();
     tempIons.fill([&](const SpaceIterator& i) {
         double r=i.val(DIM_R);
 		double theta=i.val(DIM_THETA);
-		return temp_i(r, theta);
+		return electronTemp(r,theta);
     });
 }
 
-Dimension* State::createDimension(Particle& p, std::string dimid, std::function<void(Vector&,double,double)> initializer, boost::property_tree::ptree& cfg) {
+Dimension* State::createDimension(Particle& p, string dimid, 
+		function<void(Vector&,double,double)> initializer, boost::property_tree::ptree& cfg)
+{
 	int samples=p.getpar<int>(cfg,"dim."+dimid+".samples");
 	double min=p.getpar<double>(cfg,"dim."+dimid+".min");
 	double max=p.getpar<double>(cfg,"dim."+dimid+".max");
-	return new Dimension(samples,bind(initializer,std::placeholders::_1,min,max));
+	return new Dimension(samples,bind(initializer,placeholders::_1,min,max));
 }
 
 void State::initializeParticle(Particle& p,boost::property_tree::ptree& cfg)
 {
 	using std::bind;
-
 	p.configure(cfg.get_child("particle.default"));
 	p.configure(cfg.get_child("particle."+p.id));
-	p.ps.add(createDimension(p,"energy",initializeEnergyPoints,cfg));
-	// we can't use createDimension because we're multiplying by pc before creating them
-	
-    // add dimension for R
-    double rmin=GlobalConfig.get<double>("rCusp");
-    double rmax=GlobalConfig.get<double>("rEdge");
-	int nR=p.getpar(cfg,"dim.radius.samples",20);
-	p.ps.add(new Dimension(nR,bind(initializeRadiiPoints,std::placeholders::_1,rmin,rmax)));
+
+	// add dimension for energies
+	//p.ps.add(createDimension(p,"energy",initEnergyPoints,cfg));
+	p.ps.add(new Dimension(nE,bind(initEnergyPoints,placeholders::_1,
+								logMinEnergy,logMaxEnergy)));
+	// add dimension for r
+	double dr = (edgeRadius-cuspRadius)/nR;
+	p.ps.add(new Dimension(nR,bind(initGridLinearly,placeholders::_1,
+							cuspRadius+dr/2,edgeRadius-dr/2)));
     
     // add dimension for theta
-    double thetamin=p.getpar(cfg,"dim.theta.min",0.0);
-    double thetamax=pi/2.0*p.getpar(cfg,"dim.theta.max",0.8);
-    int nTheta=p.getpar(cfg,"dim.theta.samples",5);
-    GlobalConfig.put("thetamin", GlobalConfig.get<double>("thetamin", thetamin));
-    GlobalConfig.put("thetamax", GlobalConfig.get<double>("thetamax", thetamax));
-    p.ps.add(new Dimension(nTheta,bind(initializeThetaPoints,std::placeholders::_1,thetamin,thetamax)));
-
+    p.ps.add(new Dimension(nTheta,bind(initGridLinearly,std::placeholders::_1,
+							minPolarAngle,maxPolarAngle)));
 	p.initialize();
 }
 

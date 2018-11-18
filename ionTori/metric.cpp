@@ -2,62 +2,41 @@
 #include <math.h>
 #include <fparameters/parameters.h>
 #include <boost/property_tree/ptree.hpp>
-//#include <math.h>
 
-//////////////////////////////////////////////////////////////////////////////////////
-// METRIC COMPONENTS (in Boyer-Lindquist coordinates)
-
-//void readSpinMbh(double& massBH, double& spinBH)
-//{	
-//	static const double massBH = GlobalConfig.get<double>("massBH");
-//    static const double spinBH = GlobalConfig.get<double>("spinBH"); //unidades??
-//}
-
-//double massBH = 1.0;
-//double spinBH = 0.0;
-//double lambda = 0.8;
+extern const double blackHoleSpinPar;
 
 double g_tt(double r, double theta)
 {  
-	static const double massBH = GlobalConfig.get<double>("massBH");
-    static const double spinBH = GlobalConfig.get<double>("spinBH"); //unidades??
-	
-	double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
-	return - (1.0 - 2.0*massBH*r / sigma);
+	double a2 = blackHoleSpinPar*blackHoleSpinPar;
+	double sigma = r*r + a2*sin(theta)*sin(theta);
+	return - (1.0 - 2.0*r / sigma);
 }
 
 double g_rr(double r, double theta)
-{  
-	static const double massBH = GlobalConfig.get<double>("massBH");
-    static const double spinBH = GlobalConfig.get<double>("spinBH"); //unidades??
-	
-	double delta = r*r - 2.0 * massBH * r + spinBH*spinBH;
-	double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
+{  	
+	double a2 = blackHoleSpinPar*blackHoleSpinPar;
+	double delta = r*r - 2.0 * r + a2;
+	double sigma = r*r + a2*sin(theta)*sin(theta);
 	return sigma / delta;
 }
 
 double g_thetatheta(double r, double theta)
 {  
-	static const double spinBH = GlobalConfig.get<double>("spinBH");
-	
-	return r*r + spinBH*spinBH*sin(theta)*sin(theta);
+	double a2 = blackHoleSpinPar*blackHoleSpinPar;
+	return r*r + a2*sin(theta)*sin(theta);
 }
 
 double g_tphi(double r, double theta)
 {
-	static const double massBH = GlobalConfig.get<double>("massBH");
-    static const double spinBH = GlobalConfig.get<double>("spinBH"); //unidades??
-	
-	double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
-	return - 2.0*massBH*r*spinBH / sigma * cos(theta)*cos(theta);
+	double a2 = blackHoleSpinPar*blackHoleSpinPar;
+	double sigma = r*r + a2*sin(theta)*sin(theta);
+	return - 2.0*r*blackHoleSpinPar / sigma * cos(theta)*cos(theta);
 }
 
 double g_phiphi(double r, double theta)
-{  
-	static const double massBH = GlobalConfig.get<double>("massBH");
-    static const double spinBH = GlobalConfig.get<double>("spinBH"); //unidades??
-	
-	double sigma = r*r + spinBH*spinBH*sin(theta)*sin(theta);
-	return (r*r + spinBH*spinBH + 2.0*massBH*r*spinBH*spinBH*cos(theta)*cos(theta) / sigma )
+{
+	double a2 = blackHoleSpinPar*blackHoleSpinPar;
+	double sigma = r*r + a2*sin(theta)*sin(theta);
+	return (r*r + a2 + 2.0*r*a2*cos(theta)*cos(theta) / sigma )
     * cos(theta)*cos(theta);
 }

@@ -88,7 +88,7 @@ void show_module(ProgramModule module)
             break;
 
 		case Module_state:
-            printf("Tori structure and parameters");
+            printf("Torus structure and parameters");
             break;
         
 		case Module_targetField:
@@ -100,7 +100,7 @@ void show_module(ProgramModule module)
             break;
 			
 		case Module_torusSampling:
-			printf("Scattering Matrix");
+			printf("Scattering Probability Matrix");
 			break;
       
         case Module_Message:
@@ -111,11 +111,13 @@ void show_module(ProgramModule module)
             printf("Electron Distribution ");
             break;
 
-
-		case Module_luminosities:
-			printf("Non-thermal SEDs");
+		case Module_thermalLuminosities:
+			printf("Thermal SEDs");
 			break;
-
+			
+		case Module_thermalCompton:
+			printf("Thermal Compton");
+			break;
  
   /*      default:
             printf("\n");

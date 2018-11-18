@@ -13,7 +13,8 @@ enum ProgramModule {Module_Main,
 					Module_electronDistribution,
 					Module_torusSampling,
 					Module_photonInjection,
-					Module_luminosities, 
+					Module_thermalLuminosities,
+					Module_thermalCompton,
 					Module_Message}; 
 
 
