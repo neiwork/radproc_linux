@@ -3,21 +3,20 @@
 #include <fmath/physics.h>
 #include "metric.h"
 
-extern "C" {
-	#include <nrMath/bisection.h>
-}
-
 double massDensity(double r, double theta)  // = mass density (c=1)
 {
 	double w;
-	return ( w = normalizedPotential(r,theta) > 0.0 ) ? 
+	double result = (w = normalizedPotential(r,theta)) > 0.0 ? 
 		pow((pow(polytropConst*pow(centralMassDens,1.0/polytropIndex) + 
 		1.0,w)-1.0)/polytropConst,polytropIndex) : 0.0;
+
+	return result;
 }
 
 double electronDensity(double r, double theta)
 {
-	return massDensity(r,theta)/(atomicMassUnit*eMeanMolecularWeight);
+	double result = massDensity(r,theta)/(atomicMassUnit*eMeanMolecularWeight);
+	return result;
 }
 
 double totalPressure(double r, double theta) 
@@ -31,19 +30,21 @@ double totalPressure(double r, double theta)
 // Electrons
 double electronTemp(double r, double theta) {
 	double w;
-    return (w=normalizedPotential(r,theta) > 0.0) ? 
+    double result = (w = normalizedPotential(r,theta)) > 0.0 ? 
 		(1.0-w)*auxM0 + w*auxM1*eMeanMolecularWeight* 
 		((1.0-magFieldPar)*atomicMassUnit*totalPressure(r,theta))
 		/(boltzmann*massDensity(r,theta))+2.7 : 2.7;
+	return result;
 }
 
 // Ions
 double ionTemp(double r, double theta) {
 	double w;    
-    return (w=normalizedPotential(r,theta) > 0.0) ? 
+    double result = (w = normalizedPotential(r,theta)) > 0.0 ? 
 		(eMeanMolecularWeight/iMeanMolecularWeight*auxM0 + w*(auxM0-auxM1))*iMeanMolecularWeight*
 		( (1.0-magFieldPar)*atomicMassUnit*totalPressure(r,theta) ) / 
 		(boltzmann*massDensity(r,theta))+2.7 : 2.7;
+	return result;
 }
 
 
@@ -102,24 +103,7 @@ double normalizedPotential(double r, double theta)
 	return (r > cuspRadius) ? (gravPotential(r,theta)-potentialS)/(potentialC-potentialS) : -1.0;
 }
 
-void specificAngularMomentum(double r_ms, double r_mb)
-{
-	double l_ms = keplAngularMom(r_ms);          // Keplerian specific angular momentum at r = r_ms
-	double l_mb = keplAngularMom(r_mb);          // Keplerian specific angular momentum at r = r_mb
-	specificAngMom = (1.0 - specificAngMomPar) * l_ms + specificAngMomPar * l_mb;
-}
-
 double modfKepl(double r) {
 	return keplAngularMom(r) - specificAngMom; }
 double modfw(double r)
 	{return normalizedPotential(r,0.0);}
-
-void criticalRadii(double r_ms, double r_mb)
-{
-	int maxmitr = 1000;
-	double allerr = 1.0e-3;
-	
-	cuspRadius = bisection(r_mb, r_ms, allerr, maxmitr,modfKepl);
-	torusCenterRadius = bisection(r_ms, 20.0*r_ms, allerr, maxmitr, modfKepl);
-	edgeRadius = bisection(torusCenterRadius,10.0*torusCenterRadius,allerr,maxmitr,modfw);
-}

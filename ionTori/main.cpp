@@ -7,7 +7,7 @@
 #include "thermalLuminosities.h"
 #include "globalVariables.h"
 #include "distribution.h"
-
+#include "trial.h"
 #include <fparameters/parameters.h>
 #include <inout/ioutil.h>
 #include <boost/property_tree/ptree.hpp>
@@ -25,6 +25,8 @@ int main()
 
 		State model(GlobalConfig.get_child("model"));
 		show_message(msgEnd, Module_state);
+		
+		trial();
 		
 		thermalDistribution(model.proton, model);
 		

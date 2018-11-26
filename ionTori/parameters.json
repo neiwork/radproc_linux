@@ -13,7 +13,7 @@
 	"centralMassDens":"1.0e-16",
 	"magFieldPar":"0.9",
 	"numProcesses":"4",
-	"nPhotMatrix":"200",
+	"nPhotMatrix":"100",
 
 	"ThermalProcessNumber": {
 				"0":1,
@@ -39,7 +39,7 @@
 					"energy":{
 						"min":-6.0,
 						"max":11.0,
-						"samples":100
+						"samples":50
 					},
 					"radius":{
 						"min":1.0,
@@ -48,7 +48,7 @@
 					},
 					"theta":{
 						"min":0.0,
-						"max":0.8,
+						"max":0.5,
 						"samples":5
 					}
 				}

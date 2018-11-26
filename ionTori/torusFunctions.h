@@ -1,4 +1,7 @@
 #pragma once
+extern "C" {
+	#include <nrMath/bisection.h>
+}
 
 void marginalOrbits(double&,double&);
 double keplAngularMom(double);
@@ -10,5 +13,8 @@ double normalizedPotential(double,double);
 double massDensity(double,double);
 double electronDensity(double,double);
 double totalPressure(double,double);
-double electronTemp(double, double);
+double electronTemp(double,double);
 double ionTemp(double,double);
+
+double modfKepl(double);
+double modfw(double);

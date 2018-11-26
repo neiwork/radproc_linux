@@ -10,6 +10,23 @@ using namespace std;
 
 ///////////////////////
 
+void specificAngularMomentum(double r_ms, double r_mb)
+{
+	double l_ms = keplAngularMom(r_ms);          // Keplerian specific angular momentum at r = r_ms
+	double l_mb = keplAngularMom(r_mb);          // Keplerian specific angular momentum at r = r_mb
+	specificAngMom = (1.0 - specificAngMomPar) * l_ms + specificAngMomPar * l_mb;
+}
+
+void criticalRadii(double r_ms, double r_mb)
+{
+	int maxmitr = 1000;
+	double allerr = 1.0e-3;
+	
+	cuspRadius = bisection(r_mb, r_ms, allerr, maxmitr,modfKepl);
+	torusCenterRadius = bisection(r_ms, 20.0*r_ms, allerr, maxmitr, modfKepl);
+	edgeRadius = bisection(torusCenterRadius,10.0*torusCenterRadius,allerr,maxmitr,modfw);
+}
+
 void torusParameters() 
 {	
 	blackHoleMass = GlobalConfig.get<double>("blackHoleMass")*solarMass;
@@ -29,7 +46,7 @@ void torusParameters()
 	logMaxEnergy = GlobalConfig.get<double>("model.particle.default.dim.energy.max");
 	minPolarAngle = GlobalConfig.get<double>("model.particle.default.dim.theta.min");
 	maxPolarAngle = GlobalConfig.get<double>("model.particle.default.dim.theta.max");
-	numProcesses=GlobalConfig.get<int>("numProcesses");
+	numProcesses = GlobalConfig.get<int>("numProcesses");
 	
 	// DERIVED CONSTANTS
 	auxM0 = iMeanMolecularWeight / (eMeanMolecularWeight + iMeanMolecularWeight);

@@ -14,6 +14,7 @@ extern "C" {
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/parameters.h>
 #include <fluminosities/compton.h>
+#include <fluminosities/thermalCompton.h>
 #include <fluminosities/thermalSync.h>
 #include <fluminosities/thermalBremss.h>
 #include <fluminosities/luminosityHadronic.h>
@@ -39,16 +40,10 @@ double volFactor,areaFactor,dr,dtheta;
 using namespace std;
 
 void localProcesses(const State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOutpp, 
-			Matrix scatt, Vector& energies, const int flags[])
+			Matrix scatt, Vector& energies, const int flags[], Matrix& lumOut)
 {
 	double lumSync1,lumSync2;
-	if (flags[0])
-		matrixInit(lumOutSy,nE,nR,0.0);
-		lumSync1=lumSync2=0.0;
-	if (flags[1])
-		matrixInit(lumOutBr,nE,nR,0.0);
-	if (flags[2])
-		matrixInit(lumOutpp,nE,nR,0.0);
+	matrixInit4(lumOutSy,lumOutBr,lumOutpp,lumOut,nE,nR,0.0);
 	
 	size_t jE=0;
 	st.photon.ps.iterate([&](const SpaceIterator& itE) {
@@ -101,6 +96,7 @@ void localProcesses(const State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix&
 					lumBr=max(lumBr,lumSy);
 				lumOutBr[jE][jR]=lumBr;
 			}
+			lumOut[jE][jR] = lumOutSy[jE][jR]+lumOutBr[jE][jR]+lumOutpp[jE][jR];
 		jR++;
 		},{itE.coord[DIM_E],-1,0});
 	jE++;	
@@ -118,19 +114,18 @@ double maxTempNorm(const State& st, const SpaceIterator& i)
 	return temp;
 }
 
-void thermalCompton(const State& st, Matrix lumOutSy, Matrix lumOutBr, Matrix lumOutpp, 
-			Matrix scatt, Matrix& lumOutIC, Vector energies)
+void thermalCompton(const State& st, Matrix& lumOut, Matrix scatt,
+				Matrix& lumOutIC, Vector energies)
 {
 	show_message(msgStart,Module_thermalCompton);
 	
+	Matrix lumOutLocal;
+	Vector lumInIC(nE,0.0);
 	matrixInit(lumOutIC,nE,nR,0.0);
-	Matrix lumOutLocalConst,lumOutLocal;
-	matrixInit(lumOutLocalConst,nE,nR,lumOutSy,lumOutBr,lumOutpp);
-	matrixInit(lumOutLocal,nE,nR,lumOutLocalConst);
+	matrixInitCopy(lumOutLocal,nE,nR,lumOut);
 			
 	double res;
 	size_t it=1;
-	Vector lumInIC(nE,0.0);
 	do {
 		cout << "Iteration number = " << it << endl;
 		res=0.0;
@@ -141,7 +136,6 @@ void thermalCompton(const State& st, Matrix lumOutSy, Matrix lumOutBr, Matrix lu
 		if(it > 1)
 		{
 			for (size_t jE=0;jE<nE;jE++) {
-				lumInIC[jE]=0.0;
 				for (size_t jR=0;jR<nR;jR++) {
 					lumOutIC[jE][jR]=0.0;
 				}
@@ -154,7 +148,7 @@ void thermalCompton(const State& st, Matrix lumOutSy, Matrix lumOutBr, Matrix lu
 			// CALCULAMOS LinC PARA CADA E        			 function LinC
 			for (size_t jE=0;jE<nE;jE++) {
 				for (size_t jjR=0;jjR<nR;jjR++) {
-					lumInIC[jE] += scatt[jjR][jR]*lumOutLocal[jE][jjR];
+					lumInIC[jE] += scatt[jjR][jR]*lumOut[jE][jjR];
 				}
 			}
 			
@@ -162,22 +156,25 @@ void thermalCompton(const State& st, Matrix lumOutSy, Matrix lumOutBr, Matrix lu
 			double normtemp = boltzmann*temp/(electronMass*cLight2);
 			
 			// CALCULAMOS LA COMPTONIZACION					 function compton()
-			if (normtemp >= 0.1) 
+			if (normtemp >= 0.001) 
 			{
 				for (size_t jjE=0;jjE<nE;jjE++) {   // para cada energía del espectro inicial
 													// calculamos la contribución a la luminosidad
 													// total a cada energía del espectro final
 													// y sumamos.
 					double frecuency=energies[jjE]/planck;
-					if (lumInIC[jjE]*frecuency > 1.0e20) 
-						compton2(lumOutIC,lumInIC[jjE],energies,temp,nE,jjE,jR);
+					if (lumInIC[jjE]*frecuency > 1.0e20 && energies[jjE] > 1.0e-18)
+						// puedo definir una función que calcule las probabilidades una vez y
+						// las guarde, y luego otra que haga la integral 
+						comptonNew(lumOutIC,lumInIC[jjE],energies,temp,nE,jjE,jR);
 				}
 			}
 			
 			for (size_t jE=0;jE<nE;jE++) {
-				if (lumOutLocal[jE][jR] > 0.0)
-					res += log10(1+lumOutIC[jE][jR]/lumOutLocal[jE][jR]);
-				lumOutLocal[jE][jR] = lumOutLocalConst[jE][jR] + lumOutIC[jE][jR];
+				double lum = lumOutLocal[jE][jR] + lumOutIC[jE][jR];
+				if (lumOut[jE][jR] > 0.0)
+					res += log10(lum/lumOut[jE][jR]);
+				lumOut[jE][jR] = lum;
 			}
 			jR++;
 		},{0,-1,0});
@@ -189,8 +186,7 @@ void thermalCompton(const State& st, Matrix lumOutSy, Matrix lumOutBr, Matrix lu
 	show_message(msgEnd,Module_thermalCompton);
 }
 
-void gravRedshift(const State& st, Vector energies, Matrix lumSy, Matrix lumBr, Matrix lumpp,
-			Matrix lumIC, Matrix& lumRed)
+void gravRedshift(const State& st, Vector energies, Matrix lum, Matrix& lumRed)
 {
 	matrixInit(lumRed,nE,nR,0.0);
 
@@ -202,10 +198,6 @@ void gravRedshift(const State& st, Vector energies, Matrix lumSy, Matrix lumBr, 
 	for (size_t jE=1;jE<nE;jE++){
 		benergies[jE] = sqrt(energies[jE-1]*energies[jE]);
 	}
-
-	/////////////////////////////////////////////////////////////////
-	// CALCULO LA REDISTRIBUCION EN ENERGIAS POR EFECTOS 
-	// GRAVITACIONALES
 	
 	size_t jR=0;
 	st.photon.ps.iterate([&](const SpaceIterator& itR) {
@@ -229,21 +221,20 @@ void gravRedshift(const State& st, Vector energies, Matrix lumSy, Matrix lumBr, 
 			if (items[jE] < nE) {
 				double denergy_original = benergies[jE+1]-benergies[jE];
 				double denergy_new = benergies[items[jE]+1]-benergies[items[jE]];
-				double lumOut = lumSy[jE][jR]+lumBr[jE][jR]+lumpp[jE][jR]+lumIC[jE][jR];
-				lumRed[items[jE]][jR] += lumOut * (gfactor*denergy_original/denergy_new);
+				lumRed[items[jE]][jR] += lum[jE][jR] * (gfactor*denergy_original/denergy_new);
 			}
 		}
 		jR++;
 	},{0,-1,0});
 }
 
-void binEmissivities(const State& st, Vector energies, Matrix lumSy, Matrix lumBr, Matrix lumpp,
-				Matrix lumIC)
+void binEmissivities(const State& st, Vector esc, Vector energies, Matrix lumOut)
 {
 	ofstream filePar, fileLum;
+	FILE *fileEmissBin;
+	
 	fileLum.open("emissivities.txt", ios::out);
 	filePar.open("parSpace.txt", ios::out);
-	FILE *fileEmissBin;
 	fileEmissBin=fopen("emissivities.bin","wb");
 
 	float *emissivities;
@@ -257,18 +248,16 @@ void binEmissivities(const State& st, Vector energies, Matrix lumSy, Matrix lumB
         size_t jR=0;
 		st.photon.ps.iterate([&](const SpaceIterator& itR) {
 			double r = itR.val(DIM_R);
-			double thetamax = fbisection([&](double x){return normalizedPotential(r,x);},0.1,pi/2.1,1.0e-3);
 			double rB1=r-dr/2.0;
 			double rB2=r+dr/2.0;
 			double vol=(rB2*rB2*rB2-rB1*rB1*rB1)*volFactor;
 			double emissToLum=vol*4.0*pi;
 			double sumFactor=0.0;
-			double lumOut = lumSy[jE][jR]+lumBr[jE][jR]+lumpp[jE][jR]+lumIC[jE][jR];
 			st.photon.ps.iterate([&](const SpaceIterator& itTheta) {
 				sumFactor += st.tempElectrons.get(itTheta);
 			},{0,itR.coord[DIM_R],-1});
 			st.photon.ps.iterate([&](const SpaceIterator& itTheta) {
-				double lum = lumOut*st.tempElectrons.get(itTheta) / sumFactor / 2.0;
+				double lum = lumOut[jE][jR]*esc[jR]*st.tempElectrons.get(itTheta)/(sumFactor*2.0);
 				fileLum << jE << "\t" << jR << "\t" 
 						  << lum << endl;
 				emissivities[jj++] = (float)(lum/emissToLum);
@@ -290,6 +279,68 @@ void binEmissivities(const State& st, Vector energies, Matrix lumSy, Matrix lumB
 	filePar.close();
 }
 
+void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOutBr,
+						Matrix lumOutpp, Matrix lumOutIC, Matrix lumOut, 
+						Matrix lumOutRed, Vector esc, const string& filename)
+{
+	ofstream file1,file2;
+	file1.open(filename.c_str(),ios::out);
+	file2.open("lumRadius.txt",ios::out);
+	
+	for (size_t jE=0;jE<nE;jE++) {
+		double frecuency = energies[jE]/planck;
+		double energyEV = energies[jE]/1.6e-12;
+		double lumSy,lumBr,lumIC,lumpp,lum,lumRed;
+		lumSy = lumBr = lumIC = lumpp = lum = lumRed = 0.0;
+		for (size_t jR=0;jR<nR;jR++) {
+			lumSy += lumOutSy[jE][jR] * esc[jR];
+			lumBr += lumOutBr[jE][jR] * esc[jR];
+			lumIC += lumOutIC[jE][jR] * esc[jR];
+			lumpp += lumOutpp[jE][jR] * esc[jR];
+			lum += lumOut[jE][jR] * esc[jR];
+			lumRed += lumOutRed[jE][jR] * esc[jR];
+		}
+        file1
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << energyEV
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumSy*frecuency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumBr*frecuency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumIC*frecuency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumpp*frecuency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lum*frecuency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumRed*frecuency
+			<< endl;
+	};
+	
+	double eVar = pow(energies[nE-1]/energies[0],1.0/nE);
+	size_t jR=0;
+	st.photon.ps.iterate([&](const SpaceIterator& itR) {
+		double r = itR.val(DIM_R);
+		double lumSy,lumBr,lumIC,lumpp,lum;
+		lumSy = lumBr = lumIC = lumpp = lum = 0.0;
+		for (size_t jE=0;jE<nE;jE++)  {
+			double dfrecuency = energies[jE]/planck * (eVar-1.0);
+			lumSy += lumOutSy[jE][jR]*dfrecuency;
+			lumBr += lumOutBr[jE][jR]*dfrecuency;
+			lumIC += lumOutIC[jE][jR]*dfrecuency;
+			lumpp += lumOutpp[jE][jR]*dfrecuency;
+			lum += lumOut[jE][jR];
+		}
+		file2
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << r
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumSy
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumBr
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumIC
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumpp
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lum
+			<< endl;
+		jR++;
+	},{0,-1,0});
+	
+	file1.close();
+	file2.close();
+}
+
 void thermalLuminosities(State& st, const string& filename, Matrix &scatt, Vector& esc)
 {
 	show_message(msgStart,Module_thermalLuminosities);
@@ -305,31 +356,13 @@ void thermalLuminosities(State& st, const string& filename, Matrix &scatt, Vecto
 	
 	readThermalProcesses(processesFlags);
 	if (processesFlags[0] || processesFlags[1] || processesFlags[2]) {
-		localProcesses(st,lumOutSy,lumOutBr,lumOutpp,scatt,energies,processesFlags);
+		localProcesses(st,lumOutSy,lumOutBr,lumOutpp,scatt,energies,processesFlags,lumOut);
 		if (processesFlags[3])
-			thermalCompton(st,lumOutSy,lumOutBr,lumOutpp,scatt,lumOutIC,energies);
-		gravRedshift(st,energies,lumOutSy,lumOutBr,lumOutpp,lumOutIC,lumOutRed);
-		binEmissivities(st,energies,lumOutSy,lumOutBr,lumOutpp,lumOutIC);
+			thermalCompton(st,lumOut,scatt,lumOutIC,energies);
+		gravRedshift(st,energies,lumOut,lumOutRed);
+		binEmissivities(st,esc,energies,lumOut);
+		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,
+							lumOutIC,lumOut,lumOutRed,esc,filename);
 	}
-	
-/*	
-	ofstream file;
-	file.open(filename.c_str(), ios::out);
-	for(size_t jE=0;jE<nE;jE++) {
-		double frecuency = energies[jE]/planck;
-		double eVenergy = energies[jE]/1.6e-12;
-        file << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency
-			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << eVenergy
-			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumSyTot[jE]*frecuency
-			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumBrTot[jE]*frecuency
-			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumICinTot[jE]*frecuency
-			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumICout_vec[jE]*frecuency
-			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumppTot[jE]*frecuency
-			 << setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumOutTot[jE]*frecuency
-			 << std::endl;
-	};
-		
-	file.close(); */
-	
 	show_message(msgEnd,Module_thermalLuminosities);
 }

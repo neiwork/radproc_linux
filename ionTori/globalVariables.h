@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 
 // PARAMETERS (from parameter.json)
 extern const double blackHoleMass;              // Black hole mass [M_Sol]
@@ -16,7 +17,7 @@ extern const double minPolarAngle;				// Minimum polar angle
 extern const double maxPolarAngle;				// Maximum polar angle
 extern const double logMinEnergy;				// Logarithm of the minimum energy for photons
 extern const double logMaxEnergy;				// Logarithm of the maximum energy for photons
-extern const std::size_t nR,nE,nTheta;			// Number of points in each dimension
+extern const size_t nR,nE,nTheta;			// Number of points in each dimension
 extern const double auxM0,auxM1;				// Auxiliary parameters
 
 // PARAMETERS

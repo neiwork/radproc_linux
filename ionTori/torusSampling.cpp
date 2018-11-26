@@ -23,23 +23,23 @@ extern "C" {
 
 void torusSampling(State& st, Matrix& scatt, Vector& escape)
 {
-    long nPhot=GlobalConfig.get<long>("nPhotMatrix");
+    size_t nPhot=GlobalConfig.get<size_t>("nPhotMatrix");
     
     double dr=(edgeRadius-cuspRadius)/nR;      	        // Cells' radial size.
 	Vector rCellsBoundaries(nR+1,0.0);					// Cells' boundaries.
 	rCellsBoundaries[0]=cuspRadius;
-    for(int i=1;i<=nR;i++)
+    for(size_t i=1;i<=nR;i++)
         rCellsBoundaries[i]=rCellsBoundaries[i-1]+dr;
 
 	matrixInit(scatt,nR,nR,0.0);
     escape.resize(nR,0.0);
     
     InitialiseRandom(RANDOM_GENERATOR);
-	int iR=0;
+	size_t iR=0;
 	st.photon.ps.iterate([&](const SpaceIterator& it1) {
         double dyaux=(sin(maxPolarAngle)-sin(minPolarAngle))/nTheta;
 		double r=it1.val(DIM_R);
-        for(int k=1;k<=nTheta+1;k++) {
+        for(size_t k=1;k<=nTheta+1;k++) {
             double yaux=sin(minPolarAngle)+(k-1)*dyaux;   // Theta distributed uniformly in sin(theta).
             double theta0=asin(yaux);
             double y0=r*cos(theta0);
@@ -47,7 +47,7 @@ void torusSampling(State& st, Matrix& scatt, Vector& escape)
             double drprim=dr/10.0;                        // Initial step for the photon path.
             double drprimmin=dr/1.0e6;                    // Minimum step.
             double drprimmax=dr/2.0;                      // Maximum step.
-            for(int jPh=1;jPh<=nPhot;jPh++) {
+            for(size_t jPh=1;jPh<=nPhot;jPh++) {
                 double random_number;
                 random_number=gsl_rng_uniform(RandomNumberGenerator);
                 double phiprim=2.0*pi*random_number;
@@ -61,7 +61,7 @@ void torusSampling(State& st, Matrix& scatt, Vector& escape)
 				neant=electronDensity(r,theta0);
 				double pescap=1.0;
                 do {
-                    int count=0;
+                    size_t count=0;
                     double control;
                     do {
                         if(count >= 1) {                                                             // Control of the step.
@@ -82,7 +82,7 @@ void torusSampling(State& st, Matrix& scatt, Vector& escape)
                     } while((control > 1.0e-2) && (drprim-drprimmin > 1.0e-9));
                     double psc=ne*thomson*(drprim*gravRadius);    // Probability of scattering.
                     pescap=1.0-accumulatedp;       // Probability that a photon reaches the previous position.
-                    for(int jR=0;jR<nR;jR++) {
+                    for(size_t jR=0;jR<nR;jR++) {
                         if (r1 > rCellsBoundaries[jR] && r1 < rCellsBoundaries[jR+1]) 
 							scatt[iR][jR] += psc*pescap;            // Add the probability
 																    // interaction in the matrix
@@ -101,7 +101,7 @@ void torusSampling(State& st, Matrix& scatt, Vector& escape)
             }
         }
 		escape[iR] /= (nPhot*(nTheta+1));
-        for(int jR=0;jR<nR;jR++) {
+        for(size_t jR=0;jR<nR;jR++) {
             scatt[iR][jR] /= (nPhot*(nTheta+1));      // Dividing by the number of photons launched.
         }
 		iR++;

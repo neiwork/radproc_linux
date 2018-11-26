@@ -24,6 +24,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="trial.h"/>
+    <File Name="trial.cpp"/>
     <File Name="globalVariables.h"/>
     <File Name="read.h"/>
     <File Name="read.cpp"/>
