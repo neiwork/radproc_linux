@@ -6,6 +6,8 @@
 #include <fparameters/parameters.h>
 #include <boost/property_tree/ptree.hpp>
 
+#include <fmath/brent.h>
+
 using namespace std;
 
 ///////////////////////
@@ -14,17 +16,39 @@ void specificAngularMomentum(double r_ms, double r_mb)
 {
 	double l_ms = keplAngularMom(r_ms);          // Keplerian specific angular momentum at r = r_ms
 	double l_mb = keplAngularMom(r_mb);          // Keplerian specific angular momentum at r = r_mb
-	specificAngMom = (1.0 - specificAngMomPar) * l_ms + specificAngMomPar * l_mb;
+	specificAngMom = specificAngMomPar * (l_mb-l_ms) + l_ms;
 }
 
 void criticalRadii(double r_ms, double r_mb)
 {
-	int maxmitr = 1000;
-	double allerr = 1.0e-3;
+	int status1,status2,count=0;
+	double x_lo,x_hi;
 	
-	cuspRadius = bisection(r_mb, r_ms, allerr, maxmitr,modfKepl);
-	torusCenterRadius = bisection(r_ms, 20.0*r_ms, allerr, maxmitr, modfKepl);
-	edgeRadius = bisection(torusCenterRadius,10.0*torusCenterRadius,allerr,maxmitr,modfw);
+	struct zero_params modfKepl_params = {};
+	struct zero_params modfNormPot_params = {};
+	gsl_function gsl_modfKepl, gsl_modfNormPot;
+		gsl_modfKepl.function= &modfKepl;
+		gsl_modfKepl.params = &modfKepl_params;
+		gsl_modfNormPot.function = &modfNormPot;
+		gsl_modfNormPot.params = &modfNormPot_params;
+		
+	x_lo = r_mb;	x_hi = r_ms;
+	cuspRadius = brent(&gsl_modfKepl,x_lo,x_hi,&status1,&status2);
+	
+	x_lo = r_ms;	x_hi = x_lo;
+	do {
+		x_hi += 1.0;
+	} while ((keplAngularMom(x_hi)-specificAngMom)*(keplAngularMom(x_lo)-specificAngMom) > 0.0);
+	torusCenterRadius = brent(&gsl_modfKepl,x_lo,x_hi,&status1,&status2);
+	
+	x_lo = torusCenterRadius;	x_lo = x_hi;
+	do {
+		x_hi += 10.0;
+	} while (normalizedPotential(x_lo,0.0)*normalizedPotential(x_hi,0.0) > 0.0 && ++count < 1000);
+	edgeRadius = brent(&gsl_modfNormPot,x_lo,x_hi,&status1,&status2);
+	double aux=edgeRadius;
+	
+	double s=0.;
 }
 
 void torusParameters() 

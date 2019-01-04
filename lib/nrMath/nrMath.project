@@ -8,6 +8,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="bisection.c"/>
     <File Name="laguerre.c"/>
     <File Name="laguerre.h"/>
     <File Name="erff.c"/>
@@ -17,7 +18,6 @@
     <File Name="mathematics.h"/>
     <File Name="interpol.c"/>
     <File Name="bisection.h"/>
-    <File Name="bisection.c"/>
     <File Name="bessel.h"/>
     <File Name="zbrent.c"/>
     <File Name="nrutil.c"/>

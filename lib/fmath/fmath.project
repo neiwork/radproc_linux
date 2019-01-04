@@ -8,6 +8,10 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="integrators.h"/>
+    <File Name="integrators.cpp"/>
+    <File Name="brent.h"/>
+    <File Name="brent.cpp"/>
     <File Name="fbisection.h"/>
     <File Name="fbisection.cpp"/>
     <File Name="laguerre.h" ExcludeProjConfig="Release;Debug;"/>

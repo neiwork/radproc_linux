@@ -101,7 +101,11 @@ double inclusiveSigma(double sGeV)
 	double eta=sqrt(P2(sGeV-P2(piGeV)-P2(2.0*pGeV))-4.0*P2(piGeV*2.0*pGeV))/(2.0*piGeV*sqrt(sGeV));
 	double pthr = 0.78; //[GeV]
 	double sigma=0.0;;
-	double p = 0.5*sGeV/pGeV - 2.0*pGeV;
+	
+	// s = 2mp(Ek+2mp) = 2mp(E+mp)
+	// E = s/2mp - mp
+	// p = sqrt(E**2-m**2)
+	double p = sqrt(P2(0.5*sGeV/pGeV-pGeV)-P2(pGeV));
 	
 	if (p >= pthr && p <= 0.96) {
 		sigma = 0.032*eta*eta+0.04*pow(eta,6)+0.047*pow(eta,8);
@@ -120,7 +124,7 @@ double dsigma(double gx, double gr, double sGeV)
 	double GammaGeV = 0.0575;
 	double pGeV = protonMass*cLight2/1.6e-3;
 	double piGeV = neutralPionMass * cLight2 / 1.6e-3;
-	double isoGeV = 1.313*pGeV;
+	double isoGeV = 1.236;
 	double atan1 = atan((sqrt(sGeV)-pGeV-isoGeV)/GammaGeV);
 	double atan2 = atan((pGeV+piGeV-isoGeV)/GammaGeV);
 	double aux1 = GammaGeV/(atan1-atan2);
@@ -136,8 +140,8 @@ double dsigma(double gx, double gr, double sGeV)
 
 double auxf2(double gx, double gr, double epi, double normtemp, double sGeV)
 {
-	double piMeV = neutralPionMass*cLight2/1.6e-3;
-	double g = epi/piMeV;
+	double piGeV = neutralPionMass*cLight2/1.6e-3;
+	double g = epi/piGeV;
 	double beta = sqrt(1.0-1.0/(g*g));
 	double betax = sqrt(1.0-1.0/(gx*gx));
 	double q = sqrt(2.0*(gr+1.0))/normtemp;
@@ -170,7 +174,7 @@ double fPion(double epi, double density, double temp)
 						{return auxf(gr,epi,normtemp);});         //  [cm-3 s-1 GeV-1]
 }
 
-double fHadron(double epi, const Particle& p, double density, const SpaceCoord& psc, double temp)
+double fHadron(double epi, double density, double temp)
 {
 	double piGeV = neutralPionMass*cLight2/1.6e-3;
 	double qpi = fPion(epi,density,temp);
@@ -178,15 +182,15 @@ double fHadron(double epi, const Particle& p, double density, const SpaceCoord& 
 }
 
 
-double luminosityHadronic(double E, const Particle& p,
-	const double density, const SpaceCoord& psc, double temp)
+double luminosityHadronic(double E,
+	const double density, double temp)
 {
 	double Kpi = 0.17;
 	double thr = 0.0016; //1GeV
 
 	//double Max  = dHadron();   //esto es un infinito 
-	//double Min  = cHadron(E);
-	double Min = E+P2(0.5*neutralPionMass*cLight2)/E;
+	double Min  = cHadron(E);
+	//double Min = E+P2(0.5*neutralPionMass*cLight2)/E;
 	Min = Min / 1.6e-3;
 	double Max = 1.0e3;  // [en GeV]
 	
@@ -194,7 +198,7 @@ double luminosityHadronic(double E, const Particle& p,
 	//	[&E,&p,&psc](double x) {return fHadron(x, E, p, psc); });    //integra entre Emin y Emax
 	
 	double integral = 2.0*RungeKuttaSimple(Min,Max,[&](double epi)
-							{return fHadron(epi,p,density,psc,temp);}); // [cm-3 s-1 GeV-1]
+							{return fHadron(epi,density,temp);}); // [cm-3 s-1 GeV-1]
 	
 	/*double integral = 2.0*cLight*density*RungeKutta(p.emin(), p.emax(),
 		[E](double u){

@@ -2,6 +2,7 @@
 #define NTRY 100
 #define FACTOR 1.6
 
+
 int zbrac2(fun1 func,double& x1,double& x2)
     /* Given a function func and an initial guessed range x1 to x2, the routine expands the range
     geometrically until a root is bracketed by the returned values x1 and x2 (in which case zbrac
@@ -22,6 +23,7 @@ int zbrac2(fun1 func,double& x1,double& x2)
     }
     return 0;
 }
+
 #define JMAX 40
 
 double fbisection(fun1 func,double x1,double x2,double xacc)
@@ -32,7 +34,7 @@ double fbisection(fun1 func,double x1,double x2,double xacc)
     int j;
     double dx,f,fmid,xmid,rtb;
     
-    zbrac2(func,x1,x2);
+    //zbrac2(func,x1,x2);
     f=func(x1);
     fmid=func(x2);
     if (f*fmid >= 0.0) nrerror("Root must be bracketed for bisection in rtbis");

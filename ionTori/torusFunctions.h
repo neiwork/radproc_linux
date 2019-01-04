@@ -16,5 +16,5 @@ double totalPressure(double,double);
 double electronTemp(double,double);
 double ionTemp(double,double);
 
-double modfKepl(double);
-double modfw(double);
+double modfKepl(double,void *);
+double modfNormPot(double, void *);

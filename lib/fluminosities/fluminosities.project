@@ -8,12 +8,16 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="luminosityHadronic2.h"/>
+    <File Name="luminosityHadronic2.cpp"/>
+    <File Name="probexact.h"/>
+    <File Name="thermalCompton.h"/>
+    <File Name="thermalCompton.cpp"/>
     <File Name="luminosityHadronic.h" ExcludeProjConfig=""/>
     <File Name="luminosityHadronic.cpp" ExcludeProjConfig=""/>
     <File Name="probaprox.h"/>
     <File Name="probaprox.cpp"/>
     <File Name="probexact.cpp"/>
-    <File Name="probexact.h"/>
     <File Name="probMatrix.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="compton.cpp"/>
     <File Name="probMatrix.h" ExcludeProjConfig="Release;Debug;"/>

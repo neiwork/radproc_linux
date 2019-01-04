@@ -5,9 +5,8 @@
 
 double massDensity(double r, double theta)  // = mass density (c=1)
 {
-	double w;
-	double result = (w = normalizedPotential(r,theta)) > 0.0 ? 
-		pow((pow(polytropConst*pow(centralMassDens,1.0/polytropIndex) + 
+	double w = normalizedPotential(r,theta);
+	double result = w > 0.0 ? pow((pow(polytropConst*pow(centralMassDens,1.0/polytropIndex) + 
 		1.0,w)-1.0)/polytropConst,polytropIndex) : 0.0;
 
 	return result;
@@ -21,7 +20,7 @@ double electronDensity(double r, double theta)
 
 double totalPressure(double r, double theta) 
 {
-    return polytropConst*pow(massDensity(r, theta),1.0+1.0/polytropIndex);
+    return polytropConst*pow(massDensity(r,theta),1.0+1.0/polytropIndex);
 }
 
 /////////////////////////////////////////////
@@ -29,20 +28,20 @@ double totalPressure(double r, double theta)
 
 // Electrons
 double electronTemp(double r, double theta) {
-	double w;
-    double result = (w = normalizedPotential(r,theta)) > 0.0 ? 
-		(1.0-w)*auxM0 + w*auxM1*eMeanMolecularWeight* 
-		((1.0-magFieldPar)*atomicMassUnit*totalPressure(r,theta))
+	double w = normalizedPotential(r,theta);
+    double result = (w > 0.0) ? 
+		((1.0-w)*auxM0 + w*auxM1)*eMeanMolecularWeight* 
+		(1.0-magFieldPar)*atomicMassUnit*totalPressure(r,theta)
 		/(boltzmann*massDensity(r,theta))+2.7 : 2.7;
 	return result;
 }
 
 // Ions
 double ionTemp(double r, double theta) {
-	double w;    
-    double result = (w = normalizedPotential(r,theta)) > 0.0 ? 
+	double w = normalizedPotential(r,theta);    
+    double result = (w > 0.0) ? 
 		(eMeanMolecularWeight/iMeanMolecularWeight*auxM0 + w*(auxM0-auxM1))*iMeanMolecularWeight*
-		( (1.0-magFieldPar)*atomicMassUnit*totalPressure(r,theta) ) / 
+		(1.0-magFieldPar)*atomicMassUnit*totalPressure(r,theta) / 
 		(boltzmann*massDensity(r,theta))+2.7 : 2.7;
 	return result;
 }
@@ -72,8 +71,8 @@ double keplAngularMom(double r)
 // ANGULAR VELOCITIY OF THE TORUS
 double torusAngularVel(double r, double theta)
 {
-	return -(g_tphi(r,theta)+specificAngMom*g_tt(r,theta)) / 
-			(g_phiphi(r,theta)+specificAngMom*g_tphi(r,theta));
+	double gtphi = g_tphi(r,theta);
+	return -(gtphi+specificAngMom*g_tt(r,theta)) / (g_phiphi(r,theta)+specificAngMom*gtphi);
 }
 
 // REDSHIFT FACTOR
@@ -103,7 +102,5 @@ double normalizedPotential(double r, double theta)
 	return (r > cuspRadius) ? (gravPotential(r,theta)-potentialS)/(potentialC-potentialS) : -1.0;
 }
 
-double modfKepl(double r) {
-	return keplAngularMom(r) - specificAngMom; }
-double modfw(double r)
-	{return normalizedPotential(r,0.0);}
+double modfKepl(double r, void *params) {return keplAngularMom(r)-specificAngMom;}
+double modfNormPot(double r, void *params) {return normalizedPotential(r,0.0);}

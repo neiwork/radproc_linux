@@ -1,19 +1,19 @@
 {
-	"id":"Sgr A*",
+	"id":"Supermassive BH",
 	"blackHoleMass":"4.0e8",
-	"blackHoleSpinPar":"0.7",
+	"blackHoleSpinPar":"0.9",
 	"polytropIndex":"1.5",
-	"eCentralTemp":"1.0e10",
+	"eCentralTemp":"5.0e9",
 	"eiTempRatio":"1.0e-2",
 	"specificAngMomPar":"0.7",
 	"iMeanMolecularWeight":"1.23",
         "eMeanMolecularWeight":"1.14",
-        "zgap":"2.0",
+        "zGap":"2.0",
 
 	"centralMassDens":"1.0e-16",
-	"magFieldPar":"0.9",
+	"magFieldPar":"0.01",
 	"numProcesses":"4",
-	"nPhotMatrix":"100",
+	"nPhotMatrix":"200",
 
 	"ThermalProcessNumber": {
 				"0":1,
@@ -39,12 +39,12 @@
 					"energy":{
 						"min":-6.0,
 						"max":11.0,
-						"samples":50
+						"samples":100
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":30
+						"samples":100
 					},
 					"theta":{
 						"min":0.0,

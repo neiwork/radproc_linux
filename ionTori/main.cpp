@@ -26,7 +26,7 @@ int main()
 		State model(GlobalConfig.get_child("model"));
 		show_message(msgEnd, Module_state);
 		
-		trial();
+		//trial();
 		
 		thermalDistribution(model.proton, model);
 		
@@ -47,7 +47,6 @@ int main()
 		
         //luminosities(model, folder+"\\electronLuminosities.txt", a);
 		thermalLuminosities(model,"lum.txt",a,e);
-		
 		
 		//writeRandTParamSpace(getFileName(folder, "\\magf"), model.magf, 0);
         //writeRandTParamSpace(getFileName(folder, "\\denf"), model.denf_e, 0);
