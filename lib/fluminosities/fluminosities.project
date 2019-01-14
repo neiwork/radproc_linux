@@ -8,6 +8,17 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="luminosityHadronic.h"/>
+    <File Name="luminosityHadronic.cpp"/>
+    <File Name="probexact.cpp"/>
+    <File Name="probexact.h"/>
+    <File Name="probaprox.cpp"/>
+    <File Name="probaprox.h"/>
+    <File Name="thermalCompton.cpp"/>
+    <File Name="thermalCompton.h"/>
+    <File Name="luminosityHadronic2.cpp"/>
+    <File Name="luminosityHadronic2.h"/>
+    <File Name="compton.h"/>
     <File Name="compton.cpp"/>
     <File Name="luminosityIC.cpp"/>
     <File Name="luminosityIC.h"/>
@@ -28,8 +39,6 @@
   <VirtualDirectory Name="falta">
     <File Name="annihilationLine.cpp" ExcludeProjConfig="Debug;Release"/>
     <File Name="annihilationLine.h" ExcludeProjConfig="Debug;Release"/>
-    <File Name="luminosityHadronic.cpp" ExcludeProjConfig="Debug;Release"/>
-    <File Name="luminosityHadronic.h" ExcludeProjConfig="Debug;Release"/>
     <File Name="luminosityPhotoHadronic.cpp" ExcludeProjConfig="Debug;Release"/>
     <File Name="luminosityPhotoHadronic.h" ExcludeProjConfig="Debug;Release"/>
   </VirtualDirectory>

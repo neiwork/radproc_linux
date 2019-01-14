@@ -8,6 +8,12 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="integrators.h"/>
+    <File Name="integrators.cpp"/>
+    <File Name="brent.h"/>
+    <File Name="brent.cpp"/>
+    <File Name="laguerre.h"/>
+    <File Name="laguerre.cpp"/>
     <File Name="zbrent.cpp"/>
     <File Name="zbrac.cpp"/>
     <File Name="ran1.cpp"/>
@@ -44,6 +50,7 @@
         <IncludePath Value="."/>
         <IncludePath Value="../../lib"/>
         <IncludePath Value="/../../gsl/lib"/>
+        <IncludePath Value="../../gsl/include"/>
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="/../../lib/"/>

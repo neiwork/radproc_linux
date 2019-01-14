@@ -3,7 +3,7 @@
 #include "modelParameters.h"
 #include "write.h"
 #include "luminosities.h"
-#include "functions.h"
+#include "torusFunctions.h"
 #include "messages.h"
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/parameters.h>

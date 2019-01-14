@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="selfsimilarADAF" Database="" Version="10.0.0">
-  <Project Name="ADAF" Path="selfsimilarADAF.project" Active="Yes"/>
-  <Project Name="nrMath" Path="../lib/nrMath/nrMath.project" Active="No"/>
+  <Project Name="ADAF" Path="selfsimilarADAF.project" Active="No"/>
+  <Project Name="nrMath" Path="../lib/nrMath/nrMath.project" Active="Yes"/>
   <Project Name="fmath" Path="../lib/fmath/fmath.project" Active="No"/>
   <Project Name="ssADAF" Path="../lib/ssADAF/ssADAF.project" Active="No"/>
   <Project Name="fparameters" Path="../lib/fparameters/fparameters.project" Active="No"/>

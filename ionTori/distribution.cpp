@@ -2,7 +2,6 @@
 
 
 #include "maxwellJuttner.h"
-#include "functions.h"
 #include "modelParameters.h"
 
 #include <fmath/RungeKutta.h>
@@ -21,7 +20,6 @@ void thermalDistribution(Particle& p, State& st)
 	double gMin = p.emin()/Erest;
 	double gMax = p.emax()/Erest;
 	
-	
 	p.ps.iterate([&](const SpaceIterator& i) {
 	//p.distribution.fill ([&](const SpaceIterator& i){
 		
@@ -29,20 +27,18 @@ void thermalDistribution(Particle& p, State& st)
 		double r = i.val(DIM_R);
 		double theta = i.val(DIM_THETA);
 
-		double norm_temp = boltzmann*st.tempElectrons.get(i)/(Erest);
+		double norm_temp = boltzmann*st.tempIons.get(i)/(Erest);
 		
 		double K2 =  boost::math::cyl_bessel_k(2, 1.0/norm_temp); //bessk(2, 1.0/norm_temp);
 		
-		double integral = RungeKuttaSimple(gMin,gMax,
-			[&norm_temp](double g){
-			return f_norm(g, norm_temp); 
-		});
+		//double integral = RungeKuttaSimple(gMin,gMax,
+		//	[&norm_temp](double g){return f_norm(g, norm_temp);});
 		
-		double A=0.0;
-		if (integral > 0.0)
-		{
-			A = st.denf_e.get(i)/integral;  //*theta*K2
-		}
+		//double A=0.0;
+		//if (integral > 0.0)
+		//{
+		double A = st.denf_e.get(i); // /integral;  //*theta*K2
+		//}
 		
 		p.ps.iterate([&](const SpaceIterator& j) {
 				

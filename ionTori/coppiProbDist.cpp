@@ -1,5 +1,5 @@
 #include <math.h>
-#include <fmath/laguerre.h>
+#include <nrMath/laguerre.h>
 #include <fmath/mathFunctions.h>
 #include <fparameters/nrutil.h>
 #include <fmath/physics.h>

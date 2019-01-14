@@ -1,7 +1,7 @@
 #include "targetFields.h"
 
 
-#include "functions.h"
+#include "torusFunctions.h"
 #include "modelParameters.h"
 
 #include <fluminosities/blackBody.h>

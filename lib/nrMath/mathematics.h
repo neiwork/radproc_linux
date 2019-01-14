@@ -1,3 +1,5 @@
+#pragma once
+
 /*** mathematics.h:
 
      Mathematical and statistical functions. ***/

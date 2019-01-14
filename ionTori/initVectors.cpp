@@ -1,6 +1,6 @@
 #include "nr.h"
 #include "nrutil.h"
-#include "functions.h"
+#include "torusFunctions.h"
 #include <stdio.h>
 #include <math.h>
 

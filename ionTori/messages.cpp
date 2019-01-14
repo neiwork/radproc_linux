@@ -88,7 +88,7 @@ void show_module(ProgramModule module)
             break;
 
 		case Module_state:
-            printf("Tori structure and parameters");
+            printf("Torus structure and parameters");
             break;
         
 		case Module_targetField:
@@ -98,6 +98,10 @@ void show_module(ProgramModule module)
 		case Module_electronInjection:
             printf("Injection of electrons");
             break;
+			
+		case Module_torusSampling:
+			printf("Scattering Probability Matrix");
+			break;
       
         case Module_Message:
             printf("message ");
@@ -107,11 +111,13 @@ void show_module(ProgramModule module)
             printf("Electron Distribution ");
             break;
 
-
-		case Module_luminosities:
-			printf("Non-thermal SEDs");
+		case Module_thermalLuminosities:
+			printf("Thermal SEDs");
 			break;
-
+			
+		case Module_thermalCompton:
+			printf("Thermal Compton");
+			break;
  
   /*      default:
             printf("\n");
@@ -130,45 +136,37 @@ double diff_seconds(clock_t timeStart, clock_t timeEnd)
 /* void show_error(ErrorType error, ProgramModule module)
 {
     printf("\t ");
-
     switch(error)
     {
         case Invalid_Energy:
             show_message(msgError, module);
             printf("Invalid energy.");
             break;
-
         case Invalid_Particle:
             show_message(msgError, module);
             printf("Invalid particle type.");
             break;
-
         case Invalid_Pointer:
             show_message(msgError, module);
             printf("Invalid pointer.");
             break;
-
         case Invalid_MessageType:
             show_message(msgError, module);
             printf("Invalid message type.");
             break;
-
         case Invalid_Module:
             show_message(msgError, Module_Message);
             printf("Invalid Module.");
             break;
-
         case Invalid_Process:
             show_message(msgError, module);
             printf("Invalid process.");
             break;
-
         default:
             show_message(msgError, Module_Message);
             printf("Unknown error message.");
             break;
     }
-
     printf("\n");
     system("pause");
     exit(1);

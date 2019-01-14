@@ -5,11 +5,12 @@
 #include <fmath/physics.h>
 #include <boost/math/special_functions/bessel.hpp>
 #include "blackBody.h"
+#include <gsl/gsl_sf_bessel.h>
 
 double auxiliaryFunction(double& alpha, double& beta, double& gamma, double temp) {
     
     // se podría interpolar entre uno y otro.
-    if (temp > 5.0e8 && temp < 1.0e9) {
+    if (temp < 1.0e9) {
         alpha = 1.121;
         beta   = -10.65;
         gamma = 9.169;
@@ -60,10 +61,11 @@ double jSync(double energy, double temp, double magfield, double dens_e)
     double nu0 = (electronCharge * magfield) / (2.0 *pi * electronMass * cLight);
     double xM = (2.0 * frecuency) / (3.0 * nu0 * norm_temp*norm_temp);
 	
-	double bessel = boost::math::cyl_bessel_k(2, 1.0/norm_temp);
-	//double bessel2 = bessk(2, 1.0/norm_temp);
+	//double bessel = boost::math::cyl_bessel_k(2, 1.0/norm_temp);
+	double bessel = gsl_sf_bessel_Kn(2,1.0/norm_temp);
 	
-    double result = electronCharge*electronCharge / (sqrt(3.0)*cLight) * dens_e * frecuency / bessel * mAux(xM, temp);
+    double result = (bessel > 0.0) ? electronCharge*electronCharge / (sqrt(3.0)*cLight) *
+	dens_e * frecuency / bessel * mAux(xM, temp) : 0.0;
     
 	return result;
-}   // esto debería tener unidades de erg cm^-3 ster^-1 s^-1 Hz^-1
+} // esto debería tener unidades de erg cm^-3 ster^-1 s^-1 Hz^-1

@@ -1,104 +1,67 @@
-
-
+#include "modelParameters.h"
 #include "torusSampling.h"
-//#include "auxFunctions.h"
-#include "torusParameters.h"
+#include "globalVariables.h"
+#include <fparameters/SpaceIterator.h>
+#include "torusFunctions.h"
 #include <boost/property_tree/ptree.hpp>
 #include <fparameters/Dimension.h>
 #include <fparameters/parameters.h>
 
 extern "C" {
-#include <nrMath/nrutil.h>
-//#include <nrMath/nr.h>
-#include <nrMath/random.h>
+	#include <nrMath/nrutil.h>
+	#include <nrMath/random.h>
 }
 
 #include <fmath/constants.h>
 
 #include <stdio.h>
 
-//#define PI 3.14159265359
-//#define thomson 6.652458734e-25
-#define RG 1.5e11
 #define RANDOM_GENERATOR gsl_rng_r250 /* R250 random number generator from GNU Scientific Library. */
 
 #define new_max(x,y) ((x) >= (y)) ? (x) : (y)
 #define new_min(x,y) ((x) <= (y)) ? (x) : (y)
 
-//extern double rMin, rCenter, l_0;
-//extern double spinBH, lambda;
-
-void torusSampling(Particle& p)
+void torusSampling(State& st, Matrix& scatt, Vector& escape)
 {
-    //criticalRadii(&rMin, &rCenter);
-	double rMin= GlobalConfig.get<double>("rCusp"); //1.0;
-    //l_0=specificAngularMom();
-    //double rMax=edge();
-	double rMax=GlobalConfig.get<double>("rEdge"); //1.0e4;
+    size_t nPhot=GlobalConfig.get<size_t>("nPhotMatrix");
+    
+    double dr=(edgeRadius-cuspRadius)/nR;      	        // Cells' radial size.
+	Vector rCellsBoundaries(nR+1,0.0);					// Cells' boundaries.
+	rCellsBoundaries[0]=cuspRadius;
+    for(size_t i=1;i<=nR;i++)
+        rCellsBoundaries[i]=rCellsBoundaries[i-1]+dr;
 
-	
-	
-    int nR = GlobalConfig.get<double>("model.particle.default.dim.radius.samples");//100
-	int nTheta= GlobalConfig.get<double>("model.particle.default.dim.theta.samples");//10;
-    long nPhot=1000;
-    FILE *fp1, *fp2;
-    
-    fp1=fopen("torus.txt","w");
-    fp2=fopen("prob.txt","w");
-    
-    //double dr=(rMax-rMin)/nR;                                // Cells' radial size.
-	double paso=pow(rMax/rMin,1.0/nR);
-	double *rCells,*r,**prob;
-    
-	double dr = paso;//XXX es solo para compilar, no se cuanto vale dr
-    rCells=dvector(0,nR);                                          // Cells' boundaries.
-    r=dvector(1,nR);                                                   // Cells' central position.
-    prob=dmatrix(1,nR,1,nR);
-    rCells[0]=rMin;
-    /*for(int i=1;i<=nR;i++) {
-        rCells[i]=rCells[i-1]+dr;
-        r[i]=rCells[i-1]+dr/2.0;
-    }*/
-	for(int i=1;i<=nR;i++) {
-		rCells[i]=rMin*paso;
-		r[i]=sqrt(rCells[i]*rCells[i-1]);
-	}
-    //double thetaMin=0.0;
-    //double thetaMax=pi/4.0;
-	double thetaMin=GlobalConfig.get<double>("model.particle.default.dim.theta.min");
-    double thetaMax=pi/2.0*GlobalConfig.get<double>("model.particle.default.dim.theta.max");
+	matrixInit(scatt,nR,nR,0.0);
+    escape.resize(nR,0.0);
     
     InitialiseRandom(RANDOM_GENERATOR);
-    for(int i=1;i<=nR;i++) {
-        double dyaux=(sin(thetaMax)-sin(thetaMin))/nTheta;
-        for(int k=1;k<=nTheta+1;k++) {
-            double yaux=sin(thetaMin)+(k-1)*dyaux;                  // Theta distributed uniformly in sin(theta).
+	size_t iR=0;
+	st.photon.ps.iterate([&](const SpaceIterator& it1) {
+        double dyaux=(sin(maxPolarAngle)-sin(minPolarAngle))/nTheta;
+		double r=it1.val(DIM_R);
+        for(size_t k=1;k<=nTheta+1;k++) {
+            double yaux=sin(minPolarAngle)+(k-1)*dyaux;   // Theta distributed uniformly in sin(theta).
             double theta0=asin(yaux);
-            double y0=r[i]*cos(theta0);
-            double z0=r[i]*sin(theta0);
-            /*if (w(r[i],theta0) > 0) {
-                fprintf(fp1,"%f   %f\n",y0,z0);
-                fprintf(fp1,"%f   %f\n",y0,-z0);
-                fprintf(fp1,"%f   %f\n",-y0,z0);
-                fprintf(fp1,"%f   %f\n",-y0,-z0);
-            }*/
-            double drprim=dr/100.0;                                   // Initial step for the photon path.
-            double drprimmin=dr/1.0e6;                                // Minimum step.
-            double drprimmax=dr/10.0;                                 // Maximum step.
-            for(int j=1;j<=nPhot;j++) {
+            double y0=r*cos(theta0);
+            double z0=r*sin(theta0);
+            double drprim=dr/10.0;                        // Initial step for the photon path.
+            double drprimmin=dr/1.0e6;                    // Minimum step.
+            double drprimmax=dr/2.0;                      // Maximum step.
+            for(size_t jPh=1;jPh<=nPhot;jPh++) {
                 double random_number;
                 random_number=gsl_rng_uniform(RandomNumberGenerator);
                 double phiprim=2.0*pi*random_number;
                 random_number=gsl_rng_uniform(RandomNumberGenerator);
-                double thetaprim=acos((pi/2.0-random_number*pi)/(pi/2.0));        // Photon directions distributed
+                double thetaprim=acos((pi/2.0-random_number*pi)/(pi/2.0)); // Photon directions distributed
                 double rprim=drprim;                                                                                       // isotropically.
                 double rprimant=0.0;
                 double accumulatedp=0.0;
                 double neant, ne;
                 double r1,theta1;
-                neant=electronDensity(r[i],theta0);
+				neant=electronDensity(r,theta0);
+				double pescap=1.0;
                 do {
-                    int count=0;
+                    size_t count=0;
                     double control;
                     do {
                         if(count >= 1) {                                                             // Control of the step.
@@ -117,31 +80,31 @@ void torusSampling(Particle& p)
                         control = abs(ne-neant)/(0.5*(ne+neant));                 // dn/n
                         count++;
                     } while((control > 1.0e-2) && (drprim-drprimmin > 1.0e-9));
-                    double psc=ne*thomson*(drprim*RG);    // Probability of scattering.
-                    double pescap=1.0-accumulatedp;           // Probability that a photon reaches the previous position.
-                    for(int j=1;j<=nR;j++) {
-                        if(r1 > rCells[j-1] && r1 < rCells[j]) prob[i][j] += psc*pescap;            // Add the probability of
-                                                                                                                                                      // interaction in the matrix
-                                                                                                                                                      // element.
+                    double psc=ne*thomson*(drprim*gravRadius);    // Probability of scattering.
+                    pescap=1.0-accumulatedp;       // Probability that a photon reaches the previous position.
+                    for(size_t jR=0;jR<nR;jR++) {
+                        if (r1 > rCellsBoundaries[jR] && r1 < rCellsBoundaries[jR+1]) 
+							scatt[iR][jR] += psc*pescap;            // Add the probability
+																    // interaction in the matrix
+																	// element.
                     }
-                    printf("r1 = %f, drprim=%6.3e, j = %d, i = %d\n",r1,drprim,j,i);
-                    accumulatedp+=psc;    // The product of (1-p_k) gives the probability for a photon to reach the
-                                                              // previous position. To first order, this is 1-sum(p_k). Hence, we accumulate
-                                                              // the sum of the p_k.
+                    accumulatedp += psc;    // The product of (1-p_k) gives the probability for a photon to reach the
+											// previous position. To first order, this is 1-sum(p_k). Hence, we accumulate
+											// the sum of the p_k.
                     neant=ne;
                     rprimant=rprim;
                     drprim=new_min(drprim*2,drprimmax);
                     rprim+=drprim;
-                } while(ne > 1.0e-10);                          // Escape from the torus.
+                } while (ne > 1.0e1);                          // Escape from the torus.
+				pescap = 1.0-accumulatedp;
+				escape[iR] += pescap;
             }
         }
-        for(int j=1;j<=nR;j++) {
-            prob[i][j] /= (nPhot*(nTheta+1));         // Dividing by the number of photons launched.
-            fprintf(fp2,"%8.5e  ",prob[i][j]);
+		escape[iR] /= (nPhot*(nTheta+1));
+        for(size_t jR=0;jR<nR;jR++) {
+            scatt[iR][jR] /= (nPhot*(nTheta+1));      // Dividing by the number of photons launched.
         }
-        fprintf(fp2,"\n");
-    }
+		iR++;
+    },{0,-1,0});
     FinaliseRandom();
-    fclose(fp1);
-    fclose(fp2);
 }

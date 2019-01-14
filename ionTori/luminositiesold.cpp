@@ -3,7 +3,7 @@
 #include "modelParameters.h"
 #include "write.h"
 
-#include "functions.h"
+#include "torusFunctions.h"
 #include "maxwellJuttner.h"
 #include "thermalCompton.h"
 

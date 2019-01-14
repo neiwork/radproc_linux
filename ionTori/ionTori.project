@@ -6,14 +6,12 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="torusStruct">
+    <File Name="torusFunctions.h"/>
+    <File Name="torusFunctions.cpp" ExcludeProjConfig=""/>
     <File Name="torusParameters.h"/>
-    <File Name="functions.h" ExcludeProjConfig="Debug;"/>
-    <File Name="functions.cpp" ExcludeProjConfig="Debug;"/>
     <File Name="torusParameters.cpp"/>
     <File Name="metric.h"/>
     <File Name="metric.cpp"/>
-    <File Name="torusParam.h" ExcludeProjConfig="Debug;"/>
-    <File Name="torusParam.cpp" ExcludeProjConfig="Debug;"/>
   </VirtualDirectory>
   <VirtualDirectory Name="probMatrix">
     <File Name="initVectors.h" ExcludeProjConfig="Debug;"/>
@@ -26,14 +24,21 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="probCompton.h"/>
-    <File Name="probCompton.cpp"/>
-    <File Name="coppiProbDist.cpp"/>
-    <File Name="compton.h"/>
-    <File Name="luminosities.h"/>
-    <File Name="luminosities.cpp"/>
-    <File Name="coppiProbDist.h"/>
-    <File Name="compton.cpp"/>
+    <File Name="trial.h"/>
+    <File Name="trial.cpp"/>
+    <File Name="thermalLuminosities.h"/>
+    <File Name="thermalLuminosities.cpp"/>
+    <File Name="luminosities3.h" ExcludeProjConfig="Debug;"/>
+    <File Name="luminosities3.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="globalVariables.h"/>
+    <File Name="probCompton.h" ExcludeProjConfig="Debug;"/>
+    <File Name="probCompton.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="coppiProbDist.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="compton.h" ExcludeProjConfig="Debug;"/>
+    <File Name="luminosities.h" ExcludeProjConfig="Debug;"/>
+    <File Name="luminosities.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="coppiProbDist.h" ExcludeProjConfig="Debug;"/>
+    <File Name="compton.cpp" ExcludeProjConfig="Debug;"/>
     <File Name="main.cpp"/>
     <File Name="modelParameters.cpp"/>
     <File Name="modelParameters.h"/>
@@ -43,14 +48,14 @@
     <File Name="State.h"/>
     <File Name="targetFields.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="targetFields.h" ExcludeProjConfig="Debug;Release;"/>
-    <File Name="maxwellJuttner.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="maxwellJuttner.h" ExcludeProjConfig="Debug;"/>
-    <File Name="distribution.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="distribution.h" ExcludeProjConfig="Debug;"/>
-    <File Name="probabilityMatrix.cpp"/>
-    <File Name="probabilityMatrix.h"/>
-    <File Name="probabilityMatrix2.cpp"/>
-    <File Name="probabilityMatrix2.h"/>
+    <File Name="maxwellJuttner.cpp" ExcludeProjConfig=""/>
+    <File Name="maxwellJuttner.h" ExcludeProjConfig=""/>
+    <File Name="distribution.cpp" ExcludeProjConfig=""/>
+    <File Name="distribution.h" ExcludeProjConfig=""/>
+    <File Name="probabilityMatrix.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="probabilityMatrix.h" ExcludeProjConfig="Debug;"/>
+    <File Name="probabilityMatrix2.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="probabilityMatrix2.h" ExcludeProjConfig="Debug;"/>
   </VirtualDirectory>
   <VirtualDirectory Name="pruebas">
     <File Name="luminositiesold.h" ExcludeProjConfig="Debug;"/>
@@ -63,6 +68,8 @@
     <File Name="thermalCompton.h" ExcludeProjConfig="Debug;Release"/>
   </VirtualDirectory>
   <VirtualDirectory Name="extras">
+    <File Name="read.h"/>
+    <File Name="read.cpp"/>
     <File Name="write.h"/>
     <File Name="write.cpp"/>
     <File Name="messages.cpp"/>

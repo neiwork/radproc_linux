@@ -1,6 +1,6 @@
 #include "torusSampling2.h"
 
-#include "functions.h"
+#include "torusFunctions.h"
 
 #include <nrMath/nrutil.h>
 #include <nrMath/random.h>
