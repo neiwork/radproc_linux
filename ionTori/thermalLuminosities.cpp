@@ -240,7 +240,7 @@ void thermalCompton2(const State& st, Matrix& lumOut, Matrix scatt,
 			{
 				for (size_t jjE=0;jjE<nE;jjE++) {
 					double frecuency=energies[jjE]/planck;
-					if (lumInIC[jjE]*frecuency > 1.0e20)
+					//if (lumInIC[jjE]*frecuency > 1.0e20)
 						comptonNew2(lumOutIC,lumInIC[jjE],energies,nG,nE,nOm,normtemp,p,jjE,jR);
 				}
 				for (size_t jE=0;jE<nE;jE++) {
@@ -331,10 +331,13 @@ void binEmissivities(const State& st, Vector esc, Vector energies, Matrix lumOut
 			double emissToLum=vol*4.0*pi;
 			double sumFactor=0.0;
 			st.photon.ps.iterate([&](const SpaceIterator& itTheta) {
-				sumFactor += st.tempElectrons.get(itTheta);
+				//sumFactor += st.tempElectrons.get(itTheta);
+				double theta = itTheta.val(DIM_THETA);
+				sumFactor += normalizedPotential(r,theta);
 			},{0,itR.coord[DIM_R],-1});
 			st.photon.ps.iterate([&](const SpaceIterator& itTheta) {
-				double lum = lumOut[jE][jR]*esc[jR]*st.tempElectrons.get(itTheta)/(sumFactor*2.0);
+				double theta = itTheta.val(DIM_THETA);
+				double lum = lumOut[jE][jR]*esc[jR]*normalizedPotential(r,theta)/(sumFactor*2.0);
 				fileLum << jE << "\t" << jR << "\t" 
 						  << lum << endl;
 				emissivities[jj++] = (float)(lum/emissToLum);
@@ -418,30 +421,46 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 	file2.close();
 }
 
-void photonDensity(State& st, Vector energies, Matrix lumOut, Vector esc)
+void photonDensity(State& st, Vector energies, Matrix lumOutSy, Matrix lumOutBr,
+					Matrix lumOutpp, Matrix lumOutIC, Vector esc)
 {
-	double zGap = GlobalConfig.get<double>("zGap");
+	double zGap[2];
+	zGap[0]= GlobalConfig.get<double>("zGap");
+	zGap[1] = 2.0;
 	
-	ofstream file;
-	file.open("photonDensity.txt",ios::out);
-	file << "zGap = " << zGap << endl;
-	file << "energy [eV] \t n_ph [cm^-3 erg^-1]" << endl << endl;
+	ofstream file[2];
+	file[0].open("photonDensity1.txt",ios::out);
+	file[1].open("photonDensity2.txt",ios::out);
+	file[0] << "zGap = " << zGap[0] << endl;
+	file[1] << "zGap = " << zGap[1] << endl;
+	file[0] << "energy [eV] \t n_ph [cm^-3 erg^-1] orden: Sy Br IC pp" << endl << endl;
+	file[1] << "energy [eV] \t n_ph [cm^-3 erg^-1] orden: Sy Br IC pp" << endl << endl;
 
+	for (int i=0;i<2;i++) {
+		
 	size_t jE=0;
 	st.photon.ps.iterate([&](const SpaceIterator& itE) {
-		double nPh = 0.0;
+		double nPhSy = 0.0;
+		double nPhBr = 0.0;
+		double nPhIC = 0.0;
+		double nPhpp = 0.0;
 		double energy = itE.val(DIM_E);
 		size_t jR=0;
 		st.photon.ps.iterate([&](const SpaceIterator& itER) {
 			double r = itER.val(DIM_R);
-			double dist2 = (zGap*zGap + r*r) * gravRadius*gravRadius;
-			nPh += lumOut[jE][jR]*esc[jR] / (pi*dist2*cLight*energy*planck);
+			double dist2 = (zGap[i]*zGap[i] + r*r) * gravRadius*gravRadius;
+			nPhSy += lumOutSy[jE][jR]*esc[jR] / (pi*dist2*cLight*energy*planck);
+			nPhBr += lumOutBr[jE][jR]*esc[jR] / (pi*dist2*cLight*energy*planck);
+			nPhIC += lumOutIC[jE][jR]*esc[jR] / (pi*dist2*cLight*energy*planck);
+			nPhpp += lumOutpp[jE][jR]*esc[jR] / (pi*dist2*cLight*energy*planck);
 			jR++;
 		},{itE.coord[DIM_E],-1,0});
-		file << energy/1.6e-12 << "\t" << nPh << endl;
+		file[i] << energy/1.6e-12 << "\t" << nPhSy
+				<< "\t" << nPhBr << "\t"<< nPhIC << "\t" << nPhpp << endl;
 		jE++;
 	},{-1,0,0});
-	file.close();
+	file[i].close();
+	}
 }
 
 void thermalLuminosities(State& st, const string& filename, Matrix &scatt, Vector& esc)
@@ -464,7 +483,7 @@ void thermalLuminosities(State& st, const string& filename, Matrix &scatt, Vecto
 			thermalCompton2(st,lumOut,scatt,lumOutIC,energies);
 		gravRedshift(st,energies,lumOut,lumOutRed);
 		binEmissivities(st,esc,energies,lumOut);
-		photonDensity(st,energies,lumOut,esc);
+		photonDensity(st,energies,lumOutSy,lumOutBr,lumOutIC,lumOutpp,esc);
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,
 							lumOutIC,lumOut,lumOutRed,esc,filename);
 	}
