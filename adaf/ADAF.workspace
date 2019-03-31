@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="ADAF" Database="" Version="10.0.0">
+  <Project Name="fluminosities" Path="../lib/fluminosities/fluminosities.project" Active="No"/>
+  <Project Name="fmath" Path="../lib/fmath/fmath.project" Active="No"/>
+  <Project Name="fparameters" Path="../lib/fparameters/fparameters.project" Active="No"/>
+  <Project Name="fparticle" Path="../lib/fparticle/fparticle.project" Active="No"/>
+  <Project Name="adaf" Path="adaf.project" Active="Yes"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Environment/>
+      <Project Name="adaf" ConfigName="Debug"/>
+      <Project Name="fluminosities" ConfigName="Debug"/>
+      <Project Name="fmath" ConfigName="Debug"/>
+      <Project Name="fparameters" ConfigName="Debug"/>
+      <Project Name="fparticle" ConfigName="Debug"/>
+      <Project Name="adaf" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release" Selected="yes">
+      <Environment/>
+      <Project Name="adaf" ConfigName="Release"/>
+      <Project Name="fluminosities" ConfigName="Release"/>
+      <Project Name="fmath" ConfigName="Release"/>
+      <Project Name="fparameters" ConfigName="Release"/>
+      <Project Name="fparticle" ConfigName="Release"/>
+      <Project Name="adaf" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>
