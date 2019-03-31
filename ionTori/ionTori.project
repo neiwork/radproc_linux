@@ -75,14 +75,6 @@
     <File Name="messages.cpp"/>
     <File Name="messages.h"/>
   </VirtualDirectory>
-  <Dependencies Name="Release">
-    <Project Name="fmath"/>
-    <Project Name="fparameters"/>
-    <Project Name="fparticle"/>
-    <Project Name="flosses"/>
-    <Project Name="fluminosities"/>
-    <Project Name="inout"/>
-  </Dependencies>
   <Dependencies Name="Debug">
     <Project Name="nrMath"/>
     <Project Name="fmath"/>
@@ -91,6 +83,14 @@
     <Project Name="inout"/>
     <Project Name="flosses"/>
     <Project Name="fluminosities"/>
+  </Dependencies>
+  <Dependencies Name="Release">
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+    <Project Name="fparticle"/>
+    <Project Name="flosses"/>
+    <Project Name="fluminosities"/>
+    <Project Name="inout"/>
   </Dependencies>
   <Settings Type="Executable">
     <GlobalSettings>

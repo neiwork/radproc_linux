@@ -11,11 +11,11 @@
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
+      <Project Name="flosses" ConfigName="Debug"/>
+      <Project Name="fluminosities" ConfigName="Debug"/>
       <Project Name="fmath" ConfigName="Debug"/>
       <Project Name="fparameters" ConfigName="Debug"/>
       <Project Name="fparticle" ConfigName="Debug"/>
-      <Project Name="flosses" ConfigName="Debug"/>
-      <Project Name="fluminosities" ConfigName="Debug"/>
       <Project Name="inout" ConfigName="Debug"/>
       <Project Name="ionTori" ConfigName="Debug"/>
       <Project Name="nrMath" ConfigName="Debug"/>

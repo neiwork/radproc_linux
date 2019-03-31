@@ -5,22 +5,9 @@
 #include <iostream>
 #include <algorithm>
 
-// Global variables
-/*double massBH;                // Black hole mass
-double RS;                    // Schwarzschild Radius
-double alphapar;              // Viscosity parameter
-double betapar;               // Magnetic parameter
-double gammapar;              // Polytropic index
-double rmin;                  // Inner edge of the ADAF
-double rmax;                  // Outer edge of the ADAF
-double f;                     // Advection parameter
-double r;                     // Radius*/
-
 void prepareGlobalCfg()
 {
-	static const double massBH=GlobalConfig.get<double>("massBH")*solarMass;
-	double rg=gravitationalConstant*massBH/cLight2;
-    GlobalConfig.put("rg", rg);
+	adafParameters();
 	fmath_configure(GlobalConfig);
 }
 
@@ -35,22 +22,18 @@ void initializeEnergyPoints(Vector& v, double logEmin, double logEmax)
 	}
 }
 
-void initializeRadiiPoints(Vector& v,double min,double max) 
+void initGridLogarithmically(Vector& v, double min, double max)
 {
-    double var_int=pow(max/min,1.0/(v.size()-1));
-    v[0]=min;
-    for (size_t i=1;i<v.size();++i) {
-        v[i]=v[i-1]*var_int;
-    }
+	double ratio = pow(max/min,1.0/(v.size()-1));
+	v[0]=min;
+	for (size_t i=1; i < v.size(); ++i) 
+		v[i] = v[i-1]*ratio;
 }
 
-void initializeThetaPoints(Vector& v,double min,double max)
+void initGridLinearly(Vector& v, double min, double max)
 {
-    double var_int=(sin(max)-sin(min))/(v.size()-1);
-    v[0]=min;
-    double sin0=sin(v[0]);
-    for (size_t i=1;i<v.size();++i) {
-        v[i]=asin(sin0+var_int);
-        sin0+=var_int;
-    }
+	double dv = (max-min)/(v.size()-1);
+	v[0]=min;
+	for (size_t i=1;i<v.size();++i)
+		v[i] = v[i-1]+dv;
 }

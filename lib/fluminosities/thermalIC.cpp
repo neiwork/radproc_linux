@@ -6,7 +6,7 @@
 #include <fparameters/ParamSpace.h>
 #include <fparameters/ParamSpaceValues.h>
 #include <iostream>
-#include <../ionTori/torusFunctions.h>
+#include <../ionTori/adafFunctions.h>
 #include <fmath/fbisection.h>
 
 void auxFunction(double& e1, double& e2,  double& e3, double xc, double energy, double norm_temp, 
