@@ -73,11 +73,17 @@ double costhetaH(double r)
 	return sqrt(pi/2.0) * cs/omR * erf(omR / (sqrt(2.0)*cs));
 }
 
-double massDensity(double r)
+double massDensityADAF(double r)
 {
 	double rOut = exp(logr.back())*schwRadius;
 	return accRateOut*pow(r/rOut,s) / 
 		(4.0*pi*r*r*(-radialVel(r))*costhetaH(r));
+}
+
+double massDensityCorona(double r)
+{
+	double rtr = GlobalConfig.get<double>("rtr");
+	return massDensityADAF(r)*(rt/r);
 }
 
 double electronDensity(double r)
