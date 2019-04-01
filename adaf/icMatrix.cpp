@@ -32,8 +32,9 @@ void icMatrix(State& st, Matrix& scatt, Vector& escape)
 
 	Vector rCellsBoundaries(nR+1,0.0);					// Cells' boundaries.
 	rCellsBoundaries[0]=schwRadius;
+	double rN = paso_r;
     for(size_t iR=1;iR<=nR;iR++)
-        {rCellsBoundaries[iR]=rCellsBoundaries[iR-1]*paso_r;}
+        rCellsBoundaries[iR]=rCellsBoundaries[iR-1]*paso_r;
 
 	matrixInit(scatt,nR,nR,0.0);
     escape.resize(nR,0.0);
@@ -111,7 +112,8 @@ void icMatrix(State& st, Matrix& scatt, Vector& escape)
 					pasoprim=new_min(pasoprim*pasoprim,pasoprimmax);
                     drprim=r1*(pasoprim-1.0);
                     rprim += drprim;
-                } while(ne > 1.0e1);               // Escape from the torus.
+					printf("r = %f",rprim);
+                } while(ne > 1.0e100);               // Escape from the torus.
 				pescap = 1.0-accumulatedp;
 				escape[iR] += pescap;
             }

@@ -8,7 +8,7 @@ double angularVel(double);
 double sqrdSoundVel(double);
 double height_fun(double);
 double costhetaH(double);
-double massDensity(double);
+double massDensityADAF(double);
 double electronDensity(double);
 double ionDensity(double);
 

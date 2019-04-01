@@ -3,6 +3,8 @@
 	"mu_i":"1.23",
 	"mu_e":"1.14",
 	"numProcesses":"4",
+	"nPhotMatrix":"100",
+	"nTheta":"6",
 
 	"model": {
 		"particle": {

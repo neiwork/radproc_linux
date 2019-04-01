@@ -42,6 +42,7 @@ void adafParameters()
 	logMaxEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.max");
 	numProcesses = GlobalConfig.get<int>("numProcesses");
 	
+	paso_r = pow(exp(logr.back())/1.1,1.0/nR);
 	// DERIVED CONSTANTS
 	schwRadius = 2.0*gravitationalConstant*blackHoleMass / cLight2;
 }

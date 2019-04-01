@@ -25,24 +25,23 @@ State::State(boost::property_tree::ptree& cfg) :
  {
 	particles.push_back(&electron);
 	particles.push_back(&photon);
-	particles.push_back(&proton);
 	for (auto p : particles) {
 		initializeParticle(*p, cfg);
 	}
 	magf.initialize();
 	magf.fill([&](const SpaceIterator& i){
 	    double r=i.val(DIM_R);
-		return sqrt( (1.0-magFieldPar)*8.0*pi*massDensity(r)*sqrdSoundVel(r) );
+		return sqrt( (1.0-magFieldPar)*8.0*pi*massDensityADAF(r)*sqrdSoundVel(r) );
     });
     denf_i.initialize();
     denf_i.fill([&](const SpaceIterator& i) {
         double r=i.val(DIM_R); 
-		return massDensity(r)/(atomicMassUnit*iMeanMolecularWeight);
+		return massDensityADAF(r)/(atomicMassUnit*iMeanMolecularWeight);
     });
     denf_e.initialize();
     denf_e.fill([&](const SpaceIterator& i) {
         double r=i.val(DIM_R);
-		return massDensity(r)/(atomicMassUnit*eMeanMolecularWeight);
+		return massDensityADAF(r)/(atomicMassUnit*eMeanMolecularWeight);
     });
     tempElectrons.initialize();
     tempElectrons.fill([&](const SpaceIterator& i) {
@@ -52,6 +51,7 @@ State::State(boost::property_tree::ptree& cfg) :
     tempIons.initialize();
     tempIons.fill([&](const SpaceIterator& i) {
         double r=i.val(DIM_R);
+		
 		return ionTemp(r);
     });
 	thetaH.initialize();
@@ -86,9 +86,8 @@ void State::initializeParticle(Particle& p,boost::property_tree::ptree& cfg)
 	p.ps.add(new Dimension(nE,bind(initEnergyPoints,placeholders::_1,
 								logMinEnergy,logMaxEnergy)));
 	// add dimension for r
-	double edgeRadius = exp(logr.back())*schwRadius;   // l_0
-	double innerRadius = schwRadius;           	       // l_nR
-	double paso_r = pow(edgeRadius/innerRadius,1.0/nR);
+	double innerRadius = schwRadius*1.1;
+	double edgeRadius = exp(logr.back())*schwRadius;
 	p.ps.add(new Dimension(nR,bind(initGridLogarithmically,placeholders::_1,
 							innerRadius*paso_r,edgeRadius/paso_r)));
 	p.initialize();

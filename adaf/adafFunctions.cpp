@@ -13,7 +13,7 @@ double electronTemp(double r)
 		pos_r++;
 		aux = logr[pos_r];
 	}
-	double m = (logTe[pos_r]-logTe[pos_r-1])/(logr[pos_r]-logr[pos_r]);
+	double m = (logTe[pos_r]-logTe[pos_r-1])/(logr[pos_r]-logr[pos_r-1]);
 	double logT = m*(logr_actual-logr[pos_r-1])+logTe[pos_r-1];
 	return eMeanMolecularWeight*exp(logT);
 }
@@ -27,8 +27,10 @@ double ionTemp(double r) {
 		pos_r++;
 		aux = logr[pos_r];
 	}
-	double m = (logTi[pos_r]-logTi[pos_r-1])/(logr[pos_r]-logr[pos_r]);
+	double m = (logTi[pos_r]-logTi[pos_r-1])/(logr[pos_r]-logr[pos_r-1]);
 	double logT = m*(logr_actual-logr[pos_r-1])+logTi[pos_r-1];
+	
+	
 	return iMeanMolecularWeight*exp(logT);
 }
 
@@ -40,7 +42,7 @@ double radialVel(double r) {
 		pos_r++;
 		aux = logr[pos_r];
 	}
-	double m = (logv[pos_r]-logv[pos_r-1])/(logr[pos_r]-logr[pos_r]);
+	double m = (logv[pos_r]-logv[pos_r-1])/(logr[pos_r]-logr[pos_r-1]);
 	double logrv = m*(logr_actual-logr[pos_r-1])+logv[pos_r-1];
 	return -exp(logrv);
 }
@@ -82,16 +84,15 @@ double massDensityADAF(double r)
 
 double massDensityCorona(double r)
 {
-	double rtr = GlobalConfig.get<double>("rtr");
-	return massDensityADAF(r)*(rt/r);
+	return massDensityADAF(r)*(1.0/r);
 }
 
 double electronDensity(double r)
 {
-	return massDensity(r)/(atomicMassUnit*eMeanMolecularWeight);
+	return massDensityADAF(r)/(atomicMassUnit*eMeanMolecularWeight);
 }
 
 double ionDensity(double r)
 {
-	return massDensity(r)/(atomicMassUnit*iMeanMolecularWeight);
+	return massDensityADAF(r)/(atomicMassUnit*iMeanMolecularWeight);
 }
