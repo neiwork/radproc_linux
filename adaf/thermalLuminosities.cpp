@@ -62,7 +62,7 @@ void localProcesses(const State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix&
 			if (flags[0]) {
 				double jSy = jSync(energies[jE],temp,magf,dens_e);
 				//lumSy += jSy*emissToLum;
-				lumSy += 2.0*min(jSy*emissToLum,bb_RJ(frecuency,temp)*fluxToLum);
+				lumSy += min(jSy*emissToLum,bb_RJ(frecuency,temp)*fluxToLum);
 				//lumRJ += fluxToLum*bb_RJ(frecuency,temp);
 			}
 			if (flags[1])
@@ -73,8 +73,8 @@ void localProcesses(const State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix&
 			}
             if (flags[0]) {
 				if (jR>0)
-					lumSync2 = min((1.0-scatt[jR-1][jR])*lumSync1+2.0*lumSy,2.0*lumRJ);
-				else { lumSync2 = 2.0*min(lumSy,lumRJ);}
+					lumSync2 = min((1.0-scatt[jR-1][jR])*lumSync1+lumSy,lumRJ);
+				else { lumSync2 = min(lumSy,lumRJ);}
 				//lumSy= max(lumSync2-lumSync1,0.0);
 				//lumSy=lumSync2-lumSync1;
 				if (lumSy > 0.0)
@@ -82,7 +82,6 @@ void localProcesses(const State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix&
 				lumSync1=lumSync2;
             }
 			if (flags[1]) {
-				lumBr *= 2.0;
 				if (flags[0] && frecuency < 1.0e8)
 					lumBr=max(lumBr,lumSy);
 				lumOutBr[jE][jR]=lumBr;
@@ -158,7 +157,7 @@ void thermalCompton2(const State& st, Matrix& lumOut, Matrix scatt,
 			{
 				for (size_t jjE=0;jjE<nE;jjE++) {
 					double frecuency=energies[jjE]/planck;
-					if (lumInIC[jjE]*frecuency > 1.0e20)
+					if (lumInIC[jjE]*frecuency > 1.0e15)
 						comptonNew2(lumOutIC,lumInIC[jjE],energies,nG,nE,nOm,normtemp,p,jjE,jR);
 				}
 				for (size_t jE=0;jE<nE;jE++) {
@@ -293,7 +292,7 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 			lumIC += lumOutIC[jE][jR] * esc[jR];
 			lumpp += lumOutpp[jE][jR] * esc[jR];
 			lum += lumOut[jE][jR] * esc[jR];
-			lumRed += lumOutRed[jE][jR] * esc[jR];
+			//lumRed += lumOutRed[jE][jR] * esc[jR];
 		}
         file1
 			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency
@@ -303,7 +302,7 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumIC*frecuency
 			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumpp*frecuency
 			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lum*frecuency
-			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumRed*frecuency
+			//<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumRed*frecuency
 			<< endl;
 	};
 	
