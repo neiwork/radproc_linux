@@ -18,6 +18,7 @@ public:
     ParamSpaceValues denf_e;
     ParamSpaceValues tempElectrons, tempIons;
 	ParamSpaceValues thetaH, height;
+	ParamSpaceValues tempColdDisk;
 
 	State(boost::property_tree::ptree& cfg);
 	

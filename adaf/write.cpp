@@ -39,7 +39,7 @@ void writeAllSpaceParam(const std::string& filename, const ParamSpaceValues& dat
 	data.ps.iterate([&file, &data](const SpaceIterator& i){
 		double logE = log10(i.val(DIM_E) / 1.6e-12);
 		double logR = (i.val(DIM_R));
-		double logT = (i.val(DIM_THETA));
+		double logT = (i.val(DIM_Rcd));
 		double logQ = safeLog10(data.get(i)); //log10(salida.values(i));  // values(i));
 //		salida.values(i);
 
@@ -129,9 +129,9 @@ void writeRandTParamSpace(const std::string& filename, const ParamSpaceValues& d
 	data.ps.iterate([&file, &data](const SpaceIterator& i){
 
 		double r = i.val(DIM_R);
-		double theta = i.val(DIM_THETA);
+		//double theta = i.val(DIM_THETA);
 		
-		file << r << '\t' << theta << '\t' << data.get(i) << std::endl;
+		file << r << '\t' << '\t' << data.get(i) << std::endl;
 		
 	}, { E, -1, -1 });  //el -1 indica que las E se recorren, no quedan fijas
 	//las otras dos dimensiones quedan fijas en las posiciones r y t (recordar que la primera es 0 )

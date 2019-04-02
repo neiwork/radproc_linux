@@ -30,8 +30,8 @@
     <File Name="thermalSync.cpp" ExcludeProjConfig=""/>
     <File Name="thermalSync.h" ExcludeProjConfig=""/>
     <File Name="thermalBremss.h" ExcludeProjConfig=""/>
-    <File Name="thermalIC.h"/>
-    <File Name="thermalIC.cpp"/>
+    <File Name="thermalIC.h" ExcludeProjConfig="Debug;"/>
+    <File Name="thermalIC.cpp" ExcludeProjConfig="Debug;"/>
     <File Name="blackBody.cpp"/>
     <File Name="blackBody.h"/>
   </VirtualDirectory>

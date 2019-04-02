@@ -26,8 +26,6 @@
     <File Name="adafParameters.cpp"/>
     <File Name="thermalLuminosities.h"/>
     <File Name="thermalLuminosities.cpp"/>
-    <File Name="thermalCompton.h"/>
-    <File Name="thermalCompton.cpp"/>
     <File Name="State.h"/>
     <File Name="State.cpp"/>
     <File Name="main.cpp"/>
@@ -147,4 +145,10 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug">
+    <Project Name="fparticle"/>
+    <Project Name="fluminosities"/>
+    <Project Name="fparameters"/>
+    <Project Name="fmath"/>
+  </Dependencies>
 </CodeLite_Project>

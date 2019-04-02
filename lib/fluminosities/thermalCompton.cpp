@@ -55,7 +55,7 @@ void comptonRedistribution(Vector& p, size_t nG, size_t nE, size_t nOm,
 					for (size_t jOm=0;jOm<nOm;jOm++) {
 						double dOm = om*(var_int_om-1.0);
 						double prob = probexactNew(om,omPrim,gamma)*dOm;
-						p[((jR*nG+jG)*nE+jE)*nOm+jOm] = prob/probtotexact;
+						p[((jR*nG+(jG-1))*nE+jE)*nOm+jOm] = prob/probtotexact;
 						om *= var_int_om;
 					}
 				}

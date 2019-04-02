@@ -8,7 +8,7 @@
 const DimensionCoord
 	DIM_E = 0,
 	DIM_R = 1,
-	DIM_THETA = 2;
+	DIM_Rcd = 2;
 	
 /* define the inital values of the global parameters*/
 void prepareGlobalCfg();

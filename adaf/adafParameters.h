@@ -12,10 +12,12 @@ double magFieldPar;						// Magnetic field parameter (beta)
 double j;
 double alpha;
 double paso_r;
+double paso_rCD;
+double rTr;
 
 double logMinEnergy;					// Logarithm of the minimum energy for photons
 double logMaxEnergy;					// Logarithm of the maximum energy for photons
-std::size_t nR,nE;						// Number of points in each dimension
+std::size_t nR,nE,nRcd;					// Number of points in each dimension
 
 int numProcesses;
 

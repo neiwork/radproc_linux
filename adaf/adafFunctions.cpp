@@ -75,16 +75,34 @@ double costhetaH(double r)
 	return sqrt(pi/2.0) * cs/omR * erf(omR / (sqrt(2.0)*cs));
 }
 
-double massDensityADAF(double r)
+double accRateADAF(double r)
 {
 	double rOut = exp(logr.back())*schwRadius;
-	return accRateOut*pow(r/rOut,s) / 
+	double result = accRateOut*pow(r/rOut,s);
+	if (r > rTr) result *= (rTr/r);
+	return result;
+}
+
+double massDensityADAF(double r)
+{
+	return accRateADAF(r) / 
 		(4.0*pi*r*r*(-radialVel(r))*costhetaH(r));
 }
 
-double massDensityCorona(double r)
+double accRateColdDisk(double r)
 {
-	return massDensityADAF(r)*(1.0/r);
+	return accRateOut*(1.0-rTr/r);
+}
+
+double tempCD(double r)
+{
+	double lj = r/sqrt(paso_r);
+	double lj1 = r*sqrt(paso_r);
+	double area = 2.0*pi*(lj1*lj1-lj*lj);
+	
+	double aux = 3.0*gravitationalConstant*blackHoleMass*accRateColdDisk(r)/2.0 *
+				(1.0/lj * (1.0-2.0/3.0*sqrt(rTr/lj))-1.0/lj1*(1.0-2.0/3.0*sqrt(rTr/lj1)));
+	return pow(aux/area/ stefanBoltzmann,0.25);
 }
 
 double electronDensity(double r)

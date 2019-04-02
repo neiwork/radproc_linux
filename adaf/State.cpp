@@ -7,7 +7,6 @@
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/parameters.h>
 #include <boost/property_tree/ptree.hpp>
-//#include <fmath/bisection.h>
 
 using namespace std;
 
@@ -21,7 +20,8 @@ State::State(boost::property_tree::ptree& cfg) :
  tempElectrons(photon.ps, false),
  tempIons(photon.ps, false),
  thetaH(photon.ps, false),
- height(photon.ps, false)
+ height(photon.ps, false),
+ tempColdDisk(photon.ps, false)
  {
 	particles.push_back(&electron);
 	particles.push_back(&photon);
@@ -64,6 +64,11 @@ State::State(boost::property_tree::ptree& cfg) :
 		double r=i.val(DIM_R);
 		return height_fun(r);
 	});
+	tempColdDisk.initialize();
+	tempColdDisk.fill([&](const SpaceIterator& i) {
+		double r=i.val(DIM_Rcd);
+		return tempCD(r);
+	});
 }
 
 Dimension* State::createDimension(Particle& p, string dimid, 
@@ -90,5 +95,10 @@ void State::initializeParticle(Particle& p,boost::property_tree::ptree& cfg)
 	double edgeRadius = exp(logr.back())*schwRadius;
 	p.ps.add(new Dimension(nR,bind(initGridLogarithmically,placeholders::_1,
 							innerRadius*paso_r,edgeRadius/paso_r)));
+							
+	// add dimension for rcd
+	p.ps.add(new Dimension(nRcd,bind(initGridLogarithmically,placeholders::_1,
+							rTr*sqrt(paso_rCD),edgeRadius/sqrt(paso_rCD))));
+	
 	p.initialize();
 }

@@ -32,17 +32,19 @@ void adafParameters()
 	adafFile.close();
 	
 	blackHoleMass *= solarMass;
+	schwRadius = 2.0*gravitationalConstant*blackHoleMass / cLight2;
 	double eddAccRate = 1.39e18 * blackHoleMass/solarMass;
 	accRateOut = accRateNorm*eddAccRate;
+	rTr = GlobalConfig.get<double>("rTr") * schwRadius;
 	eMeanMolecularWeight = GlobalConfig.get<double>("mu_e");
 	iMeanMolecularWeight = GlobalConfig.get<double>("mu_i");
 	nR = GlobalConfig.get<int>("model.particle.default.dim.radius.samples");
 	nE = GlobalConfig.get<int>("model.particle.default.dim.energy.samples");
+	nRcd = GlobalConfig.get<int>("model.particle.default.dim.radius_cd.samples");
 	logMinEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.min");
 	logMaxEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.max");
 	numProcesses = GlobalConfig.get<int>("numProcesses");
 	
 	paso_r = pow(exp(logr.back())/1.1,1.0/nR);
-	// DERIVED CONSTANTS
-	schwRadius = 2.0*gravitationalConstant*blackHoleMass / cLight2;
+	paso_rCD = pow(exp(logr.back())*schwRadius/rTr,1.0/nRcd);
 }
