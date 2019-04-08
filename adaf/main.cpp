@@ -13,8 +13,8 @@
 using namespace std;
 int main()
 {
-	Matrix scatt;
-	Vector esc;
+	Matrix scattADAF,scattCD,absCD;
+	Vector esc,escCD;
 	string folder{prepareOutputfolder()};
 	try {
 		GlobalConfig = readConfig();
@@ -26,10 +26,9 @@ int main()
 		show_message(msgEnd, Module_state);
 
 		show_message(msgStart, Module_torusSampling);
-		icMatrix(model,scatt,esc);
+		icMatrix(model,scattADAF,scattCD,absCD,esc,escCD);
 		show_message(msgEnd, Module_torusSampling);
-		
-		thermalLuminosities(model,"lum.txt",scatt,esc);
+		thermalLuminosities(model,"lum.txt",scattADAF,scattCD,absCD,esc,escCD);
 
 	}
 	catch (std::runtime_error& e)

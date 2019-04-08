@@ -14,6 +14,7 @@ double alpha;
 double paso_r;
 double paso_rCD;
 double rTr;
+double inclination;
 
 double logMinEnergy;					// Logarithm of the minimum energy for photons
 double logMaxEnergy;					// Logarithm of the maximum energy for photons

@@ -2,6 +2,7 @@
 	"id":"stellarMassBH",
 	"mu_i":"1.23",
 	"mu_e":"1.14",
+	"inclination":"30"
 	"numProcesses":"4",
 
 	"model": {

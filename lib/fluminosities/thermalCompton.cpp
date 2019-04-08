@@ -34,7 +34,7 @@ void comptonRedistribution(Vector& p, size_t nG, size_t nE, size_t nOm,
 		double gamma=abscissas[jG]*normtemp+1.0;
 		double beta=sqrt(1.0-1.0/(gamma*gamma));
 		for (size_t jE=0;jE<nE;jE++) {
-			if (lum[jE][jR]*(energies[jE]/planck) > 1.0e20) {
+			if (lum[jE][jR]*(energies[jE]/planck) > 1.0e10) {
 				double omPrim = energies[jE]/(electronMass*cLight2);
 				double eps = omPrim/gamma;
 						

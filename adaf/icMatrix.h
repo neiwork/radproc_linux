@@ -7,4 +7,4 @@
 #include <stdlib.h>
 #include <fparticle/Particle.h>
 
-void icMatrix(State&, Matrix&, Vector&);
+void icMatrix(State&, Matrix&, Matrix&, Matrix&, Vector&, Vector&);

@@ -51,7 +51,6 @@ State::State(boost::property_tree::ptree& cfg) :
     tempIons.initialize();
     tempIons.fill([&](const SpaceIterator& i) {
         double r=i.val(DIM_R);
-		
 		return ionTemp(r);
     });
 	thetaH.initialize();

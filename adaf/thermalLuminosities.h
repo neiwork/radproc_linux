@@ -1,4 +1,4 @@
 #pragma once
 #include "State.h"
 
-void thermalLuminosities(State& st, const std::string& filename, Matrix &scatt, Vector& e);
+void thermalLuminosities(State&, const std::string&,Matrix&,Matrix&,Matrix&,Vector&,Vector&);

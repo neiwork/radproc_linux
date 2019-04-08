@@ -100,8 +100,8 @@ void localProcesses(const State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix&
 	return temp;
 }*/
 
-void thermalCompton2(const State& st, Matrix& lumOut, Matrix scatt,
-				Matrix& lumOutIC, Vector energies)
+void thermalCompton2(const State& st, Matrix& lumOut, Matrix scattADAF, Matrix scattCD, 
+					Matrix& lumCD, Matrix& lumOutIC, Vector energies)
 {
 	show_message(msgStart,Module_thermalCompton);
 	
@@ -145,7 +145,9 @@ void thermalCompton2(const State& st, Matrix& lumOut, Matrix scatt,
 			// CALCULAMOS LinC PARA CADA E        			 function LinC
 			for (size_t jE=0;jE<nE;jE++) {
 				for (size_t jjR=0;jjR<nR;jjR++)
-					lumInIC[jE] += scatt[jjR][jR]*lumOut[jE][jjR];
+					{lumInIC[jE] += scattADAF[jjR][jR]*lumOut[jE][jjR];}
+				for (size_t jjRcd=0;jjRcd<nRcd;jjRcd++)
+					{lumInIC[jE] += scattCD[jjRcd][jR]*lumCD[jE][jjRcd];}
 			}
 			double temp = st.tempElectrons.get(itR);
 			double normtemp = boltzmann*temp/(electronMass*cLight2);
@@ -181,18 +183,17 @@ void coldDiskLuminosity(const State& st, Matrix& lumOutCD, Vector energies)
 	st.photon.ps.iterate([&](const SpaceIterator& itE) {
 		energies[jE] = itE.val(DIM_E);
 		double frecuency=energies[jE]/planck;
-		size_t jR=0;
+		size_t jRcd=0;
 		st.photon.ps.iterate([&](const SpaceIterator& itERcd) {
 			double r = itERcd.val(DIM_Rcd);
 			double lj = r/sqrt(paso_rCD);
 			double lj1 = r*sqrt(paso_rCD);
-			double aux=paso_rCD;
 			double area = 2.0*pi*(lj1*lj1-lj*lj);
 			double temp = st.tempColdDisk.get(itERcd);
 			
 			
-			lumOutCD[jE][jR] = area * bb(frecuency,temp);
-			jR++;
+			lumOutCD[jE][jRcd] = area * bb(frecuency,temp);
+			jRcd++;
 		},{itE.coord[DIM_E],0,-1});
 		jE++;
 	},{-1,0,0});
@@ -293,7 +294,7 @@ void coldDiskLuminosity(const State& st, Matrix& lumOutCD, Vector energies)
 
 void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOutBr,
 						Matrix lumOutpp, Matrix lumOutIC, Matrix lumOut, 
-						Matrix lumOutCD, Vector esc, const string& filename)
+						Matrix lumOutCD, Vector esc, Vector escCD, const string& filename)
 {
 	ofstream file1,file2;
 	file1.open(filename.c_str(),ios::out);
@@ -312,7 +313,7 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 			lum += lumOut[jE][jR] * esc[jR];
 		}
 		for (size_t jRcd=0;jRcd<nRcd;jRcd++) {
-			lumCD += lumOutCD[jE][jRcd];
+			lumCD += lumOutCD[jE][jRcd] * escCD[jRcd];
 		}
         file1
 			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency
@@ -381,7 +382,8 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 	file.close();
 }*/
 
-void thermalLuminosities(State& st, const string& filename, Matrix &scatt, Vector& esc)
+void thermalLuminosities(State& st, const string& filename, Matrix &scattADAF, 
+							Matrix& scattCD, Matrix& absCD, Vector& esc, Vector& escCD)
 {
 	show_message(msgStart,Module_thermalLuminosities);
 
@@ -393,16 +395,16 @@ void thermalLuminosities(State& st, const string& filename, Matrix &scatt, Vecto
 	readThermalProcesses(processesFlags);
 	if (processesFlags[0] || processesFlags[1] || processesFlags[2] || processesFlags[3]) {
 		if (processesFlags[0] || processesFlags[1] || processesFlags[2])
-			localProcesses(st,lumOutSy,lumOutBr,lumOutpp,scatt,energies,processesFlags,lumOut);
+			localProcesses(st,lumOutSy,lumOutBr,lumOutpp,scattADAF,energies,processesFlags,lumOut);
 		if (processesFlags[3])
 			coldDiskLuminosity(st,lumOutCD,energies);
 		if (processesFlags[4])
-			thermalCompton2(st,lumOut,scatt,lumOutIC,energies);
+			thermalCompton2(st,lumOut,scattADAF,scattCD,lumOutCD,lumOutIC,energies);
 		//gravRedshift(st,energies,lumOut,lumOutRed);
 		//binEmissivities(st,esc,energies,lumOut);
 		//photonDensity(st,energies,lumOut,esc);
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,
-							lumOutIC,lumOut,lumOutCD,esc,filename);
+							lumOutIC,lumOut,lumOutCD,esc,escCD,filename);
 	}
 	show_message(msgEnd,Module_thermalLuminosities);
 }
