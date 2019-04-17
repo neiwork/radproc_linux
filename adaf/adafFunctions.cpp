@@ -72,7 +72,9 @@ double costhetaH(double r)
 {
 	double cs = sqrt(sqrdSoundVel(r));
 	double omR = angularVel(r)*r;
-	return sqrt(pi/2.0) * cs/omR * erf(omR / (sqrt(2.0)*cs));
+	double result = sqrt(pi/2.0) * cs/omR * erf(omR / (sqrt(2.0)*cs));
+	
+	return result;
 }
 
 double accRateADAF(double r)
@@ -94,20 +96,17 @@ double accRateColdDisk(double r)
 	return accRateOut*(1.0-rTr/r);
 }
 
-double tempCD(double r)
+double auxCD(double r)
 {
 	double lj = r/sqrt(paso_r);
 	double lj1 = r*sqrt(paso_r);
-	double area = 2.0*pi*(lj1*lj1-lj*lj);
-	
-	double aux = 3.0*gravitationalConstant*blackHoleMass*accRateColdDisk(r)/2.0 *
-				(1.0/lj * (1.0-2.0/3.0*sqrt(rTr/lj))-1.0/lj1*(1.0-2.0/3.0*sqrt(rTr/lj1)));
-	return pow(aux/area/ stefanBoltzmann,0.25);
+	return 3.0*gravitationalConstant*blackHoleMass*accRateColdDisk(r)/2.0 *
+			(1.0/lj * (1.0-2.0/3.0*sqrt(rTr/lj))-1.0/lj1*(1.0-2.0/3.0*sqrt(rTr/lj1)));
 }
 
 double electronDensity(double r)
 {
-	return massDensityADAF(r)/(atomicMassUnit*eMeanMolecularWeight);
+	return (r > schwRadius) ? massDensityADAF(r)/(atomicMassUnit*eMeanMolecularWeight) : 0.0;
 }
 
 double ionDensity(double r)

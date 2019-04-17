@@ -20,8 +20,7 @@ State::State(boost::property_tree::ptree& cfg) :
  tempElectrons(photon.ps, false),
  tempIons(photon.ps, false),
  thetaH(photon.ps, false),
- height(photon.ps, false),
- tempColdDisk(photon.ps, false)
+ height(photon.ps, false)
  {
 	particles.push_back(&electron);
 	particles.push_back(&photon);
@@ -62,11 +61,6 @@ State::State(boost::property_tree::ptree& cfg) :
 	height.fill([&](const SpaceIterator& i) {
 		double r=i.val(DIM_R);
 		return height_fun(r);
-	});
-	tempColdDisk.initialize();
-	tempColdDisk.fill([&](const SpaceIterator& i) {
-		double r=i.val(DIM_Rcd);
-		return tempCD(r);
 	});
 }
 

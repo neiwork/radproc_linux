@@ -97,8 +97,8 @@ void icMatrix(State& st, Matrix& scattADAF, Matrix& scattCD, Matrix& absCD, Vect
                         z1=z0+zprim;
                         r1=sqrt(x1*x1+y1*y1+z1*z1);
                         theta1=atan(sqrt(x1*x1+y1*y1)/abs(z1));
-						thetaMin = acos(costhetaH(r1));
-						ne = (theta1 > thetaMin && theta1 < (pi-thetaMin)) 
+						double thetaMinLocal = acos(costhetaH(r1));
+						ne = (theta1 > thetaMinLocal && theta1 < (pi-thetaMinLocal)) 
 												? electronDensity(r1) : 0.0;
                         control = abs(ne-neant)/(0.5*(ne+neant));       // dn/n
                         count++;
@@ -189,8 +189,8 @@ void icMatrix(State& st, Matrix& scattADAF, Matrix& scattCD, Matrix& absCD, Vect
                         double z1=z0+zprim;
                         r1=sqrt(x1*x1+y1*y1+z1*z1);
                         theta1=atan(sqrt(x1*x1+y1*y1)/abs(z1));
-						thetaMin = acos(costhetaH(r1));
-						ne = (theta1 > thetaMin && theta1 < pi-thetaMin) ?
+						double thetaMinLocal = acos(costhetaH(r1));
+						ne = (theta1 > thetaMinLocal && theta1 < pi-thetaMinLocal) ?
 										electronDensity(r1) : 0.0;
                         control = abs(ne-neant)/(0.5*(ne+neant));       // dn/n
                         count++;
@@ -255,8 +255,8 @@ void icMatrix(State& st, Matrix& scattADAF, Matrix& scattCD, Matrix& absCD, Vect
 					double z1=zprim;
 					r1=sqrt(x1*x1+y1*y1+z1*z1);
 					theta1=atan(sqrt(x1*x1+y1*y1)/abs(z1));
-					double thetaMin = acos(costhetaH(r1));
-					ne = (theta1 > thetaMin && theta1 < (pi-thetaMin)) 
+					double thetaMinLocal = acos(costhetaH(r1));
+					ne = (theta1 > thetaMinLocal && theta1 < (pi-thetaMinLocal)) 
 												? electronDensity(r1) : 0.0;
 					control = abs(ne-neant)/(0.5*(ne+neant));       // dn/n
 					count++;
@@ -324,8 +324,8 @@ void icMatrix(State& st, Matrix& scattADAF, Matrix& scattCD, Matrix& absCD, Vect
 					double z1=zprim;
 					r1=sqrt(x1*x1+y1*y1+z1*z1);
 					theta1=atan(sqrt(x1*x1+y1*y1)/abs(z1));
-					double thetaMin = acos(costhetaH(r1));
-					ne = (theta1 > thetaMin && theta1 < (pi-thetaMin)) 
+					double thetaMinLocal = acos(costhetaH(r1));
+					ne = (theta1 > thetaMinLocal && theta1 < (pi-thetaMinLocal)) 
 												? electronDensity(r1) : 0.0;
 					control = abs(ne-neant)/(0.5*(ne+neant));       // dn/n
 					count++;
