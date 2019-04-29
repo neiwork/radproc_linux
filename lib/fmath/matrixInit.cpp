@@ -44,13 +44,43 @@ void matrixInit4(Matrix& m1, Matrix& m2, Matrix& m3, Matrix& m4,
 using namespace std;
 #include <fstream>
 
-void matrixRead(Matrix& m, int rows, int columns) {
+void matrixRead(const string filename, Matrix& m, size_t rows, size_t columns) {
     
-    ifstream f("probMatrix2.txt");
+    ifstream f(filename);
     
     double aux;
     
-    for (int i = 0; i < rows; i++)
-        for (int j = 0; j < columns; j++)
+    for (size_t i = 0; i < rows; i++)
+        for (size_t j = 0; j < columns; j++)
             f >> m[i][j];
+	f.close();
+}
+
+void matrixWrite(const string filename, Matrix m, size_t rows, size_t columns) {
+	
+	ofstream f(filename);
+	
+	for (size_t i=0;i<rows;i++) {
+		for (size_t j=0;j<columns; j++)
+			f << m[i][j] << "\t";
+		f << endl;
+	}
+	f.close();
+}
+
+void vectorRead(const string filename, Vector& v, size_t size) 
+{    
+    ifstream f(filename);
+    for (size_t i = 0; i < size; i++)
+            f >> v[i];
+	f.close();
+}
+
+void vectorWrite(const string filename, Vector v, size_t size)
+{
+	ofstream f(filename);
+	for (size_t i=0;i<size;i++)
+		f << v[i] << endl;
+	
+	f.close();
 }

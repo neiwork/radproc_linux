@@ -179,7 +179,7 @@ void comptonNew2(Matrix& lumOut, double lumIn, Vector energies, size_t nG, size_
 		
 		size_t jE=1;
 		for (size_t jOm=0;jOm<nOm;jOm++) {
-			double lumOutAux = lumIn * double(probab[((jR*nG+jG)*nE+jE)*nOm+jOm]) * (om/omPrim);
+			double lumOutAux = lumIn * double(probab[((jR*nG+jG)*nE+jE)*nOm+jOm]);//*(om/omPrim);
 			double lim1=sqrt(energies[1]*energies[0]);
 			double lim2;
 			double energy = om * (electronMass*cLight2);

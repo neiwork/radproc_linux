@@ -10,7 +10,7 @@
   <VirtualDirectory Name="src">
     <File Name="configure.h"/>
     <File Name="constants.h"/>
-    <File Name="elimiGaussiana.cpp"/>
+    <File Name="elimiGaussiana.cpp" ExcludeProjConfig="Debug;"/>
     <File Name="elimiGaussiana.h"/>
     <File Name="gaussianScaledPivoting.cpp" ExcludeProjConfig="Debug;"/>
     <File Name="gaussianScaledPivoting.h" ExcludeProjConfig="Debug;"/>
