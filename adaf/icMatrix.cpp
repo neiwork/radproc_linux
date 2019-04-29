@@ -25,6 +25,15 @@ extern "C" {
 #define new_min(x,y) ((x) <= (y)) ? (x) : (y)
 #define new_abs(x,y) ((x) >= (y)) ?(x-y) : (y-x)
 
+void icMatrixWrite(Matrix scattADAF, Matrix scattCD, Matrix absCD, Vector escape,
+						Vector escapeCD) {
+	matrixWrite("scattADAF.dat",scattADAF,nR,nR);
+	matrixWrite("scattCD.dat",scattCD,nRcd,nR);
+	matrixWrite("absCD.dat",absCD,nR,nRcd);
+	vectorWrite("escape.dat",escape,nR);
+	vectorWrite("escapeCD.dat",escapeCD,nRcd);
+}
+
 void icMatrix(State& st, Matrix& scattADAF, Matrix& scattCD, Matrix& absCD, Vector& escape,
 					Vector& escapeCD)
 {
@@ -48,7 +57,7 @@ void icMatrix(State& st, Matrix& scattADAF, Matrix& scattCD, Matrix& absCD, Vect
 	//ADAF SCATTERING MATRIX
 	
 	double pasoprim = pow(rCellsBoundaries[nR]/rCellsBoundaries[0],1.0/(nR*10.0));
-	double pasoprimmin = pow(rCellsBoundaries[nR]/rCellsBoundaries[0],1.0/(nR*100.0));
+	double pasoprimmin = pow(rCellsBoundaries[nR]/rCellsBoundaries[0],1.0/(nR*1000.0));
 	double pasoprimmax = pow(rCellsBoundaries[nR]/rCellsBoundaries[0],1.0/(0.5*nR));
 	
     InitialiseRandom(RANDOM_GENERATOR);
@@ -62,7 +71,7 @@ void icMatrix(State& st, Matrix& scattADAF, Matrix& scattCD, Matrix& absCD, Vect
 			double y0=r0*sin(theta0);
             double z0=r0*cos(theta0);
             double drprim=r0*(pasoprim-1.0);             // Initial step for the photon path.
-			double drprimmin=r0*(pasoprimmin-1.0);       // Minimum step.
+			double drprimmin=rCellsBoundaries[0]*(pasoprimmin-1.0);       // Minimum step.
 			for(size_t jPh=1;jPh<=nPhot;jPh++) {
                 double random_number = gsl_rng_uniform(RandomNumberGenerator);
                 double phiprim = 2.0*pi*random_number;
@@ -103,8 +112,10 @@ void icMatrix(State& st, Matrix& scattADAF, Matrix& scattCD, Matrix& absCD, Vect
                         control = abs(ne-neant)/(0.5*(ne+neant));       // dn/n
                         count++;
                     } while( (control > 1.0e-2) && (drprim-drprimmin > 1.0e-9) );
+					pescap *= 1.0-accumulatedp;
                     double psc=ne*thomson*drprim;    // Probability of scattering.
-                    pescap=1.0-accumulatedp;         // Probability that a photon reaches 
+					if (psc >= 1.0) psc = 1.0-1.0e-6;
+                    //pescap=1.0-accumulatedp;       // Probability that a photon reaches 
 													 // the previous position.
 					if (r1 > rTr && z1*z1ant < 0.0) {
 						for(size_t jRcd=0;jRcd<=nRcd;jRcd++) {
@@ -119,12 +130,19 @@ void icMatrix(State& st, Matrix& scattADAF, Matrix& scattCD, Matrix& absCD, Vect
                     }
 					z1ant = z1;
                     for(size_t jR=0;jR<=nR;jR++) {
-                        if(r1 > rCellsBoundaries[jR] && r1 < rCellsBoundaries[jR+1]) 
+                        if(r1 > rCellsBoundaries[jR] && r1 < rCellsBoundaries[jR+1]) {
+							
+							if (psc < 0.0 || pescap < 0.0) {
+								double aux1=0.0;
+								
+								double aux2=0.0;
+							}
 							scattADAF[iR][jR] += psc*pescap; 	// Add the probability of
 																// interaction in the matrix
 																// element.
+						}
                     }
-                    accumulatedp += psc;  // The product of (1-p_k) gives the probability for a photon to reach the
+                    accumulatedp = psc;  // The product of (1-p_k) gives the probability for a photon to reach the
 										  // previous position. To first order, this is 1-sum(p_k). Hence, we accumulate
 										  // the sum of the p_k.
                     neant=ne;
@@ -155,7 +173,7 @@ void icMatrix(State& st, Matrix& scattADAF, Matrix& scattCD, Matrix& absCD, Vect
 		double dyaux=(1.0-sin(thetaMin))/nTheta;
         for(size_t kTh=1;kTh<=nTheta;kTh++) {
             double yaux=sin(thetaMin)+kTh*dyaux;  // Theta distributed uniformly in sin(theta).
-            double theta0=asin(yaux);
+            double theta0 = (yaux < 1.0 ? asin(yaux) : pi/2.0);
 			double y0=r0*sin(theta0);
             double z0=r0*cos(theta0);
             double drprim=r0*(pasoprim-1.0);             // Initial step for the photon path.
@@ -346,6 +364,24 @@ void icMatrix(State& st, Matrix& scattADAF, Matrix& scattCD, Matrix& absCD, Vect
         escapeCD[iRcd] /= nPhot;
 		iRcd++;
     },{0,0,-1});
-	
     FinaliseRandom();
+	
+	icMatrixWrite(scattADAF, scattCD, absCD, escape, escapeCD);
+
+}
+
+void icMatrixRead(State& st, Matrix& scattADAF, Matrix& scattCD, Matrix& absCD, Vector& escape,
+					Vector& escapeCD)
+{
+	matrixInit(scattADAF,nR,nR,0.0);
+	matrixInit(scattCD,nRcd,nR,0.0);
+	matrixInit(absCD,nR,nRcd,0.0);
+    escape.resize(nR,0.0);
+	escapeCD.resize(nRcd,0.0);
+	
+	matrixRead("scattADAF.dat",scattADAF,nR,nR);
+	matrixRead("absCD.dat",absCD,nR,nRcd);
+	matrixRead("scattCD.dat",scattCD,nRcd,nR);
+	vectorRead("escape.dat",escape,nR);
+	vectorRead("escapeCD.dat",escapeCD,nRcd);
 }

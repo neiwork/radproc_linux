@@ -13,6 +13,7 @@
 #include <fluminosities/thermalBremss.h>
 #include <fluminosities/luminosityHadronic.h>
 #include <fluminosities/blackBody.h>
+#include <fluminosities/reflection.h>
 #include <fmath/mathFunctions.h>
 #include <fmath/physics.h>
 #include <fmath/fbisection.h>
@@ -100,38 +101,81 @@ void localProcesses(const State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix&
 	return temp;
 }*/
 
-void coldDiskLuminosity(const State& st, Matrix absCD, Matrix lumOut, 
+void reflectedSpectrum(Matrix lumOut, Matrix absCD, Matrix& lumOutRefl, Vector energies,
+						double pasoE)
+{
+	size_t numInt = 30;
+	for (size_t jE=nE/2;jE<nE;jE++) {
+		double freq = energies[jE]/planck;
+		double x = energies[jE]/(electronMass*cLight2);
+		double xMax = 1.0e2;
+		for (size_t jRcd=0;jRcd<nRcd;jRcd++) {
+			double freq0,pasoFreq,aux1;
+			int logicalInt = 1;
+			if (x > 0.03 && x < xMax) {
+				freq0 = energies[jE]/planck;
+				pasoFreq = pow(xMax/x,1.0/(numInt+1));
+				aux1 = 0.0;
+			} else if (x <= 0.03) {
+				freq0 = 0.03*electronMass*cLight2/planck;
+				pasoFreq = pow(xMax/0.03,1.0/(numInt+1));
+				aux1 = greenDeltaFunc(x);
+			} else { logicalInt = 0; aux1 = 0.0; }
+			
+			double lum = 0.0;
+			if (logicalInt == 1) {
+				for (size_t jjFreq=0;jjFreq<numInt;jjFreq++) {
+					double dfreq0 = freq0*(pasoFreq-1.0);
+					double lumInc = lumShellInc(freq0,jE,jRcd,lumOut,absCD,energies,nR);
+					double green = greenFuncRefl(freq,freq0);
+					lum += green*lumInc*dfreq0;//*(freq/freq0);
+					freq0 *= pasoFreq;
+				}
+			}
+			lumOutRefl[jE][jRcd] =
+					lum + aux1*lumShellInc(freq,jE,jRcd,lumOut,absCD,energies,nR);
+		}
+	}
+}
+
+void coldDiskLuminosity(const State& st, Matrix absCD, Matrix lumOut, Matrix& lumOutRefl, 
 						Matrix& lumOutCD, Vector energies)
 {
 	matrixInit(lumOutCD,nE,nRcd,0.0);
-	size_t jE=0;
-	st.photon.ps.iterate([&](const SpaceIterator& itE) {
-		energies[jE] = itE.val(DIM_E);
-		double frecuency=energies[jE]/planck;
-		size_t jRcd=0;
-		st.photon.ps.iterate([&](const SpaceIterator& itERcd) {
-			double r = itERcd.val(DIM_Rcd);
-			double lj = r/sqrt(paso_rCD);
-			double lj1 = r*sqrt(paso_rCD);
-			double area = 2.0*pi*(lj1*lj1-lj*lj);
-			double aux1 = auxCD(r);
-			double aux2 = 0.0;
+	matrixInit(lumOutRefl,nE,nRcd,0.0);
+	
+	size_t jRcd=0;
+	st.photon.ps.iterate([&](const SpaceIterator& itRcd) {
+		double rCd = itRcd.val(DIM_Rcd);
+		double lj = rCd/sqrt(paso_rCD);
+		double lj1 = rCd*sqrt(paso_rCD);
+		double area = 2.0*pi*(lj1*lj1-lj*lj);
+		double aux1 = auxCD(rCd);
+		double aux2 = 0.0;
+		
+		double pasoE = pow(energies[nE-1]/energies[0],1.0/(nE+1));
+		reflectedSpectrum(lumOut,absCD,lumOutRefl,energies,pasoE);
+
+		for (size_t jjE=0;jjE<nE;jjE++) {
+			double frequency = energies[jjE]/planck;
+			double dfreq = frequency*(pasoE-1.0);
+			double lumInc = 0.0;
 			for (size_t kR=0;kR<nR;kR++) {
-				double lum = 0.0;
-				for (size_t jjE=0;jjE<nE;jjE++)
-					lum += lumOut[jjE][kR]*(energies[jjE]/planck);
-					
-				aux2 += absCD[kR][jRcd]*lum;
+				lumInc += lumOut[jjE][kR]*absCD[kR][jRcd];
 			}
-			double aux = aux1+aux2;
-			double temp = pow(aux/area/ stefanBoltzmann,0.25);
-			
-			cout << temp/1.0e6 << endl;
+			aux2 += (lumInc - lumOutRefl[jjE][jRcd])*dfreq;
+		}
+		double aux = aux1+aux2;
+		double temp = pow(aux/area/ stefanBoltzmann,0.25);
+		cout << temp/1.0e6 << endl;
+
+		for(size_t jE=0;jE<nE;jE++) {
+			double frecuency=energies[jE]/planck;
 			lumOutCD[jE][jRcd] = area * bb(frecuency,temp);
-			jRcd++;
-		},{itE.coord[DIM_E],0,-1});
-		jE++;
-	},{-1,0,0});
+		};
+
+		jRcd++;
+	},{0,0,-1});
 }
 
 void thermalCompton2(const State& st, Matrix& lumOut, Matrix scattADAF, Matrix scattCD, 
@@ -139,8 +183,8 @@ void thermalCompton2(const State& st, Matrix& lumOut, Matrix scattADAF, Matrix s
 {
 	show_message(msgStart,Module_thermalCompton);
 	
-	size_t nOm = 50;
-	size_t nG = 5;
+	size_t nOm = 30;
+	size_t nG = 10;
 	Vector p(nR*nG*nE*nOm,0.0);
 	
 	size_t jR = 0;
@@ -153,7 +197,7 @@ void thermalCompton2(const State& st, Matrix& lumOut, Matrix scattADAF, Matrix s
 		jR++;
 	},{0,-1,0});
 	
-	Matrix lumOutLocal,lumCD;
+	Matrix lumOutLocal,lumCD,lumOutRefl;
 	Vector lumInIC(nE,0.0);
 	matrixInit(lumOutIC,nE,nR,0.0);
 	matrixInitCopy(lumOutLocal,nE,nR,lumOut);
@@ -165,24 +209,19 @@ void thermalCompton2(const State& st, Matrix& lumOut, Matrix scattADAF, Matrix s
 		res=0.0;
 
 		fill(lumInIC.begin(),lumInIC.end(),0.0);
-				
-		if(it > 1) {
-			for (size_t jE=0;jE<nE;jE++) {
-				for (size_t jR=0;jR<nR;jR++)
-					lumOutIC[jE][jR]=0.0;
-			}
-		}
+		matrixInit(lumOutIC,nE,nR,0.0);
 		
-		coldDiskLuminosity(st,absCD,lumOut,lumCD,energies);
+		coldDiskLuminosity(st,absCD,lumOut,lumOutRefl,lumCD,energies);
+		
 		// PARA CADA CELDA
 		size_t jR=0;
 		st.photon.ps.iterate([&](const SpaceIterator& itR) {
 			// CALCULAMOS LinC PARA CADA E        			 function LinC
 			for (size_t jE=0;jE<nE;jE++) {
 				for (size_t jjR=0;jjR<nR;jjR++)
-					{lumInIC[jE] += scattADAF[jjR][jR]*lumOut[jE][jjR];}
+					lumInIC[jE] += scattADAF[jjR][jR]*lumOut[jE][jjR];
 				for (size_t jjRcd=0;jjRcd<nRcd;jjRcd++)
-					{lumInIC[jE] += scattCD[jjRcd][jR]*lumCD[jE][jjRcd];}
+					lumInIC[jE] += scattCD[jjRcd][jR]*lumCD[jE][jjRcd];
 			}
 			double temp = st.tempElectrons.get(itR);
 			double normtemp = boltzmann*temp/(electronMass*cLight2);
@@ -308,17 +347,18 @@ void thermalCompton2(const State& st, Matrix& lumOut, Matrix scattADAF, Matrix s
 
 void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOutBr,
 						Matrix lumOutpp, Matrix lumOutIC, Matrix lumOut, 
-						Matrix lumOutCD, Vector esc, Vector escCD, const string& filename)
+						Matrix lumOutCD, Matrix lumOutRefl,
+						Vector esc, Vector escCD, const string& filename)
 {
 	ofstream file1,file2;
 	file1.open(filename.c_str(),ios::out);
 	file2.open("lumRadius.txt",ios::out);
 	
-	double lumSy,lumBr,lumIC,lumpp,lum,lumCD;
+	double lumSy,lumBr,lumIC,lumpp,lum,lumCD,lumRefl;
 	for (size_t jE=0;jE<nE;jE++) {
 		double frecuency = energies[jE]/planck;
 		double energyEV = energies[jE]/1.6e-12;
-		lumSy = lumBr = lumIC = lumpp = lum = lumCD = 0.0;
+		lumSy = lumBr = lumIC = lumpp = lum = lumCD = lumRefl = 0.0;
 		for (size_t jR=0;jR<nR;jR++) {
 			lumSy += lumOutSy[jE][jR] * esc[jR];
 			lumBr += lumOutBr[jE][jR] * esc[jR];
@@ -328,6 +368,7 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 		}
 		for (size_t jRcd=0;jRcd<nRcd;jRcd++) {
 			lumCD += lumOutCD[jE][jRcd] * escCD[jRcd];
+			lumRefl += lumOutRefl[jE][jRcd] * escCD[jRcd];
 		}
         file1
 			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency
@@ -338,6 +379,7 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumpp*frecuency
 			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lum*frecuency
 			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumCD*frecuency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumRefl*frecuency
 			<< endl;
 	};
 	
@@ -401,7 +443,8 @@ void thermalLuminosities(State& st, const string& filename, Matrix &scattADAF,
 {
 	show_message(msgStart,Module_thermalLuminosities);
 
-	Matrix lumOutSy,lumOutBr,lumOutpp,lumOutIC,lumOut,lumOutCD;
+	Matrix lumOutSy,lumOutBr,lumOutpp,lumOutIC,lumOut,lumOutCD,lumOutRefl;
+	matrixInit(lumOutIC,nE,nR,0.0);
 	Vector energies(nE,0.0);
 
 	int processesFlags[numProcesses];
@@ -413,12 +456,12 @@ void thermalLuminosities(State& st, const string& filename, Matrix &scattADAF,
 		if (processesFlags[4] && processesFlags[3])
 			thermalCompton2(st,lumOut,scattADAF,scattCD,absCD,lumOutIC,energies);
 		if (processesFlags[3])
-			coldDiskLuminosity(st,absCD,lumOut,lumOutCD,energies);
+			coldDiskLuminosity(st,absCD,lumOut,lumOutRefl,lumOutCD,energies);
 		//gravRedshift(st,energies,lumOut,lumOutRed);
 		//binEmissivities(st,esc,energies,lumOut);
 		//photonDensity(st,energies,lumOut,esc);
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,
-							lumOutIC,lumOut,lumOutCD,esc,escCD,filename);
+							lumOutIC,lumOut,lumOutCD,lumOutRefl,esc,escCD,filename);
 	}
 	show_message(msgEnd,Module_thermalLuminosities);
 }

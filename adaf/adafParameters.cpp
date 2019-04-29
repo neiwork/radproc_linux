@@ -44,6 +44,7 @@ void adafParameters()
 	logMinEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.min");
 	logMaxEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.max");
 	numProcesses = GlobalConfig.get<int>("numProcesses");
+	calculateScatt = GlobalConfig.get<int>("calculateScatt");
 	
 	paso_r = pow(exp(logr.back())/1.1,1.0/nR);
 	paso_rCD = pow(exp(logr.back())*schwRadius/rTr,1.0/nRcd);

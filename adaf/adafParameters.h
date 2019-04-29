@@ -21,6 +21,7 @@ double logMaxEnergy;					// Logarithm of the maximum energy for photons
 std::size_t nR,nE,nRcd;					// Number of points in each dimension
 
 int numProcesses;
+int calculateScatt;
 
 size_t nRaux;
 Vector logr;

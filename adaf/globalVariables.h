@@ -27,6 +27,7 @@ extern const Vector logr;
 extern const Vector logTi;
 extern const Vector logTe;
 extern const Vector logv;
+extern const int calculateScatt;
 
 // PARAMETERS
 extern const double schwRadius;					// Gravitationl Radius [cm]

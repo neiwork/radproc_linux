@@ -8,3 +8,4 @@
 #include <fparticle/Particle.h>
 
 void icMatrix(State&, Matrix&, Matrix&, Matrix&, Vector&, Vector&);
+void icMatrixRead(State&, Matrix&, Matrix&, Matrix&, Vector&, Vector&);
