@@ -8,10 +8,12 @@ radproc/
 **/.codelite/
 
 .vscode/
+.vs/
 
 *.bz2
 
 *.ipch
+.builds
 
 *.gz
 *.mk
