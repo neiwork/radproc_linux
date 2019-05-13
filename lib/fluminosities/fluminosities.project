@@ -8,6 +8,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="luminosityNTHadronic.h"/>
+    <File Name="luminosityNTHadronic.cpp"/>
     <File Name="reflection.h"/>
     <File Name="reflection.cpp"/>
     <File Name="luminosityHadronic.h"/>
@@ -18,8 +20,6 @@
     <File Name="probaprox.h"/>
     <File Name="thermalCompton.cpp"/>
     <File Name="thermalCompton.h"/>
-    <File Name="luminosityHadronic2.cpp"/>
-    <File Name="luminosityHadronic2.h"/>
     <File Name="compton.h"/>
     <File Name="compton.cpp"/>
     <File Name="luminosityIC.cpp"/>

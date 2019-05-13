@@ -30,13 +30,6 @@
     <File Name="State.cpp"/>
     <File Name="main.cpp"/>
   </VirtualDirectory>
-  <Dependencies Name="Debug">
-    <Project Name="fparticle"/>
-    <Project Name="fluminosities"/>
-    <Project Name="fparameters"/>
-    <Project Name="fmath"/>
-    <Project Name="nrMath"/>
-  </Dependencies>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -152,4 +145,12 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug">
+    <Project Name="fparticle"/>
+    <Project Name="fluminosities"/>
+    <Project Name="fparameters"/>
+    <Project Name="fmath"/>
+    <Project Name="nrMath"/>
+    <Project Name="inout"/>
+  </Dependencies>
 </CodeLite_Project>

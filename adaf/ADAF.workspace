@@ -6,6 +6,7 @@
   <Project Name="fparticle" Path="../lib/fparticle/fparticle.project" Active="No"/>
   <Project Name="adaf" Path="adaf.project" Active="Yes"/>
   <Project Name="nrMath" Path="../lib/nrMath/nrMath.project" Active="No"/>
+  <Project Name="inout" Path="../lib/inout/inout.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
@@ -16,6 +17,7 @@
       <Project Name="fparticle" ConfigName="Debug"/>
       <Project Name="adaf" ConfigName="Debug"/>
       <Project Name="nrMath" ConfigName="Debug"/>
+      <Project Name="inout" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
@@ -26,6 +28,7 @@
       <Project Name="fparticle" ConfigName="Release"/>
       <Project Name="adaf" ConfigName="Release"/>
       <Project Name="nrMath" ConfigName="Release"/>
+      <Project Name="inout" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>
