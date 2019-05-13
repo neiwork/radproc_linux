@@ -7,7 +7,11 @@ external/
 radproc/
 **/.codelite/
 
+.vscode/
+
 *.bz2
+
+*.ipch
 
 *.gz
 *.mk
@@ -49,3 +53,13 @@ Makefile
 
 # Generated files
 *.txt
+
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+
+
+
