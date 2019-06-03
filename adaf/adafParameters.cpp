@@ -43,8 +43,11 @@ void adafParameters()
 	nRcd = GlobalConfig.get<int>("model.particle.default.dim.radius_cd.samples");
 	logMinEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.min");
 	logMaxEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.max");
+	
 	numProcesses = GlobalConfig.get<int>("numProcesses");
 	calculateScatt = GlobalConfig.get<int>("calculateScatt");
+	calculateProbs = GlobalConfig.get<int>("calculateProbs");
+	calculateComptonRedMatrix = GlobalConfig.get<int>("calculateComptonRedMatrix");
 	
 	paso_r = pow(exp(logr.back())/1.1,1.0/nR);
 	paso_rCD = pow(exp(logr.back())*schwRadius/rTr,1.0/nRcd);

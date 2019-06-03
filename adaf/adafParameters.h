@@ -22,6 +22,8 @@ std::size_t nR,nE,nRcd;					// Number of points in each dimension
 
 int numProcesses;
 int calculateScatt;
+int calculateProbs;
+int calculateComptonRedMatrix;
 
 size_t nRaux;
 Vector logr;

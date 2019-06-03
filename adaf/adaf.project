@@ -9,6 +9,8 @@
   <Dependencies/>
   <VirtualDirectory Name="include"/>
   <VirtualDirectory Name="src">
+    <File Name="thermalCompton.h"/>
+    <File Name="thermalCompton.cpp"/>
     <File Name="read.h"/>
     <File Name="read.cpp"/>
     <File Name="modelParameters.h"/>
@@ -30,6 +32,22 @@
     <File Name="State.cpp"/>
     <File Name="main.cpp"/>
   </VirtualDirectory>
+  <Dependencies Name="Debug">
+    <Project Name="fparticle"/>
+    <Project Name="fluminosities"/>
+    <Project Name="fparameters"/>
+    <Project Name="fmath"/>
+    <Project Name="nrMath"/>
+    <Project Name="inout"/>
+  </Dependencies>
+  <Dependencies Name="Release">
+    <Project Name="fparticle"/>
+    <Project Name="fluminosities"/>
+    <Project Name="fparameters"/>
+    <Project Name="fmath"/>
+    <Project Name="nrMath"/>
+    <Project Name="inout"/>
+  </Dependencies>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -104,17 +122,40 @@
       </Completion>
     </Configuration>
     <Configuration Name="Release" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-O2;-Wall;$(shell pkg-config --cflags gtkmm-3.0)" C_Options="-O2;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+      <Compiler Options="-O3;-Wall;$(shell pkg-config --cflags gtkmm-3.0)" C_Options="-O2;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
+        <IncludePath Value="../lib"/>
+        <IncludePath Value="../external/include"/>
+        <IncludePath Value="../gsl/include"/>
         <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="BOOST_SYSTEM_NO_DEPRECATED"/>
+        <Preprocessor Value="BOOST_NO_CXX11_SCOPED_ENUMS"/>
       </Compiler>
-      <Linker Options="$(shell pkg-config --libs gtkmm-3.0)" Required="yes"/>
+      <Linker Options="$(shell pkg-config --libs gtkmm-3.0)" Required="yes">
+        <LibraryPath Value="../gsl/lib"/>
+        <LibraryPath Value="../external/lib"/>
+        <LibraryPath Value="../lib/fmath/Release"/>
+        <LibraryPath Value="../lib/nrMath/Release"/>
+        <LibraryPath Value="../lib/fparameters/Release"/>
+        <LibraryPath Value="../lib/fparticle/Release"/>
+        <LibraryPath Value="../lib/fluminosities/Release"/>
+        <LibraryPath Value="../lib/inout/Release"/>
+        <Library Value="fparameters"/>
+        <Library Value="fparticle"/>
+        <Library Value="fluminosities"/>
+        <Library Value="inout"/>
+        <Library Value="fmath"/>
+        <Library Value="nrMath"/>
+        <Library Value="boost_filesystem"/>
+        <Library Value="boost_system"/>
+        <Library Value="gsl"/>
+        <Library Value="gslcblas"/>
+      </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
-        <![CDATA[
-      ]]>
+        <![CDATA[]]>
       </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
         <DebuggerSearchPaths/>
@@ -145,12 +186,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug">
-    <Project Name="fparticle"/>
-    <Project Name="fluminosities"/>
-    <Project Name="fparameters"/>
-    <Project Name="fmath"/>
-    <Project Name="nrMath"/>
-    <Project Name="inout"/>
-  </Dependencies>
 </CodeLite_Project>

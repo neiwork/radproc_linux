@@ -88,7 +88,7 @@ double accRateADAF(double r)
 double massDensityADAF(double r)
 {
 	return accRateADAF(r) / 
-		(4.0*pi*r*r*(-radialVel(r))*costhetaH(r));
+		(4.0*pi*r*r*(-radialVel(r)));
 }
 
 double accRateColdDisk(double r)

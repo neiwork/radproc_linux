@@ -84,3 +84,11 @@ void vectorWrite(const string filename, Vector v, size_t size)
 	
 	f.close();
 }
+
+/*void readBin(const string filename, float *v, unsigned size)
+{
+	ifstream file;
+	file.open(filename,ios::binary);
+	file.read();
+	fclose(ptr);
+}*/
