@@ -31,7 +31,6 @@ double fntHadron(double x, const Particle& p, const double density, const SpaceC
 	
 	double l = log10((protonMass*cLight2+x/Kpi)/1.6); //evaluada en eval
 	double sigma = 1.e-27 * (34.3+1.88*l+0.25*l*l);
-	
 	double pionEmiss = cLight*density*sigma*distCreator/Kpi;  //sigma = crossSectionHadronicDelta(Ekin)
 															  //lo saco asi pongo la condicion Ekin > Ethr en el limite de la int
 	

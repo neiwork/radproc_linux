@@ -1,16 +1,22 @@
 {
-	"id":"stellarMassBH",
+	"id":"SgrA*",
 	"mu_i":"1.23",
 	"mu_e":"1.14",
-	"numProcesses":"5",
-	"nPhotMatrix":"200",
+	"nPhotMatrix":"1000",
 	"calculateScatt":"0",
-	"nTheta":"6",
-	"rTr":"1.0e2",
+	"nGamma":"50",
+	"nTemp":"30",
+	"nNu":"100",
+	"nNuPrim":"100",
+	"calculateProbs":"0",
+	"calculateComptonRedMatrix":"0",
+	"nTheta":"5",
+	"rTr":"9.0e3",
+	"numProcesses":"5",
 	"ThermalProcessNumber": {
 				"0":1,
 				"1":1,
-				"2":1,
+				"2":0,
 				"3":1,
 				"4":1
 	},
@@ -21,22 +27,22 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":50
+						"samples":80
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":25
+						"samples":50
 					},
 					"radius_cd":{
-                        "samples":10
+                        "samples":2
                     }
 				}
 			},
 			"photon": {
 				"dim":{
 					"energy": {
-						"min":-10.0,
+						"min":-5.0,
 						"max":9.0
 					}
 				}
@@ -56,7 +62,7 @@
 	"math": {
 		"runge-kutta-1": {
 			"samples": {
-				"x": 30
+				"x": 100
 			}
 		},
 

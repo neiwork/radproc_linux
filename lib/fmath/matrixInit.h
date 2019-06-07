@@ -15,3 +15,4 @@ void matrixRead(const string name, Matrix& m, size_t rows, size_t columns);
 void vectorRead(const string name, Vector& v, size_t size);
 void matrixWrite(const string name, Matrix m, size_t rows, size_t columns);
 void vectorWrite(const string name, Vector v, size_t size);
+void readBin(const char *name, float *v, unsigned size);

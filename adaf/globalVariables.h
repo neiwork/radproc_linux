@@ -28,6 +28,8 @@ extern const Vector logTi;
 extern const Vector logTe;
 extern const Vector logv;
 extern const int calculateScatt;
+extern const int calculateProbs;
+extern const int calculateComptonRedMatrix;
 
 // PARAMETERS
 extern const double schwRadius;					// Gravitationl Radius [cm]
