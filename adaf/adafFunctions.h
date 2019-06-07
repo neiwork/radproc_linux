@@ -11,5 +11,6 @@ double costhetaH(double);
 double massDensityADAF(double);
 double auxCD(double);
 double electronDensity(double);
+double electronDensityTheta(double,double);
 double ionDensity(double);
 

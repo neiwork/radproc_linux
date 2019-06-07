@@ -8,7 +8,7 @@
   <Project Name="nrMath" Path="../lib/nrMath/nrMath.project" Active="No"/>
   <Project Name="inout" Path="../lib/inout/inout.project" Active="No"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="yes">
+    <WorkspaceConfiguration Name="Debug" Selected="no">
       <Environment/>
       <Project Name="adaf" ConfigName="Debug"/>
       <Project Name="fluminosities" ConfigName="Debug"/>
@@ -19,7 +19,7 @@
       <Project Name="nrMath" ConfigName="Debug"/>
       <Project Name="inout" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="no">
+    <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
       <Project Name="adaf" ConfigName="Release"/>
       <Project Name="fluminosities" ConfigName="Release"/>

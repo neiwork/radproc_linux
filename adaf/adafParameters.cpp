@@ -48,6 +48,39 @@ void adafParameters()
 	calculateScatt = GlobalConfig.get<int>("calculateScatt");
 	calculateProbs = GlobalConfig.get<int>("calculateProbs");
 	calculateComptonRedMatrix = GlobalConfig.get<int>("calculateComptonRedMatrix");
+	comptonMethod = GlobalConfig.get<int>("comptonMethod");
+	
+	if (calculateComptonRedMatrix) {
+
+		nGammaCompton = GlobalConfig.get<size_t>("nGammaCompton");
+		nTempCompton = GlobalConfig.get<size_t>("nTempCompton");
+		nNuPrimCompton = GlobalConfig.get<size_t>("nNuPrimCompton");
+		nNuCompton = GlobalConfig.get<size_t>("nNuCompton");
+		gammaMinCompton = GlobalConfig.get<double>("gammaMinCompton");
+		gammaMaxCompton = GlobalConfig.get<double>("gammaMaxCompton");
+		tempMinCompton = GlobalConfig.get<double>("tempMinCompton");
+		tempMaxCompton = GlobalConfig.get<double>("tempMaxCompton");
+		nuPrimMinCompton = GlobalConfig.get<double>("nuPrimMinCompton");
+		nuPrimMaxCompton = GlobalConfig.get<double>("nuPrimMaxCompton");
+		nuMinCompton = GlobalConfig.get<double>("nuMinCompton");
+		nuMaxCompton = GlobalConfig.get<double>("nuMaxCompton");
+		
+		ofstream fileSizes;
+		fileSizes.open("sizesVecCompton.dat",ios::out);
+		fileSizes << nGammaCompton << "\t" << gammaMinCompton << "\t" << gammaMaxCompton << endl
+				  << nTempCompton << "\t" << tempMinCompton << "\t" << tempMaxCompton << endl
+				  << nNuPrimCompton << "\t" << nuPrimMinCompton << "\t" << nuPrimMaxCompton << endl
+				  << nNuCompton << "\t" << nuMinCompton << "\t" << nuMaxCompton << endl;
+		fileSizes.close();
+	} else {
+		ifstream fileSizes;
+		fileSizes.open("sizesVecCompton.dat",ios::in);
+		fileSizes >> nGammaCompton >> gammaMinCompton >> gammaMaxCompton
+				  >> nTempCompton >> tempMinCompton >> tempMaxCompton
+				  >> nNuPrimCompton >> nuPrimMinCompton >> nuPrimMaxCompton
+				  >> nNuCompton >> nuMinCompton >> nuMaxCompton;
+		fileSizes.close();
+	}
 	
 	paso_r = pow(exp(logr.back())/1.1,1.0/nR);
 	paso_rCD = pow(exp(logr.back())*schwRadius/rTr,1.0/nRcd);

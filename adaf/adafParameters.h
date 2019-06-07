@@ -24,6 +24,20 @@ int numProcesses;
 int calculateScatt;
 int calculateProbs;
 int calculateComptonRedMatrix;
+int comptonMethod;
+
+size_t nGammaCompton;
+size_t nTempCompton;
+size_t nNuPrimCompton;
+size_t nNuCompton;
+double gammaMinCompton;
+double gammaMaxCompton;
+double tempMinCompton;
+double tempMaxCompton;
+double nuPrimMinCompton;
+double nuPrimMaxCompton;
+double nuMinCompton;
+double nuMaxCompton;
 
 size_t nRaux;
 Vector logr;

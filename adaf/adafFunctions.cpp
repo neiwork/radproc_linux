@@ -1,5 +1,6 @@
 #include "adafFunctions.h"
 #include "globalVariables.h"
+#include "read.h"
 #include <fmath/physics.h>
 
 // Electrons
@@ -81,7 +82,11 @@ double accRateADAF(double r)
 {
 	double rOut = exp(logr.back())*schwRadius;
 	double result = accRateOut*pow(r/rOut,s);
-	if (r > rTr) result *= (rTr/r);
+	int processesFlags[numProcesses];
+	readThermalProcesses(processesFlags);
+	if (processesFlags[3]) {
+		if (r > rTr) result *= (rTr/r);
+	}
 	return result;
 }
 
@@ -107,6 +112,13 @@ double auxCD(double r)
 double electronDensity(double r)
 {
 	return (r > schwRadius) ? massDensityADAF(r)/(atomicMassUnit*eMeanMolecularWeight) : 0.0;
+}
+
+double electronDensityTheta(double r, double theta)
+{
+	double thetaMinLocal = acos(costhetaH(r));
+	return (theta > thetaMinLocal && theta < pi-thetaMinLocal) ?
+										electronDensity(r) : 0.0;
 }
 
 double ionDensity(double r)
