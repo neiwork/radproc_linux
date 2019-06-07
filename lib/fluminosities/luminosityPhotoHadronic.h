@@ -1,6 +1,6 @@
 #pragma once
 
-#include <fparticle\particle.h>
+#include <fparticle/Particle.h>
 
 /*(Atoyan & Dermer 2003; Vila & Aharonian 2009) */
-double luminosityPhotoHadronic(double E, Particle& creator, fun1 tpf);
+double luminosityPhotoHadronic(double E, Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& psc, double phEmin, double phEmax);

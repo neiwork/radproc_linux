@@ -14,7 +14,7 @@
 
 
 
-double fntHadron(double x, double E, const Particle& p, const SpaceCoord& psc) //funcion a integrar   x=Ecreator; L=L(Ega)
+double fntHadron(double x, const Particle& p, const double density, const SpaceCoord& psc) //funcion a integrar   x=Ecreator; L=L(Ega)
 {	
 	double Kpi = 0.17;
 	double eval = p.mass*cLight2+x/Kpi;
