@@ -1,106 +1,106 @@
 #include "radiativeLosses.h"
 
-#include "dynamics.h"
-#include "targetFields.h"
 #include "write.h"
 #include "messages.h"
+#include "globalVariables.h"
 
-#include <flosses\lossesSyn.h>
-#include <flosses\nonThermalLosses.h>
-#include <flosses\lossesIC.h>
-#include <fparameters\SpaceIterator.h>
-#include <fparameters\Dimension.h>
+#include <flosses/nonThermalLosses.h>
+#include <flosses/lossesSyn.h>
+#include <flosses/lossesIC.h>
+#include <flosses/lossesHadronics.h>
+#include <flosses/lossesPhotoHadronic.h>
+
+
+#include <fparameters/SpaceIterator.h>
+#include <fparameters/Dimension.h>
 #include <fparameters/parameters.h>
 
 #include <boost/property_tree/ptree.hpp>
 
-void radiativeLosses(State& st, const std::string& filename, Vector& Gc, Vector& Rc, Vector& tobs)
+void radiativeLosses(Particle& p, State& st, const std::string& filename)
 {
 	show_message(msgStart, Module_radLosses);
 
-	static const double Gj = GlobalConfig.get<double>("Gamma");
-	static const double openingAngle = GlobalConfig.get<double>("openingAngle");
-	static const double accEfficiency = GlobalConfig.get<double>("accEfficiency");
-	static const double starT = GlobalConfig.get<double>("starT");
-	static const double starTIR = GlobalConfig.get<double>("IRstarT");
 
-	double z_0 = st.electron.ps[DIM_R].first();
-	double t0 = z_0 / cLight;
-	double beta_j = sqrt(1.0 - 1.0 / P2(Gj));
+	double rg = gravitationalConstant*blackHoleMass / cLight;
+
+	static const double accEfficiency = GlobalConfig.get<double>("accEfficiency");
+
 
 	std::ofstream file;
 	file.open(filename.c_str(), std::ios::out);
 
 	file << "Log(E/eV)" 
-		<< "\t" << "z [pc]"
-		<< "\t" << "tobs [yr]"
+		<< "\t" << "r/rg"
 		<< "\t" << "Synchr"
-		<< "\t" << "IC"
-		<< "\t" << "IC - IR"
-		<< "\t" << "Esc"
+		<< "\t" << "adv"
 		<< "\t" << "Acc"
-		//<< "\t" << "Ad"
+		<< "\t" << "IC / pp"
+		<< "\t" << "pg"
 		<< std::endl;
 
-	double Emin = boltzmann*starT / 100.0;
-	double EphminAux = boltzmann*starTIR / 100.0;
+	double phEmin = st.photon.emin();
+	double phEmax = st.photon.emax();
 
 
-	st.electron.ps.iterate([&](const SpaceIterator& i) {
-		//const double B = st.magf.get(i);
-		double vel_lat = cLight*openingAngle;
+	p.ps.iterate([&](const SpaceIterator& i) {
+		
 
 		double E = i.val(DIM_E);
-		double z = i.val(DIM_R);
-
-		double gamma = Gc[i.coord[DIM_R]];
-
-		double Reff = z / gamma; // Rc[i.coord[DIM_R]];
-
-		double fmtE = log10(E / 1.6e-12);
+		double r = i.val(DIM_R);
+		const double B = st.magf.get(i);
 		
-		//VER como le paso el vector Gc a las perdidas
-		double eIC = lossesIC(i.val(DIM_E), st.electron,
-			[&E, &z, &gamma](double E) {
-			return starBlackBody(E, z, gamma); },
-			Emin, 1.0e4*Emin) / i.val(DIM_E);
+		double rB1   = r/sqrt(paso_r);
+		double rB2   = r*sqrt(paso_r);
+		double delta_r = rB2-rB1;
+		
+		const double density = st.denf_e.get(i)+st.denf_i.get(i); //ver
 
-		double eIC_Aux = lossesIC(i.val(DIM_E), st.electron,
-			[&E, &z, &gamma](double E) {
-			return starIR(E, z, gamma); },
-			EphminAux, 1.0e4*EphminAux) / i.val(DIM_E);
+		double beta = sqrt(1.0 - 1.0 / P2(E/(p.mass*cLight2)));
 
-		double beta_c = sqrt(1.0 - 1.0 / P2(gamma));
-		//double beta_j = sqrt(1.0 - 1.0 / P2(Gj));
+		double v = 0.1*cLight*beta;
+		
+		double fmtE = log10(E / 1.6e-12);
 
-		double beta_rel = (beta_j - beta_c) / (1.0 - beta_j*beta_c);
+		
 
-		double G_rel = 1.0 / sqrt(1.0 - P2(beta_rel));
+		double eAdv = v/delta_r;  //ver deberia ser v_r XXX
 
-		double v_rel = cLight*beta_rel;
-		double eEsc = escapeRate(Reff, v_rel);
-
-		double B = computeMagField(z, G_rel);
 		double eSyn = lossesSyn(i.val(DIM_E), B, st.electron) / i.val(DIM_E);
 
 		double eAcc = accelerationRate(E, B, accEfficiency);
-		//double eAdia = adiabaticLosses(E, z, vel_lat, gamma) / E;
-
-		double tlab = (z / cLight - t0) / yr;
-		double t = tobs[i.coord[DIM_R]];
-
-				file << fmtE << '\t' << z / pc
-					<< '\t' << t/yr
+		
+		
+		file << fmtE << '\t' << r/rg
 					<< "\t" << safeLog10(eSyn)
-					<< "\t" << safeLog10(eIC)
-					<< "\t" << safeLog10(eIC_Aux)
-					<< "\t" << safeLog10(eEsc)
-					<< "\t" << safeLog10(eAcc)
-					//<< "\t" << safeLog10(eAdia)
-					<< std::endl;
+					<< "\t" << safeLog10(eAdv)
+					<< "\t" << safeLog10(eAcc);
+		
+		
+		if(p.id == "ntElectron"){
+			double eIC = lossesIC(E, p, st.photon.distribution, i.coord, phEmin, phEmax)/ i.val(DIM_E);  //ver unidades del distributino XXX
+			
+			//lossesIC(i.val(DIM_E), st.electron,
+			//[&E, &r, &st.photon](double E) {
+			//return photon.distribution.interpolate({ {DIM_E, E },{ DIM_R, r } })},Emin, Emax) / i.val(DIM_E); 
+			
+			file << "\t" << safeLog10(eIC)
+				 << std::endl;
+			
+		}
+		else if(p.id == "ntProton"){
+			double pPP = lossesHadronics(E, density, p);
+			
+			double pPG = lossesPhotoHadronic(E, p, st.photon.distribution, i, phEmin, phEmax);
+			
+			
+			file << "\t" << safeLog10(pPP)
+				 << "\t" << safeLog10(pPG)
+				 << std::endl;
+			}
+			
 
-
-	});
+	},{-1,-1,0});
 
 
 	file.close();

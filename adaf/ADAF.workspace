@@ -7,6 +7,8 @@
   <Project Name="adaf" Path="adaf.project" Active="Yes"/>
   <Project Name="nrMath" Path="../lib/nrMath/nrMath.project" Active="No"/>
   <Project Name="inout" Path="../lib/inout/inout.project" Active="No"/>
+  <Project Name="flosses" Path="../lib/flosses/flosses.project" Active="No"/>
+  <Project Name="finjection" Path="../lib/finjection/finjection.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="no">
       <Environment/>
@@ -18,6 +20,8 @@
       <Project Name="adaf" ConfigName="Debug"/>
       <Project Name="nrMath" ConfigName="Debug"/>
       <Project Name="inout" ConfigName="Debug"/>
+      <Project Name="flosses" ConfigName="Debug"/>
+      <Project Name="finjection" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
@@ -29,6 +33,8 @@
       <Project Name="adaf" ConfigName="Release"/>
       <Project Name="nrMath" ConfigName="Release"/>
       <Project Name="inout" ConfigName="Release"/>
+      <Project Name="flosses" ConfigName="Release"/>
+      <Project Name="finjection" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

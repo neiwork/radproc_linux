@@ -95,6 +95,10 @@ void show_module(ProgramModule module)
             printf("Target fields");
             break;
 			
+		case Module_radLosses:
+            printf("INon-thermal radiative losses");
+            break;
+	
 		case Module_electronInjection:
             printf("Injection of electrons");
             break;
@@ -118,7 +122,10 @@ void show_module(ProgramModule module)
 		case Module_thermalCompton:
 			printf("Thermal Compton");
 			break;
- 
+			
+		case Module_luminosities:
+			printf("Non-thermal luminosities");
+			break;
   /*      default:
             printf("\n");
             show_error(Invalid_Module, Module_Message);

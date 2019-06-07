@@ -1,11 +1,9 @@
 #pragma once
 
-#include "state.h"
-//#include <fparticle\Particle.h>
+#include "State.h"
 
 
-void radiativeLosses(State& st, const std::string& filename, 
-				Vector& Gc, Vector& Rc, Vector& tobs);
+void radiativeLosses(Particle& p, State& st, const std::string& filename);
 
 
 

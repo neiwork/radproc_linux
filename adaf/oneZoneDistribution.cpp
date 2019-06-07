@@ -1,6 +1,6 @@
 #include "oneZoneDistribution.h"
 
-#include "dynamics.h"
+
 #include "losses.h"
 
 #include <flosses\nonThermalLosses.h>
@@ -12,10 +12,9 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-void oneZoneDistribution(Particle& p, State& st, const SpaceIterator& si, 
-	Vector& Gc, Vector& Rc)
+void oneZoneDistribution(Particle& p, State& st, const SpaceIterator& si)
 {
-	static const double Gj = GlobalConfig.get<double>("Gamma");
+	//static const double Gj = GlobalConfig.get<double>("Gamma");
 
 	int z_ix = si.coord[DIM_R]; //posicion en la coordenada z
 	double z = si.val(DIM_R);

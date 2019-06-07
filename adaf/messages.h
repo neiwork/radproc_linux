@@ -9,12 +9,14 @@ enum MessageType {msgStart, msgEnd, msgError};
 enum ProgramModule {Module_Main,
 					Module_state,
 					Module_targetField,
+					Module_radLosses,
 					Module_electronInjection,
 					Module_electronDistribution,
 					Module_torusSampling,
 					Module_photonInjection,
 					Module_thermalLuminosities,
 					Module_thermalCompton,
+					Module_luminosities,
 					Module_Message}; 
 
 

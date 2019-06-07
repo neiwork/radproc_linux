@@ -2,44 +2,47 @@
 <CodeLite_Project Name="finjection" Version="10.0.0" InternalType="Library">
   <Plugins>
     <Plugin Name="qmake">
-      <![CDATA[00010001N0005Debug000000000000]]>
+      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
     </Plugin>
   </Plugins>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="protonNeutron.h" ExcludeProjConfig="Debug;"/>
-    <File Name="protonNeutron.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="protonNeutron.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="protonNeutron.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="ppPionInj.h" ExcludeProjConfig=""/>
     <File Name="ppPionInj.cpp" ExcludeProjConfig=""/>
     <File Name="pgammaPionInj.h" ExcludeProjConfig=""/>
     <File Name="pgammaPionInj.cpp" ExcludeProjConfig=""/>
-    <File Name="pgammaPairInj.h" ExcludeProjConfig="Debug;"/>
-    <File Name="pgammaPairInj.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="pairMuonDecay.h" ExcludeProjConfig="Debug;"/>
-    <File Name="pairMuonDecay.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="pairInjectionExact.h" ExcludeProjConfig="Debug;"/>
-    <File Name="pairInjectionExact.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="pairInjection.h" ExcludeProjConfig="Debug;"/>
-    <File Name="pairInjection.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="pairBH.h" ExcludeProjConfig="Debug;"/>
-    <File Name="pairBH.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="pairAnnihilation.h" ExcludeProjConfig="Debug;"/>
-    <File Name="pairAnnihilation.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="packageData.h" ExcludeProjConfig="Debug;"/>
+    <File Name="pgammaPairInj.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="pgammaPairInj.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="pairMuonDecay.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="pairMuonDecay.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="pairInjectionExact.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="pairInjectionExact.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="pairInjection.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="pairInjection.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="pairBH.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="pairBH.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="pairAnnihilation.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="pairAnnihilation.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="neutronPp.h" ExcludeProjConfig=""/>
     <File Name="neutronPp.cpp" ExcludeProjConfig=""/>
-    <File Name="neutronPgamma.h" ExcludeProjConfig="Debug;"/>
-    <File Name="neutronPgamma.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="neutrinoInjection.h" ExcludeProjConfig="Debug;"/>
-    <File Name="neutrinoInjection.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="neutronPgamma.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="neutronPgamma.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="neutrinoInjection.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="neutrinoInjection.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="muonInj.h" ExcludeProjConfig=""/>
     <File Name="muonInj.cpp" ExcludeProjConfig=""/>
-    <File Name="electronNeutron.h" ExcludeProjConfig="Debug;"/>
-    <File Name="electronNeutron.cpp" ExcludeProjConfig="Debug;"/>
-    <File Name="dataInjection.h" ExcludeProjConfig="Debug;"/>
+    <File Name="electronNeutron.h" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="electronNeutron.cpp" ExcludeProjConfig="Release;Debug;"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include"/>
+  <Dependencies Name="Debug">
+    <Project Name="fparticle"/>
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+  </Dependencies>
   <Settings Type="Static Library">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -98,6 +101,9 @@
     <Configuration Name="Release" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
+        <IncludePath Value="."/>
+        <IncludePath Value="../../lib"/>
+        <IncludePath Value="../../external/include"/>
       </Compiler>
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
@@ -135,9 +141,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug">
-    <Project Name="fparticle"/>
-    <Project Name="fmath"/>
-    <Project Name="fparameters"/>
-  </Dependencies>
 </CodeLite_Project>

@@ -1,10 +1,20 @@
 #include <stdio.h>
+
+#include "write.h"
 #include "messages.h"
 #include "modelParameters.h"
 #include "State.h"
 #include "icMatrix.h"
 #include "thermalLuminosities.h"
 #include "globalVariables.h"
+
+#include "targetField.h"
+#include "thermalDistribution.h"
+#include "radiativeLosses.h"
+#include "injection.h"
+#include "processes.h"
+
+
 #include <fparameters/parameters.h>
 #include <inout/ioutil.h>
 #include <iostream>
@@ -24,6 +34,27 @@ int main()
 		show_message(msgStart, Module_state);
 		State model(GlobalConfig.get_child("model"));
 		show_message(msgEnd, Module_state);
+
+
+//***********nonthermal particles**************		
+		
+/*				//completo las distribuciones de los termicos con Maxwell-Jutner
+		thermalDistribution(model.electron, model); 
+		thermalDistribution(model.proton, model);
+		targetField(model);
+		
+		radiativeLosses(model.ntElectron, model, "electronLosses.txt");
+		//radiativeLosses(model.ntProton, model, "protonLosses.txt");
+		
+		injection(model.ntElectron, model);
+		writeEandRParamSpace("electronInj.txt", model.ntElectron.injection, 0);
+		//injection(model.ntProton, model);
+		
+		processes(model, "ntLuminosities");*/
+		
+//********************************************
+
+
 
 		if (calculateScatt) {
 			show_message(msgStart, Module_torusSampling);

@@ -12,8 +12,10 @@ using namespace std;
 
 State::State(boost::property_tree::ptree& cfg) :
  electron{ "electron" },
+ proton{ "proton" },
  photon{ "photon" },
- proton("proton"),
+ ntProton("ntProton"),
+ ntElectron{ "ntElectron" },
  magf(photon.ps, false),
  denf_i(photon.ps, false),
  denf_e(photon.ps, false),
@@ -23,6 +25,9 @@ State::State(boost::property_tree::ptree& cfg) :
  height(photon.ps, false)
  {
 	particles.push_back(&electron);
+	particles.push_back(&proton);
+	particles.push_back(&ntElectron);
+	particles.push_back(&ntProton);
 	particles.push_back(&photon);
 	for (auto p : particles) {
 		initializeParticle(*p, cfg);

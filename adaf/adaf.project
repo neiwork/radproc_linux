@@ -5,19 +5,36 @@
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
     </Plugin>
   </Plugins>
+  <VirtualDirectory Name="non thermal">
+    <File Name="targetField.h"/>
+    <File Name="targetField.cpp"/>
+    <File Name="radiativeLosses.h"/>
+    <File Name="radiativeLosses.cpp"/>
+    <File Name="processes.h"/>
+    <File Name="processes.cpp"/>
+    <File Name="injection.h"/>
+    <File Name="injection.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="thermal">
+    <File Name="maxwellJuttner.h"/>
+    <File Name="maxwellJuttner.cpp"/>
+    <File Name="thermalDistribution.h"/>
+    <File Name="thermalDistribution.cpp"/>
+    <File Name="thermalLuminosities.h"/>
+    <File Name="thermalLuminosities.cpp"/>
+    <File Name="thermalComptonOld.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="thermalCompton.h"/>
+    <File Name="thermalCompton.cpp"/>
+    <File Name="icMatrix.h"/>
+    <File Name="icMatrix.cpp"/>
+  </VirtualDirectory>
   <Description/>
   <Dependencies/>
-  <VirtualDirectory Name="include"/>
   <VirtualDirectory Name="src">
-    <File Name="thermalCompton.h"/>
-    <File Name="thermalComptonOld.cpp" ExcludeProjConfig="Release;"/>
-    <File Name="thermalCompton.cpp"/>
     <File Name="read.h"/>
     <File Name="read.cpp"/>
     <File Name="modelParameters.h"/>
     <File Name="modelParameters.cpp"/>
-    <File Name="icMatrix.h"/>
-    <File Name="icMatrix.cpp"/>
     <File Name="write.h"/>
     <File Name="write.cpp"/>
     <File Name="messages.h"/>
@@ -27,28 +44,10 @@
     <File Name="adafFunctions.cpp"/>
     <File Name="adafParameters.h"/>
     <File Name="adafParameters.cpp"/>
-    <File Name="thermalLuminosities.h"/>
-    <File Name="thermalLuminosities.cpp"/>
     <File Name="State.h"/>
     <File Name="State.cpp"/>
     <File Name="main.cpp"/>
   </VirtualDirectory>
-  <Dependencies Name="Debug">
-    <Project Name="fparticle"/>
-    <Project Name="fluminosities"/>
-    <Project Name="fparameters"/>
-    <Project Name="fmath"/>
-    <Project Name="nrMath"/>
-    <Project Name="inout"/>
-  </Dependencies>
-  <Dependencies Name="Release">
-    <Project Name="fparticle"/>
-    <Project Name="fluminosities"/>
-    <Project Name="fparameters"/>
-    <Project Name="fmath"/>
-    <Project Name="nrMath"/>
-    <Project Name="inout"/>
-  </Dependencies>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -75,11 +74,15 @@
         <LibraryPath Value="../lib/nrMath/Debug"/>
         <LibraryPath Value="../lib/fparameters/Debug"/>
         <LibraryPath Value="../lib/fparticle/Debug"/>
+        <LibraryPath Value="../lib/flosses/Debug"/>
+        <LibraryPath Value="../lib/finjection/Debug"/>
         <LibraryPath Value="../lib/fluminosities/Debug"/>
         <LibraryPath Value="../lib/inout/Debug"/>
         <Library Value="fparameters"/>
         <Library Value="fparticle"/>
         <Library Value="fluminosities"/>
+        <Library Value="finjection"/>
+        <Library Value="flosses"/>
         <Library Value="inout"/>
         <Library Value="fmath"/>
         <Library Value="nrMath"/>
@@ -137,11 +140,15 @@
         <LibraryPath Value="../lib/nrMath/Release"/>
         <LibraryPath Value="../lib/fparameters/Release"/>
         <LibraryPath Value="../lib/fparticle/Release"/>
+        <LibraryPath Value="../lib/flosses/Release"/>
+        <LibraryPath Value="../lib/finjection/Release"/>
         <LibraryPath Value="../lib/fluminosities/Release"/>
         <LibraryPath Value="../lib/inout/Release"/>
         <Library Value="fparameters"/>
         <Library Value="fparticle"/>
         <Library Value="fluminosities"/>
+        <Library Value="finjection"/>
+        <Library Value="flosses"/>
         <Library Value="inout"/>
         <Library Value="fmath"/>
         <Library Value="nrMath"/>
@@ -185,4 +192,24 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Release">
+    <Project Name="nrMath"/>
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+    <Project Name="fparticle"/>
+    <Project Name="inout"/>
+    <Project Name="flosses"/>
+    <Project Name="finjection"/>
+    <Project Name="fluminosities"/>
+  </Dependencies>
+  <Dependencies Name="Debug">
+    <Project Name="nrMath"/>
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+    <Project Name="fparticle"/>
+    <Project Name="inout"/>
+    <Project Name="flosses"/>
+    <Project Name="finjection"/>
+    <Project Name="fluminosities"/>
+  </Dependencies>
 </CodeLite_Project>
