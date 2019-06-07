@@ -30,10 +30,24 @@ extern const Vector logv;
 extern const int calculateScatt;
 extern const int calculateProbs;
 extern const int calculateComptonRedMatrix;
+extern const int comptonMethod;
 
 // PARAMETERS
 extern const double schwRadius;					// Gravitationl Radius [cm]
 extern const int numProcesses;                  // Number of thermal processes
+
+extern const size_t nGammaCompton;
+extern const size_t nTempCompton;
+extern const size_t nNuPrimCompton;
+extern const size_t nNuCompton;
+extern const double gammaMinCompton;
+extern const double gammaMaxCompton;
+extern const double tempMinCompton;
+extern const double tempMaxCompton;
+extern const double nuPrimMinCompton;
+extern const double nuPrimMaxCompton;
+extern const double nuMinCompton;
+extern const double nuMaxCompton;
 
 extern const DimensionCoord
 	DIM_E,

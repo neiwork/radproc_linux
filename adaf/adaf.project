@@ -10,6 +10,7 @@
   <VirtualDirectory Name="include"/>
   <VirtualDirectory Name="src">
     <File Name="thermalCompton.h"/>
+    <File Name="thermalComptonOld.cpp" ExcludeProjConfig="Release;"/>
     <File Name="thermalCompton.cpp"/>
     <File Name="read.h"/>
     <File Name="read.cpp"/>
@@ -122,16 +123,14 @@
       </Completion>
     </Configuration>
     <Configuration Name="Release" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-O3;-Wall;$(shell pkg-config --cflags gtkmm-3.0)" C_Options="-O2;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+      <Compiler Options="-O3;-fopenmp;-Wall;$(shell pkg-config --cflags gtkmm-3.0)" C_Options="-O3;-fopenmp;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <IncludePath Value="../lib"/>
         <IncludePath Value="../external/include"/>
         <IncludePath Value="../gsl/include"/>
         <Preprocessor Value="NDEBUG"/>
-        <Preprocessor Value="BOOST_SYSTEM_NO_DEPRECATED"/>
-        <Preprocessor Value="BOOST_NO_CXX11_SCOPED_ENUMS"/>
       </Compiler>
-      <Linker Options="$(shell pkg-config --libs gtkmm-3.0)" Required="yes">
+      <Linker Options="-fopenmp;$(shell pkg-config --libs gtkmm-3.0)" Required="yes">
         <LibraryPath Value="../gsl/lib"/>
         <LibraryPath Value="../external/lib"/>
         <LibraryPath Value="../lib/fmath/Release"/>

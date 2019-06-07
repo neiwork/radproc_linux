@@ -98,6 +98,27 @@ double rate(double om, double gamma)
 	}
 }
 
+double rateThermal(double normtemp, double frequency)
+{
+	double alf=0.0;
+	int nG=6;
+    double *abscissas,*weights;
+    abscissas=dvector(1,nG);
+    weights=dvector(1,nG);
+    gaulag(abscissas,weights,nG,alf);
+	
+	double om = planck*frequency/(electronMass*cLight2);
+	double sum1 = 0.0;
+	double sum2 = 0.0;
+	for (int jG=1;jG<=nG;jG++) {
+		double gamma = abscissas[jG]*normtemp+1.0;
+        double cWeights = weights[jG]*gamma*sqrt(gamma*gamma-1.0);
+		sum1 += (cWeights*rate(om,gamma));
+		sum2 += cWeights;
+	}
+	return sum1/sum2;
+}
+
 double dPdz(double z,double om, double omprim, double gamma)
 {
 	double g2 = gamma*gamma;
@@ -208,153 +229,4 @@ double probexact(double om,double omprim,double gamma)
 				(double z){return dPdz(z,om,omprim,gamma);});
 	
 	return (result > 0.0 ? result : 0.0);
-}
-
-double probInterpolated(Vector comp, double nu, double nuPrim, double gamma)
-{
-	int nGamma, nNu, nNuPrim;
-	nGamma = nNu = nNuPrim = 30;
-	double gammaMin = 1.0;
-	double gammaMax = 5.0e3;
-	double pasoGamma = pow(gammaMax/gammaMin,1.0/nGamma);
-	double nuPrimMin = 1.0e8;
-	double nuPrimMax = 1.0e20;
-	double pasoNuPrim = pow(nuPrimMax/nuPrimMin,1.0/nNuPrim);
-	double nuMin = 1.0e10;
-	double nuMax = 1.0e22;
-	double pasoNu = pow(nuMax/nuMin,1.0/nNu);
-
-	size_t kGamma, kNuPrim, kNu;
-	kGamma = kNuPrim = kNu = 0;
-	double gammaAux = gammaMin;
-	while (gammaAux < gamma) {
-		gammaAux *= pasoGamma;
-		kGamma++;
-	}
-	double nuPrimAux = nuPrimMin;
-	while (nuPrimAux < nuPrim) {
-		nuPrimAux *= pasoNuPrim;
-		kNuPrim++;
-	}
-	double nuAux = nuMin;
-	while (nuAux < nu) {
-		nuAux *= pasoNu;
-		kNu++;
-	}
-	
-	double logGamma1 = log(gammaAux/pasoGamma);
-	double logGamma2 = log(gammaAux);
-	double logGamma = log(gamma);
-	double logNuPrim1 = log(nuPrimAux/pasoNuPrim);
-	double logNuPrim2 = log(nuPrimAux);
-	double logNuPrim = log(nuPrim);
-	double logNu1 = log(nuAux/pasoNu);
-	double logNu2 = log(nuAux);
-	double logNu = log(nu);
-	
-	double prob111 = comp[((kGamma-1)*nNuPrim+(kNuPrim-1))*nNu+(kNu-1)];
-	double prob112 = comp[((kGamma-1)*nNuPrim+(kNuPrim-1))*nNu+kNu];
-	double prob121 = comp[((kGamma-1)*nNuPrim+kNuPrim)*nNu+(kNu-1)];
-	double prob122 = comp[((kGamma-1)*nNuPrim+kNuPrim)*nNu+kNu];
-	double prob211 = comp[(kGamma*nNuPrim+(kNuPrim-1))*nNu+(kNu-1)];
-	double prob212 = comp[(kGamma*nNuPrim+(kNuPrim-1))*nNu+kNu];
-	double prob221 = comp[(kGamma*nNuPrim+kNuPrim)*nNu+(kNu-1)];
-	double prob222 = comp[(kGamma*nNuPrim+kNuPrim)*nNu+kNu];
-	
-	double prob11 = (prob112-prob111)/(logNu2-logNu1) * (logNu-logNu1) + prob111;
-	double prob12 = (prob122-prob121)/(logNu2-logNu1)*(logNu-logNu1) + prob121;
-	double prob1 = (prob12-prob11)/(logNuPrim2-logNuPrim1)*(logNuPrim-logNuPrim1)+prob11;
-	
-	double prob21 = (prob212-prob211)/(logNu2-logNu1) * (logNu-logNu1) + prob211;
-	double prob22 = (prob222-prob221)/(logNu2-logNu1)*(logNu-logNu1) + prob221;
-	double prob2 = (prob22-prob21)/(logNuPrim2-logNuPrim1)*(logNuPrim-logNuPrim1)+prob21;
-	
-	double prob = (prob2-prob1)/(logGamma2-logGamma1)*(logGamma-logGamma1) + prob1;
-	return prob;
-}
-
-double probInterpolated2(Vector comp, double nu, double nuPrim, double temp)
-{
-	int nTemp, nNu, nNuPrim;
-	nTemp = nNu = nNuPrim = 30;
-	double tempMin = 0.1;
-	double tempMax = 10.0;
-	double pasoTemp = pow(tempMax/tempMin,1.0/nTemp);
-	double nuPrimMin = 1.0e8;
-	double nuPrimMax = 1.0e20;
-	double pasoNuPrim = pow(nuPrimMax/nuPrimMin,1.0/nNuPrim);
-	double nuMin = 1.0e10;
-	double nuMax = 1.0e22;
-	double pasoNu = pow(nuMax/nuMin,1.0/nNu);
-
-	size_t kTemp, kNuPrim, kNu;
-	kTemp = kNuPrim = kNu = 0;
-	double tempAux = tempMin;
-	while (tempAux < temp) {
-		tempAux *= pasoTemp;
-		kTemp++;
-	}
-	double nuPrimAux = nuPrimMin;
-	while (nuPrimAux < nuPrim) {
-		nuPrimAux *= pasoNuPrim;
-		kNuPrim++;
-	}
-	double nuAux = nuMin;
-	while (nuAux < nu) {
-		nuAux *= pasoNu;
-		kNu++;
-	}
-	
-	double logTemp1 = log(tempAux/pasoTemp);
-	double logTemp2 = log(tempAux);
-	double logTemp = log(temp);
-	double logNuPrim1 = log(nuPrimAux/pasoNuPrim);
-	double logNuPrim2 = log(nuPrimAux);
-	double logNuPrim = log(nuPrim);
-	double logNu1 = log(nuAux/pasoNu);
-	double logNu2 = log(nuAux);
-	double logNu = log(nu);
-	
-	double prob111 = comp[((kTemp-1)*nNuPrim+(kNuPrim-1))*nNu+(kNu-1)];
-	double prob112 = comp[((kTemp-1)*nNuPrim+(kNuPrim-1))*nNu+kNu];
-	double prob121 = comp[((kTemp-1)*nNuPrim+kNuPrim)*nNu+(kNu-1)];
-	double prob122 = comp[((kTemp-1)*nNuPrim+kNuPrim)*nNu+kNu];
-	double prob211 = comp[(kTemp*nNuPrim+(kNuPrim-1))*nNu+(kNu-1)];
-	double prob212 = comp[(kTemp*nNuPrim+(kNuPrim-1))*nNu+kNu];
-	double prob221 = comp[(kTemp*nNuPrim+kNuPrim)*nNu+(kNu-1)];
-	double prob222 = comp[(kTemp*nNuPrim+kNuPrim)*nNu+kNu];
-	
-	double prob11 = (prob112-prob111)/(logNu2-logNu1) * (logNu-logNu1) + prob111;
-	double prob12 = (prob122-prob121)/(logNu2-logNu1)*(logNu-logNu1) + prob121;
-	double prob1 = (prob12-prob11)/(logNuPrim2-logNuPrim1)*(logNuPrim-logNuPrim1)+prob11;
-	
-	double prob21 = (prob212-prob211)/(logNu2-logNu1) * (logNu-logNu1) + prob211;
-	double prob22 = (prob222-prob221)/(logNu2-logNu1)*(logNu-logNu1) + prob221;
-	double prob2 = (prob22-prob21)/(logNuPrim2-logNuPrim1)*(logNuPrim-logNuPrim1)+prob21;
-	
-	double prob = (prob2-prob1)/(logTemp2-logTemp1)*(logTemp-logTemp1) + prob1;
-	return prob;
-}
-
-double probTemp(Vector comp, double nu, double nuPrim, double normtemp)
-{
-	void gaulag(double *x, double *w, int n, double alf);
-	size_t nG = 5;
-	double *abscissas,*weights;
-	abscissas=dvector(1,nG);
-	weights=dvector(1,nG);
-	double alf=0.0;
-	gaulag(abscissas, weights,nG,alf);
-	double sum1=0.0;
-	double sum2=0.0;
-	double omPrim = planck*nuPrim/(electronMass*cLight2);
-	
-	for (size_t jG=1;jG<=nG;jG++) {
-		double gamma=abscissas[jG]*normtemp+1.0;
-		double cWeights = weights[jG]*gamma*sqrt(gamma*gamma-1.0);
-		sum1 += probInterpolated(comp,nu,nuPrim,gamma)*cWeights;
-		sum2 += cWeights;
-	}
-	
-	return sum1/sum2;
 }
