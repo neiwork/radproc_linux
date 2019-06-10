@@ -10,7 +10,7 @@ double lumShellInc(double freq0, size_t jE, size_t jRcd, Matrix lumOut, Matrix a
 		while (freq0*planck > energies[jjE]) jjE++;
 		double logLumFreq0;
 		if (jjE > 0) {
-			if (lumOut[jjE-1][jjR] > 0) {
+			if (lumOut[jjE-1][jjR] > 0.0 && lumOut[jjE][jjR] > 0.0) {
 				logLumFreq0 = log10(lumOut[jjE][jjR]/lumOut[jjE-1][jjR]) /
 					log10(energies[jjE]/energies[jjE-1]) * log10(freq0*planck/energies[jjE-1])
 					+ log10(lumOut[jjE-1][jjR]);

@@ -211,15 +211,17 @@ void comptonMatrix()
 
 			double probtot = RungeKuttaSimple(omMin,omMax,[&](double om)
 						{return probexactNew(om,omPrim,gamma);});
-			file2 << (float)gamma << "\t" << (float)omPrim << "\t" <<
-					omMin << "\t" << omMax << "\t" << probtot << endl;
+			file2 << "gamma = " << (float)log10(gamma) << "\t nuPrim = " << (float)log10(nuPrim)
+					<< "\t nuMin = " << log10(omMin*electronMass*cLight2/planck)
+					<< "\t nuMax = " << log10(omMax*electronMass*cLight2/planck)
+					<< "\t prob = " << probtot << endl;
 			double nu = nuMinCompton;
 			for (size_t jNu=0;jNu<nNuCompton;jNu++) {
 				nu *= pasoNu;
 				double om = planck*nu / (electronMass*cLight2);
 				double prob = 0.0;
-				if (om > omMin && om < omMax) {// && probtot > 0.9 && probtot < 1.1) {
-					prob = probexactNew(om,omPrim,gamma)*planck/(electronMass*cLight2)/probtot;
+				if (om > omMin && om < omMax && probtot < 1.1) {
+					prob = probexactNew(om,omPrim,gamma)*planck/(electronMass*cLight2);
 				}
 				file1 << prob << endl;
 			}
@@ -340,10 +342,91 @@ double comptonNewNew(Vector tempVec, Vector nuPrimVec, Vector nuVec, Vector prob
 	return sum;
 }
 
+void comptonNewNewPruebaVector(Vector tempVec, Vector nuPrimVec, Vector nuVec, Vector probVec,
+			size_t jTemp, Vector energies, size_t jE, Vector& p, double normtemp)
+{
+	double nu = energies[jE]/planck;
+	for (size_t jjNu=0;jjNu<nE;jjNu++) {
+		double nuPrim = energies[jjNu]/planck;
+		if (comptonMethod == 0)
+			p[(jTemp*nE+jjNu)*nE+jE] = probInterpolated2(tempVec,nuPrimVec,nuVec,probVec,
+											nu,nuPrim,normtemp);
+		else if (comptonMethod == 1)
+			p[(jTemp*nE+jjNu)*nE+jE] = probTemp(probVec,nu,nuPrim,normtemp);
+	}
+}
+
+void comptonNewNewNewPruebaVector(size_t jR, Vector energies, size_t jE, Vector& p, double normtemp)
+{
+	gsl_function gsl_extrinf;
+	gsl_extrinf.function = &extrinf;
+	double alf=0.0;
+	int nG=8;
+	double pasoOm = pow(energies[nE-1]/energies[0],1.0/(nE+1));
+    double *abscissas,*weights;
+    abscissas=dvector(1,nG);
+    weights=dvector(1,nG);
+    gaulag(abscissas,weights,nG,alf);
+	double om = energies[jE]/(electronMass*cLight2);
+	double om1 = om/sqrt(pasoOm);
+	double om2 = om*sqrt(pasoOm);
+	for (size_t jjNu=0;jjNu<nE;jjNu++) {
+		double omPrim = energies[jjNu]/(electronMass*cLight2);
+		
+		double sum1 = 0.0;
+		double sum2 = 0.0;
+		for (int jG=1;jG<=nG;jG++) {
+			double gamma = abscissas[jG]*normtemp+1.0;
+			double beta = sqrt(1.0-1.0/(gamma*gamma));
+			double cWeights = weights[jG]*gamma*sqrt(gamma*gamma-1.0);
+			double eps = omPrim/gamma;
+		
+			struct two_d_params extrinf_params = {eps,gamma};
+			gsl_extrinf.params = &extrinf_params;
+			int status1,status2;
+		
+			double omMin = omPrim * brent(&gsl_extrinf,0.0,1.0,&status1,&status2);
+			double omMaxAbs = omPrim + (gamma - 1.0);
+			double omMax = omPrim*(1.0+beta)/(1.0-beta+2.0*omPrim/gamma);
+			double aux = beta/(1.0+gamma*(1.0+beta));
+			omMax = (eps < aux) ? omMax : omMaxAbs;
+
+			//double prob1 = (omMin < om1 && om1 < omMax) ? // && probtotal < 1.2) ?
+			//				probexactNew(om1,omPrim,gamma) : 0.0;
+			//double prob2 = (omMin < om2 && om2 < omMax) ? // && probtotal < 1.2) ?
+			//				probexactNew(om2,omPrim,gamma) : 0.0;
+			double prob = (omMin < om && om < omMax) ? // && probtotal < 1.2) ?
+							probexactNew(om,omPrim,gamma) : 0.0;
+			sum1 += prob*cWeights;
+			//sum1 += (prob2+prob1)/2.0 * cWeights;
+			sum2 += cWeights;
+		}
+		p[(jR*nE+jjNu)*nE+jE] = (sum1/sum2) * (planck/(electronMass*cLight2));
+	}
+}
+
+double comptonNewNewPrueba(Vector p, Vector lumIn, size_t jTemp, Vector energies, size_t jE)
+{
+	double pasoNuPrim = pow(energies[nE-1]/energies[0],1.0/nE);
+	double sum = 0.0;
+	for (size_t jjNu=0;jjNu<nE;jjNu++) {
+		double nuPrim = energies[jjNu]/planck;
+		if (nuPrim > nuPrimMinCompton && nuPrim < nuPrimMaxCompton)
+		{
+			double dNuPrim = nuPrim * (sqrt(pasoNuPrim)-pow(pasoNuPrim,-0.5));
+			double prob = 0.0;
+			prob = p[(jTemp*nE+jjNu)*nE+jE];
+			sum += lumIn[jjNu]*dNuPrim*prob*(energies[jE]/energies[jjNu]);
+		}
+	}
+	return sum;
+}
+
 double comptonNewNewNew(Vector lumIn, double normtemp, double nu, Vector energies, size_t jE)
 {
 	gsl_function gsl_extrinf;
 	gsl_extrinf.function = &extrinf;
+	
 	double alf=0.0;
 	int nG=8;
     double *abscissas,*weights;
@@ -360,7 +443,7 @@ double comptonNewNewNew(Vector lumIn, double normtemp, double nu, Vector energie
 		
 		double sum1 = 0.0;
 		double sum2 = 0.0;
-		for (size_t jG=1;jG<=nG;jG++) {
+		for (int jG=1;jG<=nG;jG++) {
 			double gamma = abscissas[jG]*normtemp+1.0;
 			double beta = sqrt(1.0-1.0/(gamma*gamma));
 			double cWeights = weights[jG]*gamma*sqrt(gamma*gamma-1.0);
@@ -375,8 +458,9 @@ double comptonNewNewNew(Vector lumIn, double normtemp, double nu, Vector energie
 			double omMax = omPrim*(1.0+beta)/(1.0-beta+2.0*omPrim/gamma);
 			double aux = beta/(1.0+gamma*(1.0+beta));
 			omMax = (eps < aux) ? omMax : omMaxAbs;
-			
-			double prob1 = (omMin < om && om < omMax) ? probexactNew(om,omPrim,gamma) : 0.0;
+
+			double prob1 = (omMin < om && om < omMax) ? // && probtotal < 1.2) ?
+							probexactNew(om,omPrim,gamma) : 0.0;
 			sum1 += prob1*cWeights;
 			sum2 += cWeights;
 		}

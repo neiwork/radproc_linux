@@ -98,16 +98,16 @@ double rate(double om, double gamma)
 	}
 }
 
-double rateThermal(double normtemp, double frequency)
+double rateThermal(double normtemp, double energy)
 {
 	double alf=0.0;
-	int nG=6;
+	int nG=10;
     double *abscissas,*weights;
     abscissas=dvector(1,nG);
     weights=dvector(1,nG);
     gaulag(abscissas,weights,nG,alf);
 	
-	double om = planck*frequency/(electronMass*cLight2);
+	double om = energy/(electronMass*cLight2);
 	double sum1 = 0.0;
 	double sum2 = 0.0;
 	for (int jG=1;jG<=nG;jG++) {

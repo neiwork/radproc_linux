@@ -2,6 +2,7 @@
 #include "globalVariables.h"
 #include "read.h"
 #include <fmath/physics.h>
+#include <fparameters/parameters.h>
 
 // Electrons
 
@@ -80,12 +81,13 @@ double costhetaH(double r)
 
 double accRateADAF(double r)
 {
+	double accRateCorona = GlobalConfig.get<double>("accretionRateCorona")*accRateOut;
 	double rOut = exp(logr.back())*schwRadius;
 	double result = accRateOut*pow(r/rOut,s);
 	int processesFlags[numProcesses];
 	readThermalProcesses(processesFlags);
 	if (processesFlags[3]) {
-		if (r > rTr) result *= (rTr/r);
+		if (r > rTr) result = accRateCorona*pow(r/rOut,s)*(rTr/r);
 	}
 	return result;
 }
@@ -93,11 +95,15 @@ double accRateADAF(double r)
 double massDensityADAF(double r)
 {
 	return accRateADAF(r) / 
-		(4.0*pi*r*r*(-radialVel(r)));
+		(4.0*pi*r*r*costhetaH(r)*(-radialVel(r)));
 }
 
 double accRateColdDisk(double r)
 {
+	double rOut = exp(logr.back())*schwRadius;
+	int processesFlags[numProcesses];
+	readThermalProcesses(processesFlags);
+	if (processesFlags[3] && rTr < 5.0) return accRateOut * (1.0-rTr/rOut);
 	return accRateOut*(1.0-rTr/r);
 }
 

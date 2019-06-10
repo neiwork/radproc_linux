@@ -46,7 +46,6 @@ void adafParameters()
 	
 	numProcesses = GlobalConfig.get<int>("numProcesses");
 	calculateScatt = GlobalConfig.get<int>("calculateScatt");
-	calculateProbs = GlobalConfig.get<int>("calculateProbs");
 	calculateComptonRedMatrix = GlobalConfig.get<int>("calculateComptonRedMatrix");
 	comptonMethod = GlobalConfig.get<int>("comptonMethod");
 	
