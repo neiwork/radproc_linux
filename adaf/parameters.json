@@ -2,31 +2,32 @@
 	"id":"SgrA*",
 	"mu_i":"1.23",
 	"mu_e":"1.14",
-	"nPhotMatrix":"300",
+	"nPhotMatrix":"100",
 	"nTheta":"5",
-	"calculateScatt":"0",
+	"calculateScatt":"1",
 	"calculateProbs":"0",
-	"calculateComptonRedMatrix":"1",
-	"comptonMethod":"1",
+	"calculateComptonRedMatrix":"0",
+	"comptonMethod":"3",
+	"accretionRateCorona":"1.0",
 	"nGammaCompton":"30",
 	"nTempCompton":"30",
-	"nNuPrimCompton":"90",
-	"nNuCompton":"90",
+	"nNuPrimCompton":"60",
+	"nNuCompton":"60",
 	"gammaMinCompton":"1.0",
 	"gammaMaxCompton":"1.0e3",
 	"tempMinCompton":"0.1",
 	"tempMaxCompton":"11.0",
-	"nuPrimMinCompton":"1.0e8",
+	"nuPrimMinCompton":"1.0e10",
 	"nuPrimMaxCompton":"1.0e22",
 	"nuMinCompton":"1.0e12",
 	"nuMaxCompton":"1.0e24",
-	"rTr":"3.0e1",
+	"rTr":"1.0e1",
 	"numProcesses":"5",
 	"ThermalProcessNumber": {
 				"0":1,
 				"1":1,
 				"2":0,
-				"3":0,
+				"3":1,
 				"4":1
 	},
 
@@ -35,23 +36,21 @@
 	"accEfficiency":"0.1",
 	"primaryIndex":"2.0",
 
-
-
 	"model": {
 		"particle": {
 			"default": {
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":80
+						"samples":"50"
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":50
+						"samples":10
 					},
 					"radius_cd":{
-                        "samples":10
+                        "samples":2
                     }
 				}
 			},
@@ -59,7 +58,7 @@
 				"dim":{
 					"energy": {
 						"min":-8.0,
-						"max":10.0
+						"max":16.0
 					}
 				}
 			},
@@ -85,7 +84,7 @@
 				"dim":{
 					"energy": {
 						"min":6.0,
-						"max":12.0
+						"max":13.0
 					}
 				}
 			},
@@ -94,7 +93,7 @@
 				"dim":{
 					"energy": {
 						"min":9.0,
-						"max":15.0
+						"max":16.0
 					}
 				}
 			}			
@@ -104,7 +103,7 @@
 	"math": {
 		"runge-kutta-1": {
 			"samples": {
-				"x": 100
+				"x": 30
 			}
 		},
 

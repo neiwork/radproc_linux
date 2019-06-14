@@ -12,6 +12,7 @@
 #include "thermalDistribution.h"
 #include "radiativeLosses.h"
 #include "injection.h"
+#include "distribution.h"
 #include "processes.h"
 
 
@@ -38,22 +39,32 @@ int main()
 
 //***********nonthermal particles**************		
 		
-/*				//completo las distribuciones de los termicos con Maxwell-Jutner
+		/*//completo las distribuciones de los termicos con Maxwell-Jutner
 		thermalDistribution(model.electron, model); 
 		thermalDistribution(model.proton, model);
 		targetField(model);
 		
-		radiativeLosses(model.ntElectron, model, "electronLosses.txt");
+		//radiativeLosses(model.ntElectron, model, "electronLosses.txt");
 		//radiativeLosses(model.ntProton, model, "protonLosses.txt");
 		
+		//nt electrons
 		injection(model.ntElectron, model);
-		writeEandRParamSpace("electronInj.txt", model.ntElectron.injection, 0);
-		//injection(model.ntProton, model);
+		writeEandRParamSpace("electronInj", model.ntElectron.injection, 0);
+
+		distribution(model.ntElectron, model);
+		writeEandRParamSpace("electronDis", model.ntElectron.distribution, 0);
 		
-		processes(model, "ntLuminosities");*/
+		//nt protons
+		injection(model.ntProton, model);
+		writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
+	
+		distribution(model.ntProton, model);
+		writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
+		
+		
+		processes(model, "ntLuminosities.txt");*/
 		
 //********************************************
-
 
 
 		if (calculateScatt) {

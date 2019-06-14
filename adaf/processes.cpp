@@ -37,10 +37,6 @@ for [N(E)] = 1/erg, then it just sums over all z and returns erg/s  */
 
 void processes(State& st, const std::string& filename)
 {
-	
-	
-	//static const double openingAngle = GlobalConfig.get<double>("openingAngle");
-
 
 	show_message(msgStart, Module_luminosities);
 
@@ -52,7 +48,6 @@ void processes(State& st, const std::string& filename)
 	
 
 	file << "log(E/eV)"
-			<< '\t' << "r/rg" 
 			<< '\t' << "eSyn"
 			<< '\t' << "pSyn"
 			<< "\t" << "eIC"
@@ -60,47 +55,53 @@ void processes(State& st, const std::string& filename)
 			<< "\t" << "pPG"
 			<< std::endl;
 
-	const int N_R = st.photon.ps[DIM_R].size() - 1;
+		
+	int nE = st.photon.ps[DIM_E].size();
 	
-	for (int z_ix = 0; z_ix < N_R; z_ix++) {
+	for (int E_ix = 0; E_ix < nE; E_ix++) {
 
 
-		double r = st.photon.distribution.ps[DIM_R][z_ix];
-
+		double E = st.photon.distribution.ps[DIM_E][E_ix];
+		double fmtE = log10(E / 1.6e-12);
+		
+		double eSyn = 0.0;
+		double eIC = 0.0;
+		double pSyn = 0.0;
+		double pPP = 0.0;
+		double pPG = 0.0;
 
 		st.photon.ps.iterate([&](const SpaceIterator &i) {
 
-			const double E = i.val(DIM_E);
-			double fmtE = log10(E / 1.6e-12);
+			//const double E = i.val(DIM_E);
 			
 			double density = st.denf_e.get(i)+st.denf_i.get(i);
 			
 			
-			double eSyn = luminositySynchrotron(E, st.electron, i, st.magf);
-			double eIC = luminosityIC(E,st.electron,i.coord,st.photon.distribution,Emin); //ver unidades del distribution XXX
+			eSyn += luminositySynchrotron(E, st.electron, i, st.magf);
+			eIC  += luminosityIC(E,st.electron,i.coord,st.photon.distribution,Emin); //ver unidades del distribution XXX
 			
 			//luminosityIC(E, st.electron, i.coord, [&st, &E, &r](double E) {
 						//	return st.photon.distribution.interpolate({ {DIM_E, E },{ DIM_R, r } });},Emin);
 							
 			
-			double pSyn = luminositySynchrotron(E, st.proton, i, st.magf);
+			pSyn += luminositySynchrotron(E, st.proton, i, st.magf);
 				
-			double pPP = luminosityNTHadronic(E, st.proton, density, i);
+			pPP  += luminosityNTHadronic(E, st.proton, density, i);
 			
-			double pPG = luminosityPhotoHadronic(E, st.proton, st.photon.distribution, i, Emin, Emax);				
+			pPG  += luminosityPhotoHadronic(E, st.proton, st.photon.distribution, i, Emin, Emax);				
 							
+		
+		}, { E_ix, -1 , 0});
+		
 			file << fmtE
-				<< '\t' << r 
 				<< '\t' << safeLog10(eSyn)
 				<< '\t' << safeLog10(pSyn)
 				<< "\t" << safeLog10(eIC)
 				<< "\t" << safeLog10(pPP)
 				<< "\t" << safeLog10(pPG)
 				<< std::endl;
-		}, { -1, z_ix });
 
-	}  //ver como recorro los r y los sumo XXX
-
+	}  
 }
 	
 	

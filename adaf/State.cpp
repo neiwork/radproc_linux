@@ -85,9 +85,10 @@ void State::initializeParticle(Particle& p,boost::property_tree::ptree& cfg)
 	p.configure(cfg.get_child("particle."+p.id));
 
 	// add dimension for energies
-	//p.ps.add(createDimension(p,"energy",initEnergyPoints,cfg));
-	p.ps.add(new Dimension(nE,bind(initEnergyPoints,placeholders::_1,
-								logMinEnergy,logMaxEnergy)));
+	p.ps.add(createDimension(p,"energy",initEnergyPoints,cfg));
+	//p.ps.add(new Dimension(nE,bind(initEnergyPoints,placeholders::_1,
+	//							logMinEnergy,logMaxEnergy)));
+	
 	// add dimension for r
 	double innerRadius = schwRadius*1.1;
 	double edgeRadius = exp(logr.back())*schwRadius;

@@ -51,7 +51,16 @@ void injection(Particle& p, State& st)
 		double vol_i = (rB2*rB2*rB2-rB1*rB1*rB1)*(4.0/3.0)*pi; //*cos(thetaH);
 		double area  = 4.0*pi*rB2*rB2; //*(2.0*cos(thetaH)+sin(thetaH)*sin(thetaH));
 		
-		double uth,Emin;
+
+		
+		
+		double Emin = p.emin();
+		
+		//double dens = st.denf_e.get(i); 
+		//double norm_temp = boltzmann*st.tempElectrons.get(i)/(p.mass*cLight2);
+		//double uth = dens*boltzmann*norm_temp*(p.mass*cLight2)*3.0/2.0; //cambiar 3/2 por factor a(theta_e)   erg cm^-3
+		
+		double uth;
 		
 		if(p.id == "ntElectron"){
 			double norm_temp = boltzmann*st.tempElectrons.get(i)/(p.mass*cLight2);
@@ -59,10 +68,10 @@ void injection(Particle& p, State& st)
 			
 			uth = dens*boltzmann*norm_temp*(p.mass*cLight2)*3.0/2.0; //cambiar 3/2 por factor a(theta_e)   erg cm^-3
 		
-			Emin =  fbisection ([&](double E)    //({ { 0, eval } }, &psc)
+			/*Emin =  fbisection ([&](double E)    //({ { 0, eval } }, &psc)
 			{return st.electron.distribution.interpolate({ {DIM_E, E },{ DIM_R, r },{ 3, 0 } }) - powerLaw(E, Emin, Emax)*uth/int_E; },
 			//aca normalizo al Q' con unidades de erg^-1 cm^-3, para compararlo con la termica
-									st.electron.emin(), st.electron.emax(), 1.0e-2);
+									st.electron.emin(), st.electron.emax(), 1.0e-2);*/
 								
 			
 		}
@@ -72,11 +81,11 @@ void injection(Particle& p, State& st)
 			
 			uth = dens*boltzmann*norm_temp*(p.mass*cLight2)*3.0/2.0; //cambiar 3/2 por factor a(theta_e)   erg cm^-3
 		
-			//fbisection(fun1 func,double x1,double x2,double xacc)
+			/*//fbisection(fun1 func,double x1,double x2,double xacc)
 			Emin =  fbisection ([&](double E) 
 			{return st.proton.distribution.interpolate({ {DIM_E, E },{ DIM_R, r },{ 3, 0 } }) - powerLaw(E, Emin, Emax)*uth/int_E; },
 			//aca normalizo al Q' con unidades de erg^-1 cm^-3, para compararlo con la termica
-									st.proton.emin(), st.proton.emax(), 1.0e-2);
+									st.proton.emin(), st.proton.emax(), 1.0e-2);*/
 			
 		}
 		

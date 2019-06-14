@@ -96,7 +96,7 @@ void show_module(ProgramModule module)
             break;
 			
 		case Module_radLosses:
-            printf("INon-thermal radiative losses");
+            printf("Non-thermal radiative losses");
             break;
 	
 		case Module_electronInjection:

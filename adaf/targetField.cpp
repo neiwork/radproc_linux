@@ -46,13 +46,13 @@ void targetField(State& st)
 
 		double lumBr = jBremss(E,temp,dens_i,dens_e)*emissToLum;
 		
-		double lumPp = 0.0;
+/*		double lumPp = 0.0;
 		if (temp_i > 1.0e11 && frecuency > 1.0e20 && frecuency < 1.0e26) {
 			double jpp = luminosityHadronic(E,dens_i,temp_i);
 			lumPp = jpp*emissToLum;
-		}
+		}*/
 		
-		double lumOut = lumRJ+lumSy+lumBr+lumPp;
+		double lumOut = min(lumRJ,lumSy)+lumBr;//+lumPp;
 		
 		st.photon.distribution.set(itER,lumOut/(fluxToLum*cLight*planck*E));
 			
