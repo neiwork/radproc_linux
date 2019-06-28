@@ -54,7 +54,7 @@ void targetField(State& st)
 		
 		double lumOut = min(lumRJ,lumSy)+lumBr;//+lumPp;
 		
-		st.photon.distribution.set(itER,lumOut/(fluxToLum*cLight*planck*E));
+		st.photon.distribution.set(itER,lumOut/(fluxToLum*cLight*planck*E)); //erg^⁻1 cm^-3
 			
 	},{-1,-1,0}); //{itE.coord[DIM_E],-1,0});
 //		jE++;	

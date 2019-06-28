@@ -39,7 +39,7 @@ int main()
 
 //***********nonthermal particles**************		
 		
-		/*//completo las distribuciones de los termicos con Maxwell-Jutner
+		//completo las distribuciones de los termicos con Maxwell-Jutner
 		thermalDistribution(model.electron, model); 
 		thermalDistribution(model.proton, model);
 		targetField(model);
@@ -62,11 +62,11 @@ int main()
 		writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
 		
 		
-		processes(model, "ntLuminosities.txt");*/
+		processes(model, "ntLuminosities.txt");
 		
 //********************************************
 
-
+/*
 		if (calculateScatt) {
 			show_message(msgStart, Module_torusSampling);
 			icMatrix(model,scattADAF,scattCD,absCD,esc,escCD);
@@ -75,7 +75,7 @@ int main()
 			icMatrixRead(model,scattADAF,scattCD,absCD,esc,escCD);
 		}
 
-		thermalLuminosities(model,"lum.txt",scattADAF,scattCD,absCD,esc,escCD);
+		thermalLuminosities(model,"lum.txt",scattADAF,scattCD,absCD,esc,escCD);*/
 	}
 	catch (std::runtime_error& e)
 	{

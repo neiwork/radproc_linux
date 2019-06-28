@@ -2,7 +2,7 @@
 
 #include "messages.h"
 #include "globalVariables.h"
-//#include "modelParameters.h"
+#include "adafFunctions.h"
 
 #include <fparameters/parameters.h>
 #include <fparameters/SpaceIterator.h>
@@ -15,6 +15,23 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include <iostream>
+
+
+
+double eEmax(Particle& p, double r, double B, double v)
+{
+	
+	double accE = 0.1;  //acceleration efficiency
+
+    double Emax_adv = accE*r*cLight*electronCharge*B / v; 
+    double Emax_syn = p.mass*cLight2*sqrt(accE*6.0*pi*electronCharge / (thomson*B));
+
+   
+    double result = min(Emax_syn, Emax_adv);
+
+    return result;
+}
+	
 
 double powerLaw(double E, double Emin, double Emax)
 {
@@ -32,12 +49,11 @@ void injection(Particle& p, State& st)
 	static const double etaInj = GlobalConfig.get<double>("etaInj");
 
 
-
-	double Emin1 = p.emin();  //esta es la primera que uso de prueba
-	double Emax = p.emax();
-
-	double int_E = RungeKuttaSimple(Emin1, Emax, [&Emax, &Emin1](double E) {
-		return E*powerLaw(E, Emin1, Emax);
+	double Emax = p.emax();   // uso la gral para calcular esta integral, despues la cambio
+	double Emin = p.emin();   //esta es la primera que uso de prueba
+	
+	double int_E = RungeKuttaSimple(Emin, Emax, [&Emax, &Emin](double E) {
+		return E*powerLaw(E, Emin, Emax);
 	});  //integra E*Q(E)  entre Emin y Emax
 
 
@@ -48,13 +64,13 @@ void injection(Particle& p, State& st)
 		
 		double rB1   = r/sqrt(paso_r);
 		double rB2   = r*sqrt(paso_r);
-		double vol_i = (rB2*rB2*rB2-rB1*rB1*rB1)*(4.0/3.0)*pi; //*cos(thetaH);
+	//	double vol_i = (rB2*rB2*rB2-rB1*rB1*rB1)*(4.0/3.0)*pi; //*cos(thetaH);
 		double area  = 4.0*pi*rB2*rB2; //*(2.0*cos(thetaH)+sin(thetaH)*sin(thetaH));
 		
+		double B = st.magf.get(i); 
+		double v	 = -radialVel(r);
 
-		
-		
-		double Emin = p.emin();
+		Emax = eEmax(p, r, B, v); //p.emax(); 
 		
 		//double dens = st.denf_e.get(i); 
 		//double norm_temp = boltzmann*st.tempElectrons.get(i)/(p.mass*cLight2);
@@ -66,7 +82,7 @@ void injection(Particle& p, State& st)
 			double norm_temp = boltzmann*st.tempElectrons.get(i)/(p.mass*cLight2);
 			double dens = st.denf_e.get(i); 
 			
-			uth = dens*boltzmann*norm_temp*(p.mass*cLight2)*3.0/2.0; //cambiar 3/2 por factor a(theta_e)   erg cm^-3
+			uth = dens*norm_temp*(p.mass*cLight2)*3.0/2.0; //cambiar 3/2 por factor a(theta_e)   erg cm^-3
 		
 			/*Emin =  fbisection ([&](double E)    //({ { 0, eval } }, &psc)
 			{return st.electron.distribution.interpolate({ {DIM_E, E },{ DIM_R, r },{ 3, 0 } }) - powerLaw(E, Emin, Emax)*uth/int_E; },
@@ -79,7 +95,7 @@ void injection(Particle& p, State& st)
 			double norm_temp = boltzmann*st.tempIons.get(i)/(p.mass*cLight2);
 			double dens = st.denf_i.get(i); 
 			
-			uth = dens*boltzmann*norm_temp*(p.mass*cLight2)*3.0/2.0; //cambiar 3/2 por factor a(theta_e)   erg cm^-3
+			uth = dens*norm_temp*(p.mass*cLight2)*3.0/2.0; //cambiar 3/2 por factor a(theta_e)   erg cm^-3
 		
 			/*//fbisection(fun1 func,double x1,double x2,double xacc)
 			Emin =  fbisection ([&](double E) 
@@ -89,7 +105,7 @@ void injection(Particle& p, State& st)
 			
 		}
 		
-		double Q0 = etaInj*uth*vol_i/(area*cLight);   //power injected in nt particles
+		double Q0 = etaInj*uth*(area*cLight);//vol_i/   //power injected in nt particles
 	
 		double Q0p = Q0/ (int_E);
 

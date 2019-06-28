@@ -9,7 +9,7 @@
     <File Name="distribution.h"/>
     <File Name="losses.h"/>
     <File Name="losses.cpp"/>
-    <File Name="timeDistribution.cpp" ExcludeProjConfig="Debug;"/>
+    <File Name="timeDistribution.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="distribution.cpp"/>
     <File Name="targetField.h"/>
     <File Name="targetField.cpp"/>
@@ -183,7 +183,7 @@
         <Library Value="gslcblas"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="./$(IntermediateDirectory)/$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>

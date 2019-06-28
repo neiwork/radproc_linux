@@ -77,18 +77,18 @@ void processes(State& st, const std::string& filename)
 			double density = st.denf_e.get(i)+st.denf_i.get(i);
 			
 			
-			eSyn += luminositySynchrotron(E, st.electron, i, st.magf);
-			eIC  += luminosityIC(E,st.electron,i.coord,st.photon.distribution,Emin); //ver unidades del distribution XXX
+			eSyn += luminositySynchrotron(E, st.ntElectron, i, st.magf);
+			eIC  += luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin); //ver unidades del distribution XXX
 			
-			//luminosityIC(E, st.electron, i.coord, [&st, &E, &r](double E) {
+			//luminosityIC(E, st.ntElectron, i.coord, [&st, &E, &r](double E) {
 						//	return st.photon.distribution.interpolate({ {DIM_E, E },{ DIM_R, r } });},Emin);
 							
 			
-			pSyn += luminositySynchrotron(E, st.proton, i, st.magf);
+			pSyn += luminositySynchrotron(E, st.ntProton, i, st.magf);
 				
-			pPP  += luminosityNTHadronic(E, st.proton, density, i);
+			pPP  += luminosityNTHadronic(E, st.ntProton, density, i);
 			
-			pPG  += luminosityPhotoHadronic(E, st.proton, st.photon.distribution, i, Emin, Emax);				
+			pPG  += luminosityPhotoHadronic(E, st.ntProton, st.photon.distribution, i, Emin, Emax);				
 							
 		
 		}, { E_ix, -1 , 0});
