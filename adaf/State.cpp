@@ -93,7 +93,7 @@ void State::initializeParticle(Particle& p,boost::property_tree::ptree& cfg)
 	double innerRadius = schwRadius*1.1;
 	double edgeRadius = exp(logr.back())*schwRadius;
 	p.ps.add(new Dimension(nR,bind(initGridLogarithmically,placeholders::_1,
-							innerRadius*paso_r,edgeRadius/paso_r)));
+							innerRadius*sqrt(paso_r),edgeRadius/sqrt(paso_r))));
 							
 	// add dimension for rcd
 	p.ps.add(new Dimension(nRcd,bind(initGridLogarithmically,placeholders::_1,

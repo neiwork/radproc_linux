@@ -1,7 +1,7 @@
 #include "distribution.h"
-
+#include "injection.h"
 #include "messages.h"
-
+#include "write.h"
 #include "adafFunctions.h"
 #include "globalVariables.h"
 #include "losses.h"
@@ -18,121 +18,86 @@
 
 double effectiveE(double Ee, double Emax, double t, Particle& p, State& st, const SpaceCoord& i)
 {
-	double Eeffmin, Eeffmax, Eeff_int, sum_Eeff, dEeff, dtau_eff;
-
-	Eeffmin = Ee;
-	Eeffmax = Emax;
-	double Eeff = Eeffmin;
-
-	double nEeff = 50;
-
-	Eeff_int = pow((Eeffmax / Eeffmin), 1.0/nEeff);  //0.00001
-	sum_Eeff = 0.0;
-
-	while ((sum_Eeff < t) && ( (Eeffmax-Eeff) < 1.0e-2)){//  (Eeff < Eeffmax))	{// for (int k=0; k<=100000; ++k)	{
-
-		dEeff = Eeff*(Eeff_int - 1.0);
-		dtau_eff = dEeff / losses(Eeff, p, st, i); //losses(Eeff, r, p, st, i);
-		sum_Eeff = sum_Eeff + dtau_eff;
-
-		//	if (sum_Eeff > times[j]) goto
-
-		Eeff = Eeff*Eeff_int;
-
+	int nEeff = 50;
+	double Eeff = Ee;
+	double Eeff_int = pow(Emax/Ee,1.0/nEeff);
+	double sum_tau = 0.0;
+	while ((sum_tau < t) && (Eeff < Emax)) {
+		double dEeff = Eeff/sqrt(Eeff_int)*(Eeff_int-1.0);
+		double dtau_eff = dEeff/losses(Eeff,p,st,i);
+		sum_tau += dtau_eff;
+		Eeff *= Eeff_int;
 	}
-
 	return Eeff;
-
 }
 
-
-void distribution(Particle& p, State& st)
+/*void distribution(Particle& p, State& st)
 {
-
 	show_message(msgStart, Module_electronDistribution);
 
+	ParamSpaceValues N1(p.ps), N2(p.ps);
 
-	ParamSpaceValues N1(p.ps);
 	N1.fill([&](const SpaceIterator& i){
 		return 0.0;
-	}, { -1, -1, 0 });
-
-	ParamSpaceValues N2(p.ps);
+	},{-1,-1,0});
 
 	p.ps.iterate([&](const SpaceIterator& r_glob){
 		
 		const double E = r_glob.val(DIM_E);
 		const double r = r_glob.val(DIM_R);
-		
-		double rB1   = r/sqrt(paso_r);
-		double rB2   = r*sqrt(paso_r);
-		double delta_r = rB2-rB1;
-		double vel	 = -radialVel(r); 
+		double rB1 = r/sqrt(paso_r);
+		double delta_r = rB1*(paso_r-1.0);
+		double vel = -radialVel(r); 
 		
 		double tcell = delta_r/vel;
-		double tcool = E/losses(E, p, st, r_glob);
+		double tcool = E/losses(E,p,st,r_glob);
 		
-		double dist1 = p.injection.get(r_glob)*min(tcell,tcool); //Q(E)×min(tcell,tcool), where tcell=scell(θ)/v‖(θ)
-
-		N1.set(r_glob,dist1);   //hay injeccion solo en la primera celda de cada emisor lineal 
+		double dist1 = p.injection.get(r_glob)*min(tcell,tcool);
+		N1.set(r_glob,dist1);   //hay injeccion solo en la primera celda de cada emisor lineal
+		//N1.set(r_glob,safeLog10(dist1));
 		
-	}, { -1, -1, 0 });
+	},{-1,-1,0});
 
-	
+	for (int r_glob=0;r_glob<p.ps[1].size();r_glob++){
 
-	for (int r_glob = 0; r_glob < p.ps[1].size(); r_glob++){
-						
 		N2.fill([&](const SpaceIterator& h){
 			return 0.0;
-		}, { -1, -1, 0 });  
+		}, {-1,-1,0});  
 		
-		
-		for (int r_i = r_glob-1; r_i >= 0; r_i--){  //(int z_ix = 0; z_ix < r_i; z_ix++){ //p.ps[1].size(); z_ix++) { //inicio de los emisores lineales
-		
+		for (int r_i=r_glob-1;r_i>=0;r_i--) {
 		
 			double r = p.ps[DIM_R][r_i];
-			double rB1   = r/sqrt(paso_r);
-			double rB2   = r*sqrt(paso_r);
-			double delta_r = rB2-rB1;
-			double vel	 = -radialVel(r); 
-			
+			double rB1 = r/sqrt(paso_r);
+			double delta_r = rB1*(paso_r-1.0);
+			double vel = -radialVel(r);
 			double tcell = delta_r/vel;
-		
-		
+
 			p.ps.iterate([&](const SpaceIterator& i){
 				const double E = i.val(DIM_E);
 				const double r = i.val(DIM_R);
 			
 				const double magf = st.magf.get(i);
-				
-				double Emax = p.emax(); //VER eEmax(r, magf);
+				//double Emax = p.emax(); //VER eEmax(r, magf);
+				double Emax = eEmax(p,r,magf,vel);
 				
 				double dist2 = 0.0;
-				
-				if (i.its[1].canPeek(+1))  //if (r_ix != 0)
-					{	
-						
-						double Eeff;
+				if (i.its[1].canPeek(+1)) { //if (r_ix != 0)
+					double Eeff=Emax;
 
-						if (i.its[0].canPeek(+1)){ Eeff = effectiveE(E, Emax, tcell, p, st, i);}
-						else { Eeff = Emax; }
-						
-						SpaceCoord i_plus_1 = i.moved({ i.its[0].peek(0), +1, 0 }); //muevo el r uno para adentro
-						
-						double r_plus_1 = i.its[1].peek(+1);
-						double dist =0.0; // N1.interpolate({ { DIM_E, Eeff }}, &i_plus_1); //{ DIM_R, r_plus_1 }}, &i);
-						
-						double ratioLosses = losses(Eeff, p, st, i_plus_1) / losses(E, p, st, i);
-						
-						dist2 = dist*ratioLosses;
+					if (i.its[0].canPeek(+1)) { 
+						Eeff = effectiveE(E,Emax,tcell,p,st,i);
 					}
-
-					N2.set(i, dist2);
 				
-				}, { -1, r_i, 0 });
+					SpaceCoord i_plus_1 = i.moved({i.its[0].peek(0),+1,0}); //muevo el r uno para adentro
+					//double r_plus_1 = i.its[1].peek(+1);
+					double dist = N1.interpolate({{DIM_E,Eeff}},&i_plus_1);
 
+					double ratioLosses = losses(Eeff,p,st,i_plus_1)/losses(E,p,st,i);
+					dist2 = dist*ratioLosses;
+				}
+				N2.set(i, dist2);
+			},{-1,r_i,0});
 		}
-		
 		
 		for (int E_i = 0; E_i < p.ps[0].size(); E_i++){
 			
@@ -143,14 +108,10 @@ void distribution(Particle& p, State& st)
 				p.distribution.set(i2,sum2);
 			}, { E_i, -1, 0 });
 		}
-		
 	}
 
-
 	for (int E_i = 0; E_i < p.ps[0].size(); E_i++){
-	
 		double sum1 = 0.0;
-
 		p.ps.iterate([&](const SpaceIterator& i1){
 			sum1 += N1.get(i1);
 			double tot = sum1 + sum1;
@@ -158,10 +119,66 @@ void distribution(Particle& p, State& st)
 		}, { E_i, -1, 0 });
 	}
 	
-
 	show_message(msgEnd, Module_electronDistribution);
+}*/
 
+void distribution2(Particle& p, State& st)
+{
+	if (p.id == "ntElectron") show_message(msgStart,Module_electronDistribution);
+	else if (p.id == "ntProton") show_message(msgStart,Module_protonDistribution);
+
+	p.ps.iterate([&](const SpaceIterator& itR) {
+		
+		const double r = itR.val(DIM_R);
+		double delta_r = (r/sqrt(paso_r))*(paso_r-1.0);
+		double tcell = delta_r/(-radialVel(r));
+		
+		ParamSpaceValues Nle(p.ps);
+		p.ps.iterate([&](const SpaceIterator& itRR) {
+			p.ps.iterate([&](const SpaceIterator& itRRE) {
+				if (itRR.coord[DIM_R] == itR.coord[DIM_R]) {
+					double energy = itRRE.val(DIM_E);
+					double tcool = energy/losses(energy,p,st,itRRE);
+					Nle.set(itRRE,safeLog10(p.injection.get(itRRE)*min(tcell,tcool)));
+				} else
+					Nle.set(itRRE,0.0);
+			},{-1,itRR.coord[DIM_R],0});
+		},{0,-1,0});
+
+		for (int itRR=itR.coord[DIM_R]-1;itRR>=0;itRR--) {
+			double rprim = p.ps[DIM_R][itRR];
+			double delta_r = (rprim/sqrt(paso_r))*(paso_r-1.0);
+			double vel = -radialVel(rprim);
+			double tcell = delta_r/vel;
+			p.ps.iterate([&](const SpaceIterator& itRRE) {  // para cada energía
+				const double E = itRRE.val(DIM_E);
+				double Emax = p.emax();
+				double Eeff = Emax;
+				if (itRRE.its[0].canPeek(+1)) { 
+					Eeff = effectiveE(E,Emax,tcell,p,st,itRRE);
+				}
+				SpaceCoord itRRE_plus_1 = itRRE.moved({0,+1,0});
+				if (p.id == "ntProton" && Eeff > 150000)
+					cout << Eeff << "\t" << p.ps[DIM_E].last() << endl;
+				double logdist = (Eeff < p.ps[DIM_E].last()) ? 
+								Nle.interpolate({{DIM_E,Eeff}},&itRRE_plus_1) : 0.0;
+				double logratioLosses = safeLog10(losses(Eeff,p,st,itRRE_plus_1)/losses(E,p,st,itRRE));
+				double logdist2 = logdist + logratioLosses;
+				Nle.set(itRRE,logdist2);
+			},{-1,itRR,0});
+		}
+
+		p.ps.iterate([&](const SpaceIterator& it) {
+			p.distribution.set(it,p.distribution.get(it)+pow(10.0,Nle.get(it)));
+		},{-1,-1,0});
+
+	},{0,-1,0});
+
+	if (p.id == "ntElectron") show_message(msgEnd,Module_electronDistribution);
+	else if (p.id == "ntProton") show_message(msgEnd,Module_protonDistribution);
 }
+
+
 
 
 

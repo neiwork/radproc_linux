@@ -69,7 +69,7 @@ void writeEandRParamSpace(const std::string& filename, const ParamSpaceValues& d
 		double r = i.val(DIM_R);
 
 		double logQ = safeLog10(data.get(i));
-
+		
 		file << logE << '\t' << r << '\t' << logQ << std::endl;
 			
 	}, { -1, -1, t });  

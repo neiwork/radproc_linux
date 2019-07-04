@@ -36,37 +36,6 @@ int main()
 		State model(GlobalConfig.get_child("model"));
 		show_message(msgEnd, Module_state);
 
-
-//***********nonthermal particles**************		
-		
-		//completo las distribuciones de los termicos con Maxwell-Jutner
-		thermalDistribution(model.electron, model); 
-		thermalDistribution(model.proton, model);
-		targetField(model);
-		
-		//radiativeLosses(model.ntElectron, model, "electronLosses.txt");
-		//radiativeLosses(model.ntProton, model, "protonLosses.txt");
-		
-		//nt electrons
-		injection(model.ntElectron, model);
-		writeEandRParamSpace("electronInj", model.ntElectron.injection, 0);
-
-		distribution(model.ntElectron, model);
-		writeEandRParamSpace("electronDis", model.ntElectron.distribution, 0);
-		
-		//nt protons
-		injection(model.ntProton, model);
-		writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
-	
-		distribution(model.ntProton, model);
-		writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
-		
-		
-		processes(model, "ntLuminosities.txt");
-		
-//********************************************
-
-/*
 		if (calculateScatt) {
 			show_message(msgStart, Module_torusSampling);
 			icMatrix(model,scattADAF,scattCD,absCD,esc,escCD);
@@ -75,7 +44,34 @@ int main()
 			icMatrixRead(model,scattADAF,scattCD,absCD,esc,escCD);
 		}
 
-		thermalLuminosities(model,"lum.txt",scattADAF,scattCD,absCD,esc,escCD);*/
+		thermalLuminosities(model,"lum.txt",scattADAF,scattCD,absCD,esc,escCD);
+		
+//***********nonthermal particles**************		
+		
+		//completo las distribuciones de los termicos con Maxwell-Jutner
+		//thermalDistribution(model.electron, model); 
+		//thermalDistribution(model.proton, model);
+		//targetField(model);
+		
+		//radiativeLosses(model.ntElectron, model, "electronLosses.txt");
+		//radiativeLosses(model.ntProton, model, "protonLosses.txt");
+		
+		//nt electrons
+		injection(model.ntElectron, model);
+		writeEandRParamSpace("electronInj",model.ntElectron.injection,0);
+		distribution2(model.ntElectron, model);
+		writeEandRParamSpace("electronDis",model.ntElectron.distribution,0);
+		
+		//nt protons
+		injection(model.ntProton,model);
+		writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
+		distribution2(model.ntProton,model);
+		writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
+
+		processes(model, "ntLuminosities.txt");
+		
+//********************************************
+
 	}
 	catch (std::runtime_error& e)
 	{

@@ -535,6 +535,24 @@ void photonDensity(State& st, Vector energies, Matrix lumOut, Vector esc)
 	file.close();
 }
 
+void targetField(State& st, Matrix lumOut, Vector energies)
+{
+	size_t jE=0;
+	st.photon.ps.iterate([&](const SpaceIterator& itE) {
+		size_t jR=0;
+		st.photon.ps.iterate([&](const SpaceIterator& itER) {
+			double r=itER.val(DIM_R);
+			double thetaH = st.thetaH.get(itER);
+			double rB2=r*sqrt(paso_r);
+			double area=2.0*pi*rB2*rB2*(2.0*cos(thetaH)+sin(thetaH)*sin(thetaH));
+			double fluxToLum=area;
+			st.photon.distribution.set(itER,lumOut[jE][jR]/(fluxToLum*cLight*planck*energies[jE])); //erg^⁻1 cm^-3
+			jR++;
+		},{itE.coord[DIM_E],-1,0});
+		jE++;
+	},{-1,0,0});
+}
+
 void thermalLuminosities(State& st, const string& filename, Matrix &scattADAF, 
 							Matrix& scattCD, Matrix& absCD, Vector& esc, Vector& escCD)
 {
@@ -568,6 +586,8 @@ void thermalLuminosities(State& st, const string& filename, Matrix &scattADAF,
 		photonDensity(st,energies,lumOut,esc);
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,
 					lumOutIC,lumOut,lumOutCD,lumOutRefl,esc,escCD,filename);
-	}
+		targetField(st,lumOut,energies);
+	}	
+	
 	show_message(msgEnd,Module_thermalLuminosities);
 }

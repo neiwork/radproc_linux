@@ -1,4 +1,7 @@
 [Dolphin]
-Timestamp=2019,3,30,23,18,31
+HeaderColumnWidths=704,72,95
+SortOrder=1
+SortRole=modificationtime
+Timestamp=2019,6,30,19,28,35
 Version=4
-ViewMode=2
+ViewMode=1

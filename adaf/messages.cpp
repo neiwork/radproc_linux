@@ -114,6 +114,10 @@ void show_module(ProgramModule module)
 		case Module_electronDistribution:
             printf("Electron Distribution ");
             break;
+		
+		case Module_protonDistribution:
+            printf("Proton Distribution ");
+            break;
 
 		case Module_thermalLuminosities:
 			printf("Thermal SEDs");

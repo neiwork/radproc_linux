@@ -19,8 +19,6 @@
 //#include <fmath/physics.h>
 //#include <boost/property_tree/ptree.hpp>
 
-
-
 /*double Llab(double Lint, double gamma)
 {
 	double Dlorentz = computeDlorentz(gamma);
@@ -28,25 +26,15 @@
 	return Lint*boost;
 }*/
 
-
 /* Takes [emi] =  E^2*[Q(E)] and calculates int(2.0*pi*P2(jetR)*emi dz); 
 for [N(E)] = 1/erg, then it just sums over all z and returns erg/s  */
 
-
-
-
 void processes(State& st, const std::string& filename)
 {
-
 	show_message(msgStart, Module_luminosities);
 
 	std::ofstream file;
-	file.open(filename.c_str(), std::ios::out);
-	
-	double Emin = st.photon.emin();
-	double Emax = st.photon.emax();
-	
-
+	file.open(filename.c_str(),std::ios::out);
 	file << "log(E/eV)"
 			<< '\t' << "eSyn"
 			<< '\t' << "pSyn"
@@ -54,61 +42,35 @@ void processes(State& st, const std::string& filename)
 			<< "\t" << "pPP"
 			<< "\t" << "pPG"
 			<< std::endl;
-
-		
+	
+	double Emin = st.photon.emin();
+	double Emax = st.photon.emax();
 	int nE = st.photon.ps[DIM_E].size();
 	
-	for (int E_ix = 0; E_ix < nE; E_ix++) {
-
+	for (int E_ix=0;E_ix<nE;E_ix++) {
 
 		double E = st.photon.distribution.ps[DIM_E][E_ix];
 		double fmtE = log10(E / 1.6e-12);
-		
-		double eSyn = 0.0;
-		double eIC = 0.0;
-		double pSyn = 0.0;
-		double pPP = 0.0;
-		double pPG = 0.0;
+		double eSyn,eIC,pSyn,pPP,pPG;
+		eSyn = eIC = pSyn = pPP = pPG = 0.0;
 
 		st.photon.ps.iterate([&](const SpaceIterator &i) {
-
-			//const double E = i.val(DIM_E);
-			
-			double density = st.denf_e.get(i)+st.denf_i.get(i);
-			
-			
-			eSyn += luminositySynchrotron(E, st.ntElectron, i, st.magf);
-			eIC  += luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin); //ver unidades del distribution XXX
-			
-			//luminosityIC(E, st.ntElectron, i.coord, [&st, &E, &r](double E) {
-						//	return st.photon.distribution.interpolate({ {DIM_E, E },{ DIM_R, r } });},Emin);
-							
-			
-			pSyn += luminositySynchrotron(E, st.ntProton, i, st.magf);
-				
-			pPP  += luminosityNTHadronic(E, st.ntProton, density, i);
-			
-			pPG  += luminosityPhotoHadronic(E, st.ntProton, st.photon.distribution, i, Emin, Emax);				
-							
+			eSyn += luminositySynchrotron(E,st.ntElectron,i, st.magf);
+			eIC  += luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);//ver unidades del distribution XXX
+			pSyn += luminositySynchrotron(E,st.ntProton,i,st.magf);
+			pPP  += luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
+			pPG  += luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
+		},{E_ix,-1,0});
 		
-		}, { E_ix, -1 , 0});
-		
-			file << fmtE
-				<< '\t' << safeLog10(eSyn)
-				<< '\t' << safeLog10(pSyn)
-				<< "\t" << safeLog10(eIC)
-				<< "\t" << safeLog10(pPP)
-				<< "\t" << safeLog10(pPG)
-				<< std::endl;
-
-	}  
+		file << fmtE
+			 << '\t' << safeLog10(eSyn)
+			 << '\t' << safeLog10(pSyn)
+			 << "\t" << safeLog10(eIC)
+			 << "\t" << safeLog10(pPP)
+			 << "\t" << safeLog10(pPG)
+			 << std::endl;
+	}
 }
-	
-	
-
-
-
-
 
 ///////////////////
 //#   pragma omp parallel for \
