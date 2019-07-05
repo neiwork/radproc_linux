@@ -4,7 +4,7 @@
 	"mu_e":"1.14",
 	"nPhotMatrix":"100",
 	"nTheta":"5",
-	"calculateScatt":"0",
+	"calculateScatt":"1",
 	"calculateProbs":"0",
 	"calculateComptonRedMatrix":"0",
 	"comptonMethod":"3",
@@ -21,14 +21,14 @@
 	"nuPrimMaxCompton":"1.0e22",
 	"nuMinCompton":"1.0e12",
 	"nuMaxCompton":"1.0e24",
-	"rTr":"1.0e1",
+	"rTr":"9.0e1",
 	"numProcesses":"5",
 	"ThermalProcessNumber": {
 				"0":1,
 				"1":1,
-				"2":0,
+				"2":1,
 				"3":0,
-				"4":0
+				"4":1
 	},
 
 
@@ -42,15 +42,15 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":"300"
+						"samples":"200"
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":100
+						"samples":30
 					},
 					"radius_cd":{
-                        			"samples":2
+                        			"samples":5
                     			}
 				}
 			},

@@ -27,6 +27,15 @@ extern const Vector logr;
 extern const Vector logTi;
 extern const Vector logTe;
 extern const Vector logv;
+
+extern Matrix scattAA;
+extern Matrix scattDA;
+extern Matrix reachAA;
+extern Matrix reachAD;
+extern Matrix reachDA;
+extern Vector escapeAi;
+extern Vector escapeDi;
+
 extern const int calculateScatt;
 extern const int calculateProbs;
 extern const int calculateComptonRedMatrix;

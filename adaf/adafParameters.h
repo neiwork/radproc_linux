@@ -56,6 +56,21 @@ Vector logTi;							// Precomputed ADAF Ti.
 Vector logTe;							// Precomputed ADAF Te.
 Vector logv;							// Precomputed ADAF	radial velocity.
 
+Matrix scattAA;							// Probab. for a photon emitted in an ADAF shell
+										// to be Compton-scattered in another shell.
+Matrix scattDA;							// Probab. for a photon emitted in a thin disk shell to
+										// be Compton-scattered in an ADAF shell.
+Matrix reachAD;							// Probab. for a photon emitted in an ADAF shell to
+										// reach a thin disk shell.
+Matrix reachAA;							// Probab. for a photon emitted in an ADAF shell
+										// to reach another shell.
+Matrix reachDA;							// Probab. for a photon emitted in a thin disk shell to
+										// reach an ADAF shell.
+Vector escapeAi;						// Probab. for a photon emitted in an ADAF shell to escape
+										// to infinity at an angle i.
+Vector escapeDi;						// Probab. for a photon emitted in a thin disk shell to
+										// escape to infinity at an angle i.
+
 // PARAMETERS
 double schwRadius;						// Schwarzschild Radius [cm]
 

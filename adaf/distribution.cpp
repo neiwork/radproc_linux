@@ -158,8 +158,6 @@ void distribution2(Particle& p, State& st)
 					Eeff = effectiveE(E,Emax,tcell,p,st,itRRE);
 				}
 				SpaceCoord itRRE_plus_1 = itRRE.moved({0,+1,0});
-				if (p.id == "ntProton" && Eeff > 150000)
-					cout << Eeff << "\t" << p.ps[DIM_E].last() << endl;
 				double logdist = (Eeff < p.ps[DIM_E].last()) ? 
 								Nle.interpolate({{DIM_E,Eeff}},&itRRE_plus_1) : 0.0;
 				double logratioLosses = safeLog10(losses(Eeff,p,st,itRRE_plus_1)/losses(E,p,st,itRRE));

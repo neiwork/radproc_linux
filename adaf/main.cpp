@@ -24,8 +24,6 @@
 using namespace std;
 int main()
 {
-	Matrix scattADAF,scattCD,absCD;
-	Vector esc,escCD;
 	string folder{prepareOutputfolder()};
 	try {
 		GlobalConfig = readConfig();
@@ -38,13 +36,13 @@ int main()
 
 		if (calculateScatt) {
 			show_message(msgStart, Module_torusSampling);
-			icMatrix(model,scattADAF,scattCD,absCD,esc,escCD);
+			icMatrix(model);
 			show_message(msgEnd, Module_torusSampling);
 		} else {
-			icMatrixRead(model,scattADAF,scattCD,absCD,esc,escCD);
+			icMatrixRead(model);
 		}
 
-		thermalLuminosities(model,"lum.txt",scattADAF,scattCD,absCD,esc,escCD);
+		thermalLuminosities(model,"lum.txt");
 		
 //***********nonthermal particles**************		
 		

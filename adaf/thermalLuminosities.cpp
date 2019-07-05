@@ -30,8 +30,8 @@
 // Namespaces
 using namespace std;
 
-void localProcesses(const State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOutpp, 
-			Matrix scatt, Vector& energies, const int flags[], Matrix& lumOut)
+void localProcesses(const State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOutpp,
+						Vector& energies, const int flags[], Matrix& lumOut)
 {
 	double lumSync1,lumSync2;
 	lumSync1 = lumSync2 = 0.0;
@@ -72,7 +72,7 @@ void localProcesses(const State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix&
 			}
             if (flags[0]) {
 				if (jR > 0)
-					lumSync2 = min((1.0-scatt[jR-1][jR])*lumSync1+lumSy,lumRJ);
+					lumSync2 = min((1.0-scattAA[jR-1][jR])*lumSync1+lumSy,lumRJ);
 				else { lumSync2 = min(lumSy,lumRJ);}
 				if (lumSync2>lumSync1)
 					lumOutSy[jE][jR]=lumSync2-lumSync1;
@@ -90,7 +90,7 @@ void localProcesses(const State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix&
 	},{-1,0,0});
 }
 
-void reflectedSpectrum(Matrix lumOut, Matrix absCD, Matrix& lumOutRefl, Vector energies,
+void reflectedSpectrum(Matrix lumOut, Matrix& lumOutRefl, Vector energies,
 						double pasoE)
 {
 	size_t numInt = 40;
@@ -115,20 +115,20 @@ void reflectedSpectrum(Matrix lumOut, Matrix absCD, Matrix& lumOutRefl, Vector e
 			if (logicalInt == 1) {
 				for (size_t jjFreq=0;jjFreq<numInt;jjFreq++) {
 					double dfreq0 = freq0*(sqrt(pasoFreq)-pow(pasoFreq,-0.5));
-					double lumInc = lumShellInc(freq0,jE,jRcd,lumOut,absCD,energies,nR);
+					double lumInc = lumShellInc(freq0,jE,jRcd,lumOut,reachAD,energies,nR);
 					double green = greenFuncRefl(freq,freq0);
 					lum += green*lumInc*dfreq0*(freq/freq0);
 					freq0 *= pasoFreq;
 				}
 			}
 			lumOutRefl[jE][jRcd] =
-					lum + aux1*lumShellInc(freq,jE,jRcd,lumOut,absCD,energies,nR);
+					lum + aux1*lumShellInc(freq,jE,jRcd,lumOut,reachAD,energies,nR);
 					
 		}
 	}
 }
 
-void coldDiskLuminosity(const State& st, Matrix absCD, Matrix lumOut, Matrix& lumOutRefl, 
+void coldDiskLuminosity(const State& st, Matrix lumOut, Matrix& lumOutRefl, 
 						Matrix& lumOutCD, Vector energies)
 {
 	matrixInit(lumOutCD,nE,nRcd,0.0);
@@ -143,14 +143,14 @@ void coldDiskLuminosity(const State& st, Matrix absCD, Matrix lumOut, Matrix& lu
 		double aux2 = 0.0;
 		
 		double pasoE = pow(energies[nE-1]/energies[0],1.0/(nE+1));
-		reflectedSpectrum(lumOut,absCD,lumOutRefl,energies,pasoE);
+		reflectedSpectrum(lumOut,lumOutRefl,energies,pasoE);
 
 		for (size_t jjE=0;jjE<nE;jjE++) {
 			double frequency = energies[jjE]/planck;
 			double dfreq = frequency*(pasoE-1.0);
 			double lumInc = 0.0;
 			for (size_t kR=0;kR<nR;kR++) {
-				lumInc += (lumOut[jjE][kR]*absCD[kR][jRcd]);
+				lumInc += (lumOut[jjE][kR]*reachAD[kR][jRcd]);
 			}
 			aux2 += ((lumInc - lumOutRefl[jjE][jRcd])*dfreq);
 		}
@@ -231,8 +231,8 @@ void localCompton(const State& st, Matrix& lumOut, Matrix& lumOutIC, Vector ener
 	show_message(msgEnd,Module_thermalCompton);
 }
 
-void thermalCompton(const State& st, Matrix& lumOut, Matrix scattADAF, Matrix scattCD, 
-					Matrix absCD, Matrix& lumOutIC, Vector energies, int processesFlags[])
+void thermalCompton(const State& st, Matrix& lumOut, Matrix& lumOutIC, Vector energies, 
+						int processesFlags[])
 {
 	show_message(msgStart,Module_thermalCompton);
 	
@@ -281,7 +281,7 @@ void thermalCompton(const State& st, Matrix& lumOut, Matrix scattADAF, Matrix sc
 		matrixInit(lumOutIC,nE,nR,0.0);
 		
 		if (processesFlags[3])
-			coldDiskLuminosity(st,absCD,lumOut,lumOutRefl,lumOutCD,energies);
+			coldDiskLuminosity(st,lumOut,lumOutRefl,lumOutCD,energies);
 
 		// For each shell.
 		size_t jR=0;
@@ -297,11 +297,11 @@ void thermalCompton(const State& st, Matrix& lumOut, Matrix scattADAF, Matrix sc
 				
 				if (Rprom > 0.0) {
 					for (size_t jjR=0;jjR<nR;jjR++)
-						lumInIC[jjE] += (scattADAF[jjR][jR]*Rprom) * lumOut[jjE][jjR];
+						lumInIC[jjE] += (scattAA[jjR][jR]*Rprom) * lumOut[jjE][jjR];
 				}
 				if (processesFlags[3]) {
 					for (size_t jRcd=0;jRcd<nRcd;jRcd++)
-						lumInIC[jjE] += (scattCD[jRcd][jR]*Rprom) * 
+						lumInIC[jjE] += (scattDA[jRcd][jR]*Rprom) * 
 											(lumOutCD[jjE][jRcd]+lumOutRefl[jjE][jRcd]);
 				}
 			}
@@ -445,8 +445,7 @@ void thermalCompton(const State& st, Matrix& lumOut, Matrix scattADAF, Matrix sc
 
 void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOutBr,
 						Matrix lumOutpp, Matrix lumOutIC, Matrix lumOut, 
-						Matrix lumOutCD, Matrix lumOutRefl,
-						Vector esc, Vector escCD, const string& filename)
+						Matrix lumOutCD, Matrix lumOutRefl, const string& filename)
 {
 	ofstream file1,file2;
 	file1.open(filename.c_str(),ios::out);
@@ -458,15 +457,15 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 		double energyEV = energies[jE]/1.6e-12;
 		lumSy = lumBr = lumIC = lumpp = lumTot = lumCD = lumRefl = 0.0;
 		for (size_t jR=0;jR<nR;jR++) {
-			lumSy += lumOutSy[jE][jR] * esc[jR];
-			lumBr += lumOutBr[jE][jR] * esc[jR];
-			lumIC += lumOutIC[jE][jR] * esc[jR];
-			lumpp += lumOutpp[jE][jR] * esc[jR];
-			lumTot += lumOut[jE][jR] * esc[jR];
+			lumSy += lumOutSy[jE][jR] * escapeAi[jR];
+			lumBr += lumOutBr[jE][jR] * escapeAi[jR];
+			lumIC += lumOutIC[jE][jR] * escapeAi[jR];
+			lumpp += lumOutpp[jE][jR] * escapeAi[jR];
+			lumTot += lumOut[jE][jR] * escapeAi[jR];
 		}
 		for (size_t jRcd=0;jRcd<nRcd;jRcd++) {
-			lumCD += lumOutCD[jE][jRcd] * escCD[jRcd];
-			lumRefl += lumOutRefl[jE][jRcd] * escCD[jRcd];
+			lumCD += lumOutCD[jE][jRcd] * escapeDi[jRcd];
+			lumRefl += lumOutRefl[jE][jRcd] * escapeDi[jRcd];
 		}
         file1
 			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency
@@ -510,7 +509,7 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 	file2.close();
 }
 
-void photonDensity(State& st, Vector energies, Matrix lumOut, Vector esc)
+void photonDensity(State& st, Vector energies, Matrix lumOut)
 {
 	double z = 10;
 	
@@ -525,7 +524,7 @@ void photonDensity(State& st, Vector energies, Matrix lumOut, Vector esc)
 		st.photon.ps.iterate([&](const SpaceIterator& itER) {
 			double r = itER.val(DIM_R);
 			double dist2 = (z*z + r*r) * schwRadius*schwRadius;
-			nPh += lumOut[jE][jR]*esc[jR] / (pi*dist2*cLight*energy*planck);
+			nPh += lumOut[jE][jR] / (pi*dist2*cLight*energy*planck);
 			jR++;
 		},{itE.coord[DIM_E],-1,0});
 		nPh *= 1.0e13;
@@ -535,7 +534,7 @@ void photonDensity(State& st, Vector energies, Matrix lumOut, Vector esc)
 	file.close();
 }
 
-void targetField(State& st, Matrix lumOut, Vector energies)
+void targetField(State& st, Matrix lumOut, Matrix lumCD, Matrix lumRefl, Vector energies)
 {
 	size_t jE=0;
 	st.photon.ps.iterate([&](const SpaceIterator& itE) {
@@ -546,15 +545,19 @@ void targetField(State& st, Matrix lumOut, Vector energies)
 			double rB2=r*sqrt(paso_r);
 			double area=2.0*pi*rB2*rB2*(2.0*cos(thetaH)+sin(thetaH)*sin(thetaH));
 			double fluxToLum=area;
-			st.photon.distribution.set(itER,lumOut[jE][jR]/(fluxToLum*cLight*planck*energies[jE])); //erg^⁻1 cm^-3
+			double lumReachingShell = 0.0;
+			for (size_t jjR=0;jjR<nR;jjR++)
+				lumReachingShell += reachAA[jjR][jR]*lumOut[jE][jjR];
+			for (size_t jjRcd=0;jjRcd<nRcd;jjRcd++)
+				lumReachingShell += reachDA[jjRcd][jR]*(lumCD[jE][jjRcd]+lumRefl[jE][jjRcd]);
+			st.photon.distribution.set(itER,lumReachingShell/(fluxToLum*cLight*planck*energies[jE])); //erg^⁻1 cm^-3
 			jR++;
 		},{itE.coord[DIM_E],-1,0});
 		jE++;
 	},{-1,0,0});
 }
 
-void thermalLuminosities(State& st, const string& filename, Matrix &scattADAF, 
-							Matrix& scattCD, Matrix& absCD, Vector& esc, Vector& escCD)
+void thermalLuminosities(State& st, const string& filename)
 {
 	show_message(msgStart,Module_thermalLuminosities);
 
@@ -572,21 +575,21 @@ void thermalLuminosities(State& st, const string& filename, Matrix &scattADAF,
 	int processesFlags[numProcesses];	readThermalProcesses(processesFlags);
 	if (processesFlags[0] || processesFlags[1] || processesFlags[2] || processesFlags[3]) {
 		if (processesFlags[0] || processesFlags[1] || processesFlags[2])
-			localProcesses(st,lumOutSy,lumOutBr,lumOutpp,scattADAF,energies,processesFlags,lumOut);
+			localProcesses(st,lumOutSy,lumOutBr,lumOutpp,energies,processesFlags,lumOut);
 		if (processesFlags[4]) {
 			if (comptonMethod == 2)
 				localCompton(st,lumOut,lumOutIC,energies);
 			else
-				thermalCompton(st,lumOut,scattADAF,scattCD,absCD,lumOutIC,energies,processesFlags);
+				thermalCompton(st,lumOut,lumOutIC,energies,processesFlags);
 		}
 		if (processesFlags[3])
-			coldDiskLuminosity(st,absCD,lumOut,lumOutRefl,lumOutCD,energies);
+			coldDiskLuminosity(st,lumOut,lumOutRefl,lumOutCD,energies);
 		//gravRedshift(st,energies,lumOut,lumOutRed);
 		//binEmissivities(st,esc,energies,lumOut);
-		photonDensity(st,energies,lumOut,esc);
+		photonDensity(st,energies,lumOut);
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,
-					lumOutIC,lumOut,lumOutCD,lumOutRefl,esc,escCD,filename);
-		targetField(st,lumOut,energies);
+					lumOutIC,lumOut,lumOutCD,lumOutRefl,filename);
+		targetField(st,lumOut,lumOutCD,lumOutRefl,energies);
 	}	
 	
 	show_message(msgEnd,Module_thermalLuminosities);

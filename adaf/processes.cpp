@@ -70,6 +70,7 @@ void processes(State& st, const std::string& filename)
 			 << "\t" << safeLog10(pPG)
 			 << std::endl;
 	}
+	show_message(msgEnd,Module_luminosities);
 }
 
 ///////////////////
