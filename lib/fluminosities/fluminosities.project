@@ -8,6 +8,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="luminositySynchrotron.cpp"/>
     <File Name="luminosityPhotoHadronic.h"/>
     <File Name="luminosityPhotoHadronic.cpp"/>
     <File Name="luminosityNTHadronic.h"/>
@@ -24,7 +25,6 @@
     <File Name="compton.cpp" ExcludeProjConfig="Debug;"/>
     <File Name="luminosityIC.cpp"/>
     <File Name="luminosityIC.h"/>
-    <File Name="luminositySynchrotron.cpp"/>
     <File Name="luminositySynchrotron.h"/>
     <File Name="opticalDepthSSA.cpp"/>
     <File Name="opticalDepthSSA.h"/>

@@ -61,10 +61,10 @@ int main()
 		writeEandRParamSpace("electronDis",model.ntElectron.distribution,0);
 		
 		//nt protons
-		injection(model.ntProton,model);
-		writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
-		distribution2(model.ntProton,model);
-		writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
+		//injection(model.ntProton,model);
+		//writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
+		//distribution2(model.ntProton,model);
+		//writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
 
 		processes(model, "ntLuminosities.txt");
 		

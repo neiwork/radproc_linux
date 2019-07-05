@@ -9,8 +9,6 @@
 
 double fSyn(double x, double E, const Particle& creator, const ParamSpaceValues& magf, const SpaceCoord& psc)         //funcion a integrar   x=Ee; L=L(Ega)
 {
-	//double r = creator.ps.current->par.R;
-	//double t = creator.ps.current->par.T;
 
 	const double magneticField = magf.get(psc);
 	double distCreator;
@@ -20,7 +18,6 @@ double fSyn(double x, double E, const Particle& creator, const ParamSpaceValues&
 	else{
 		distCreator = creator.distribution.interpolate({ { 0, x } }, &psc); 
 	}
-//	double distCreator = creator.dist(x);// interpol(x, Ecreator, Ncreator, Ncreator.size() - 1);
 
 	double cte = pow(3.0, 0.5)*P3(electronCharge)*magneticField / (planck*creator.mass*cLight2);
 
@@ -50,34 +47,34 @@ double luminositySynchrotron(double E, const Particle& c, const SpaceCoord& psc,
 
 
 
+/*
+double luminositySynchrotron_conSSA(double E, const Particle& creator)
+{
 
-//double luminositySynchrotron_conSSA(double E, const Particle& creator)
-//{
-//
-//	double Emax = creator.emax();
-//	double Emin = creator.emin();
-//
-//	double tau = opticalDepthSSA(E, creator.mass, Emin, Emax, creator);  //E=Eph
-//
-//	double factorSSA = (1.0-exp(-tau))/tau;
-//
-//	if (factorSSA > 1.0 || factorSSA == 0.0) //1.0e-3)  //lo cambio solo en el caso que interesa
-//	{ factorSSA = 1.0; }	
-//	
-//	//double integralS = RungeKuttaSimple(Emin, Emax, bind(fSyn,_1,E,creator));
-//
-//	double integralS = RungeKuttaSimple(creator.emin(), creator.emax(),   //RungeKuttaSimple(double a, double b, fun1 f)
-//		[E, &creator](double x){
-//		return fSyn(x, E, creator);  //double fSyn(double x, double E, const Particle& creator)
-//	});
-//
-//
-//	double luminosityS = factorSSA*integralS*E; //multiplico por E asi obtengo luminosidad
-//
-//	if (luminosityS > 0.0){return luminosityS ; }
-//	else {return 0.0;} 
-//	 
-//}
+	double Emax = creator.emax();
+	double Emin = creator.emin();
+
+	double tau = opticalDepthSSA(E, creator.mass, Emin, Emax, creator);  //E=Eph
+
+	double factorSSA = (1.0-exp(-tau))/tau;
+
+	if (factorSSA > 1.0 || factorSSA == 0.0) //1.0e-3)  //lo cambio solo en el caso que interesa
+	{ factorSSA = 1.0; }	
+	
+	//double integralS = RungeKuttaSimple(Emin, Emax, bind(fSyn,_1,E,creator));
+
+	double integralS = RungeKuttaSimple(creator.emin(), creator.emax(),   //RungeKuttaSimple(double a, double b, fun1 f)
+		[E, &creator](double x){
+		return fSyn(x, E, creator);  //double fSyn(double x, double E, const Particle& creator)
+	});
+
+
+	double luminosityS = factorSSA*integralS*E; //multiplico por E asi obtengo luminosidad
+
+	if (luminosityS > 0.0){return luminosityS ; }
+	else {return 0.0;} 
+	 
+}*/
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -113,3 +113,31 @@ double RungeKuttaSimple(double a, double b, fun1 f, const RungeKuttaOpt& opt)
 
 	return (J1 + 2.0 * J2 + 4.0 * J3) / 3.0;
 }
+
+
+double intSimple(double a, double b, fun1 f, const RungeKuttaOpt& opt)
+{
+	int RK_N = opt.samples_x;
+	int n = RK_N;
+
+	double x_int = pow((b / a), (1.0 / n));
+
+	double L1 = 0.0;
+
+	if (a < b)
+	{
+		double x = a;
+
+		for (int i = 0; i < n; ++i)
+		{
+			double dx = x*(x_int - 1.0);
+
+			L1 += f(x)*dx;
+
+			x = x*x_int;
+
+		}
+	}
+
+	return L1;
+}

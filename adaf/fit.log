@@ -216,3 +216,40 @@ correlation matrix of the fit parameters:
                 a      b      
 a               1.000 
 b              -0.987  1.000 
+
+
+*******************************************************************************
+Fri Jul  5 17:21:41 2019
+
+
+FIT:    data read from 'ntLuminosities.txt' u 1:2
+        format = x:z
+        x range restricted to [-8.00000 : 8.00000]
+        #datapoints = 30
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x)=a*x+b
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b            
+   0 5.4928821266e+03   0.00e+00  3.14e+00    1.000000e+00   1.000000e+00
+   4 5.9042168823e+00  -6.46e-08  3.14e-04    3.166709e+00   1.287159e+01
+
+After 4 iterations the fit converged.
+final sum of squares of residuals : 5.90422
+rel. change during last iteration : -6.455e-13
+
+degrees of freedom    (FIT_NDF)                        : 28
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.4592
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.210865
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 3.16671          +/- 0.01978      (0.6245%)
+b               = 12.8716          +/- 0.0857       (0.6658%)
+
+correlation matrix of the fit parameters:
+                a      b      
+a               1.000 
+b               0.207  1.000 
