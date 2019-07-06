@@ -42,6 +42,7 @@ void icMatrix(State& st)
 {
 	size_t nPhot = GlobalConfig.get<size_t>("nPhotMatrix");
 	size_t nTheta = GlobalConfig.get<size_t>("nTheta");
+	double captureRadius = 0.5*sqrt(27.0)*schwRadius;
 
 	Vector rCellsBoundaries(nR+1,0.0), rCellsBoundariesCD(nRcd+1,0.0);
 	rCellsBoundaries[0] = st.electron.ps[DIM_R][0]/sqrt(paso_r);
@@ -58,17 +59,16 @@ void icMatrix(State& st)
 	escapeDi.resize(nRcd,0.0);
     
     InitialiseRandom(RANDOM_GENERATOR);
-	size_t iR=0;
 	//ADAF SCATTERING MATRIX
 	
-	double pasoprim = pow(rCellsBoundaries[nR]/rCellsBoundaries[0],1.0/(nR*10.0));
-	double pasoprimmin = pow(rCellsBoundaries[nR]/rCellsBoundaries[0],1.0/(nR*100.0));
-	double pasoprimmax = pow(rCellsBoundaries[nR]/rCellsBoundaries[0],1.0/(0.5*nR));
+	double pasoprim = pow(rCellsBoundaries[nR]/rCellsBoundaries[0],1.0/((nR+1)*2.0));
 	
     InitialiseRandom(RANDOM_GENERATOR);
-	st.photon.ps.iterate([&](const SpaceIterator& it1) {
-		double r0=it1.val(DIM_R);
-		double thetaMin=st.thetaH.get(it1);
+	
+	#pragma omp parallel for
+	for (int iR=0;iR<nR;iR++) {
+		double r0 = st.denf_e.ps[DIM_R][iR];
+		double thetaMin = st.thetaH.get({0,iR,0});
 		double dyaux=(1.0-sin(thetaMin))/nTheta;
         for(size_t kTh=1;kTh<=nTheta;kTh++) {
             double yaux=sin(thetaMin)+kTh*dyaux;  // Theta distributed uniformly in sin(theta).
@@ -81,26 +81,23 @@ void icMatrix(State& st)
                 random_number = gsl_rng_uniform(RandomNumberGenerator);
                 double thetaprim = acos(1.0-2.0*random_number);   // Photon directions
 																  // distributed
-																	// isotropically.
+																  // isotropically.
 				double pescap = 1.0;
-                double ne;
-                double r1=r0;
-				double theta1;
-				double z1,z1ant;
-				z1ant = z0;
-				double drprim=r0*(pasoprimmin-1.0);       // Minimum step.
+				double z1ant = z0;
+				double drprim=r0*(pasoprim-1.0);       // Step.
 				double rprim=drprim;
 				vector<size_t> countAA(nR,0);
+				double r1 = r0;
                 do {
 					double xprim=rprim*sin(thetaprim)*cos(phiprim);
 					double yprim=rprim*sin(thetaprim)*sin(phiprim);
 					double zprim=rprim*cos(thetaprim);
 					double x1=xprim;
 					double y1=y0+yprim;
-					z1=z0+zprim;
+					double z1=z0+zprim;
 					r1=sqrt(x1*x1+y1*y1+z1*z1);
-					theta1=atan(sqrt(x1*x1+y1*y1)/abs(z1));
-					ne = electronDensityTheta(r1,theta1);
+					double theta1=atan(sqrt(x1*x1+y1*y1)/abs(z1));
+					double ne = electronDensityTheta(r1,theta1);
 					double exptau = exp(-ne*thomson*drprim);
                     double psc = 1.0-exptau;    // Probability of scattering.
 					if (r1 > rTr && z1*z1ant < 0.0) {
@@ -114,7 +111,7 @@ void icMatrix(State& st)
 						}
                     }
 					z1ant = z1;
-                    for(size_t jR=0;jR<=nR;jR++) {
+                    for(size_t jR=0;jR<nR;jR++) {
                         if(r1 > rCellsBoundaries[jR] && r1 < rCellsBoundaries[jR+1]) {
 							scattAA[iR][jR] += psc*pescap;
 							if (countAA[jR] == 0) {
@@ -124,9 +121,9 @@ void icMatrix(State& st)
 						}
                     }
 					pescap *= exptau;
-                    drprim=r1*(pasoprimmin-1.0);
+                    drprim=r1*(pasoprim-1.0);
                     rprim += drprim;
-                } while( r1 < rCellsBoundaries[nR] );     // Escape from the region.
+                } while(r1 < rCellsBoundaries[nR] && (r1 > captureRadius || phiprim < pi));
 				LOOP:;
             }
         }
@@ -137,16 +134,16 @@ void icMatrix(State& st)
 		for (size_t jRcd=0;jRcd<nRcd;jRcd++) {
 			reachAD[iR][jRcd] /= (nPhot*nTheta);
 		}
-		iR++;
-    },{0,-1,0});
+	}
 	
 	//////////////////////////////////////////////////////////////////////////////////////
 	
-	iR=0;
 	// ADAF ESCAPE PHOTONS
-    st.photon.ps.iterate([&](const SpaceIterator& it2) {
-		double r0=it2.val(DIM_R);
-		double thetaMin=st.thetaH.get(it2);
+	#pragma omp parallel for
+	for (int iR=0;iR<nR;iR++) {
+		double r0 = st.thetaH.ps[DIM_R][iR];
+		double drprim=r0*(pasoprim-1.0);
+		double thetaMin=st.thetaH.get({0,iR,0});
 		double dyaux=(1.0-sin(thetaMin))/nTheta;
         for(size_t kTh=1;kTh<=nTheta;kTh++) {
             double yaux=sin(thetaMin)+kTh*dyaux;  // Theta distributed uniformly in sin(theta).
@@ -157,46 +154,38 @@ void icMatrix(State& st)
 			double y0=r0*sin(theta0)*sin(phi0);
             double z0=r0*cos(theta0);
 			for(size_t jPh=1;jPh<=nPhot;jPh++) {
-                double thetaprim = inclination*(pi/180.0);
-				double u = sin(thetaprim);
-				double w = cos(thetaprim);
-				size_t Nk = 100;
-				double rMax = rCellsBoundaries[nR];
-				double paso_r = pow(rMax/r0,1.0/Nk);
-				double rNow = r0;
-				double xNow = x0; double yNow = y0; double zNow = z0;
-				double thetaNow = theta0;
-				size_t k = 0;
-				double tau = 0.0;
-				while (k<Nk && (electronDensityTheta(rNow,thetaNow)>1.0e-3)){
-					double drNow = rNow*(paso_r-1.0);
-					xNow += u*drNow;
-					zNow += w*drNow;
-					rNow = sqrt(xNow*xNow+yNow*yNow+zNow*zNow);
-					thetaNow = asin(abs(zNow)/rNow);
-					tau += thomson*electronDensityTheta(rNow,thetaNow)*drNow;
-					k++;
-				}
-				escapeAi[iR] += exp(-tau);
+				double thetaprim = inclination*(pi/180.0);
+				double rprim=drprim;
+				double r1 = r0;
+				double pescap = 1.0;
+				do {
+					double xprim=rprim*sin(thetaprim);
+					double zprim=rprim*cos(thetaprim);
+					double x1=x0+xprim;
+					double z1=z0+zprim;
+					r1=sqrt(x1*x1+y0*y0+z1*z1);
+					double theta1=atan(sqrt(x1*x1+y0*y0)/abs(z1));
+					double thetaMinLocal = acos(costhetaH(r1));
+					double ne = (theta1 > thetaMinLocal && theta1 < (pi-thetaMinLocal)) 
+													? electronDensity(r1) : 0.0;
+					pescap *= exp(-ne*thomson*drprim);
+					drprim=r1*(pasoprim-1.0);
+					rprim += drprim;
+				} while (r1 < rCellsBoundaries[nR]);
+				escapeAi[iR] += pescap;
 				phi0 += dPhi;
             }
         }
 		escapeAi[iR] /= (nPhot*nTheta);     // Dividing by the number of photons launched.
-		iR++;
-    },{0,-1,0});
-	
+	}
+
 	//////////////////////////////////////////////////////////////////////////////////////
 
 	// COLD DISK SCATTERING MATRIX
-	pasoprim = pow(rCellsBoundariesCD[nRcd]/rCellsBoundariesCD[0],1.0/(nRcd*10.0));
-	pasoprimmin = pow(rCellsBoundariesCD[nRcd]/rCellsBoundariesCD[0],1.0/(nRcd*100.0));
-	pasoprimmax = pow(rCellsBoundariesCD[nRcd]/rCellsBoundariesCD[0],1.0/(0.5*nRcd));
-	
-	size_t iRcd=0;
-	st.photon.ps.iterate([&](const SpaceIterator& it2) {
-		double r0cd=it2.val(DIM_Rcd);
-		double drprim=r0cd*(pasoprim-1.0);             // Initial step for the photon path.
-		double drprimmin=r0cd*(pasoprimmin-1.0);       // Minimum step.
+	#pragma omp parallel for
+	for (int iRcd=0;iRcd<nRcd;iRcd++) {
+		double r0cd = st.denf_e.ps[DIM_Rcd][iRcd];
+		double drprim=r0cd*(pasoprim-1.0);             // Step for the photon path.
 		for(size_t jPh=1;jPh<=nPhot;jPh++) {
 			double random_number = gsl_rng_uniform(RandomNumberGenerator);
 			double phiprim = 2.0*pi*random_number;
@@ -204,36 +193,21 @@ void icMatrix(State& st)
 			double thetaprim = acos(1.0-2.0*random_number);   // Photon directions
 															  // distributed
 			double rprim=drprim; 	                          // isotropically.
-			double rprimant=0.0;
 			double pescap = 1.0;
-			double ne;
-			double r1=r0cd;
-			double theta1;
-			double neant = electronDensity(r0cd);
+			double r1 = r0cd;
 			vector<size_t> countDA(nR,0);
 			do {
-				size_t count=0;
-				double control;
-				do {
-					if(count >= 1) {              // Control of the step.
-						pasoprim = sqrt(pasoprim);
-						drprim= new_max(r1*(pasoprim-1.0),drprimmin);
-						rprim = rprimant+drprim;
-					}
-					double xprim=rprim*sin(thetaprim)*cos(phiprim);
-					double yprim=rprim*sin(thetaprim)*sin(phiprim);
-					double zprim=rprim*cos(thetaprim);
-					double x1=xprim;
-					double y1=r0cd+yprim;
-					double z1=zprim;
-					r1=sqrt(x1*x1+y1*y1+z1*z1);
-					theta1=atan(sqrt(x1*x1+y1*y1)/abs(z1));
-					double thetaMinLocal = acos(costhetaH(r1));
-					ne = (theta1 > thetaMinLocal && theta1 < (pi-thetaMinLocal)) 
+				double xprim=rprim*sin(thetaprim)*cos(phiprim);
+				double yprim=rprim*sin(thetaprim)*sin(phiprim);
+				double zprim=rprim*cos(thetaprim);
+				double x1=xprim;
+				double y1=r0cd+yprim;
+				double z1=zprim;
+				r1=sqrt(x1*x1+y1*y1+z1*z1);
+				double theta1=atan(sqrt(x1*x1+y1*y1)/abs(z1));
+				double thetaMinLocal = acos(costhetaH(r1));
+				double ne = (theta1 > thetaMinLocal && theta1 < (pi-thetaMinLocal)) 
 												? electronDensity(r1) : 0.0;
-					control = abs(ne-neant)/(0.5*(ne+neant));       // dn/n
-					count++;
-				} while( (control > 1.0e-2) && (drprim-drprimmin > 1.0e-9) );
 				double exptau = exp(-ne*thomson*drprim);
 				double psc = 1.0-exptau;    // Probability of scattering.
 				for(size_t jR=0;jR<=nR;jR++) {
@@ -245,76 +219,51 @@ void icMatrix(State& st)
 						}
 					}
 				}
-				neant=ne;
-				rprimant=rprim;
-				pasoprim=new_min(pasoprim*pasoprim,pasoprimmax);
 				drprim=r1*(pasoprim-1.0);
 				rprim += drprim;
 				pescap *= exptau;                // Probability that a photon reaches 
 												 // the previous position.
-			} while( r1 < rCellsBoundaries[nR] );     // Escape from the region.
+			} while(r1 < rCellsBoundaries[nR] && r1 > captureRadius);
         }
         for(size_t jR=0;jR<nR;jR++) {
             scattDA[iRcd][jR] /= nPhot;     // Dividing by the number of photons launched.
 			reachDA[iRcd][jR] /= nPhot;
         }
-		iRcd++;
-    },{0,0,-1});
-	
+	}
+
 	//COLD DISK ESCAPE PHOTONS
-	pasoprim = pow(rCellsBoundariesCD[nRcd]/rCellsBoundariesCD[0],1.0/(nRcd*10.0));
-	iRcd=0;
-	st.photon.ps.iterate([&](const SpaceIterator& it2) {
-		double r0cd=it2.val(DIM_Rcd);
-		double drprim=r0cd*(pasoprim-1.0);             // Initial step for the photon path.
-		double drprimmin=r0cd*(pasoprimmin-1.0);       // Minimum step.
+	#pragma omp parallel for
+	for (int iRcd=0;iRcd<nRcd;iRcd++) {
+		double r0cd = st.denf_e.ps[DIM_Rcd][iRcd];
+		double drprim=r0cd*(pasoprim-1.0);
 		for(size_t jPh=1;jPh<=nPhot;jPh++) {
 			double random_number = gsl_rng_uniform(RandomNumberGenerator);
 			double phiprim = 2.0*pi*random_number;
 			double thetaprim = inclination*(pi/180.0);
-			
-			double rprim=drprim; 	                          
-			double rprimant=0.0;
+			double rprim=drprim;
+			double r1 = r0cd;
 			double pescap = 1.0;
-			double ne;
-			double r1=r0cd;
-			double theta1;
-			double neant = electronDensity(r0cd); 
 			do {
-				size_t count=0;
-				double control;
-				do {
-					if(count >= 1) {              // Control of the step.
-						pasoprim = sqrt(pasoprim);
-						drprim= new_max(r1*(pasoprim-1.0),drprimmin);
-						rprim = rprimant+drprim;
-					}
-					double xprim=rprim*sin(thetaprim)*cos(phiprim);
-					double yprim=rprim*sin(thetaprim)*sin(phiprim);
-					double zprim=rprim*cos(thetaprim);
-					double x1=xprim;
-					double y1=r0cd+yprim;
-					double z1=zprim;
-					r1=sqrt(x1*x1+y1*y1+z1*z1);
-					theta1=atan(sqrt(x1*x1+y1*y1)/abs(z1));
-					double thetaMinLocal = acos(costhetaH(r1));
-					ne = (theta1 > thetaMinLocal && theta1 < (pi-thetaMinLocal)) 
+				double xprim=rprim*sin(thetaprim)*cos(phiprim);
+				double yprim=rprim*sin(thetaprim)*sin(phiprim);
+				double zprim=rprim*cos(thetaprim);
+				double x1=xprim;
+				double y1=r0cd+yprim;
+				double z1=zprim;
+				r1=sqrt(x1*x1+y1*y1+z1*z1);
+				double theta1=atan(sqrt(x1*x1+y1*y1)/abs(z1));
+				double thetaMinLocal = acos(costhetaH(r1));
+				double ne = (theta1 > thetaMinLocal && theta1 < (pi-thetaMinLocal)) 
 												? electronDensity(r1) : 0.0;
-					control = abs(ne-neant)/(0.5*(ne+neant));       // dn/n
-					count++;
-				} while( (control > 1.0e-2) && (drprim-drprimmin > 1.0e-9) );
 				pescap *= exp(-ne*thomson*drprim);
-				neant=ne;
-				rprimant=rprim;
-				pasoprim=new_min(pasoprim*pasoprim,pasoprimmax);
 				drprim=r1*(pasoprim-1.0);
 				rprim += drprim;
-			} while( r1 < rCellsBoundaries[nR] );     // Escape from the region.
+			} while(r1 < rCellsBoundaries[nR]);     // Escape from the region.
 			escapeDi[iRcd] += pescap;
         }
         escapeDi[iRcd] /= nPhot;
-		iRcd++;
-    },{0,0,-1});
+	}
+
     FinaliseRandom();
 	icMatrixWrite();
 }
@@ -332,8 +281,8 @@ void icMatrixRead(State& st)
 	matrixRead("scattAA.dat",scattAA,nR,nR);
 	matrixRead("scattDA.dat",scattDA,nRcd,nR);
 	matrixRead("reachAD.dat",reachAD,nR,nRcd);
-	matrixRead("reachAA.dat",reachAA,nR,nRcd);
-	matrixRead("reachDA.dat",reachDA,nR,nRcd);
+	matrixRead("reachAA.dat",reachAA,nR,nR);
+	matrixRead("reachDA.dat",reachDA,nRcd,nR);
 	vectorRead("escapeAi.dat",escapeAi,nR);
 	vectorRead("escapeDi.dat",escapeDi,nRcd);
 }

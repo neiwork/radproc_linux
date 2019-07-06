@@ -30,16 +30,19 @@
 // Namespaces
 using namespace std;
 
-void localProcesses(const State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOutpp,
+void localProcesses(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOutpp,
 						Vector& energies, const int flags[], Matrix& lumOut)
 {
-	double lumSync1,lumSync2;
-	lumSync1 = lumSync2 = 0.0;
-	
 	size_t jE=0;
 	st.photon.ps.iterate([&](const SpaceIterator& itE) {
-		energies[jE] = itE.val(DIM_E);
+		energies[jE++] = itE.val(DIM_E);
+	},{-1,0,0});
+
+	#pragma omp parallel for
+	for (int jE=0;jE<nE;jE++) {
 		double frecuency=energies[jE]/planck;
+		double lumSync1,lumSync2;
+		lumSync1 = lumSync2 = 0.0;
 		size_t jR=0;
 		st.photon.ps.iterate([&](const SpaceIterator& itER) {
 			double r=itER.val(DIM_R);
@@ -85,9 +88,8 @@ void localProcesses(const State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix&
 			}
 			lumOut[jE][jR] = lumOutSy[jE][jR]+lumOutBr[jE][jR]+lumOutpp[jE][jR];
 			jR++;
-		},{itE.coord[DIM_E],-1,0});
-		jE++;	
-	},{-1,0,0});
+		},{jE,-1,0});
+	}
 }
 
 void reflectedSpectrum(Matrix lumOut, Matrix& lumOutRefl, Vector energies,
@@ -128,14 +130,15 @@ void reflectedSpectrum(Matrix lumOut, Matrix& lumOutRefl, Vector energies,
 	}
 }
 
-void coldDiskLuminosity(const State& st, Matrix lumOut, Matrix& lumOutRefl, 
+void coldDiskLuminosity(State& st, Matrix lumOut, Matrix& lumOutRefl, 
 						Matrix& lumOutCD, Vector energies)
 {
 	matrixInit(lumOutCD,nE,nRcd,0.0);
 	matrixInit(lumOutRefl,nE,nRcd,0.0);
-	size_t jRcd=0;
-	st.photon.ps.iterate([&](const SpaceIterator& itRcd) {
-		double rCd = itRcd.val(DIM_Rcd);
+
+	#pragma omp parallel for
+	for (int jRcd=0;jRcd<nRcd;jRcd++) {
+		double rCd = st.photon.ps[DIM_Rcd][jRcd];
 		double lj = rCd/sqrt(paso_rCD);
 		double lj1 = rCd*sqrt(paso_rCD);
 		double area = 2.0*pi*(lj1*lj1-lj*lj);
@@ -162,9 +165,7 @@ void coldDiskLuminosity(const State& st, Matrix lumOut, Matrix& lumOutRefl,
 			double frecuency=energies[jE]/planck;
 			lumOutCD[jE][jRcd] = area * bb(frecuency,1.7*temp)/pow(1.7,4);
 		};
-
-		jRcd++;
-	},{0,0,-1});
+	}
 }
 
 void localCompton(const State& st, Matrix& lumOut, Matrix& lumOutIC, Vector energies)

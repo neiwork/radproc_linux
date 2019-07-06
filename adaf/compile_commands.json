@@ -367,21 +367,9 @@
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
   "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/opticalDepthSSA.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/opticalDepthSSA.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
  }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminositySynchrotron.cpp",
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityIC.h",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminositySynchrotron.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminositySynchrotron.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
- }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/reflection.cpp",
-  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/reflection.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/reflection.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
- }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/thermalBremss.cpp",
-  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/thermalBremss.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/thermalBremss.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
- }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityIC.cpp",
-  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityIC.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityIC.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityIC.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityIC.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
  }, {
   "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityNTHadronic.h",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
@@ -403,10 +391,6 @@
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
   "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/probexact.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/probexact.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
  }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityPhotoHadronic.h",
-  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityPhotoHadronic.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityPhotoHadronic.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
- }, {
   "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityPhotoHadronic.cpp",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
   "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityPhotoHadronic.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityPhotoHadronic.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
@@ -422,6 +406,26 @@
   "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/probaprox.cpp",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
   "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/probaprox.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/probaprox.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
+ }, {
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityPhotoHadronic.h",
+  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityPhotoHadronic.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityPhotoHadronic.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
+ }, {
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminositySynchrotron.cpp",
+  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminositySynchrotron.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminositySynchrotron.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
+ }, {
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/reflection.cpp",
+  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/reflection.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/reflection.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
+ }, {
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/thermalBremss.cpp",
+  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/thermalBremss.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/thermalBremss.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
+ }, {
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityIC.cpp",
+  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityIC.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityIC.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
  }, {
   "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/thermalSync.cpp",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
@@ -450,10 +454,6 @@
   "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/compton.h",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
   "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/compton.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/compton.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
- }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityIC.h",
-  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityIC.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fluminosities/luminosityIC.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I../../lib -I../../external/include -I../../gsl/include"
  }, {
   "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fparticle/Particle.h",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fparticle",
