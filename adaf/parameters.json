@@ -42,15 +42,15 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":"150"
+						"samples":"50"
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":30
+						"samples":10
 					},
 					"radius_cd":{
-                        			"samples":5
+                        "samples":5
                     			}
 				}
 			},

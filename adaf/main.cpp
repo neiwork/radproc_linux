@@ -14,6 +14,7 @@
 #include "injection.h"
 #include "distribution.h"
 #include "processes.h"
+#include "ggAbsorption.h"
 
 
 #include <fparameters/parameters.h>
@@ -67,6 +68,8 @@ int main()
 		writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
 
 		processes(model, "ntLuminosities.txt");
+		
+		//ggIntAbsorption(model, "tau_int.txt");
 		
 //********************************************
 

@@ -30,21 +30,24 @@ double opticalDepthSSA(int E_ix, State& st, const Particle& p, double r_current)
 	st.photon.ps.iterate([&](const SpaceIterator &i) {
 		
 		double r = i.val(DIM_R);
-		double delta_r = (r/sqrt(paso_r))*(paso_r-1.0);
 		
+		if (r >= r_current){ //ver si la int es de 0 a r_current o de r_current hasta que escape
 		
-		if (r <= r_current){ //ver si la int es de 0 a r_current o de r_current hasta que escape
+			double thetaH = st.thetaH.get(i);
+			double rB1=r/sqrt(paso_r);
+			double rB2=r*sqrt(paso_r);
+			double delta_r = rB2-rB1; //(r/sqrt(paso_r))*(paso_r-1.0);
+			double vol=(rB2*rB2*rB2-rB1*rB1*rB1)*(4.0/3.0)*pi*cos(thetaH);
+		
 			double magneticField = st.magf.get(i);
-	
-			double cte = pow(3.0, 0.5)*P3(electronCharge)*magneticField / (planck*mass*cLight2);
-			
+				
 			double integral = intSimple(p.emin(), p.emax(), [&](double x) {
 								return fSSA(x, E, p, magneticField, i);
 								});
 
 			double absorptionCoefficient = - P3(planck)*cLight2*integral/(8*pi*P2(E)); 
 		
-			opacity += absorptionCoefficient*delta_r; // parameters.radius;
+			opacity += absorptionCoefficient*delta_r/vol; // parameters.radius;
 		}
 		
 	},{E_ix,-1,0});
@@ -82,16 +85,22 @@ void processes(State& st, const std::string& filename)
 
 		st.photon.ps.iterate([&](const SpaceIterator &i) {
 			
-			double tau = opticalDepthSSA(E_ix, st, st.ntElectron, i.val(DIM_R));   //E=Eph; i.val(DIM_R) = r_current
-			double factorSSA = 1.0;
+			double tau_e = opticalDepthSSA(E_ix, st, st.ntElectron, i.val(DIM_R));   //E=Eph; i.val(DIM_R) = r_current
+			double factorSSA_e = 1.0;
 			
-			if (tau > 1.0e-15){factorSSA = (1.0-exp(-tau))/tau;	}
+			if (tau_e > 1.0e-15){factorSSA_e = (1.0-exp(-tau_e))/tau_e;	} 
+			//esto esta para que ene el limite de tau = 0 el factor de 1 y no 0
+			
+			double tau_p = opticalDepthSSA(E_ix, st, st.ntProton, i.val(DIM_R));   //E=Eph; i.val(DIM_R) = r_current
+			double factorSSA_p = 1.0;
+			
+			if (tau_p > 1.0e-15){factorSSA_p = (1.0-exp(-tau_p))/tau_p;	}
 	
-			eSyn += factorSSA*luminositySynchrotron(E,st.ntElectron,i, st.magf);
-			eIC  += luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);//ver unidades del distribution XXX
-			pSyn += luminositySynchrotron(E,st.ntProton,i,st.magf);
-			pPP  += luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
-			pPG  += luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
+			eSyn += factorSSA_e*luminositySynchrotron(E,st.ntElectron,i, st.magf);
+			eIC  += 0.0;//luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);//ver unidades del distribution XXX
+			pSyn += factorSSA_p*luminositySynchrotron(E,st.ntProton,i,st.magf);
+			pPP  += 0.0;//luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
+			pPG  += 0.0;//luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
 		},{E_ix,-1,0});
 		
 		file << fmtE
@@ -130,9 +139,3 @@ void processes(State& st, const std::string& filename)
 //	}
 //}
 
-
-
-//double dz = z[i]*(z_int - 1);
-//volumen de la celda i
-//double vol_i = pi*P2(jetRadius(z[i], openingAngle))*dz;;
-//double E = pps[0][E_ix];

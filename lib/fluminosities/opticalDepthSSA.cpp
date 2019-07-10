@@ -48,7 +48,7 @@ double fSSA(double x, double E, const Particle& p, const double magneticField, c
 		dist_x2 = 0.0;
 	}
 	else{
-		dist_x2 = p.distribution.interpolate({ { 0, x } }, &psc);
+		dist_x2 = p.distribution.interpolate({ { 0, x2 } }, &psc);
 	}
 	
 	

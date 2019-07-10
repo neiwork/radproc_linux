@@ -17,6 +17,7 @@
 #include <fmath/mathFunctions.h>
 #include <fmath/physics.h>
 #include <fmath/fbisection.h>
+#include <fparameters/Dimension.h>
 
 // Project headers
 #include "globalVariables.h"
@@ -232,7 +233,7 @@ void localCompton(const State& st, Matrix& lumOut, Matrix& lumOutIC, Vector ener
 	show_message(msgEnd,Module_thermalCompton);
 }
 
-void thermalCompton(const State& st, Matrix& lumOut, Matrix& lumOutIC, Vector energies, 
+void thermalCompton(State& st, Matrix& lumOut, Matrix& lumOutIC, Vector energies, 
 						int processesFlags[])
 {
 	show_message(msgStart,Module_thermalCompton);
