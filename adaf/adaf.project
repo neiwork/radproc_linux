@@ -6,6 +6,8 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="non thermal">
+    <File Name="injectionNeutrons.h"/>
+    <File Name="injectionNeutrons.cpp"/>
     <File Name="distribution.h"/>
     <File Name="losses.h"/>
     <File Name="losses.cpp"/>

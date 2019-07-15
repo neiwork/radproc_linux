@@ -14,6 +14,7 @@ public:
 	Particle photon;
 	Particle ntElectron;
     Particle ntProton;
+	Particle ntNeutron;
 
 	ParamSpaceValues magf;
 	ParamSpaceValues denf_i;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <fparticle\particle.h>
+#include <fparticle/Particle.h>
 
 /*neutron injection due to photoHadronic interaction
 (Atoyan & Dermer 2003) */
