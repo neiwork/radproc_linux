@@ -67,9 +67,9 @@ int main()
 		distribution2(model.ntProton,model);
 		writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
 
-		processes(model, "ntLuminosities.txt");
+		//processes(model, "ntLuminosities.txt");
 		
-		//ggIntAbsorption(model, "tau_int.txt");
+		ggIntAbsorption(model, "tau_int.txt");
 		
 //********************************************
 

@@ -18,10 +18,18 @@ double ggCrossSection(double x, double E_ph, double E)
 
 	double Erest = electronMass*cLight2;
 
-	double beta = sqrt( 1.0 - (2.0 * Erest * Erest) / ( (1.0 - x) * E_ph * E) );
-
-	double sigma = (3.0*thomson/16.0)*(1.0-beta*beta)*( 2.0*beta*(beta*beta-2.0) + 
-					(3.0-pow(beta,4.0))*log((1+beta)/(1-beta)) );
+	double aux = (2.0 * Erest * Erest) / ( (1.0 - x) * E_ph * E);
+	double beta;
+	
+	//if (aux < 1.0){
+		beta = sqrt( abs(1.0 -  aux)); //}
+	//else{ beta = 0.0; }
+	
+	double sigma =0.0;
+	
+	if(beta < 1.0){ sigma = (3.0*thomson/16.0)*(1.0-beta*beta)*( 2.0*beta*(beta*beta-2.0) + 
+					(3.0-pow(beta,4.0))*log((1+beta)/(1-beta)) ); }
+	//si beta = 1 queda (1-beta^2)*...*log((1+beta)/(1-beta)) -> 0				
 					
 	return sigma;
 }
@@ -154,19 +162,26 @@ void ggIntAbsorption(State& st, const std::string& filename)
 	//double phEmin = st.photon.emin();
 	//double phEmax = st.photon.emax();
 	
-	st.photon.ps.iterate([&](const SpaceIterator& i) {
+	for (int r_ix=0;r_ix< st.photon.ps[DIM_R].size();r_ix++) {
+	
 		
-		double E = i.val(DIM_E);
-		double r = i.val(DIM_R);
+		double r = st.photon.ps[DIM_R][r_ix];;
+			
+		st.photon.ps.iterate([&](const SpaceIterator& i) {
+			
+			double E = i.val(DIM_E);
 
-		double tau = internalAbs(i.coord[DIM_R] , st, r); 
+			double tau = internalAbs(i.coord[DIM_E] , st, r); 
 
-		file << log(E/1.6e-12) << "\t" << r/schwRadius
-					 << "\t" << tau
-					 << "\t" << exp(-tau)
-					 << std::endl;
+			file << log10(E / 1.6e-12) << "\t" << r/schwRadius
+						 << "\t" << tau
+						 << "\t" << exp(-tau)
+						 << std::endl;
+			
+		},{-1,r_ix,0});
 		
-	},{-1,-1,0});
+		file << std::endl;
+	}
 	
 	file.close();
 }
