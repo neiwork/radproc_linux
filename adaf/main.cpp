@@ -12,6 +12,7 @@
 #include "thermalDistribution.h"
 #include "radiativeLosses.h"
 #include "injection.h"
+#include "injectionNeutrons.h"
 #include "distribution.h"
 #include "processes.h"
 #include "ggAbsorption.h"
@@ -66,6 +67,10 @@ int main()
 		writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
 		distribution2(model.ntProton,model);
 		writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
+		
+		// nt neutrons
+		injectionNeutrons(model.ntNeutron,model.ntProton,model);
+		writeEandRParamSpace("neutronInj", model.ntNeutron.injection,0);
 
 		//processes(model, "ntLuminosities.txt");
 		

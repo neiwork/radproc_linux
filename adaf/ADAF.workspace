@@ -10,7 +10,7 @@
   <Project Name="flosses" Path="../lib/flosses/flosses.project" Active="No"/>
   <Project Name="finjection" Path="../lib/finjection/finjection.project" Active="No"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="no">
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
       <Project Name="adaf" ConfigName="Debug"/>
       <Project Name="fluminosities" ConfigName="Debug"/>
@@ -23,7 +23,7 @@
       <Project Name="flosses" ConfigName="Debug"/>
       <Project Name="finjection" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="yes">
+    <WorkspaceConfiguration Name="Release" Selected="no">
       <Environment/>
       <Project Name="adaf" ConfigName="Release"/>
       <Project Name="fluminosities" ConfigName="Release"/>

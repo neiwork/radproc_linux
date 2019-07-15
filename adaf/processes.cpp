@@ -97,10 +97,10 @@ void processes(State& st, const std::string& filename)
 			if (tau_p > 1.0e-15){factorSSA_p = (1.0-exp(-tau_p))/tau_p;	}
 	
 			eSyn += factorSSA_e*luminositySynchrotron(E,st.ntElectron,i, st.magf);
-			eIC  += 0.0;//luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);//ver unidades del distribution XXX
+			eIC  += luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);//ver unidades del distribution XXX
 			pSyn += factorSSA_p*luminositySynchrotron(E,st.ntProton,i,st.magf);
-			pPP  += 0.0;//luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
-			pPG  += 0.0;//luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
+			pPP  += luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
+			pPG  += luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
 		},{E_ix,-1,0});
 		
 		file << fmtE

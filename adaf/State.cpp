@@ -16,6 +16,7 @@ State::State(boost::property_tree::ptree& cfg) :
  photon{ "photon" },
  ntProton("ntProton"),
  ntElectron{ "ntElectron" },
+ ntNeutron{ "ntNeutron" },
  magf(photon.ps, false),
  denf_i(photon.ps, false),
  denf_e(photon.ps, false),
@@ -28,6 +29,7 @@ State::State(boost::property_tree::ptree& cfg) :
 	particles.push_back(&proton);
 	particles.push_back(&ntElectron);
 	particles.push_back(&ntProton);
+	particles.push_back(&ntNeutron);
 	particles.push_back(&photon);
 	for (auto p : particles) {
 		initializeParticle(*p, cfg);
