@@ -2,9 +2,9 @@
 <CodeLite_Workspace Name="ADAF" Database="" Version="10.0.0">
   <Project Name="fluminosities" Path="../lib/fluminosities/fluminosities.project" Active="No"/>
   <Project Name="fmath" Path="../lib/fmath/fmath.project" Active="No"/>
-  <Project Name="fparameters" Path="../lib/fparameters/fparameters.project" Active="No"/>
+  <Project Name="fparameters" Path="../lib/fparameters/fparameters.project" Active="Yes"/>
   <Project Name="fparticle" Path="../lib/fparticle/fparticle.project" Active="No"/>
-  <Project Name="adaf" Path="adaf.project" Active="Yes"/>
+  <Project Name="adaf" Path="adaf.project" Active="No"/>
   <Project Name="nrMath" Path="../lib/nrMath/nrMath.project" Active="No"/>
   <Project Name="inout" Path="../lib/inout/inout.project" Active="No"/>
   <Project Name="flosses" Path="../lib/flosses/flosses.project" Active="No"/>

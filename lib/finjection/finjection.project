@@ -8,8 +8,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="protonNeutron.h" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="protonNeutron.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="neutronDecay.h"/>
+    <File Name="neutronDecay.cpp"/>
     <File Name="ppPionInj.h" ExcludeProjConfig=""/>
     <File Name="ppPionInj.cpp" ExcludeProjConfig=""/>
     <File Name="pgammaPionInj.h" ExcludeProjConfig=""/>
@@ -28,16 +28,13 @@
     <File Name="pairAnnihilation.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="neutronPp.h" ExcludeProjConfig=""/>
     <File Name="neutronPp.cpp" ExcludeProjConfig=""/>
-    <File Name="neutronPgamma.h" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="neutronPgamma.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="neutronPgamma.h" ExcludeProjConfig="Release;"/>
+    <File Name="neutronPgamma.cpp" ExcludeProjConfig="Release;"/>
     <File Name="neutrinoInjection.h" ExcludeProjConfig="Release;Debug;"/>
     <File Name="neutrinoInjection.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="muonInj.h" ExcludeProjConfig=""/>
     <File Name="muonInj.cpp" ExcludeProjConfig=""/>
-    <File Name="electronNeutron.h" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="electronNeutron.cpp" ExcludeProjConfig="Release;Debug;"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="include"/>
   <Dependencies Name="Debug">
     <Project Name="fparticle"/>
     <Project Name="fmath"/>

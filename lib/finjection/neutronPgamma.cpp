@@ -1,12 +1,12 @@
 #include "neutronPgamma.h"
 
-#include "dataInjection.h"
+
 #include "pgammaPionInj.h"
-#include <fmath\RungeKutta.h>
-#include <fparameters\parameters.h>
-#include <flosses\crossSectionInel.h>
-#include <flosses\lossesPhotoHadronic.h>
-#include <fmath\interpolation.h>
+#include <fmath/RungeKutta.h>
+#include <fparameters/parameters.h>
+#include <flosses/crossSectionInel.h>
+#include <flosses/lossesPhotoHadronic.h>
+//#include <fmath\interpolation.h>
 
 
 //con incluir #include "pgammaPionInj.h" ya incluyo las siguientes funciones
@@ -15,12 +15,10 @@
 
 //double omegaPH(double E, Particle& particle, fun1 tpf);
 
-//double fOmegaPHPion(double u,double t, void* voiddata);
 
-//double f_t_PHPion(double u,double t, void* voiddata);
+/*
 
-
-double tauEsc(double E, Particle& particle, fun1 tpf)  //E=Ep
+double tauEsc(double E, Particle& particle, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax)  //E=Ep
 {
 
 	double mass = particle.mass;
@@ -29,21 +27,28 @@ double tauEsc(double E, Particle& particle, fun1 tpf)  //E=Ep
 
 	double tauDec = neutronMeanLife*E/(neutronMass*cLight2);
 
-	double tcross = radius / cLight; //VER
+	double tcross = 0.0;//radius / cLight; //VER
 
-	double psiEsc = exp(-tcross*(psi_pn*omegaPH(E,particle,tpf)+1.0/tauDec));
+	double psiEsc = exp(-tcross*(psi_pn*omegaPH(E,particle,tpf,distCoord, tpEmin, tpEmax)+1.0/tauDec));
 
-	return psiEsc*psi_pn*omegaPH(E,particle,tpf);
-}
+	return psiEsc*psi_pn*omegaPH(E,particle,tpf,distCoord, tpEmin, tpEmax);
+}*/
 
 
-double neutronPgamma(double E, Vector Nproton, Particle& particle, Particle& proton, fun1 tpf)  
+double neutronPgamma(double E, Particle& particle, Particle& proton, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double phEmin, double phEmax)
 {
 	
-	double protonDist = proton.dist(E);// interpol(E, proton.energyPoints, Nproton, Nproton.size() - 1);
-
-	double t_1   = t_pion_PH(E, proton, tpf);     //esto no es lossesPH porque son perdidas solo del canal de produccion de piones
-	double omega = omegaPH(E, proton, tpf);
+	//double protonDist = proton.dist(E);// interpol(E, proton.energyPoints, Nproton, Nproton.size() - 1);
+	double protonDist;
+	if (E < proton.emin() || E> proton.emax()){
+		protonDist = 0.0;
+	}
+	else{
+		protonDist = proton.distribution.interpolate({ { 0, E } }, &distCoord); 
+	}
+	
+	double t_1   = t_pion_PH(E, proton, tpf, distCoord, phEmin, phEmax); //esto no es lossesPH porque son perdidas solo del canal de produccion de piones
+	double omega = omegaPH(E, proton, tpf, distCoord, phEmin, phEmax);
 	
 	double emissivity;
 
