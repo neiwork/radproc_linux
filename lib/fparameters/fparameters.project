@@ -26,7 +26,6 @@
     <File Name="Dimension.cpp"/>
     <File Name="DimensionIterator.cpp"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="include"/>
   <Settings Type="Static Library">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">

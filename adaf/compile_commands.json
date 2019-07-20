@@ -155,14 +155,6 @@
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/fmath",
   "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/fmath/mathFunctions.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/fmath/mathFunctions.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I.. -I../../external/include"
  }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/electronNeutron.cpp",
-  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/electronNeutron.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/electronNeutron.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/muonInj.cpp",
-  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/muonInj.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/muonInj.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
   "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronPgamma.cpp",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
   "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronPgamma.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronPgamma.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
@@ -178,10 +170,6 @@
   "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPionInj.h",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
   "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPionInj.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPionInj.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/ppPionInj.cpp",
-  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/ppPionInj.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/ppPionInj.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
   "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/ppPionInj.h",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
@@ -199,6 +187,14 @@
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
   "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairInjection.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairInjection.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/ppPionInj.cpp",
+  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/ppPionInj.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/ppPionInj.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronDecay.h",
+  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronDecay.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronDecay.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
   "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronPp.h",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
   "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronPp.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronPp.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
@@ -207,17 +203,29 @@
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
   "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPionInj.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPionInj.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/protonNeutron.h",
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/muonInj.cpp",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/protonNeutron.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/protonNeutron.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/muonInj.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/muonInj.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutrinoInjection.h",
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronDecay.cpp",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutrinoInjection.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutrinoInjection.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronDecay.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronDecay.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairBH.h",
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPairInj.cpp",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairBH.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairBH.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPairInj.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPairInj.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPairInj.h",
+  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPairInj.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPairInj.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairAnnihilation.h",
+  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairAnnihilation.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairAnnihilation.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairMuonDecay.h",
+  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairMuonDecay.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairMuonDecay.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
   "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/muonInj.h",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
@@ -227,37 +235,21 @@
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
   "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronPgamma.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutronPgamma.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairInjectionExact.h",
-  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairInjectionExact.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairInjectionExact.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
   "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairMuonDecay.cpp",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
   "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairMuonDecay.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairMuonDecay.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/electronNeutron.h",
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairInjectionExact.h",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/electronNeutron.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/electronNeutron.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairInjectionExact.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairInjectionExact.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPairInj.h",
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutrinoInjection.h",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPairInj.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPairInj.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutrinoInjection.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/neutrinoInjection.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPairInj.cpp",
+  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairBH.h",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPairInj.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pgammaPairInj.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairAnnihilation.h",
-  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairAnnihilation.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairAnnihilation.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/protonNeutron.cpp",
-  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/protonNeutron.cpp -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/protonNeutron.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
-  "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairMuonDecay.h",
-  "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairMuonDecay.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairMuonDecay.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+  "command": "clang  -c /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairBH.h -o /home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairBH.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
   "file": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection/pairInjection.cpp",
   "directory": "/home/luciano/Doctorado/Accretion/radproc_linux/lib/finjection",
