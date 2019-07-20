@@ -11,10 +11,7 @@
     <File Name="distribution.h"/>
     <File Name="losses.h"/>
     <File Name="losses.cpp"/>
-    <File Name="timeDistribution.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="distribution.cpp"/>
-    <File Name="targetField.h" ExcludeProjConfig="Debug;Release;"/>
-    <File Name="targetField.cpp" ExcludeProjConfig="Debug;Release;"/>
     <File Name="radiativeLosses.h"/>
     <File Name="radiativeLosses.cpp"/>
     <File Name="processes.h"/>

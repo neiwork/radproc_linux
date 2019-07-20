@@ -2,7 +2,7 @@
 	"id":"SgrA*",
 	"mu_i":"1.23",
 	"mu_e":"1.14",
-	"nPhotMatrix":"300",
+	"nPhotMatrix":"100",
 	"nTheta":"5",
 	"calculateScatt":"0",
 	"calculateProbs":"0",
@@ -23,16 +23,15 @@
 	"nuMaxCompton":"1.0e24",
 	"rTr":"2.0e2",
 	"rOutCD":"1.0e5",
+	"inclination":"45",
 	"numProcesses":"5",
 	"ThermalProcessNumber": {
 				"0":1,
 				"1":1,
 				"2":0,
 				"3":0,
-				"4":0
+				"4":1
 	},
-
-
 	"etaInj":"0.01",
 	"accEfficiency":"0.1",
 	"primaryIndex":"2.0",
@@ -43,7 +42,7 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":"150"
+						"samples":"50"
 					},
 					"radius":{
 						"min":1.0,
@@ -94,7 +93,7 @@
 				"dim":{
 					"energy": {
 						"min":9.0,
-						"max":17.0
+						"max":18.0
 					}
 				}
 			},

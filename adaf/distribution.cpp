@@ -141,7 +141,7 @@ void distribution2(Particle& p, State& st)
 					double tcool = energy/losses(energy,p,st,itRRE);
 					Nle.set(itRRE,safeLog10(p.injection.get(itRRE)*min(tcell,tcool)));
 				} else
-					Nle.set(itRRE,0.0);
+					Nle.set(itRRE,-300.0);
 			},{-1,itRR.coord[DIM_R],0});
 		},{0,-1,0});
 
@@ -159,7 +159,7 @@ void distribution2(Particle& p, State& st)
 				}
 				SpaceCoord itRRE_plus_1 = itRRE.moved({0,+1,0});
 				double logdist = (Eeff < p.ps[DIM_E].last()) ? 
-								Nle.interpolate({{DIM_E,Eeff}},&itRRE_plus_1) : 0.0;
+								Nle.interpolate({{DIM_E,Eeff}},&itRRE_plus_1) : -300;
 				double logratioLosses = safeLog10(losses(Eeff,p,st,itRRE_plus_1)/losses(E,p,st,itRRE));
 				double logdist2 = logdist + logratioLosses;
 				Nle.set(itRRE,logdist2);

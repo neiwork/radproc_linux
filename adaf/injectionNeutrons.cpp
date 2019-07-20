@@ -24,7 +24,7 @@ void injectionNeutrons(Particle& n, Particle& p, State& st)
 		const double vol  = (rB2*rB2*rB2-rB1*rB1*rB1)*(4.0/3.0)*pi*cos(thetaH);;
 		n.ps.iterate([&](const SpaceIterator& jE) {
 			const double E = jE.val(DIM_E);
-			double total = neutronPp(E,p,dens,i) /vol;
+			double total = neutronPp(E,p,dens,i);
 			n.injection.set(jE,total); //en unidades de erg^-1 s^-1 cm^{-3}
 		},{-1,i.coord[DIM_R],0});
 	},{0,-1,0});

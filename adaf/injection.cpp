@@ -38,29 +38,32 @@ void injection(Particle& p, State& st)
 	double Emin = p.emin();   //esta es la primera que uso de prueba
 	p.ps.iterate([&](const SpaceIterator& i) {
 		const double r = i.val(DIM_R);
+		double rB1 = r/sqrt(paso_r);
+		double rB2 = r*sqrt(paso_r);
 		const double thetaH = st.thetaH.get(i);
-		const double area  = r*r*(2.0*cos(thetaH)+sin(thetaH)*sin(thetaH));
+		const double area  = 2.0*pi*r*r*(2.0*cos(thetaH)+sin(thetaH)*sin(thetaH));
+		const double vol = (4.0/3.0)*pi*cos(thetaH)*(rB2*rB2*rB2-rB1*rB1*rB1);
 
 		double Emax = eEmax(p,r,st.magf.get(i),-radialVel(r),st.denf_i.get(i));
 		double int_E = RungeKuttaSimple(Emin,Emax,[&Emax,&Emin](double E){
 			return E*powerLaw(E, Emin, Emax);});  //integra E*Q(E)  entre Emin y Emax
 
 		double norm_temp, dens;
-		if(p.id == "ntElectron"){
+		if(p.id == "ntElectron") {
 			norm_temp = boltzmann*st.tempElectrons.get(i)/(p.mass*cLight2);
 			dens = st.denf_e.get(i);
-		} else if(p.id == "ntProton"){
+		} else if(p.id == "ntProton") {
 			norm_temp = boltzmann*st.tempIons.get(i)/(p.mass*cLight2);
 			dens = st.denf_i.get(i);
 		}
 		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
 		double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
-		double Q0 = etaInj*uth*(area*cLight);   // power injected in nt particles [erg s^{-1}]
+		double Q0 = etaInj*uth*cLight*(area/vol);   // power injected in nt particles [erg s^{-1}]
 		double Q0p = Q0/int_E;
 		p.ps.iterate([&](const SpaceIterator& jE) {
 			const double E = jE.val(DIM_E);
 			double total = powerLaw(E, Emin, Emax)*Q0p; 
-			p.injection.set(jE,total); //en unidades de erg^-1 s^-1
+			p.injection.set(jE,total); //en unidades de erg^-1 s^-1 cm^-3
 		},{-1,i.coord[DIM_R],0});
 	},{0,-1,0});
 }

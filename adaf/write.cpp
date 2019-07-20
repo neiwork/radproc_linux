@@ -10,7 +10,7 @@
 
 //namespace {
 	double safeLog10( double x ) {
-		return x>0.0 ? log10(x) : 0.0;
+		return x>0.0 ? log10(x) : -300.0;
 	}
 //}
 

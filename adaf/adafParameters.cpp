@@ -43,7 +43,7 @@ void adafParameters()
 	nRcd = GlobalConfig.get<int>("model.particle.default.dim.radius_cd.samples");
 	logMinEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.min");
 	logMaxEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.max");
-	
+	inclination = GlobalConfig.get<double>("inclination");
 	numProcesses = GlobalConfig.get<int>("numProcesses");
 	calculateScatt = GlobalConfig.get<int>("calculateScatt");
 	calculateComptonRedMatrix = GlobalConfig.get<int>("calculateComptonRedMatrix");

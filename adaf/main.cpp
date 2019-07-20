@@ -8,7 +8,6 @@
 #include "thermalLuminosities.h"
 #include "globalVariables.h"
 
-#include "targetField.h"
 #include "thermalDistribution.h"
 #include "radiativeLosses.h"
 #include "injection.h"
@@ -73,7 +72,6 @@ int main()
 		writeEandRParamSpace("neutronInj", model.ntNeutron.injection,0);
 
 		//processes(model, "ntLuminosities.txt");
-		
 		ggIntAbsorption(model, "tau_int.txt");
 		
 //********************************************
