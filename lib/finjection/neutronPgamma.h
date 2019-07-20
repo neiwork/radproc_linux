@@ -6,7 +6,7 @@
 (Atoyan & Dermer 2003) */
 
 //double neutronPgamma(double E, Vector Nproton, Particle& particle, Particle& proton, fun1 tpf);
-double neutronPgamma(double E, Particle& particle, Particle& proton, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax);
+double neutronPgamma(double E, double tcross, Particle& neutron, Particle& proton, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax) ;
 
 
 

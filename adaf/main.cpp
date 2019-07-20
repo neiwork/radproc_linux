@@ -8,7 +8,7 @@
 #include "thermalLuminosities.h"
 #include "globalVariables.h"
 
-#include "targetField.h"
+//#include "targetField.h"
 #include "thermalDistribution.h"
 #include "radiativeLosses.h"
 #include "injection.h"
@@ -19,6 +19,7 @@
 
 
 #include <fparameters/parameters.h>
+#include <fparameters/SpaceIterator.h>
 #include <inout/ioutil.h>
 #include <iostream>
 #include <boost/property_tree/ptree.hpp>
@@ -69,7 +70,7 @@ int main()
 		writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
 		
 		// nt neutrons
-		injectionNeutrons(model.ntNeutron,model.ntProton,model);
+		injectionNeutrons(model.ntNeutron,model.ntProton,model); //si pasamos solo model las dos particulas se pueden sacar de ahi
 		writeEandRParamSpace("neutronInj", model.ntNeutron.injection,0);
 
 		//processes(model, "ntLuminosities.txt");
@@ -85,3 +86,20 @@ int main()
 	}
 	return 0;
 }
+
+
+
+
+/* prueba interpol
+
+		model.ntElectron.ps.iterate([&](const SpaceIterator& i) {
+		
+			double E = i.val(0);
+			double u = model.ntElectron.emin()*10.0;
+			
+			double Qe = model.ntElectron.injection.interpolate({ { 0, u } }, &i.coord); 
+			
+			double res = Qe;
+			
+			
+		});*/
