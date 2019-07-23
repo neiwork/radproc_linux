@@ -69,11 +69,11 @@ int main()
 		writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
 		
 		// nt neutrons
-		injectionNeutrons(model.ntNeutron,model.ntProton,model); //si pasamos solo model las dos particulas se pueden sacar de ahi
-		writeEandRParamSpace("neutronInj", model.ntNeutron.injection,0);
+		//injectionNeutrons(model.ntNeutron,model.ntProton,model); //si pasamos solo model las dos particulas se pueden sacar de ahi
+		//writeEandRParamSpace("neutronInj", model.ntNeutron.injection,0);
 
-		//processes(model, "ntLuminosities.txt");
-		ggIntAbsorption(model, "tau_int.txt");
+		processes(model, "ntLuminosities.txt");
+		//ggIntAbsorption(model, "tau_int.txt");
 		
 //********************************************
 

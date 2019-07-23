@@ -10,7 +10,7 @@
 
 //namespace {
 	double safeLog10( double x ) {
-		return x>0.0 ? log10(x) : -300.0;
+		return x>0.0 ? log10(x) : -100.0;
 	}
 //}
 
@@ -65,12 +65,9 @@ void writeEandRParamSpace(const std::string& filename, const ParamSpaceValues& d
 	data.ps.iterate([&](const SpaceIterator& i){
 
 		double logE = log10(i.val(DIM_E) / 1.6e-12);
-		
 		double r = i.val(DIM_R);
-
 		double logQ = safeLog10(data.get(i));
-		
-		file << logE << '\t' << r << '\t' << logQ << std::endl;
+		file << logE << '\t' << i.coord[DIM_R] << '\t' << logQ << std::endl;
 			
 	}, { -1, -1, t });  
 

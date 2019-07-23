@@ -88,7 +88,7 @@ void show_module(ProgramModule module)
             break;
 
 		case Module_state:
-            printf("Torus structure and parameters");
+            printf("Model structure and parameters");
             break;
         
 		case Module_targetField:
@@ -125,6 +125,10 @@ void show_module(ProgramModule module)
 			
 		case Module_thermalCompton:
 			printf("Thermal Compton");
+			break;
+			
+		case Module_neutronInjection:
+			printf("Neutron Injection");
 			break;
 			
 		case Module_luminosities:

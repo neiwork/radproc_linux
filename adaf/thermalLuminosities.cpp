@@ -485,7 +485,7 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 	double eVar = pow(energies[nE-1]/energies[0],1.0/nE);
 	size_t jR=0;
 	st.photon.ps.iterate([&](const SpaceIterator& itR) {
-		double r = itR.val(DIM_R);
+		double r = itR.val(DIM_R)/schwRadius;
 		lumSy = lumBr = lumIC = lumpp = lumTot = 0.0;
 		for (size_t jE=0;jE<nE;jE++)  {
 			double dfrecuency = energies[jE]/planck * (eVar-1.0);

@@ -107,15 +107,22 @@ void processes(State& st, const std::string& filename)
 {
 	show_message(msgStart, Module_luminosities);
 
-	std::ofstream file;
+	std::ofstream file, file2;
 	file.open(filename.c_str(),std::ios::out);
+	file2.open("ggOpticalDepth.txt", std::ios::out);
 	file << "log(E/eV)"
-			<< '\t' << "eSyn"
-			<< '\t' << "pSyn"
-			<< "\t" << "eIC"
-			<< "\t" << "pPP"
-			<< "\t" << "pPG"
-			<< std::endl;
+		 << '\t' << "eSyn"
+		 << '\t' << "pSyn"
+		 << "\t" << "eIC"
+		 << "\t" << "pPP"
+		 << "\t" << "pPG"
+		 << std::endl;
+			
+	file2 << "Log(E/eV)" 
+		  << "\t" << "r [M]"
+		  << "\t" << "tau"
+		  << "\t" << "exp(-tau)"
+		  << std::endl;
 	
 	double Emin = st.photon.emin();
 	double Emax = st.photon.emax();
@@ -126,9 +133,9 @@ void processes(State& st, const std::string& filename)
 		double E = st.photon.distribution.ps[DIM_E][E_ix];
 		double fmtE = log10(E / 1.6e-12);
 		double eSynNotAbs,eICNotAbs,pSynNotAbs,pPPNotAbs,pPGNotAbs;
-		double eSynAbs,eICAbs,pSynAbs,pPPAbs,pPGAbs;
+		double eLumAbs,pLumAbs;
 		eSynNotAbs = eICNotAbs = pSynNotAbs = pPPNotAbs = pPGNotAbs = 0.0;
-		eSynAbs = eICAbs = pSynAbs = pPPAbs = pPGAbs = 0.0;
+		eLumAbs = pLumAbs = 0.0;
 
 		st.photon.ps.iterate([&](const SpaceIterator &i) {
 			double r = i.val(DIM_R);
@@ -140,16 +147,20 @@ void processes(State& st, const std::string& filename)
 			double factorSSA_e = 1.0;
 			double factorSSA_p = 1.0;
 			double factorGG = 1.0;
+			double tau_e, tau_p, tau_gg;
+			tau_e = tau_p = tau_gg = 0.0;
 			
 			if (fmtE < 5.0) { // para que no calcule a todas las energías
-				double tau_e = opticalDepthSSA2(E_ix,st,st.ntElectron,i.coord[DIM_R]);
+				tau_e = opticalDepthSSA2(E_ix,st,st.ntElectron,i.coord[DIM_R]);
 				factorSSA_e = (tau_e > 1.0e-15) ? (1.0-exp(-tau_e))/tau_e : 1.0;
-				double tau_p = opticalDepthSSA(E_ix, st, st.ntProton, i.val(DIM_R));
+				tau_p = opticalDepthSSA(E_ix, st, st.ntProton, i.val(DIM_R));
 				factorSSA_p = (tau_p > 1.0e-15) ? (1.0-exp(-tau_p))/tau_p : 1.0;
 			}
-			if (fmtE > 5.0) factorGG = exp(-ggOpticalDepth(E_ix,st,i.coord[DIM_R]));
+			if (fmtE > 5.0) {
+				tau_gg = ggOpticalDepth(E_ix,st,i.coord[DIM_R]);
+				factorGG = exp(-tau_gg);
+			}
 			//double tau_gg = internalAbs(E_ix,st,r);
-			//cout << "E = " << E << "\t r = " << r << "\t factor = " << factorSSA_e << endl;
 			double eSyn = luminositySynchrotron(E,st.ntElectron,i,st.magf)*vol;
 			double eIC  = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin)*vol;//ver unidades del distribution XXX
 			double pSyn = luminositySynchrotron(E,st.ntProton,i,st.magf)*vol;
@@ -160,11 +171,14 @@ void processes(State& st, const std::string& filename)
 			pSynNotAbs += pSyn;
 			pPPNotAbs += pPP;
 			pPGNotAbs += pPG;
-			eSynAbs += eSyn*factorSSA_e*factorGG;
-			eICAbs += eIC*factorGG;
-			pSynAbs += pSyn*factorSSA_p*factorGG;
-			pPPAbs += pPP*factorGG;
-			pPGAbs += pPG*factorGG;
+			eLumAbs += (eSyn+eIC)*factorSSA_e*factorGG;
+			pLumAbs += (pSyn+pPP+pPG)*factorSSA_p*factorGG;
+			
+			file2 << log10(i.val(DIM_E) / 1.6e-12) << "\t" << r/schwRadius
+						 << "\t" << tau_gg
+						 << "\t" << factorGG
+						 << std::endl;
+
 		},{E_ix,-1,0});
 		
 		file << fmtE
@@ -173,13 +187,12 @@ void processes(State& st, const std::string& filename)
 			 << "\t" << safeLog10(eICNotAbs)
 			 << "\t" << safeLog10(pPPNotAbs)
 			 << "\t" << safeLog10(pPGNotAbs)
-			 << '\t' << safeLog10(eSynAbs)
-			 << '\t' << safeLog10(pSynAbs)
-			 << "\t" << safeLog10(eICAbs)
-			 << "\t" << safeLog10(pPPAbs)
-			 << "\t" << safeLog10(pPGAbs)
+			 << '\t' << safeLog10(eLumAbs)
+			 << '\t' << safeLog10(pLumAbs)
 			 << std::endl;
 	}
+	file.close();
+	file2.close();
 	show_message(msgEnd,Module_luminosities);
 }
 

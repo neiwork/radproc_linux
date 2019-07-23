@@ -13,4 +13,4 @@ double auxCD(double);
 double electronDensity(double);
 double electronDensityTheta(double,double);
 double ionDensity(double);
-
+double accRateADAF(double);
