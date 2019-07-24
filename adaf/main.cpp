@@ -53,8 +53,10 @@ int main()
 		//thermalDistribution(model.proton, model);
 		//targetField(model);
 		
-		//radiativeLosses(model.ntElectron, model, "electronLosses.txt");
-		//radiativeLosses(model.ntProton, model, "protonLosses.txt");
+		/*show_message(msgStart, Module_radLosses);
+		radiativeLosses(model.ntElectron, model, "electronLosses.txt");
+		radiativeLosses(model.ntProton, model, "protonLosses.txt");
+		show_message(msgEnd, Module_radLosses);*/
 		
 		//nt electrons
 		injection(model.ntElectron, model);
@@ -69,7 +71,7 @@ int main()
 		writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
 		
 		// nt neutrons
-		//injectionNeutrons(model.ntNeutron,model.ntProton,model); //si pasamos solo model las dos particulas se pueden sacar de ahi
+		injectionNeutrons(model.ntNeutron,model.ntProton,model); //si pasamos solo model las dos particulas se pueden sacar de ahi
 		//writeEandRParamSpace("neutronInj", model.ntNeutron.injection,0);
 
 		processes(model, "ntLuminosities.txt");

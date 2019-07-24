@@ -18,20 +18,19 @@
 
 void radiativeLosses(Particle& p, State& st, const std::string& filename)
 {
-	show_message(msgStart, Module_radLosses);
 	static const double accEfficiency = GlobalConfig.get<double>("accEfficiency");
 	std::ofstream file;
 	file.open(filename.c_str(), std::ios::out);
 
 	file << "Log(E/eV)" 
 		<< "\t" << "r [M]"
-		<< "\t" << "Synchr"
-		<< "\t" << "adv"
-		<< "\t" << "cell"
-		<< "\t" << "diff"
 		<< "\t" << "Acc"
-		<< "\t" << "IC / pp"
-		<< "\t" << "pg / Bremss"
+		<< "\t" << "tCell"
+		<< "\t" << "Adv"
+		<< "\t" << "Diff"
+		<< "\t" << "Sy"
+		<< "\t" << "IC/pp"
+		<< "\t" << "pg/Bremss"
 		<< std::endl;
 
 	double phEmin = st.photon.emin();

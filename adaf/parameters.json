@@ -2,7 +2,7 @@
 	"id":"SgrA*",
 	"mu_i":"1.23",
 	"mu_e":"1.14",
-	"nPhotMatrix":"100",
+	"nPhotMatrix":"300",
 	"nTheta":"5",
 	"calculateScatt":"0",
 	"calculateProbs":"0",
@@ -21,7 +21,7 @@
 	"nuPrimMaxCompton":"1.0e22",
 	"nuMinCompton":"1.0e12",
 	"nuMaxCompton":"1.0e24",
-	"rTr":"2.0e2",
+	"rTr":"2.0e4",
 	"rOutCD":"1.0e5",
 	"inclination":"45",
 	"numProcesses":"5",
@@ -42,12 +42,12 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":"50"
+						"samples":"150"
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":20
+						"samples":40
 					},
 					"radius_cd":{
                         "samples":2
@@ -58,7 +58,7 @@
 				"dim":{
 					"energy": {
 						"min":-8.0,
-						"max":16.0
+						"max":18.0
 					}
 				}
 			},
@@ -93,7 +93,7 @@
 				"dim":{
 					"energy": {
 						"min":9.0,
-						"max":18.0
+						"max":19.0
 					}
 				}
 			},
@@ -102,7 +102,7 @@
 				"dim":{
 					"energy": {
 						"min":9.0,
-						"max":17.0
+						"max":19.0
 					}
 				}
             }

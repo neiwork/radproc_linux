@@ -35,6 +35,8 @@ void injection(Particle& p, State& st)
 {
 	static const double etaInj = GlobalConfig.get<double>("etaInj");
 	double Emin = p.emin();   //esta es la primera que uso de prueba
+	
+	double sumQ = 0.0;
 	p.ps.iterate([&](const SpaceIterator& i) {
 		const double r = i.val(DIM_R);
 		double rB1 = r/sqrt(paso_r);
@@ -74,5 +76,7 @@ void injection(Particle& p, State& st)
 			double total = cutOffPL(E, Emin, Emax)*Q0p; 
 			p.injection.set(jE,total); //en unidades de erg^-1 s^-1 cm^-3
 		},{-1,i.coord[DIM_R],0});
+		sumQ += Q0*vol;
 	},{0,-1,0});
+	cout << "Total power injected in " << p.id << " = " << sumQ << endl; 
 }

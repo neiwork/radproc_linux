@@ -40,7 +40,7 @@ ax1.plot(np.log10(nu),np.log10(Tot+CD+Refl),lw=3,label='Tot')
 
 fig.savefig('lum.pdf')
 
-r,Sy,Br,IC,pp,Tot = np.loadtxt('Release/lumRadius.txt',unpack=True)
+r,Sy,Br,IC,pp,Tot = np.loadtxt('lumRadius.txt',unpack=True)
 
 fig, ax = plt.subplots()
 

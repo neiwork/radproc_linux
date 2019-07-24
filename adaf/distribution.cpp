@@ -147,10 +147,9 @@ void distribution2(Particle& p, State& st)
 						double tcool = energy/losses(energy,p,st,itRRE);
 						Nle.set(itRRE,p.injection.get(itRRE)*min(tcell,tcool)*vol);
 					}
-					SpaceCoord itRcoord = itRR;
 					if (p.id == "ntElectron") {
 						double integ = RungeKuttaSimple(energy,p.emax()*0.99,[&](double e) {
-							return p.injection.interpolate({{0,e}},&itRcoord);});
+							return p.injection.interpolate({{DIM_E,e}},&itRR.coord);});
 						Nle.set(itRRE,integ/losses(energy,p,st,itRRE)*vol);
 					}
 				} else
@@ -211,7 +210,7 @@ void distribution2(Particle& p, State& st)
 		},{0,-1,0});
 	},{0,-1,0});
 	
-	if (1) {
+	if (0) {
 		double rMax = p.ps[DIM_R].last();
 		double rMin = p.ps[DIM_R].first();
 		p.ps.iterate([&](const SpaceIterator& it) {
@@ -240,8 +239,8 @@ void distribution2(Particle& p, State& st)
 			double N = 0.0;
 			SpaceCoord itAux = it;
 			double int_Ec = pow(min(Ec[nPoints-1],p.emax())/max(min(Ec[0],p.emax()),p.emin()),1.0/nPoints);
-			/*
-			for (size_t j=0;j<nPoints;j++) {
+			
+			/*for (size_t j=0;j<nPoints;j++) {
 				size_t k = nPoints-1-j;
 				if ((Ec[k]/sqrt(int_Ec) > p.emin() && Ec[k]*sqrt(int_Ec) < p.emax()) &&
 				(Rc[k] > p.ps[DIM_R][0] && Rc[k] < p.ps[DIM_R][nR-1])) {
@@ -254,8 +253,8 @@ void distribution2(Particle& p, State& st)
 					N += deriv * (-dRc);
 				}
 			}
-			p.distribution.set(it,N);
-			*/
+			p.distribution.set(it,N);*/
+			
 
 			for (size_t jE=0;jE<nPoints;jE++) {
 				if ((Ec[jE] > p.emin() && Ec[jE] < p.emax()) &&

@@ -11,8 +11,8 @@ import scipy.optimize as optimization
 nu,eV,Sy,Br,IC,pp,CD,Refl,Tot = np.loadtxt('lum.txt',unpack=True)
 NT_logeV,NT_logSye,NT_logSyp,NT_logIC,NT_logpp,NT_logpg,NT_logeAbs,NT_logpAbs = \
         np.loadtxt('ntLuminosities.txt',unpack=True,skiprows=1)
-x_eV = [-3,16]
-y_axis = [30,35]
+x_eV = [-4,16]
+y_axis = [28,35]
 
 fig, ax1 = plt.subplots()
 
@@ -29,8 +29,9 @@ ax1.plot(NT_logeV,NT_logSye,label='eSy')
 ax1.plot(NT_logeV,NT_logSyp,label='pSy')
 ax1.plot(NT_logeV,NT_logIC,label='IC')
 ax1.plot(NT_logeV,NT_logpp,label='pp')
-ax1.plot(NT_logeV,NT_logpg,label='p\gamma')
+ax1.plot(NT_logeV,NT_logpg,label=r'p$\gamma$')
 ax1.plot(NT_logeV,np.log10(np.power(10,NT_logeAbs)+np.power(10,NT_logpAbs)+Tot),\
          lw=3,label='Abs',color='k')
+ax1.legend(loc='best',fontsize=8)
 
 fig.savefig('nonThermalLum.pdf')

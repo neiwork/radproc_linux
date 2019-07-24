@@ -54,7 +54,7 @@ double opticalDepthSSA2(int E_ix, State& st, const Particle& p, int iR)
 	double rMin = st.photon.ps[DIM_R][0];
 	double pasoprim = pow(rMax/rMin,1.0/(nR*2.0));
 
-	SpaceCoord psc = {E_ix,0,0};
+	SpaceCoord psc = {E_ix,iR,0};
 	double r0 = st.photon.ps[DIM_R][iR];
 	double drprim = r0*(pasoprim-1.0);
 	double thetaprim = inclination*(pi/180.0);
@@ -175,6 +175,8 @@ void processes(State& st, const std::string& filename)
 			pLumAbs += (pSyn+pPP+pPG)*factorSSA_p*factorGG;
 			
 			file2 << log10(i.val(DIM_E) / 1.6e-12) << "\t" << r/schwRadius
+						 << "\t" << tau_e
+						 << "\t" << tau_p
 						 << "\t" << tau_gg
 						 << "\t" << factorGG
 						 << std::endl;
