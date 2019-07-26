@@ -58,7 +58,7 @@
         },
         "calculateLosses":"0",
 	"calculateDistributions":"1",
-        "calculateLuminosities":"1",
+        "calculateLuminosities":"0",
 	"calculateNeutrons":"0",
     	"neutrons":{
         	"calculatePropagation":"0"
@@ -71,12 +71,12 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":"40"
+						"samples":"100"
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":15
+						"samples":50
 					},
 					"radius_cd":{
                         "samples":2

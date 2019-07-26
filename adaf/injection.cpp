@@ -37,44 +37,48 @@ void injection(Particle& p, State& st)
 	static const double etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction");
 	double Emin = p.emin();   //esta es la primera que uso de prueba
 	
-	double sumQ = 0.0;
+    double sumQ = 0.0;
 	p.ps.iterate([&](const SpaceIterator& i) {
 		const double r = i.val(DIM_R);
 		double rB1 = r/sqrt(paso_r);
 		double rB2 = rB1*paso_r;
 		const double thetaH = st.thetaH.get(i);
-		const double area  = 2.0*pi*r*r*(2.0*cos(thetaH)+sin(thetaH)*sin(thetaH));
 		const double vol = (4.0/3.0)*pi*cos(thetaH)*(rB2*rB2*rB2-rB1*rB1*rB1);
 
 		double Emax = eEmax(p,r,st.magf.get(i),-radialVel(r),st.denf_i.get(i));
 		double int_E = RungeKuttaSimple(Emin,p.emax(),[&Emax,&Emin](double E){
 			return E*cutOffPL(E,Emin,Emax);});  //integra E*Q(E)  entre Emin y Emax
-
-		/*
-		double norm_temp, dens;
+        
+        /*
+		double grpersecToSolarMassesperyear = 3600.0*24*265.25/solarMass;
+		double Wmr = 1.0e42*4.0*accRateADAF(r)*grpersecToSolarMassesperyear * 
+					(st.tempIons.get(i)/st.tempElectrons.get(i)); // [erg s^{-1}]
+                    
+        sumWmr += accRateADAF(r);
+        
+		double Q0 = 0.0;
+		double delta = 0.1;
+		if (p.id == "ntElectron") Q0 = delta * Wmr;
+		else if (p.id == "ntProton") Q0 = (1.0-delta)* Wmr;*/
+		
+        
+        double norm_temp, dens;
 		if(p.id == "ntElectron") {
 			norm_temp = boltzmann*st.tempElectrons.get(i)/(p.mass*cLight2);
 			dens = st.denf_e.get(i);
 		} else if(p.id == "ntProton") {
 			norm_temp = boltzmann*st.tempIons.get(i)/(p.mass*cLight2);
 			dens = st.denf_i.get(i);
-		}*/
-		double grpersecToSolarMassesperyear = 3600.0*24*265.25/solarMass;
-		double Wmr = 1.0e42*4.0*accRateADAF(r)*grpersecToSolarMassesperyear * 
-					(st.tempIons.get(i)/st.tempElectrons.get(i)) / vol; // [erg s^{-1} cm^{-3}]
-		double Q0 = 0.0;
-		double delta = 0.1;
-		if (p.id == "ntElectron") Q0 = delta * Wmr;
-		else if (p.id == "ntProton") Q0 = (1.0-delta)* Wmr;
-		/*
+		}
+        
 		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
 		double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
-		double Q0 = etaInj*uth*cLight*(area/vol);*/   // power injected in nt particles [erg s^{-1}]
-		
+		double Q0 = etaInj*uth*cLight/r;   // power injected in nt particles [erg s^-1 cm^-3]
+        
 		double Q0p = Q0/int_E;
 		p.ps.iterate([&](const SpaceIterator& jE) {
 			const double E = jE.val(DIM_E);
-			double total = cutOffPL(E, Emin, Emax)*Q0p; 
+			double total = cutOffPL(E, Emin, Emax)*Q0p;
 			p.injection.set(jE,total); //en unidades de erg^-1 s^-1 cm^-3
 		},{-1,i.coord[DIM_R],0});
 		sumQ += Q0*vol;

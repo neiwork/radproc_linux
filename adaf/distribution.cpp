@@ -150,9 +150,6 @@ void distribution2(Particle& p, State& st)
 					if (p.id == "ntElectron") {
 						double integ = RungeKuttaSimple(energy,p.emax()*0.99,[&](double e) {
 							return p.injection.interpolate({{DIM_E,e}},&itRR.coord);});
-                        double los = losses(energy,p,st,itRRE);
-                        double Nlee = integ/los * vol;
-
 						Nle.set(itRRE,integ/losses(energy,p,st,itRRE)*vol);
 					}
 				} else
@@ -175,15 +172,11 @@ void distribution2(Particle& p, State& st)
 				SpaceCoord itRRE_plus_1 = itRRE.moved({0,+1,0});
 				double dist = (Eeff < Emax) ? 
 								Nle.interpolate({{DIM_E,Eeff}},&itRRE_plus_1) : 0.0;
-				double ratioLosses = losses(Eeff,p,st,itRRE_plus_1)/losses(E,p,st,itRRE);
+				double ratioLosses = losses(Eeff,p,st,itRRE_plus_1)/losses(Eeff,p,st,itRRE);
+                //double ratioLosses = 2.0-losses(E,p,st,itRRE_plus_1)/losses(Eeff,p,st,itRRE_plus_1);
 				//double ratioLosses = Eeff/E;
 				double dist2 = dist*ratioLosses;
                 
-                if (!(dist2 >= 0.0)) {
-                    double aux1=0.0;
-                    
-                    double aux2=0.0;
-                }
 				Nle.set(itRRE,dist2);
 			},{-1,itRR,0});
 		}
@@ -194,9 +187,15 @@ void distribution2(Particle& p, State& st)
 				double rB1 = r/sqrt(paso_r);
 				double rB2 = rB1*paso_r;
 				double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
+                double totalNumberOfParticles = 0.0;
+                double pasoE = pow(p.ps[DIM_E][nE-1]/p.ps[DIM_E][0],1.0/nE);
 				p.ps.iterate([&](const SpaceIterator& itRRE) {
+                    double dE = itRRE.val(DIM_E)*(sqrt(pasoE)-1.0/sqrt(pasoE));
+                    totalNumberOfParticles += Nle.get(itRRE)*dE;
 					Nle.set(itRRE,Nle.get(itRRE)/vol);
 				},{-1,itRR.coord[DIM_R],0});
+                if (p.id == "ntProton")
+                    cout << "Total Number of Particles = " << totalNumberOfParticles << endl;
 			},{0,-1,0});
 			if (p.id == "ntProton") writeEandRParamSpace("linearEmitter_p",Nle,0);
 		}

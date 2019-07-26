@@ -44,7 +44,7 @@ void adafParameters()
 	nE = GlobalConfig.get<int>("model.particle.default.dim.energy.samples");
 	nRcd = GlobalConfig.get<int>("model.particle.default.dim.radius_cd.samples");
     
-    paso_r = pow(exp(logr.back())/1.1,1.0/nR);
+    paso_r = pow(exp(logr.back())/exp(logr.front()),1.0/nR);
 	paso_rCD = pow(exp(logr.back())*schwRadius/rTr,1.0/nRcd);
 
 	logMinEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.min");

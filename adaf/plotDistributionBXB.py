@@ -17,13 +17,13 @@ logergp = np.log10(np.power(10,logeVp)*1.6e-12)
 
 x_eVe = [logeVe[0]+.5,12]
 x_eVp = [logeVp[0]+.5,logeVp[-1]]
-y_p = [-5,10]
+y_p = [0,14]
 y_e = [-4,10]
 
-nR = 15
-f = 1
-nE = 40
-colors = np.arange(nR)/nR
+nR = 50
+f = 5
+nE = 100
+colors = np.arange(nR)*f/nR
 
 
 
