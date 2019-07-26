@@ -9,7 +9,7 @@ public:
 	
 	Vector values; // all the values in the discretization of this dimension
 
-	std::function<double(double)> to_linear = [](double x) { return x; };
+	std::function<double(double)> to_linear = [](double x) { return (x > 0.0) ? log10(x) : -300.0; };
 	std::function<double(double)> from_linear = [](double x) { return x; };
 
 	inline double first() const {

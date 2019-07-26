@@ -34,7 +34,7 @@ double RungeKutta(double a, double b, fun1 c, fun1 d, fun2 f, const RungeKuttaOp
 	if (a < b)
 	{
 		double x = a;
-
+        //#pragma omp parallel for reduction(+:J1,+:J2,+:J3)
 		for (int i = 0; i < n_x; ++i)     //le saco el n para que se multiplique n veces y no n+1
 		{
 			double dx = x*(x_int - 1);

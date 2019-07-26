@@ -9,13 +9,11 @@ class State {
 public:
 	std::vector<Particle*> particles;
 
-	Particle electron;
-    Particle proton;
 	Particle photon;
-	Particle ntElectron;
+    Particle ntElectron;
     Particle ntProton;
-	Particle ntNeutron;
-
+    Particle ntNeutron;
+    
 	ParamSpaceValues magf;
 	ParamSpaceValues denf_i;
     ParamSpaceValues denf_e;

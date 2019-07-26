@@ -20,17 +20,17 @@
     <File Name="injection.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="thermal">
+    <File Name="thermalProcesses.cpp"/>
+    <File Name="thermalProcesses.h"/>
+    <File Name="comptonScattMatrix.h"/>
+    <File Name="comptonScattMatrix.cpp"/>
     <File Name="maxwellJuttner.h"/>
     <File Name="maxwellJuttner.cpp"/>
     <File Name="thermalDistribution.h"/>
     <File Name="thermalDistribution.cpp"/>
-    <File Name="thermalLuminosities.h"/>
-    <File Name="thermalLuminosities.cpp"/>
     <File Name="thermalComptonOld.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="thermalCompton.h"/>
     <File Name="thermalCompton.cpp"/>
-    <File Name="icMatrix.h"/>
-    <File Name="icMatrix.cpp"/>
   </VirtualDirectory>
   <Description/>
   <Dependencies/>

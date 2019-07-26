@@ -1,81 +1,93 @@
 {
-	"id":"SgrA*",
-	"mu_i":"1.23",
-	"mu_e":"1.14",
-	"nPhotMatrix":"300",
-	"nTheta":"5",
-	"calculateScatt":"0",
-	"calculateProbs":"0",
-	"calculateComptonRedMatrix":"0",
-	"comptonMethod":"3",
-	"accretionRateCorona":"1.0",
-	"nGammaCompton":"30",
-	"nTempCompton":"30",
-	"nNuPrimCompton":"60",
-	"nNuCompton":"60",
-	"gammaMinCompton":"1.0",
-	"gammaMaxCompton":"1.0e3",
-	"tempMinCompton":"0.1",
-	"tempMaxCompton":"11.0",
-	"nuPrimMinCompton":"1.0e10",
-	"nuPrimMaxCompton":"1.0e22",
-	"nuMinCompton":"1.0e12",
-	"nuMaxCompton":"1.0e24",
-	"rTr":"2.0e4",
-	"rOutCD":"1.0e5",
-	"inclination":"45",
-	"numProcesses":"5",
-	"ThermalProcessNumber": {
-				"0":1,
-				"1":1,
-				"2":0,
-				"3":0,
-				"4":1
-	},
-	"etaInj":"0.01",
-	"accEfficiency":"0.1",
-	"primaryIndex":"2.0",
+    "id":"BXB",	
+    "mu_i":"1.23",
+    "mu_e":"1.14",
+    "inclination":"45",
+    "accretionRateCorona":"1.0",
+    "rTr":"2.0e4",
+    "rOutCD":"1.0e5",
+      
+    "calculateComptonScatt":"0",
+    "scatt": {
+        "nRandomPhot":"100",
+        "nTheta":"5"
+    },
 
-	"model": {
+    "calculateThermal":"1",
+    "thermal": {
+        "numProcesses":"5",
+        "processNumber": {
+			"0":1,
+			"1":1,
+			"2":0,
+			"3":0,
+			"4":0
+        },
+        
+        "compton": {
+            "method":"3",
+            
+            "calculateRedMatrix":"0",
+            "redMatrixParams": {
+                "nGammaCompton":"30",
+                "nTempCompton":"30",
+                "nNuPrimCompton":"60",
+                "nNuCompton":"60",
+                "gammaMinCompton":"1.0",
+                "gammaMaxCompton":"1.0e3",
+                "tempMinCompton":"0.1",
+                "tempMaxCompton":"11.0",
+                "nuPrimMinCompton":"1.0e10",
+                "nuPrimMaxCompton":"1.0e22",
+                "nuMinCompton":"1.0e12",
+                "nuMaxCompton":"1.0e24"
+            }
+        },
+        
+        "calculatePhotonDensityGap":"0",
+        "calculateRelCorrections":"0"
+    },
+    
+    "calculateNonThermal":"1",
+    "nonThermal": {
+    
+        "injection": {
+            "energyFraction":"0.01",
+            "accEfficiency":"0.1",
+            "primaryIndex":"2.0"
+        },
+        "calculateLosses":"0",
+	"calculateDistributions":"1",
+        "calculateLuminosities":"1",
+	"calculateNeutrons":"0",
+    	"neutrons":{
+        	"calculatePropagation":"0"
+	}
+    },	
+    
+    "model": {
 		"particle": {
 			"default": {
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":"150"
+						"samples":"40"
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":40
+						"samples":15
 					},
 					"radius_cd":{
                         "samples":2
-                    			}
+                    }
 				}
 			},
 			"photon": {
 				"dim":{
 					"energy": {
-						"min":-8.0,
-						"max":18.0
-					}
-				}
-			},
-			"electron": {
-				"mass":9.1094e-28,
-				"dim":{
-					"energy": {
-						"min":6.0,
-						"max":7.0
-					}
-				}
-			},"proton": {
-				"mass":1.6726e-24,
-				"dim":{
-					"energy": {
-						"min":8.0,
-						"max":10.0
+						"min":-6.0,
+						"max":16.0
 					}
 				}
 			},
@@ -93,7 +105,7 @@
 				"dim":{
 					"energy": {
 						"min":9.0,
-						"max":19.0
+						"max":18.0
 					}
 				}
 			},
@@ -102,7 +114,7 @@
 				"dim":{
 					"energy": {
 						"min":9.0,
-						"max":19.0
+						"max":18.0
 					}
 				}
             }
@@ -118,17 +130,17 @@
 
 		"runge-kutta-2": {
 			"samples": { 
-				"x": 50,
-				"y": 50
+				"x": 30,
+				"y": 30
 			}
 		}
 	},
 
 	"integrate-losses": {
 		"samples": {
-			"x": 50,
-			"t": 50,
-			"y": 50
+			"x": 30,
+			"t": 30,
+			"y": 30
 		}
 	}
 }

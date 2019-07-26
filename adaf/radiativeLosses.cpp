@@ -18,7 +18,7 @@
 
 void radiativeLosses(Particle& p, State& st, const std::string& filename)
 {
-	static const double accEfficiency = GlobalConfig.get<double>("accEfficiency");
+	static const double accEfficiency = GlobalConfig.get<double>("nonThermal.injection.accEfficiency");
 	std::ofstream file;
 	file.open(filename.c_str(), std::ios::out);
 
@@ -28,6 +28,7 @@ void radiativeLosses(Particle& p, State& st, const std::string& filename)
 		<< "\t" << "tCell"
 		<< "\t" << "Adv"
 		<< "\t" << "Diff"
+        << "\t" << "EmaxHillas"
 		<< "\t" << "Sy"
 		<< "\t" << "IC/pp"
 		<< "\t" << "pg/Bremss"
@@ -46,15 +47,18 @@ void radiativeLosses(Particle& p, State& st, const std::string& filename)
 		
 		double eAdv = v/r;
 		double eCell = v/delta_r;
-		double eSyn = lossesSyn(E,B,p)/E;
 		double eAcc = accelerationRate(E,B,accEfficiency);
 		double eDiff = diffusionRate(E,r,B);
+        double eSyn = lossesSyn(E,B,p)/E;
+        
+        double eMaxHillas = electronCharge*B*r*(pi-2.0*st.thetaH.get(i));
 
 		file << fmtE << "\t" << r/schwRadius
 					 << "\t" << safeLog10(eAcc)
 					 << "\t" << safeLog10(eCell)
 					 << "\t" << safeLog10(eAdv)
 				 	 << "\t" << safeLog10(eDiff)
+                     << "\t" << safeLog10(eMaxHillas/1.6e-12)
 					 << "\t" << safeLog10(eSyn);
 		
 		if (p.id == "ntElectron") {

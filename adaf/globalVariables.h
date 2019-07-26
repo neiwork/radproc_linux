@@ -36,8 +36,15 @@ extern Matrix reachDA;
 extern Vector escapeAi;
 extern Vector escapeDi;
 
-extern const int calculateScatt;
-extern const int calculateProbs;
+extern const int calculateComptonScatt;
+extern const int calculateThermal;
+extern const int calculatePhotonDensityGap;
+extern const int calculateNonThermal;
+extern const int calculateLosses;
+extern const int calculateNTdistributions;
+extern const int calculateNonThermalLum;
+extern const int calculateNeutrons;
+extern const int calculateComptonProbs;
 extern const int calculateComptonRedMatrix;
 extern const int comptonMethod;
 

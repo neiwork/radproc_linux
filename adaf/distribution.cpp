@@ -150,6 +150,9 @@ void distribution2(Particle& p, State& st)
 					if (p.id == "ntElectron") {
 						double integ = RungeKuttaSimple(energy,p.emax()*0.99,[&](double e) {
 							return p.injection.interpolate({{DIM_E,e}},&itRR.coord);});
+                        double los = losses(energy,p,st,itRRE);
+                        double Nlee = integ/los * vol;
+
 						Nle.set(itRRE,integ/losses(energy,p,st,itRRE)*vol);
 					}
 				} else
@@ -170,11 +173,17 @@ void distribution2(Particle& p, State& st)
 					Eeff = effectiveE(E,Emax,tcell,p,st,itRRE);
 				}
 				SpaceCoord itRRE_plus_1 = itRRE.moved({0,+1,0});
-				double dist = (Eeff < p.ps[DIM_E].last()) ? 
+				double dist = (Eeff < Emax) ? 
 								Nle.interpolate({{DIM_E,Eeff}},&itRRE_plus_1) : 0.0;
 				double ratioLosses = losses(Eeff,p,st,itRRE_plus_1)/losses(E,p,st,itRRE);
 				//double ratioLosses = Eeff/E;
 				double dist2 = dist*ratioLosses;
+                
+                if (!(dist2 >= 0.0)) {
+                    double aux1=0.0;
+                    
+                    double aux2=0.0;
+                }
 				Nle.set(itRRE,dist2);
 			},{-1,itRR,0});
 		}
@@ -190,7 +199,6 @@ void distribution2(Particle& p, State& st)
 				},{-1,itRR.coord[DIM_R],0});
 			},{0,-1,0});
 			if (p.id == "ntProton") writeEandRParamSpace("linearEmitter_p",Nle,0);
-			if (p.id == "ntElectron") writeEandRParamSpace("linearEmitter_e",Nle,0);
 		}
 
 		p.ps.iterate([&](const SpaceIterator& itRR) {
@@ -211,7 +219,7 @@ void distribution2(Particle& p, State& st)
 	},{0,-1,0});
 	
 	if (0) {
-		double rMax = p.ps[DIM_R].last();
+        double rMax = p.ps[DIM_R].last();
 		double rMin = p.ps[DIM_R].first();
 		p.ps.iterate([&](const SpaceIterator& it) {
 			double r = it.val(DIM_R);
@@ -237,26 +245,25 @@ void distribution2(Particle& p, State& st)
 			}
 			
 			double N = 0.0;
-			SpaceCoord itAux = it;
-			double int_Ec = pow(min(Ec[nPoints-1],p.emax())/max(min(Ec[0],p.emax()),p.emin()),1.0/nPoints);
 			
-			/*for (size_t j=0;j<nPoints;j++) {
+			for (size_t j=0;j<nPoints-1;j++) {
 				size_t k = nPoints-1-j;
-				if ((Ec[k]/sqrt(int_Ec) > p.emin() && Ec[k]*sqrt(int_Ec) < p.emax()) &&
+				if (((Ec[k] > p.emin() && Ec[k+1] < p.emax()) && (Ec[k+1] > p.emin() && Ec[k] < p.emax())) &&
 				(Rc[k] > p.ps[DIM_R][0] && Rc[k] < p.ps[DIM_R][nR-1])) {
-					double Q = p.injection.interpolate({{DIM_E,Ec[k]},{DIM_R,Rc[k]}},&itAux);
+					double Q = p.injection.interpolate({{DIM_E,Ec[k]},{DIM_R,Rc[k]}},&it.coord);
 					double dRc = Rc[k]*(sqrt(int_Rc)-1.0/sqrt(int_Rc));
-					double dEc = Ec[k]*(sqrt(int_Ec)-1.0/sqrt(int_Ec));
-					double dbde = (b(Ec[k]*sqrt(int_Ec),Rc[k],p,st,it) - 
-									b(Ec[k]/sqrt(int_Ec),Rc[k],p,st,it))/dEc;
+					double dEc = (Ec[k+1] > Ec[k]) ? Ec[k+1]-Ec[k] : 0.0;
+					double dbde = (dEc > 0.0) ? (b(Ec[k+1],Rc[k],p,st,it.coord) - 
+									b(Ec[k],Rc[k],p,st,it))/dEc : 0.0;
+                                    
 					double deriv = (Q-N*dbde) / radialVel(Rc[k]);
 					N += deriv * (-dRc);
 				}
 			}
-			p.distribution.set(it,N);*/
+			p.distribution.set(it,N);
 			
 
-			for (size_t jE=0;jE<nPoints;jE++) {
+			/*for (size_t jE=0;jE<nPoints;jE++) {
 				if ((Ec[jE] > p.emin() && Ec[jE] < p.emax()) &&
 				(Rc[jE] > p.ps[DIM_R][0] && Rc[jE] < p.ps[DIM_R][nR-1])) {
 					double mu = 0.0;
@@ -264,7 +271,9 @@ void distribution2(Particle& p, State& st)
 						if ((Ec[jjE] > p.emin() && Ec[jjE] < p.emax()) &&
 						(Rc[jjE]/sqrt(int_Rc) > p.ps[DIM_R][0] && 
 						Rc[jjE]*sqrt(int_Rc) < p.ps[DIM_R][nR-1])) {
-							double dEE = Ec[jjE]*(sqrt(int_Ec)-1.0/sqrt(int_Ec));
+                            double dEE = 0.0;
+                            if (jjE+1 < nPoints)
+                                dEE = (Ec[jjE+1]-Ec[jjE]) ? Ec[jjE+1]-Ec[jjE] : 0.0;
 							double vr = abs(radialVel(Rc[jjE]));
 							double dRc = Rc[jjE]*(sqrt(int_Rc)-1.0/sqrt(int_Rc));
 							double dbdr = (b(Ec[jjE],Rc[jjE]*sqrt(int_Rc),p,st,it) - 
@@ -275,13 +284,16 @@ void distribution2(Particle& p, State& st)
 						}
 					}
 					mu = exp(mu);
-					double dEc = Ec[jE]*(sqrt(int_Ec)-1.0/sqrt(int_Ec));
-					N += p.injection.interpolate({{DIM_E,Ec[jE]},{DIM_R,Rc[jE]}},&itAux)*mu*dEc;
+                    double dEc = 0.0;
+                    if (jE+1 < nPoints)
+                        dEc = (Ec[jE+1] > Ec[jE]) ? Ec[jE+1]-Ec[jE] : 0.0;
+					N += p.injection.interpolate({{DIM_E,Ec[jE]},{DIM_R,Rc[jE]}},&it.coord)*mu*dEc;
 				}
 			}
 			N = (e > p.emin() && e < p.emax()) &&
 				(r > p.ps[DIM_R][0] && r) ? N/abs(b(e,r,p,st,it)) : 0.0;
-			p.distribution.set(it,N);
+			p.distribution.set(it,N);*/
+            
 		},{-1,-1,0});
 	}
 

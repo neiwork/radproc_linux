@@ -13,12 +13,16 @@
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/Dimension.h>
 #include <fparameters/parameters.h>
+#include <fparticle/Particle.h>
 #include "write.h"
 
-void injectionNeutrons(Particle& n, Particle& p, State& st)
+void injectionNeutrons(State& st)
 {
 	show_message(msgStart,Module_neutronInjection);
 	
+    Particle &p = st.ntProton;
+    Particle &n = st.ntNeutron;
+    
 	std::ofstream file;
 	file.open("neutronInj.txt",std::ios::out);
 	file 	<< "log(E/eV)"

@@ -32,7 +32,6 @@ double ionTemp(double r) {
 	double m = (logTi[pos_r]-logTi[pos_r-1])/(logr[pos_r]-logr[pos_r-1]);
 	double logT = m*(logr_actual-logr[pos_r-1])+logTi[pos_r-1];
 	
-	
 	return iMeanMolecularWeight*exp(logT);
 }
 

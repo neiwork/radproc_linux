@@ -14,33 +14,34 @@
 
 double eEmax(Particle& p, double r, double B, double v, double dens)
 {
-	double accE = GlobalConfig.get<double>("accEfficiency");
+	double accE = GlobalConfig.get<double>("nonThermal.injection.accEfficiency");
     double Emax_adv = accE*r*cLight*electronCharge*B / v; 
     double Emax_syn = p.mass*cLight2*sqrt(accE*6.0*pi*electronCharge / (thomson*B));
+    double Emax_Hillas = electronCharge*B*r;
 	if (p.id == "ntProton") {
 		double sigmapp = 34.3e-27;
 		double Emax_pp = accE*electronCharge*B/(0.5*dens*sigmapp);
-		return min(Emax_adv,Emax_pp);
+		return min(min(Emax_adv,Emax_pp),Emax_Hillas);
 	} else
-		return min(Emax_syn,Emax_adv);
+		return min(min(Emax_syn,Emax_adv),Emax_Hillas);
 }
 
 double cutOffPL(double E, double Emin, double Emax)
 {
-	static const double primaryIndex = GlobalConfig.get<double>("primaryIndex");
+	static const double primaryIndex = GlobalConfig.get<double>("nonThermal.injection.primaryIndex");
 	return pow(E,-primaryIndex)*exp(-E/Emax)*exp(-5*Emin/E);
 }
 
 void injection(Particle& p, State& st)
 {
-	static const double etaInj = GlobalConfig.get<double>("etaInj");
+	static const double etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction");
 	double Emin = p.emin();   //esta es la primera que uso de prueba
 	
 	double sumQ = 0.0;
 	p.ps.iterate([&](const SpaceIterator& i) {
 		const double r = i.val(DIM_R);
 		double rB1 = r/sqrt(paso_r);
-		double rB2 = r*sqrt(paso_r);
+		double rB2 = rB1*paso_r;
 		const double thetaH = st.thetaH.get(i);
 		const double area  = 2.0*pi*r*r*(2.0*cos(thetaH)+sin(thetaH)*sin(thetaH));
 		const double vol = (4.0/3.0)*pi*cos(thetaH)*(rB2*rB2*rB2-rB1*rB1*rB1);

@@ -3,6 +3,7 @@
 #include <fmath/physics.h>
 
 // PARAMETERS (from parameter.json)
+
 double blackHoleMass;               	// Black hole mass [g].
 double accRateOut;						// Accretion rate at rOut.
 double s;								// ADAF wind index.
@@ -21,8 +22,15 @@ double logMaxEnergy;					// Logarithm of the maximum energy for photons.
 std::size_t nR,nE,nRcd;					// Number of points in each dimension.
 
 int numProcesses;						// Number of thermal radiative processes.
-int calculateScatt;						// If 1 calculate the Compton scattering 
+int calculateComptonScatt;				// If 1 calculate the Compton scattering 
 										// probability matrices.
+int calculateThermal;   				// If 1 calculate the thermal processes.
+int calculatePhotonDensityGap;          // If 1 calculate the photon density at zGap.
+int calculateNonThermal;   				// If 1 calculate the non-thermal processes.
+int calculateLosses;                    // If 1 calculate radiative losses for electrons and protons.
+int calculateNTdistributions;           // If 1 calculate non-thermal particle distributions.
+int calculateNonThermalLum;             // If 1 calculate non-thermal luminosities.
+int calculateNeutrons;                  // If 1 calculate processes for neutrons.
 int calculateComptonRedMatrix;			// If 1 calculate the Comptonization energy redistribution
 										// matrices. It only works if comptonMethod=0 or 1.
 int comptonMethod;						// Method used to calculate the Comptonized spectrum.

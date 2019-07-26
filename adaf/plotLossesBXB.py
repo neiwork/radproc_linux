@@ -8,17 +8,17 @@ rc('text',usetex = True)
 
 import scipy.optimize as optimization
 
-logeVe,logr,logAcce,logtcelle,logAdve,logDiffe,logSye,logIC,logBr = np.loadtxt('electronLosses.txt',unpack=True,skiprows=1)
-logeVp,logr,logAccp,logtcellp,logAdvp,logDiffp,logSyp,logpp,logpg = np.loadtxt('protonLosses.txt',unpack=True,skiprows=1)
+logeVe,logr,logAcce,logtcelle,logAdve,logDiffe,logEmaxHe,logSye,logIC,logBr = np.loadtxt('electronLosses.txt',unpack=True,skiprows=1)
+logeVp,logr,logAccp,logtcellp,logAdvp,logDiffp,logEmaxHp,logSyp,logpp,logpg = np.loadtxt('protonLosses.txt',unpack=True,skiprows=1)
 
 x_eVe = [logeVe[0]+.5,12]
 x_eVp = [logeVp[0]+.5,logeVp[-1]]
 y_p = [-10,15]
 y_e = [-10,15]
 
-nR = 20
+nR = 15
 f = 5
-nE = 50
+nE = 40
 colors = np.arange(nR)/nR
 
 
@@ -36,12 +36,12 @@ for r1 in np.arange(nR//f):
     ax1.plot(logeVe[f*r1*nE:(f*r1+1)*nE],logAdve[f*r1*nE:(f*r1+1)*nE],label='Adv')
     ax1.plot(logeVe[f*r1*nE:(f*r1+1)*nE],logtcelle[f*r1*nE:(f*r1+1)*nE],label='tCell')
     ax1.plot(logeVe[f*r1*nE:(f*r1+1)*nE],logDiffe[f*r1*nE:(f*r1+1)*nE],label='Diff')
+    ax1.axvline(logEmaxHe[0],label='Hillas')
     ax1.plot(logeVe[f*r1*nE:(f*r1+1)*nE],logAcce[f*r1*nE:(f*r1+1)*nE],label='Acc')
     ax1.plot(logeVe[f*r1*nE:(f*r1+1)*nE],logIC[f*r1*nE:(f*r1+1)*nE],label='IC')
     ax1.plot(logeVe[f*r1*nE:(f*r1+1)*nE],logBr[f*r1*nE:(f*r1+1)*nE],label='Br')
     ax1.legend(loc='best',fontsize=8)
     fig.savefig('electronLosses_'+str(Cell[r1]+1)+'.pdf')
-
 
 for r1 in np.arange(nR//f):
     
@@ -57,6 +57,7 @@ for r1 in np.arange(nR//f):
     ax1.plot(logeVp[f*r1*nE:(f*r1+1)*nE],logAdvp[f*r1*nE:(f*r1+1)*nE],label='Adv')
     ax1.plot(logeVp[f*r1*nE:(f*r1+1)*nE],logtcellp[f*r1*nE:(f*r1+1)*nE],label='tCell')
     ax1.plot(logeVp[f*r1*nE:(f*r1+1)*nE],logDiffp[f*r1*nE:(f*r1+1)*nE],label='Diff')
+    ax1.axvline(logEmaxHp[0],label='Hillas')
     ax1.plot(logeVp[f*r1*nE:(f*r1+1)*nE],logAccp[f*r1*nE:(f*r1+1)*nE],label='Acc')
     ax1.plot(logeVp[f*r1*nE:(f*r1+1)*nE],logpp[f*r1*nE:(f*r1+1)*nE],label='pp')
     ax1.plot(logeVp[f*r1*nE:(f*r1+1)*nE],logpg[f*r1*nE:(f*r1+1)*nE],label=r'p$\gamma$')

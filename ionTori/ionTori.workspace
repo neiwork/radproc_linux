@@ -9,7 +9,7 @@
   <Project Name="ionTori" Path="ionTori.project" Active="Yes"/>
   <Project Name="nrMath" Path="../lib/nrMath/nrMath.project" Active="No"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="yes">
+    <WorkspaceConfiguration Name="Debug" Selected="no">
       <Environment/>
       <Project Name="flosses" ConfigName="Debug"/>
       <Project Name="fluminosities" ConfigName="Debug"/>

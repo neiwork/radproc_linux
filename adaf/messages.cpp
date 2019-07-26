@@ -103,8 +103,8 @@ void show_module(ProgramModule module)
             printf("Injection of electrons");
             break;
 			
-		case Module_torusSampling:
-			printf("Scattering Probability Matrix");
+		case Module_comptonScattMatrix:
+			printf("Compton Scattering Probability Matrix");
 			break;
       
         case Module_Message:

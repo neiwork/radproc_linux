@@ -8,6 +8,6 @@
 void readThermalProcesses(int flags[])
 {
 	for (int i=0;i<numProcesses;i++) {
-		flags[i] = GlobalConfig.get<int>("ThermalProcessNumber."+std::to_string(i));
+		flags[i] = GlobalConfig.get<int>("thermal.processNumber."+std::to_string(i));
 	}
 }
