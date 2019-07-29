@@ -14,7 +14,7 @@
 #include "injectionNeutrons.h"
 #include "distribution.h"
 #include "processes.h"
-#include "ggAbsorption.h"
+#include "absorption.h"
 
 #include <fparameters/parameters.h>
 #include <fparameters/SpaceIterator.h>
@@ -58,18 +58,17 @@ int main()
             }
 		
             if (calculateNTdistributions) {
+
                 //nt electrons
                 injection(model.ntElectron, model);
                 writeEandRParamSpace("electronInj",model.ntElectron.injection,0);
-                
-                distribution2(model.ntElectron, model);
+                distributionFast(model.ntElectron, model);
                 writeEandRParamSpace("electronDis",model.ntElectron.distribution,0);
             
                 //nt protons
                 injection(model.ntProton,model);
                 writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
-                
-                distributionWorking(model.ntProton,model);
+                distributionFast(model.ntProton,model);
                 writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
             
                 if (calculateNeutrons) {

@@ -6,6 +6,8 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="non thermal">
+    <File Name="absorption.h"/>
+    <File Name="absorption.cpp"/>
     <File Name="injectionNeutrons.h"/>
     <File Name="injectionNeutrons.cpp"/>
     <File Name="distribution.h"/>
@@ -35,8 +37,6 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="ggAbsorption.h"/>
-    <File Name="ggAbsorption.cpp" ExcludeProjConfig=""/>
     <File Name="read.h"/>
     <File Name="read.cpp"/>
     <File Name="modelParameters.h"/>

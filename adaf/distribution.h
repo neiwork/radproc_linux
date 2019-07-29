@@ -2,7 +2,5 @@
 
 #include "State.h"
 
-
-void distributionWorking(Particle& p, State& st);
-void distribution2(Particle& p, State& st);
-void distribution3(Particle& p, State& st);
+void distributionFast(Particle& p, State& st);
+void distributionDetailed(Particle& p, State& st);

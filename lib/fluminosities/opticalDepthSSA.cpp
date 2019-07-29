@@ -91,7 +91,7 @@ double fSSA2(double x, double E, const Particle& p, const double magneticField,
 	double dx = x1*(x_int - 1.0);
 
 	double deriv = (dist_x2/P2(x2) - dist_x1/P2(x1)) / dx;
-	return P2(x)*Psyn*deriv;  // funcion a integrar
+	return x*x*Psyn*deriv;  // funcion a integrar
 }
 
 //esta rutina esta implementada en el proyecto porque depende de las coordenadas

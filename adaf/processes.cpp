@@ -1,22 +1,22 @@
 #include "processes.h"
-
 #include "modelParameters.h"
 #include "write.h"
 #include "messages.h"
 #include "globalVariables.h"
 #include "adafFunctions.h"
-#include "ggAbsorption.h"
+#include "absorption.h"
 
 #include <fmath/RungeKutta.h>
 
-#include <fluminosities/opticalDepthSSA.h>
 #include <fluminosities/luminositySynchrotron.h>
+#include <fluminosities/opticalDepthSSA.h>
 #include <fluminosities/luminosityIC.h>
 #include <fluminosities/luminosityNTHadronic.h>
 #include <fluminosities/luminosityPhotoHadronic.h>
 
 #include <fparameters/Dimension.h>
 #include <fparameters/SpaceIterator.h>
+
 
 double opticalDepthSSA(int E_ix, State& st, const Particle& p, double r_current)  
 {
@@ -73,19 +73,20 @@ double opticalDepthSSA2(int E_ix, State& st, const Particle& p, int iR)
 		double r1 = r0;
 		double theta1 = theta0;
 		double thetaMinLocal = theta0;
-		do {
+		while (r1 < rMax && r1 > rMin && theta1 > thetaMinLocal && theta1 < pi-thetaMinLocal) {
 			double xprim = rprim*sin(thetaprim);
 			double zprim = rprim*cos(thetaprim);
 			double x1 = x0+xprim;
 			double z1 = z0+zprim;
 			r1=sqrt(x1*x1+y0*y0+z1*z1);
 			
-			double magneticField = (r1 < rMax && r1 > rMin && 
-							theta1 > thetaMinLocal && theta1 < pi-thetaMinLocal) ? 
-							st.magf.interpolate({{1,r1}},&psc) : 0.0;
 			double cosThetaMinLocal = costhetaH(r1);
 			theta1 = atan(sqrt(x1*x1+y0*y0)/abs(z1));
 			thetaMinLocal = acos(cosThetaMinLocal);
+			
+			double magneticField = (r1 < rMax && r1 > rMin && 
+							theta1 > thetaMinLocal && theta1 < pi-thetaMinLocal) ? 
+							st.magf.interpolate({{1,r1}},&psc) : 0.0;
 			double integral = intSimple(p.emin(),p.emax(),[&](double x){
 							return fSSA2(x,E,p,magneticField,psc);});
 			
@@ -94,14 +95,12 @@ double opticalDepthSSA2(int E_ix, State& st, const Particle& p, int iR)
 			
 			drprim = r1*(pasoprim-1.0);
 			rprim += drprim;
-		} while (r1 < rMax && r1 > rMin && theta1 > thetaMinLocal && theta1 < pi-thetaMinLocal);
+		}
 		phi0 += dPhi;
 	}
 	return opticalDepth/nPhi;
 }
 
-/* Takes [emi] =  E^2*[Q(E)] and calculates int(2.0*pi*P2(jetR)*emi dz); 
-for [N(E)] = 1/erg, then it just sums over all z and returns erg/s  */
 
 void processes(State& st, const std::string& filename)
 {
@@ -109,90 +108,111 @@ void processes(State& st, const std::string& filename)
 
 	std::ofstream file, file2;
 	file.open(filename.c_str(),std::ios::out);
-	file2.open("ggOpticalDepth.txt", std::ios::out);
+	file2.open("opticalDepth.txt", std::ios::out);
 	file << "log(E/eV)"
 		 << '\t' << "eSyn"
 		 << '\t' << "pSyn"
 		 << "\t" << "eIC"
 		 << "\t" << "pPP"
 		 << "\t" << "pPG"
+		 << "\t" << "eAbs"
+		 << "\t" << "pAbs"
 		 << std::endl;
 			
 	file2 << "Log(E/eV)" 
 		  << "\t" << "r [M]"
-		  << "\t" << "tau"
-		  << "\t" << "exp(-tau)"
+		  << "\t" << "tau_e"
+		  << "\t" << "tau_p"
+		  << "\t" << "tau_gg"
 		  << std::endl;
 	
 	double Emin = st.photon.emin();
 	double Emax = st.photon.emax();
 	int nE = st.photon.ps[DIM_E].size();
 	
+	Vector eSy(nE,0.0);
+	Vector eIC(nE,0.0);
+	Vector pSy(nE,0.0);
+	Vector pPP(nE,0.0);
+	Vector pPG(nE,0.0);
+	Vector eAbs(nE,0.0);
+	Vector pAbs(nE,0.0);
+	Matrix tau_e;	matrixInit(tau_e,nE,nR,0.0);
+	Matrix tau_p;	matrixInit(tau_p,nE,nR,0.0);
+	Matrix tau_gg;	matrixInit(tau_gg,nE,nR,0.0);
+
+	#pragma omp parallel for
 	for (int E_ix=0;E_ix<nE;E_ix++) {
-
 		double E = st.photon.distribution.ps[DIM_E][E_ix];
-		double fmtE = log10(E / 1.6e-12);
-		double eSynNotAbs,eICNotAbs,pSynNotAbs,pPPNotAbs,pPGNotAbs;
-		double eLumAbs,pLumAbs;
-		eSynNotAbs = eICNotAbs = pSynNotAbs = pPPNotAbs = pPGNotAbs = 0.0;
-		eLumAbs = pLumAbs = 0.0;
-
 		st.photon.ps.iterate([&](const SpaceIterator &i) {
 			double r = i.val(DIM_R);
 			double rB1 = r/sqrt(paso_r);
 			double rB2 = r*sqrt(paso_r);
 			double vol = (4.0/3.0)*pi*cos(st.thetaH.get(i))*(rB2*rB2*rB2-rB1*rB1*rB1);
 			
-			//double tau_e = opticalDepthSSA(E_ix, st, st.ntElectron, i.val(DIM_R));
-			double factorSSA_e = 1.0;
-			double factorSSA_p = 1.0;
-			double factorGG = 1.0;
-			double tau_e, tau_p, tau_gg;
-			tau_e = tau_p = tau_gg = 0.0;
-			
-			if (fmtE < 5.0) { // para que no calcule a todas las energías
-				tau_e = opticalDepthSSA2(E_ix,st,st.ntElectron,i.coord[DIM_R]);
-				factorSSA_e = (tau_e > 1.0e-15) ? (1.0-exp(-tau_e))/tau_e : 1.0;
-				tau_p = opticalDepthSSA(E_ix, st, st.ntProton, i.val(DIM_R));
-				factorSSA_p = (tau_p > 1.0e-15) ? (1.0-exp(-tau_p))/tau_p : 1.0;
+			Vector tau(3,0.0);
+			double fmtE  = safeLog10(i.val(DIM_E)/1.6e-12);
+			/*if (fmtE < 5.0) { // para que no calcule a todas las energías
+				tau[1] = opticalDepthSSA2(E_ix,st,st.ntElectron,i.coord[DIM_R]);
+				tau[2] = opticalDepthSSA(E_ix, st, st.ntProton, i.val(DIM_R));
 			}
+			
 			if (fmtE > 5.0) {
 				tau_gg = ggOpticalDepth(E_ix,st,i.coord[DIM_R]);
 				factorGG = exp(-tau_gg);
-			}
-			//double tau_gg = internalAbs(E_ix,st,r);
-			double eSyn = luminositySynchrotron(E,st.ntElectron,i,st.magf)*vol;
-			double eIC  = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin)*vol;//ver unidades del distribution XXX
-			double pSyn = luminositySynchrotron(E,st.ntProton,i,st.magf)*vol;
-			double pPP  = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i)*vol;
-			double pPG  = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax)*vol;
-			eSynNotAbs += eSyn;
-			eICNotAbs += eIC;
-			pSynNotAbs += pSyn;
-			pPPNotAbs += pPP;
-			pPGNotAbs += pPG;
-			eLumAbs += (eSyn+eIC)*factorSSA_e*factorGG;
-			pLumAbs += (pSyn+pPP+pPG)*factorSSA_p*factorGG;
+			}*/
 			
-			file2 << log10(i.val(DIM_E) / 1.6e-12) << "\t" << r/schwRadius
-						 << "\t" << tau_e
-						 << "\t" << tau_p
-						 << "\t" << tau_gg
-						 << "\t" << factorGG
-						 << std::endl;
+			if (fmtE < 0.0 || fmtE > 5.0) opticalDepth(tau,E_ix,st,i.coord[DIM_R]);
+
+			double attenuation_gg = exp(-tau[0]);
+			double attenuation_ssae = (tau[1] > 1.0e-15) ? (1.0-exp(-tau[1]))/tau[1] : 1.0;
+			double attenuation_ssap = (tau[2] > 1.0e-15) ? (1.0-exp(-tau[2]))/tau[2] : 1.0;
+			
+			double eSyLocal = luminositySynchrotron(E,st.ntElectron,i,st.magf)*vol;
+			double eICLocal = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin)*vol;
+			double pSyLocal = luminositySynchrotron(E,st.ntProton,i,st.magf)*vol;
+			double pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i)*vol;
+			double pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax)*vol;
+
+			eSy[E_ix] += eSyLocal;
+			eIC[E_ix] += eICLocal;
+			pSy[E_ix] += pSyLocal;
+			pPP[E_ix] += pPPLocal;
+			pPG[E_ix] += pPGLocal;
+			eAbs[E_ix] += (eSyLocal+eICLocal)*attenuation_ssae*attenuation_gg;
+			pAbs[E_ix] += (pSyLocal+pPPLocal+pPGLocal)*attenuation_ssap*attenuation_gg;
+			tau_gg[E_ix][i.coord[DIM_R]] = tau[0];
+			tau_e[E_ix][i.coord[DIM_R]] = tau[1];
+			tau_p[E_ix][i.coord[DIM_R]] = tau[2];
 
 		},{E_ix,-1,0});
-		
+	}
+	
+	for (size_t jR=0;jR<nR;jR++) {
+		double r = st.photon.ps[DIM_R][jR] / schwRadius;
+		for (size_t jE=0;jE<nE;jE++) {
+			double fmtE = safeLog10(st.photon.ps[DIM_E][jE]/1.6e-12);
+			file2 << fmtE << "\t" << safeLog10(r)
+						  << "\t" << tau_e[jE][jR]
+						  << "\t" << tau_p[jE][jR]
+						  << "\t" << tau_gg[jE][jR]
+						  << std::endl;
+		}
+	}
+	
+	for (size_t jE=0;jE<nE;jE++) {
+		double fmtE = safeLog10(st.photon.ps[DIM_E][jE]/1.6e-12);
 		file << fmtE
-			 << '\t' << safeLog10(eSynNotAbs)
-			 << '\t' << safeLog10(pSynNotAbs)
-			 << "\t" << safeLog10(eICNotAbs)
-			 << "\t" << safeLog10(pPPNotAbs)
-			 << "\t" << safeLog10(pPGNotAbs)
-			 << '\t' << safeLog10(eLumAbs)
-			 << '\t' << safeLog10(pLumAbs)
+			 << '\t' << safeLog10(eSy[jE])
+			 << '\t' << safeLog10(pSy[jE])
+			 << "\t" << safeLog10(eIC[jE])
+			 << "\t" << safeLog10(pPP[jE])
+			 << "\t" << safeLog10(pPG[jE])
+			 << '\t' << safeLog10(eAbs[jE])
+			 << '\t' << safeLog10(pAbs[jE])
 			 << std::endl;
 	}
+	
 	file.close();
 	file2.close();
 	show_message(msgEnd,Module_luminosities);

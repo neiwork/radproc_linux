@@ -7,7 +7,7 @@
     "rTr":"2.0e4",
     "rOutCD":"1.0e5",
       
-    "calculateComptonScatt":"1",
+    "calculateComptonScatt":"0",
     "scatt": {
         "nRandomPhot":"100",
         "nTheta":"5"
@@ -58,7 +58,7 @@
         },
         "calculateLosses":"0",
 	"calculateDistributions":"1",
-        "calculateLuminosities":"0",
+        "calculateLuminosities":"1",
 	"calculateNeutrons":"0",
     	"neutrons":{
         	"calculatePropagation":"0"
