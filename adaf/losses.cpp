@@ -37,8 +37,8 @@ double losses(double E, Particle& p, State& st, const SpaceCoord& i)
 
 double b(double E, double r, Particle& p, State& st, const SpaceCoord& psc) {
 
-	double B = st.magf.interpolate({{1,r}},&psc);
-	double density = st.denf_e.interpolate({{1,r}},&psc);
+	double B = (r < p.ps[DIM_R].last()) ? st.magf.interpolate({{1,r}},&psc) : 0.0;
+	double density = (r < p.ps[DIM_R].last()) ? st.denf_e.interpolate({{1,r}},&psc) : 0.0;
 	double losses = 0.0;
 
 	if(p.id == "ntProton"){

@@ -32,96 +32,134 @@ double effectiveE(double Ee, double Emax, double t, Particle& p, State& st, cons
 	return Eeff;
 }
 
-/*void distribution(Particle& p, State& st)
+int effectiveE_2(Vector& Eeff, Vector& rCurrent, double rEnd, size_t nRR, double Emax, Particle& p,
+						State& st, const SpaceCoord& i)
 {
-	show_message(msgStart, Module_electronDistribution);
+	double pasoR = pow(rEnd/rCurrent[0],1.0/nRR);
+	size_t j=0;
+	while (rCurrent[j] < rEnd && Eeff[j] < Emax) {
+		double rAux = rCurrent[j]*sqrt(pasoR);
+		double be = -b(Eeff[j],rAux,p,st,i);
+		double v = -radialVel(rAux);
+		double dr = rCurrent[j]*(pasoR-1.0);
+		Eeff[j+1] = Eeff[j] + be/v * dr;
+		rCurrent[j+1] = rCurrent[j]*pasoR;
+		j++;
+	}
+	return --j;
+}
 
-	ParamSpaceValues N1(p.ps), N2(p.ps);
+double nLocal(double dist, Vector Eeff, Vector rCurrent, size_t nRR, Particle& p, State& st,
+					const SpaceCoord& i)
+{
+	for (size_t j=0;j<nRR;j++) {
+		size_t k = nRR-1-j;
+		double dE,dbde;
+		double dr = (rCurrent[nRR-1]/rCurrent[0],1.0/nRR);
+		if (k-1 >= 0) {
+			dE = Eeff[k]-Eeff[k-1];
+			dbde = (b(Eeff[k],rCurrent[k],p,st,i)-b(Eeff[k-1],rCurrent[k-1],p,st,i))/dE;
+		} else {
+			dE = Eeff[k+1]-Eeff[k];
+			dbde = (b(Eeff[k+1],rCurrent[k+1],p,st,i)-b(Eeff[k],rCurrent[k],p,st,i))/dE;
+		}
+		dist *= (1.0+dbde/(-radialVel(rCurrent[k]))*dr);
+	}
+	return (dist > 0.0) ? dist : 0.0;
+}
 
-	N1.fill([&](const SpaceIterator& i){
-		return 0.0;
-	},{-1,-1,0});
 
-	p.ps.iterate([&](const SpaceIterator& r_glob){
+void distributionWorking(Particle& p, State& st)
+{
+	if (p.id == "ntElectron") show_message(msgStart,Module_electronDistribution);
+	else if (p.id == "ntProton") show_message(msgStart,Module_protonDistribution);
+	p.ps.iterate([&](const SpaceIterator& itR) {
 		
-		const double E = r_glob.val(DIM_E);
-		const double r = r_glob.val(DIM_R);
-		double rB1 = r/sqrt(paso_r);
-		double delta_r = rB1*(paso_r-1.0);
-		double vel = -radialVel(r); 
+		const double r = itR.val(DIM_R);
+		double delta_r = (r/sqrt(paso_r))*(paso_r-1.0);
+		double tcell = delta_r/(-radialVel(r));
 		
-		double tcell = delta_r/vel;
-		double tcool = E/losses(E,p,st,r_glob);
-		
-		double dist1 = p.injection.get(r_glob)*min(tcell,tcool);
-		N1.set(r_glob,dist1);   //hay injeccion solo en la primera celda de cada emisor lineal
-		//N1.set(r_glob,safeLog10(dist1));
-		
-	},{-1,-1,0});
-
-	for (int r_glob=0;r_glob<p.ps[1].size();r_glob++){
-
-		N2.fill([&](const SpaceIterator& h){
-			return 0.0;
-		}, {-1,-1,0});  
-		
-		for (int r_i=r_glob-1;r_i>=0;r_i--) {
-		
-			double r = p.ps[DIM_R][r_i];
-			double rB1 = r/sqrt(paso_r);
-			double delta_r = rB1*(paso_r-1.0);
-			double vel = -radialVel(r);
-			double tcell = delta_r/vel;
-
-			p.ps.iterate([&](const SpaceIterator& i){
-				const double E = i.val(DIM_E);
-				const double r = i.val(DIM_R);
-			
-				const double magf = st.magf.get(i);
-				//double Emax = p.emax(); //VER eEmax(r, magf);
-				double Emax = eEmax(p,r,magf,vel);
-				
-				double dist2 = 0.0;
-				if (i.its[1].canPeek(+1)) { //if (r_ix != 0)
-					double Eeff=Emax;
-
-					if (i.its[0].canPeek(+1)) { 
-						Eeff = effectiveE(E,Emax,tcell,p,st,i);
+		ParamSpaceValues Nle(p.ps);
+		p.ps.iterate([&](const SpaceIterator& itRR) {
+			p.ps.iterate([&](const SpaceIterator& itRRE) {
+				if (itRR.coord[DIM_R] == itR.coord[DIM_R]) {
+					double r = itRR.val(DIM_R);
+					double rB1 = r/sqrt(paso_r);
+					double rB2 = rB1*paso_r;
+					double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
+					double energy = itRRE.val(DIM_E);
+					if (p.id == "ntProton") {
+						double tcool = energy/losses(energy,p,st,itRRE);
+						Nle.set(itRRE,p.injection.get(itRRE)*min(tcell,tcool)*vol);
 					}
-				
-					SpaceCoord i_plus_1 = i.moved({i.its[0].peek(0),+1,0}); //muevo el r uno para adentro
-					//double r_plus_1 = i.its[1].peek(+1);
-					double dist = N1.interpolate({{DIM_E,Eeff}},&i_plus_1);
-
-					double ratioLosses = losses(Eeff,p,st,i_plus_1)/losses(E,p,st,i);
-					dist2 = dist*ratioLosses;
+					if (p.id == "ntElectron") {
+						double integ = RungeKuttaSimple(energy,p.emax()*0.99,[&](double e) {
+							return p.injection.interpolate({{0,e}},&itRR.coord);});
+						Nle.set(itRRE,integ/losses(energy,p,st,itRRE)*vol);
+					}
+				} else
+					Nle.set(itRRE,0.0);
+			},{-1,itRR.coord[DIM_R],0});
+		},{0,-1,0});
+		
+		for (int itRR=itR.coord[DIM_R]-1;itRR>=0;itRR--) {
+			double rprim = p.ps[DIM_R][itRR];
+			double delta_r = (rprim/sqrt(paso_r))*(paso_r-1.0);
+			double vel = -radialVel(rprim);
+			double tcell = delta_r/vel;
+			p.ps.iterate([&](const SpaceIterator& itRRE) {  // para cada energía
+				const double E = itRRE.val(DIM_E);
+				double Emax = p.emax();
+				double Eeff = Emax;
+				if (itRRE.its[0].canPeek(+1)) { 
+					Eeff = effectiveE(E,Emax,tcell,p,st,itRRE);
 				}
-				N2.set(i, dist2);
-			},{-1,r_i,0});
+				SpaceCoord itRRE_plus_1 = itRRE.moved({0,+1,0});
+				
+				double dist = (Eeff < p.ps[DIM_E].last()) ? 
+								Nle.interpolate({{DIM_E,Eeff}},&itRRE_plus_1) : 0.0;
+				double ratioLosses = losses(Eeff,p,st,itRRE_plus_1)/losses(E,p,st,itRRE);
+				//double ratioLosses = Eeff/E;
+				double dist2 = dist*ratioLosses;
+				Nle.set(itRRE,dist2);
+			},{-1,itRR,0});
 		}
-		
-		for (int E_i = 0; E_i < p.ps[0].size(); E_i++){
-			
-			double sum2 = 0.0;
-		
-			p.ps.iterate([&](const SpaceIterator& i2){
-				sum2 += N2.get(i2);
-				p.distribution.set(i2,sum2);
-			}, { E_i, -1, 0 });
-		}
-	}
 
-	for (int E_i = 0; E_i < p.ps[0].size(); E_i++){
-		double sum1 = 0.0;
-		p.ps.iterate([&](const SpaceIterator& i1){
-			sum1 += N1.get(i1);
-			double tot = sum1 + sum1;
-			p.distribution.set(i1,tot);
-		}, { E_i, -1, 0 });
-	}
+		if (itR.coord[DIM_R] == nR-1) {
+			p.ps.iterate([&](const SpaceIterator& itRR) {
+				double r = itRR.val(DIM_R);
+				double rB1 = r/sqrt(paso_r);
+				double rB2 = rB1*paso_r;
+				double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
+				p.ps.iterate([&](const SpaceIterator& itRRE) {
+					Nle.set(itRRE,Nle.get(itRRE)/vol);
+				},{-1,itRR.coord[DIM_R],0});
+			},{0,-1,0});
+			if (p.id == "ntProton") writeEandRParamSpace("linearEmitter_p",Nle,0);
+			if (p.id == "ntElectron") writeEandRParamSpace("linearEmitter_e",Nle,0);
+		}
+
+		p.ps.iterate([&](const SpaceIterator& itRR) {
+			if (itRR.coord[DIM_R] != nR-1) {
+				double r = itRR.val(DIM_R);
+				double rB1 = r/sqrt(paso_r);
+				double rB2 = rB1*paso_r;
+				double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
+				p.ps.iterate([&](const SpaceIterator& itRRE) {
+					p.distribution.set(itRRE,p.distribution.get(itRRE)+Nle.get(itRRE)/vol);
+				},{-1,itRR.coord[DIM_R],0});
+			} else {
+				p.ps.iterate([&](const SpaceIterator& itRRE) {
+					p.distribution.set(itRRE,p.distribution.get(itRRE)+Nle.get(itRRE));
+				},{-1,itRR.coord[DIM_R],0});
+			}
+		},{0,-1,0});
+	},{0,-1,0});
 	
-	show_message(msgEnd, Module_electronDistribution);
-}*/
+	if (p.id == "ntElectron") show_message(msgEnd,Module_electronDistribution);
+	else if (p.id == "ntProton") show_message(msgEnd,Module_protonDistribution);
+}
+
 
 void distribution2(Particle& p, State& st)
 {
@@ -157,28 +195,65 @@ void distribution2(Particle& p, State& st)
 			},{-1,itRR.coord[DIM_R],0});
 		},{0,-1,0});
 
-		for (int itRR=itR.coord[DIM_R]-1;itRR>=0;itRR--) {
-			double rprim = p.ps[DIM_R][itRR];
-			double delta_r = (rprim/sqrt(paso_r))*(paso_r-1.0);
-			double vel = -radialVel(rprim);
-			double tcell = delta_r/vel;
-			p.ps.iterate([&](const SpaceIterator& itRRE) {  // para cada energía
-				const double E = itRRE.val(DIM_E);
-				double Emax = p.emax();
-				double Eeff = Emax;
-				if (itRRE.its[0].canPeek(+1)) { 
-					Eeff = effectiveE(E,Emax,tcell,p,st,itRRE);
-				}
-				SpaceCoord itRRE_plus_1 = itRRE.moved({0,+1,0});
-				double dist = (Eeff < Emax) ? 
-								Nle.interpolate({{DIM_E,Eeff}},&itRRE_plus_1) : 0.0;
-				double ratioLosses = losses(Eeff,p,st,itRRE_plus_1)/losses(Eeff,p,st,itRRE);
-                //double ratioLosses = 2.0-losses(E,p,st,itRRE_plus_1)/losses(Eeff,p,st,itRRE_plus_1);
-				//double ratioLosses = Eeff/E;
-				double dist2 = dist*ratioLosses;
-                
-				Nle.set(itRRE,dist2);
-			},{-1,itRR,0});
+		if (p.id == "ntProtton") {
+			for (int itRR=itR.coord[DIM_R]-1;itRR>=0;itRR--) {
+				double rprim = p.ps[DIM_R][itRR];
+				double delta_r = (rprim/sqrt(paso_r))*(paso_r-1.0);
+				double vel = -radialVel(rprim);
+				double tcell = delta_r/vel;
+				p.ps.iterate([&](const SpaceIterator& itRRE) {  // para cada energía
+					
+					/*
+					const double E = itRRE.val(DIM_E);
+					double Emax = p.emax();
+					double Eeff = Emax;
+					if (itRRE.its[0].canPeek(+1)) { 
+						Eeff = effectiveE(E,Emax,tcell,p,st,itRRE);
+					}
+					SpaceCoord itRRE_plus_1 = itRRE.moved({0,+1,0});
+					double dist = (Eeff < Emax) ? 
+									Nle.interpolate({{DIM_E,Eeff}},&itRRE_plus_1) : 0.0;
+					//double ratioLosses = losses(Eeff,p,st,itRRE_plus_1)/losses(Eeff,p,st,itRRE);
+					//double ratioLosses = 2.0-losses(E,p,st,itRRE_plus_1)/losses(Eeff,p,st,itRRE_plus_1);
+					//double ratioLosses = Eeff/E;
+					
+					double deltaR = itRRE_plus_1.val(DIM_R) - itRRE.val(DIM_R);
+					double dr = deltaR/100.0;
+					double rcurrent = itRRE_plus_1.val(DIM_R);
+					double ecurrent = Eeff;
+					double dist2 = dist;
+					while (rcurrent > itRRE.val(DIM_R)){
+						double dt = dr/(-radialVel(rcurrent));
+						double dbde = losses(ecurrent,p,st,itRRE_plus_1)-losses(ecurrent-de,p,st,itRRE_plus_1);
+						dbde /= de;
+						dist2 = dist2 * (1.0+dbde*dt);
+						ecurrent = ecurrent - losses(ecurrent,p,st,itRRE_plus_1)*dt;
+						rcurrent -= dr;
+					}
+					
+					double logb2 = 0.5*(log10(losses(Eeff,p,st,itRRE_plus_1))+log10(losses(Eeff,p,st,itRRE)));
+					double b2 = pow(10.0,logb2);
+					double logb1 = 0.5*(log10(losses(E,p,st,itRRE_plus_1))+log10(losses(E,p,st,itRRE)));
+					double b1 = pow(10.0,logb1);
+					double dbde = (b2-b1)/(Eeff-E);
+					double ratioLosses = 1.0 + dbde * tcell;
+					double dist2 = dist*ratioLosses;
+					*/
+					double Emax = p.emax();
+					double E = itRRE.val(DIM_E);
+					size_t nRR = 10;
+					Vector Eeff(nRR+2,E);
+					Vector rCurrent(nRR+2,rprim);
+					SpaceCoord itRRE_plus_1 = itRRE.moved({0,+1,0});
+					double rEnd = p.ps[DIM_R][itRR+1];
+					effectiveE_2(Eeff,rCurrent,rEnd,nRR,Emax,p,st,itRRE);
+					double dist = (Eeff[nRR-1] < Emax) ? 
+									Nle.interpolate({{DIM_E,Eeff[nRR-1]}},&itRRE_plus_1) : 0.0;
+					double dist2 = nLocal(dist,Eeff,rCurrent,nRR,p,st,itRRE);
+					
+					Nle.set(itRRE,dist2);
+				},{-1,itRR,0});
+			}
 		}
 		
 		if (itR.coord[DIM_R] == nR-1) {
@@ -189,9 +264,12 @@ void distribution2(Particle& p, State& st)
 				double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
                 double totalNumberOfParticles = 0.0;
                 double pasoE = pow(p.ps[DIM_E][nE-1]/p.ps[DIM_E][0],1.0/nE);
+				
+				totalNumberOfParticles = RungeKuttaSimple(p.emin(),p.emax(),[&](double e) {
+					return e*Nle.interpolate({{DIM_E,e}},&itRR.coord);});
 				p.ps.iterate([&](const SpaceIterator& itRRE) {
-                    double dE = itRRE.val(DIM_E)*(sqrt(pasoE)-1.0/sqrt(pasoE));
-                    totalNumberOfParticles += Nle.get(itRRE)*dE;
+                    double dE = itRRE.val(DIM_E)*(pasoE-1.0);
+                    //totalNumberOfParticles += Nle.get(itRRE)*dE;
 					Nle.set(itRRE,Nle.get(itRRE)/vol);
 				},{-1,itRR.coord[DIM_R],0});
                 if (p.id == "ntProton")
@@ -300,90 +378,115 @@ void distribution2(Particle& p, State& st)
 	else if (p.id == "ntProton") show_message(msgEnd,Module_protonDistribution);
 }
 
+int rangeE(double e, Particle& p)
+{
+	return (e > p.emin() && e < p.emax());
+}
+
+int rangeR(double r, Particle& p)
+{
+	return (r > p.ps[DIM_R].first() && r < p.ps[DIM_R].last());
+}
+
+double fAux(double r, double pasoR)
+{
+	double cos1 = costhetaH(r);
+	double cos2 = costhetaH(r*pasoR);
+	double cos0 = costhetaH(r*sqrt(pasoR));
+	double dcos = cos2-cos1;
+	double d2cos = (cos2+cos1-2.0*cos0)/(paso_r-1.0);
+	return -(2.0*(pasoR-1.0) + 4.0/3.0 * dcos) / (cos0 + 1.0/3.0 * dcos/ (paso_r-1.0)) - 
+				d2cos/(cos1+1.0/3.0 * dcos);
+}
 
 
+void distribution3(Particle& p, State& st)
+{
+	if (p.id == "ntElectron") show_message(msgStart,Module_electronDistribution);
+	else if (p.id == "ntProton") show_message(msgStart,Module_protonDistribution);
 
-
-			/*for (int t_ix = 0; t_ix < p.ps[2].size(); t_ix++) {
-
-		if (t_ix % 5 == 0) {
-			std::cout << "time: " << t_ix << std::endl;
-		}
-		 
-		//for (int z_ix = 0; z_ix < p.ps[1].size(); z_ix++) { //emisores para todo z
-		//for (int z_ix = 0; z_ix <= t_ix; z_ix++) {	//unico emisor en z=0
-
-		if (single) { superior = t_ix + 1; }
-		//el +1 es para que el for incluya el t_ix
-
-		for (int z_ix = 0; z_ix < superior; z_ix++) { */	
-
-
-/*  paso 2
-	
-				double tp = t / Gamma; //time in the FF
-
-				if (E < 10.0*Emax){
-					double Eeff = effectiveE(E, Emax, tp, r, p, st, i);  //este tp se usa
-					double dist1(0.0), dist2(0.0);
-
-					dist1 = timeDistribution(E, r, tp, p, st, Eeff, i); //este tp NO se usa
-
-					if (t_ix != 0)
-					{	//estos son los puntos donde Q=0, y las particulas vienen de ti-1
-						//if (i.its[2].canPeek(-1)) 
-
-						double dist = N2.interpolate({ { DIM_E, Eeff }, { DIM_R, r }, { DIM_T, i.its[2].peek(-1) } });
-						double ratioLosses = losses(Eeff, r, p, st, i) / losses(E, r, p, st, i);
-						dist2 = dist*ratioLosses;
-					}
-
-					N12.set(i, dist1 + dist2); //lo cargo en N12 mientras interpolo de N2
-					//N12.set(i, dist1); //lo cargo en N12 mientras interpolo de N2
+	p.ps.iterate([&](const SpaceIterator& itR) {
+		
+		const double r = itR.val(DIM_R);
+		const double v = abs(radialVel(r));
+		size_t nPoints = 50;
+		const double pasoRc = pow(p.ps[DIM_R].last()/r,1.0/nPoints);
+		
+		p.ps.iterate([&](const SpaceIterator& itRE) {
+			double e = itRE.val(DIM_E);
+			Vector Rc(nPoints,r);
+			Vector Ec(nPoints,e);
+			
+			// CHARACTERISTIC CURVE ///////////////////////////
+			for (size_t j=0;j<nPoints-1;j++) {
+				double vr = 1.0;
+				double be = 0.0;
+				double deriv = 0.0;
+				if (rangeR(Rc[j],p)) {
+					vr = radialVel(Rc[j]);
+					be = b(Ec[j],Rc[j],p,st,itRE);
+					deriv = be/vr;
 				}
-				else
-				{
-					N12.set(i, 0.0);  //si E>Emax entonces anulo la N
+				double dRc = Rc[j]*(pasoRc-1.0);
+				Ec[j+1] = Ec[j] + deriv*dRc;
+				Rc[j+1] = Rc[j]*pasoRc;
+			}
+			///////////////////////////////////////////////////
+			
+			double N = 0.0;
+			/*
+			for (size_t j=0;j<nPoints;j++) {
+				double Qinj = (rangeE(Ec[j],p) && rangeR(Rc[j],p)) ? 
+						p.injection.interpolate({{DIM_E,Ec[j]},{DIM_R,Rc[j]}},&itRE.coord) : 0.0;
+				double mu = 0.0;
+				double pasoEaux = 1.000001;
+				for (size_t jj=0;jj<j;jj++) {
+					double dEe = Ec[jj]*(sqrt(pasoEaux)-1.0/sqrt(pasoEaux));
+					double dbde = ( (rangeE(Ec[jj]*sqrt(pasoEaux),p) &&
+							rangeE(Ec[jj]/sqrt(pasoEaux),p)) && rangeR(Rc[jj],p) ) ?
+							(b(Ec[jj]*sqrt(pasoEaux),Rc[j],p,st,itRE)-
+									b(Ec[jj]/sqrt(pasoEaux),Rc[j],p,st,itRE))/dEe : 0.0;
+					double vR = abs(radialVel(Rc[jj]));
+					double dRR = Rc[jj]*(pasoRc-1.0);
+					mu += dbde * (dRR/vR);
 				}
-
-			}, { -1, z_ix, t_ix });*/
+				mu = exp(-mu);
+				double f1 = fAux(Rc[j]);
+				double f2 = fAux(r);
+				cout << f1 << "\t" << f2 << endl;
+				double dRc = Rc[j]*(pasoRc-1.0);
+				N += Qinj * P2(Rc[j]/r) * (f1/f2) * mu * dRc;
+			}
+			*/
 			
-			
-	/*		paso 3
-			
-			
-			p.ps.iterate([&](const SpaceIterator& i){
-
-				double ni = N12.get(i); //el ni es que que obtengo con N12
-
-				double dist3;
-
-				double ri = i.its[1].peek(0);
-				double rip1;
-
-				if (i.its[1].canPeek(-1)) //if (z_ix != 0)
-				{
-					SpaceCoord coord = i.moved({ 0, -1, 0 }); //N(ri-1)
-					double ni_1 = p.distribution.get(coord); //este lo calculo con el p.dist porque ya esta en r-1
-				
-					double ri_1 = i.its[1].peek(-1);
+			for (size_t j=0;j<nPoints;j++) {
+				double Qinj = (rangeE(Ec[j],p) && rangeR(Rc[j],p)) ? 
+						p.injection.interpolate({{DIM_E,Ec[j]},{DIM_R,Rc[j]}},&itRE.coord) : 0.0;
+				double mu = 0.0;
+				double pasoEaux = 1.00001;
+				for (size_t jj=0;jj<j;jj++) {
+					double dEe = Ec[jj]*(sqrt(pasoEaux)-1.0/sqrt(pasoEaux));
+					double dbde = ( (rangeE(Ec[jj]*sqrt(pasoEaux),p) &&
+							rangeE(Ec[jj]/sqrt(pasoEaux),p)) && rangeR(Rc[jj],p) ) ?
+							(b(Ec[jj]*sqrt(pasoEaux),Rc[j],p,st,itRE)-
+									b(Ec[jj]/sqrt(pasoEaux),Rc[j],p,st,itRE))/dEe : 0.0;
+					double vR = abs(radialVel(Rc[jj]));
+					double dRR = Rc[jj]*(pasoRc-1.0);
+					double f = fAux(Rc[jj],pasoRc);
 					
-					if (i.its[1].canPeek(1)) { rip1 = i.its[1].peek(+1); }
-					else{
-						double r_int = pow((rmax / rmin), (1.0 / nR));
-						rip1 = ri*r_int; 
-					}
-
-					dist3 = ni*(1.0 - ri / rip1) + ni_1*(ri_1 / ri);
+					mu += f + dbde*(dRR/vR);
 				}
-				else //z_ix=0
-				{
-					rip1 = i.its[1].peek(+1);
-					dist3 = ni*(1.0 - ri / rip1);  
-				}
+				mu = exp(-mu);
+				double dRc = Rc[j]*(pasoRc-1.0);
+				N += Qinj * mu * dRc;
+			}
 
-				p.distribution.set(i,dist3); // lleno p.distribution e interpolo en N12
+			N /= v;
 
-				//p.distribution.set(i, ni); // prueba
-				
-			} , { -1, z_ix, t_ix });*/
+			/*double tCell = itR.val(DIM_R)*(sqrt(paso_r)-1.0/sqrt(paso_r)) / (-radialVel(r));
+			cout << itR.coord[DIM_R] << "\t Ninj = "
+									 << p.injection.get(itRE)*tCell << "\t N = " << N << endl;*/
+			p.distribution.set(itRE,N);
+		},{-1,itR.coord[DIM_R],0});
+	},{0,-1,0});
+}

@@ -7,7 +7,7 @@
     "rTr":"2.0e4",
     "rOutCD":"1.0e5",
       
-    "calculateComptonScatt":"0",
+    "calculateComptonScatt":"1",
     "scatt": {
         "nRandomPhot":"100",
         "nTheta":"5"
@@ -21,7 +21,7 @@
 			"1":1,
 			"2":0,
 			"3":0,
-			"4":0
+			"4":1
         },
         
         "compton": {
@@ -71,12 +71,12 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":"100"
+						"samples":"50"
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":50
+						"samples":20
 					},
 					"radius_cd":{
                         "samples":2
@@ -105,7 +105,7 @@
 				"dim":{
 					"energy": {
 						"min":9.0,
-						"max":18.0
+						"max":19.0
 					}
 				}
 			},

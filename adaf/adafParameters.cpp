@@ -59,7 +59,7 @@ void adafParameters()
         numProcesses = GlobalConfig.get<int>("thermal.numProcesses");
         calculateComptonRedMatrix = GlobalConfig.get<int>("thermal.compton.calculateRedMatrix");
         comptonMethod = GlobalConfig.get<int>("thermal.compton.method");
-        if (calculateComptonRedMatrix) {
+        if (1) {
 
             nGammaCompton = GlobalConfig.get<size_t>("thermal.compton.redMatrixParams.nGammaCompton");
             nTempCompton = GlobalConfig.get<size_t>("thermal.compton.redMatrixParams.nTempCompton");

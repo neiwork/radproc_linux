@@ -69,7 +69,7 @@ int main()
                 injection(model.ntProton,model);
                 writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
                 
-                distribution2(model.ntProton,model);
+                distributionWorking(model.ntProton,model);
                 writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
             
                 if (calculateNeutrons) {

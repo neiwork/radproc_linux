@@ -17,9 +17,9 @@ logerg = np.log10(np.power(10,logeV)*1.6e-12)
 x_eV = [logeV[0],logeV[-1]]
 y = [-15,6]
 
-nR = 40
-f = 2
-nE = 150
+nR = 20
+f = 1
+nE = 50
 colors = np.arange(nR)/nR
 
 fig, ax1 = plt.subplots()
