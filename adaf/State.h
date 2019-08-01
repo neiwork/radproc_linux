@@ -13,6 +13,7 @@ public:
     Particle ntElectron;
     Particle ntProton;
     Particle ntNeutron;
+	Particle ntPair;
     
 	ParamSpaceValues magf;
 	ParamSpaceValues denf_i;

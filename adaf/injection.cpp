@@ -3,6 +3,10 @@
 #include "messages.h"
 #include "globalVariables.h"
 #include "adafFunctions.h"
+
+#include <finjection/pairInjectionExact.h>
+#include <finjection/pairInjection.h>
+
 #include <fparameters/parameters.h>
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/Dimension.h>
@@ -84,4 +88,26 @@ void injection(Particle& p, State& st)
 		sumQ += Q0*vol;
 	},{0,-1,0});
 	cout << "Total power injected in " << p.id << " = " << sumQ << endl; 
+}
+
+
+
+
+void injectionPair(Particle& p, State& st)
+{
+	//static const double etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction");
+	//double Emin = p.emin();   //esta es la primera que uso de prueba
+	
+    //double sumQ = 0.0;
+	p.ps.iterate([&](const SpaceIterator& i) {
+		const double E = i.val(DIM_E);
+
+		// en donde pongo st.photon.injection debería ir el paramSpaceValue con la densidad de fotones no termicos
+		double result = pairInjectionExact(E, st.photon.injection, st.photon.distribution, i, st.photon.emin(), st.photon.emax());
+		double result2 = pairInjection(E, st.photon.injection, st.photon.distribution, i, st.photon.emin(), st.photon.emax());
+		
+		p.injection.set(i,result);
+		p.distribution.set(i,result2);  //en realidad son inyecciones ambas, lo hago asi para comparar las dos aproximaciones y ver cual usamos
+	});
+	//cout << "Total power injected in " << p.id << " = " << sumQ << endl; 
 }

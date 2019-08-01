@@ -75,8 +75,11 @@ int main()
                     injectionNeutrons(model);
                 }
                 
-                if (calculateNonThermalLum)
+                if (calculateNonThermalLum){
                     processes(model, "ntLuminosities.txt");
+				}
+				
+				injectionPair(model.ntPair,model);
             }
         }
 	}

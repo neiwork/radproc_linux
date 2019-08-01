@@ -10,3 +10,6 @@
 
 void injection(Particle& p, State& st);
 double eEmax(Particle&,double,double,double);
+
+
+void injectionPair(Particle& p, State& st);

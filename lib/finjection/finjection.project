@@ -18,10 +18,10 @@
     <File Name="pgammaPairInj.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="pairMuonDecay.h" ExcludeProjConfig="Release;Debug;"/>
     <File Name="pairMuonDecay.cpp" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="pairInjectionExact.h" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="pairInjectionExact.cpp" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="pairInjection.h" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="pairInjection.cpp" ExcludeProjConfig="Release;Debug;"/>
+    <File Name="pairInjectionExact.h" ExcludeProjConfig="Release;"/>
+    <File Name="pairInjectionExact.cpp" ExcludeProjConfig="Release;"/>
+    <File Name="pairInjection.h" ExcludeProjConfig="Release;"/>
+    <File Name="pairInjection.cpp" ExcludeProjConfig="Release;"/>
     <File Name="pairBH.h" ExcludeProjConfig="Release;Debug;"/>
     <File Name="pairBH.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="pairAnnihilation.h" ExcludeProjConfig="Release;Debug;"/>
