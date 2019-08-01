@@ -80,6 +80,8 @@ int main()
 				}
 				
 				injectionPair(model.ntPair,model);
+				writeEandRParamSpace("secondaryPairsInj",model.ntPair.injection,0);
+				writeEandRParamSpace("secondaryPairsInj2",model.ntPair.distribution,0);
             }
         }
 	}

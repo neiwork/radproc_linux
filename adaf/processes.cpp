@@ -18,6 +18,27 @@
 #include <fparameters/SpaceIterator.h>
 
 
+void targetFieldNT(State& st, Matrix lumNT)
+{
+	size_t jE=0;
+	st.photon.ps.iterate([&](const SpaceIterator& itE) {
+		size_t jR=0;
+		double E = itE.val(DIM_E);
+		st.photon.ps.iterate([&](const SpaceIterator& itER) {
+			double r = itER.val(DIM_R);
+			double thetaH = st.thetaH.get(itER);
+			double area = 4.0*pi*r*r*cos(thetaH);
+			double lumReachingShell = 0.0;
+			for (size_t jjR=0;jjR<nR;jjR++)
+				lumReachingShell += reachAA[jjR][jR]*lumNT[jE][jjR];
+			st.photon.injection.set(itER,lumReachingShell/(area*cLight*E*E)); //erg^⁻1 cm^-3
+			jR++;
+		},{itE.coord[DIM_E],-1,0});
+		jE++;
+	},{-1,0,0});
+}
+
+/*
 double opticalDepthSSA(int E_ix, State& st, const Particle& p, double r_current)  
 {
 	double E = st.photon.ps[DIM_E][E_ix];  //E=Eph
@@ -100,7 +121,7 @@ double opticalDepthSSA2(int E_ix, State& st, const Particle& p, int iR)
 	}
 	return opticalDepth/nPhi;
 }
-
+*/
 
 void processes(State& st, const std::string& filename)
 {
@@ -137,6 +158,9 @@ void processes(State& st, const std::string& filename)
 	Vector pPG(nE,0.0);
 	Vector eAbs(nE,0.0);
 	Vector pAbs(nE,0.0);
+	
+	Matrix lumNT_ssa;	matrixInit(lumNT_ssa,nE,nR,0.0);
+	
 	Matrix tau_e;	matrixInit(tau_e,nE,nR,0.0);
 	Matrix tau_p;	matrixInit(tau_p,nE,nR,0.0);
 	Matrix tau_gg;	matrixInit(tau_gg,nE,nR,0.0);
@@ -152,41 +176,36 @@ void processes(State& st, const std::string& filename)
 			
 			Vector tau(3,0.0);
 			double fmtE  = safeLog10(i.val(DIM_E)/1.6e-12);
-			/*if (fmtE < 5.0) { // para que no calcule a todas las energías
-				tau[1] = opticalDepthSSA2(E_ix,st,st.ntElectron,i.coord[DIM_R]);
-				tau[2] = opticalDepthSSA(E_ix, st, st.ntProton, i.val(DIM_R));
-			}
-			
-			if (fmtE > 5.0) {
-				tau_gg = ggOpticalDepth(E_ix,st,i.coord[DIM_R]);
-				factorGG = exp(-tau_gg);
-			}*/
-			
 			if (fmtE < 0.0 || fmtE > 5.0) opticalDepth(tau,E_ix,st,i.coord[DIM_R]);
 
 			double attenuation_gg = exp(-tau[0]);
 			double attenuation_ssae = (tau[1] > 1.0e-15) ? (1.0-exp(-tau[1]))/tau[1] : 1.0;
 			double attenuation_ssap = (tau[2] > 1.0e-15) ? (1.0-exp(-tau[2]))/tau[2] : 1.0;
 			
-			double eSyLocal = luminositySynchrotron(E,st.ntElectron,i,st.magf)*vol;
-			double eICLocal = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin)*vol;
-			double pSyLocal = luminositySynchrotron(E,st.ntProton,i,st.magf)*vol;
-			double pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i)*vol;
-			double pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax)*vol;
+			double eSyLocal = luminositySynchrotron(E,st.ntElectron,i,st.magf);
+			double eICLocal = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);
+			double pSyLocal = luminositySynchrotron(E,st.ntProton,i,st.magf);
+			double pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
+			double pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
 
-			eSy[E_ix] += eSyLocal;
-			eIC[E_ix] += eICLocal;
-			pSy[E_ix] += pSyLocal;
-			pPP[E_ix] += pPPLocal;
-			pPG[E_ix] += pPGLocal;
-			eAbs[E_ix] += (eSyLocal+eICLocal)*attenuation_ssae*attenuation_gg;
-			pAbs[E_ix] += (pSyLocal+pPPLocal+pPGLocal)*attenuation_ssap*attenuation_gg;
+			eSy[E_ix] += eSyLocal*vol;
+			eIC[E_ix] += eICLocal*vol;
+			pSy[E_ix] += pSyLocal*vol;
+			pPP[E_ix] += pPPLocal*vol;
+			pPG[E_ix] += pPGLocal*vol;
+			eAbs[E_ix] += (eSyLocal+eICLocal)*vol*attenuation_ssae*attenuation_gg;
+			pAbs[E_ix] += (pSyLocal+pPPLocal+pPGLocal)*vol*attenuation_ssap*attenuation_gg;
 			tau_gg[E_ix][i.coord[DIM_R]] = tau[0];
 			tau_e[E_ix][i.coord[DIM_R]] = tau[1];
 			tau_p[E_ix][i.coord[DIM_R]] = tau[2];
+			
+			lumNT_ssa[E_ix][i.coord[DIM_R]] = ( (eSyLocal+eICLocal)*attenuation_ssae + 
+												(pSyLocal+pPPLocal+pPGLocal)*attenuation_ssap ) * vol;
 
 		},{E_ix,-1,0});
 	}
+	
+	targetFieldNT(st,lumNT_ssa);
 	
 	for (size_t jR=0;jR<nR;jR++) {
 		double r = st.photon.ps[DIM_R][jR] / schwRadius;
@@ -215,6 +234,7 @@ void processes(State& st, const std::string& filename)
 	
 	file.close();
 	file2.close();
+
 	show_message(msgEnd,Module_luminosities);
 }
 

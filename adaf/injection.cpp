@@ -90,15 +90,13 @@ void injection(Particle& p, State& st)
 	cout << "Total power injected in " << p.id << " = " << sumQ << endl; 
 }
 
-
-
-
 void injectionPair(Particle& p, State& st)
 {
 	//static const double etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction");
 	//double Emin = p.emin();   //esta es la primera que uso de prueba
 	
     //double sumQ = 0.0;
+	show_message(msgStart, Module_pairInjection);
 	p.ps.iterate([&](const SpaceIterator& i) {
 		const double E = i.val(DIM_E);
 
@@ -107,7 +105,8 @@ void injectionPair(Particle& p, State& st)
 		double result2 = pairInjection(E, st.photon.injection, st.photon.distribution, i, st.photon.emin(), st.photon.emax());
 		
 		p.injection.set(i,result);
-		p.distribution.set(i,result2);  //en realidad son inyecciones ambas, lo hago asi para comparar las dos aproximaciones y ver cual usamos
-	});
+		p.distribution.set(i,result2);  //en rclTabCtrlealidad son inyecciones ambas, lo hago asi para comparar las dos aproximaciones y ver cual usamos
+	},{-1,-1,0});
+	show_message(msgEnd, Module_pairInjection);
 	//cout << "Total power injected in " << p.id << " = " << sumQ << endl; 
 }
