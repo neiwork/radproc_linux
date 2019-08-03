@@ -572,6 +572,15 @@ void thermalProcesses(State& st, const string& filename)
 	matrixInit(lumOut,nE,nR,0.0);
 
 	Vector energies(nE,0.0);
+	
+	ofstream file;
+	file.open("adaf.txt");
+	st.photon.ps.iterate([&](const SpaceIterator& i) { 
+		double r = i.val(DIM_R);
+		double z = r*costhetaH(r);
+		file << r/schwRadius << "\t" << z/schwRadius << "\t" << costhetaH(r) << endl;
+	},{0,-1,0});
+	file.close();
 
 	int processesFlags[numProcesses];	readThermalProcesses(processesFlags);
 	if (processesFlags[0] || processesFlags[1] || processesFlags[2] || processesFlags[3]) {
@@ -589,7 +598,7 @@ void thermalProcesses(State& st, const string& filename)
 		//binEmissivities(st,esc,energies,lumOut);
 		photonDensity(st,energies,lumOut);
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,
-					lumOutIC,lumOut,lumOutCD,lumOutRefl,filename);
+							lumOutIC,lumOut,lumOutCD,lumOutRefl,filename);
 		targetField(st,lumOut,lumOutCD,lumOutRefl);
 	}	
 	

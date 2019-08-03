@@ -6,7 +6,7 @@
 #include "globalVariables.h"
 #include "losses.h"
 #include <fmath/RungeKutta.h>
-//#include "timeDistribution.h"
+#include <flosses/nonThermalLosses.h>
 
 #include <iostream>
 
@@ -16,14 +16,17 @@
 int rangeE(double e, Particle& p)	{ return (e > p.emin() && e < p.emax()); }
 int rangeR(double r, Particle& p)	{ return (r > p.ps[DIM_R].first() && r < p.ps[DIM_R].last()); }
 
-double fAux(double r, double pasoR)
+double fAux(double r, double pasoR, double E, double magfield)
 {
 	double cos1 = costhetaH(r);
 	double cos2 = costhetaH(r*pasoR);
 	double cos0 = costhetaH(r*sqrt(pasoR));
 	double dcos = cos2-cos1;
+	double tadv = r/abs(radialVel(r));
+	double Diffrate = diffusionRate(E,r,magfield);
+	double q_times = tadv*Diffrate;
 	double d2cos = (cos2+cos1-2.0*cos0)/(paso_r-1.0);
-	return -(2.0*(pasoR-1.0) + 4.0/3.0 * dcos) / (cos0 + 1.0/3.0 * dcos/ (paso_r-1.0)) - 
+	return -((2.0-s-q_times)*(pasoR-1.0) + 4.0/3.0 * dcos) / (cos0 + 1.0/3.0 * dcos/ (paso_r-1.0)) - 
 				d2cos/(cos1 + 1.0/3.0 * dcos);
 }
 
@@ -179,7 +182,8 @@ void distributionDetailed(Particle& p, State& st)
 									b(Ec[jj]/sqrt(pasoEaux),Rc[j],p,st,itRE))/dEe : 0.0;
 					double vR = abs(radialVel(Rc[jj]));
 					double dRR = Rc[jj]*(pasoRc-1.0);
-					double f = fAux(Rc[jj],pasoRc);
+					double magfield = rangeR(Rc[jj],p) ? st.magf.interpolate({{DIM_R,Rc[jj]}},&itRE.coord) : 0.0;
+					double f = fAux(Rc[jj],pasoRc,Ec[jj],magfield);
 					mu += f + dbde*(dRR/vR);
 				}
 				mu = exp(-mu);
