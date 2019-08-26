@@ -558,6 +558,28 @@ void targetField(State& st, Matrix lumOut, Matrix lumCD, Matrix lumRefl)
 	},{-1,0,0});
 }
 
+void writeBlob(State& st, Vector energies, Matrix lum, double t)
+{
+	double IRfreq = 1.4e14;
+	double frequency1 = energies[0]/planck;
+	double frequency2 = frequency1;
+	size_t jE = 1;
+	while (frequency2 < IRfreq) {
+		frequency1 = frequency2;
+		frequency2 = energies[jE++]/planck;
+	}
+	frequency1 = sqrt(frequency1*frequency2);
+	double IRlum = 0.0;
+	for (size_t jR=0;jR<nR;jR++)
+		IRlum += sqrt(lum[jE-1][jR]*lum[jE+1][jR]) * escapeAi[jR];
+	
+	IRlum *= frequency1;
+	ofstream file;
+	file.open("lightCurveBlob.txt",ios::app);
+	file << t << "\t" << IRlum << endl;
+	file.close();
+}
+
 void thermalProcesses(State& st, const string& filename)
 {
 	show_message(msgStart,Module_thermalLuminosities);
@@ -573,15 +595,6 @@ void thermalProcesses(State& st, const string& filename)
 
 	Vector energies(nE,0.0);
 	
-	ofstream file;
-	file.open("adaf.txt");
-	st.photon.ps.iterate([&](const SpaceIterator& i) { 
-		double r = i.val(DIM_R);
-		double z = r*costhetaH(r);
-		file << r/schwRadius << "\t" << z/schwRadius << "\t" << costhetaH(r) << endl;
-	},{0,-1,0});
-	file.close();
-
 	int processesFlags[numProcesses];	readThermalProcesses(processesFlags);
 	if (processesFlags[0] || processesFlags[1] || processesFlags[2] || processesFlags[3]) {
 		if (processesFlags[0] || processesFlags[1] || processesFlags[2])
@@ -599,6 +612,9 @@ void thermalProcesses(State& st, const string& filename)
 		photonDensity(st,energies,lumOut);
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,
 							lumOutIC,lumOut,lumOutCD,lumOutRefl,filename);
+		
+		if (calculateFlare)
+			writeBlob(st,energies,lumOut,tAccBlob);
 		targetField(st,lumOut,lumOutCD,lumOutRefl);
 	}	
 	

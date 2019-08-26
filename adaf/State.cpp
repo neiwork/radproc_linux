@@ -40,7 +40,8 @@ State::State(boost::property_tree::ptree& cfg):
         denf_i.initialize();
         denf_i.fill([&](const SpaceIterator& i) {
             double r=i.val(DIM_R); 
-            return massDensityADAF(r)/(atomicMassUnit*iMeanMolecularWeight);
+            double dens = massDensityADAF(r)/(atomicMassUnit*iMeanMolecularWeight);
+			return dens;
         });
         denf_e.initialize();
         denf_e.fill([&](const SpaceIterator& i) {

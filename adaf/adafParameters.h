@@ -30,6 +30,7 @@ int calculateNonThermal;   				// If 1 calculate the non-thermal processes.
 int calculateLosses;                    // If 1 calculate radiative losses for electrons and protons.
 int calculateNTdistributions;           // If 1 calculate non-thermal particle distributions.
 int calculateNonThermalLum;             // If 1 calculate non-thermal luminosities.
+int calculateFlare;						// If 1 calculate non-thermal flare distributions.
 int calculateNeutrons;                  // If 1 calculate processes for neutrons.
 int calculateComptonRedMatrix;			// If 1 calculate the Comptonization energy redistribution
 										// matrices. It only works if comptonMethod=0 or 1.
@@ -81,5 +82,10 @@ Vector escapeDi;						// Probab. for a photon emitted in a thin disk shell to
 
 // PARAMETERS
 double schwRadius;						// Schwarzschild Radius [cm]
+
+// BLOB PARAMETERS
+double rBlob;
+double tAccBlob;
+double factorDensity;
 
 void adafParameters();

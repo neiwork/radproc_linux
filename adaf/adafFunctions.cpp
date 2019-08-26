@@ -1,6 +1,7 @@
 #include "adafFunctions.h"
 #include "globalVariables.h"
 #include "read.h"
+#include <iostream>
 #include <fmath/physics.h>
 #include <fparameters/parameters.h>
 
@@ -93,8 +94,10 @@ double accRateADAF(double r)
 
 double massDensityADAF(double r)
 {
-	return accRateADAF(r) / 
-		(4.0*pi*r*r*costhetaH(r)*(-radialVel(r)));
+	double result = accRateADAF(r) / (4.0*pi*r*r*costhetaH(r)*(-radialVel(r)));
+	
+	if (r < rBlob) result *= factorDensity;
+	return result;
 }
 
 double accRateColdDisk(double r)

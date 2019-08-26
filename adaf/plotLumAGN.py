@@ -12,7 +12,7 @@ nu,eV,Sy,Br,IC,pp,CD,Refl,Tot = np.loadtxt('lum.txt',unpack=True)
 NT_logeV,NT_logSye,NT_logSyp,NT_logIC,NT_logpp,NT_logpg,NT_logeAbs,NT_logpAbs = \
         np.loadtxt('ntLuminosities.txt',unpack=True,skiprows=1)
 x_eV = [-9,17]
-y_axis = [35,44]
+y_axis = [25,38]
 
 fig, ax1 = plt.subplots()
 

@@ -6,10 +6,12 @@
     "accretionRateCorona":"1.0",
     "rTr":"2.0e4",
     "rOutCD":"1.0e5",
+    "tAccBlob":"0",
+    "factorDensity":"100",
       
     "calculateComptonScatt":"0",
     "scatt": {
-        "nRandomPhot":"100",
+        "nRandomPhot":"200",
         "nTheta":"5"
     },
 
@@ -49,16 +51,30 @@
     },
     
     "calculateNonThermal":"1",
-    "nonThermal": {
-    
+    "nonThermal": { 
+	"flare": {
+		"injection": {
+			"energyFraction":"0.01",
+			"accEfficiency":"0.1",
+			"primaryIndex":"2.0"
+		},
+		"timeAfterFlare":"1000",
+		"maxRadius":"10",
+		"burst": {
+			"tRise":"160",
+			"tPlateau":"2400",
+			"tDecay":"360"
+		}
+	},
         "injection": {
             "energyFraction":"0.01",
             "accEfficiency":"0.1",
-            "primaryIndex":"2.0"
+            "primaryIndex":"3.0"
         },
         "calculateLosses":"0",
+	"calculateFlare":"0",
 	"calculateDistributions":"1",
-        "calculateLuminosities":"0",
+        "calculateLuminosities":"1",
 	"calculateNeutrons":"0",
     	"neutrons":{
         	"calculatePropagation":"0"
@@ -71,12 +87,12 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":"50"
+						"samples":"80"
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":20
+						"samples":30
 					},
 					"radius_cd":{
                         "samples":2

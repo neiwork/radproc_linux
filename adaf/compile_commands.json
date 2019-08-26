@@ -467,17 +467,21 @@
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/adafParameters.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/adafParameters.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalProcesses.cpp",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalProcesses.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalProcesses.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
- }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/injection.h",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/injection.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/injection.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
- }, {
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/adafFunctions.h",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/adafFunctions.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/adafFunctions.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/globalVariables.h",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/globalVariables.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/globalVariables.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/messages.cpp",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/messages.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/messages.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/messages.h",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/messages.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/messages.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/processes.cpp",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
@@ -499,10 +503,6 @@
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalCompton.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalCompton.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/messages.cpp",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/messages.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/messages.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
- }, {
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/radiativeLosses.h",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/radiativeLosses.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/radiativeLosses.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
@@ -511,21 +511,41 @@
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/injectionNeutrons.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/injectionNeutrons.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/injection.cpp",
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/pairProcesses.cpp",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/injection.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/injection.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
- }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/distribution.cpp",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/distribution.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/distribution.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/pairProcesses.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/pairProcesses.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/absorption.cpp",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/absorption.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/absorption.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/absorption.h",
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/adafFunctions.cpp",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/absorption.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/absorption.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/adafFunctions.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/adafFunctions.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/distribution.h",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/distribution.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/distribution.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/pairProcesses.h",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/pairProcesses.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/pairProcesses.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/injectionNeutrons.h",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/injectionNeutrons.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/injectionNeutrons.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/oneZoneTimeDependent.h",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/oneZoneTimeDependent.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/oneZoneTimeDependent.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/oneZoneTimeDependent.cpp",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/oneZoneTimeDependent.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/oneZoneTimeDependent.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalDistribution.cpp",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalDistribution.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalDistribution.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/radiativeLosses.cpp",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
@@ -535,17 +555,25 @@
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/losses.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/losses.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/injectionNeutrons.h",
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/absorption.h",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/injectionNeutrons.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/injectionNeutrons.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/absorption.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/absorption.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/adafFunctions.cpp",
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/injection.h",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/adafFunctions.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/adafFunctions.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/injection.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/injection.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/distribution.h",
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/distribution.cpp",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/distribution.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/distribution.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/distribution.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/distribution.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/injection.cpp",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/injection.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/injection.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalProcesses.cpp",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalProcesses.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalProcesses.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/main.cpp",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
@@ -575,21 +603,17 @@
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/modelParameters.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/modelParameters.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalDistribution.cpp",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalDistribution.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalDistribution.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
- }, {
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalCompton.cpp",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalCompton.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalCompton.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalDistribution.h",
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/blob.h",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalDistribution.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalDistribution.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/blob.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/blob.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/read.cpp",
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/blob.cpp",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/read.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/read.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/blob.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/blob.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalProcesses.h",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
@@ -603,6 +627,14 @@
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/modelParameters.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/modelParameters.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalDistribution.h",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalDistribution.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/thermalDistribution.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/read.cpp",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/read.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/read.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
+ }, {
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/write.cpp",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/write.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/write.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
@@ -610,14 +642,6 @@
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/write.h",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/write.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/write.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
- }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/messages.h",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/messages.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/messages.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
- }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/adaf/globalVariables.h",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/adaf",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/adaf/globalVariables.h -o /home/emgutierrez/Work/Codes/radproc_linux/adaf/globalVariables.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -DNDEBUG -I. -I. -I../lib -I../external/include -I../gsl/include  -O3  -fopenmp  -Wall"
  }, {
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/nrMath/nrutil.h",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/nrMath",

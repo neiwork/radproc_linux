@@ -5,6 +5,7 @@
 #include "globalVariables.h"
 #include "adafFunctions.h"
 #include "absorption.h"
+#include "thermalProcesses.h"
 
 #include <fmath/RungeKutta.h>
 
@@ -15,6 +16,7 @@
 #include <fluminosities/luminosityPhotoHadronic.h>
 
 #include <fparameters/Dimension.h>
+#include <fparameters/parameters.h>
 #include <fparameters/SpaceIterator.h>
 
 
@@ -164,10 +166,13 @@ void processes(State& st, const std::string& filename)
 	Matrix tau_e;	matrixInit(tau_e,nE,nR,0.0);
 	Matrix tau_p;	matrixInit(tau_p,nE,nR,0.0);
 	Matrix tau_gg;	matrixInit(tau_gg,nE,nR,0.0);
+	
+	Vector energies(nE,0.0);
 
 	#pragma omp parallel for
 	for (int E_ix=0;E_ix<nE;E_ix++) {
 		double E = st.photon.distribution.ps[DIM_E][E_ix];
+		energies[E_ix] = E;
 		st.photon.ps.iterate([&](const SpaceIterator &i) {
 			double r = i.val(DIM_R);
 			double rB1 = r/sqrt(paso_r);
@@ -181,12 +186,15 @@ void processes(State& st, const std::string& filename)
 			double attenuation_gg = exp(-tau[0]);
 			double attenuation_ssae = (tau[1] > 1.0e-15) ? (1.0-exp(-tau[1]))/tau[1] : 1.0;
 			double attenuation_ssap = (tau[2] > 1.0e-15) ? (1.0-exp(-tau[2]))/tau[2] : 1.0;
+			//double attenuation_gg = (tau[0] > 1.0e-15) ? (1.0-exp(-tau[0]))/tau[0] : 1.0;
 			
 			double eSyLocal = luminositySynchrotron(E,st.ntElectron,i,st.magf);
-			double eICLocal = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);
-			double pSyLocal = luminositySynchrotron(E,st.ntProton,i,st.magf);
-			double pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
-			double pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
+			double eICLocal,pSyLocal,pPPLocal,pPGLocal;
+			eICLocal = pSyLocal = pPPLocal = pPGLocal = 0.0;
+			eICLocal = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);
+			pSyLocal = luminositySynchrotron(E,st.ntProton,i,st.magf);
+			pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
+			pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
 
 			eSy[E_ix] += eSyLocal*vol;
 			eIC[E_ix] += eICLocal*vol;
@@ -201,6 +209,7 @@ void processes(State& st, const std::string& filename)
 			
 			lumNT_ssa[E_ix][i.coord[DIM_R]] = ( (eSyLocal+eICLocal)*attenuation_ssae + 
 												(pSyLocal+pPPLocal+pPGLocal)*attenuation_ssap ) * vol;
+			//lumNT_ssa[E_ix][i.coord[DIM_R]] = eSyLocal*vol/(E/planck);
 
 		},{E_ix,-1,0});
 	}
@@ -232,6 +241,11 @@ void processes(State& st, const std::string& filename)
 			 << std::endl;
 	}
 	
+	if (calculateFlare) {
+		double timeBurst = GlobalConfig.get<double>("nonThermal.flare.timeAfterFlare");
+		writeBlob(st,energies,lumNT_ssa,tAccBlob);
+	}
+
 	file.close();
 	file2.close();
 

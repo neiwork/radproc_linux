@@ -77,7 +77,8 @@ void injection(Particle& p, State& st)
         
 		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
 		double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
-		double Q0 = etaInj*uth*cLight/r;   // power injected in nt particles [erg s^-1 cm^-3]
+		double tCell = (rB2-rB1)/(-radialVel(r));
+		double Q0 = etaInj*uth / tCell;   // power injected in nt particles [erg s^-1 cm^-3]
         
 		double Q0p = Q0/int_E;
 		p.ps.iterate([&](const SpaceIterator& jE) {
@@ -90,23 +91,90 @@ void injection(Particle& p, State& st)
 	cout << "Total power injected in " << p.id << " = " << sumQ << endl; 
 }
 
+double burstFunction(double t)
+{
+	double tRise = GlobalConfig.get<double>("nonThermal.flare.burst.tRise");
+	double tPlateau = GlobalConfig.get<double>("nonThermal.flare.burst.tPlateau");
+	double tDecay = GlobalConfig.get<double>("nonThermal.flare.burst.tDecay");
+	
+	return (1.0 - exp(-t/tRise)) * (0.5*pi - atan((t-tPlateau)/tDecay));
+}
+
+void injectionBurst(Particle& p, State& st)
+{
+	static const double etaInj = GlobalConfig.get<double>("nonThermal.flare.injection.energyFraction");
+	double Emin = p.emin();   //esta es la primera que uso de prueba
+	
+    double sumQ = 0.0;
+	p.ps.iterate([&](const SpaceIterator& i) {
+		const double r = i.val(DIM_R);
+		double rB1 = r/sqrt(paso_r);
+		double rB2 = rB1*paso_r;
+		const double thetaH = st.thetaH.get(i);
+		const double vol = (4.0/3.0)*pi*cos(thetaH)*(rB2*rB2*rB2-rB1*rB1*rB1);
+
+		double Emax = eEmax(p,r,st.magf.get(i),-radialVel(r),st.denf_i.get(i));
+		double int_E = RungeKuttaSimple(Emin,p.emax(),[&Emax,&Emin](double E){
+			return E*cutOffPL(E,Emin,Emax);});  //integra E*Q(E)  entre Emin y Emax
+        
+		double timeBurst = GlobalConfig.get<double>("nonThermal.flare.timeAfterFlare");
+        double norm_temp, dens;
+		if(p.id == "ntElectron") {
+			norm_temp = boltzmann*st.tempElectrons.get(i)/(p.mass*cLight2);
+			dens = st.denf_e.get(i);
+		} else if(p.id == "ntProton") {
+			norm_temp = boltzmann*st.tempIons.get(i)/(p.mass*cLight2);
+			dens = st.denf_i.get(i);
+		}
+        
+		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
+		double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
+		double tCell = (rB2-rB1)/(-radialVel(r));
+		double Q0 = etaInj*uth / tCell;   // power injected in nt particles [erg s^-1 cm^-3]
+        
+		double Q0p = Q0/int_E;
+		p.ps.iterate([&](const SpaceIterator& jE) {
+			const double E = jE.val(DIM_E);
+			double total = cutOffPL(E, Emin, Emax)*Q0p * burstFunction(tAccBlob);//burstFunction(timeBurst);
+			p.injection.set(jE,total); //en unidades de erg^-1 s^-1 cm^-3
+		},{-1,i.coord[DIM_R],0});
+		sumQ += Q0*vol;
+	},{0,-1,0});
+	cout << "Total power injected in " << p.id << " = " << sumQ << endl; 
+}
+
 void injectionPair(Particle& p, State& st)
 {
 	//static const double etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction");
 	//double Emin = p.emin();   //esta es la primera que uso de prueba
 	
-    //double sumQ = 0.0;
+    double sumQtot = 0.0;
+	double sumQ2tot = 0.0;
+	double pasoE = pow(st.denf_e.ps[DIM_E][nE-1]/st.denf_e.ps[DIM_E][0],1.0/nE);
 	show_message(msgStart, Module_pairInjection);
-	p.ps.iterate([&](const SpaceIterator& i) {
-		const double E = i.val(DIM_E);
-
-		// en donde pongo st.photon.injection debería ir el paramSpaceValue con la densidad de fotones no termicos
-		double result = pairInjectionExact(E, st.photon.injection, st.photon.distribution, i, st.photon.emin(), st.photon.emax());
-		double result2 = pairInjection(E, st.photon.injection, st.photon.distribution, i, st.photon.emin(), st.photon.emax());
-		
-		p.injection.set(i,result);
-		p.distribution.set(i,result2);  //en rclTabCtrlealidad son inyecciones ambas, lo hago asi para comparar las dos aproximaciones y ver cual usamos
-	},{-1,-1,0});
+	p.ps.iterate([&](const SpaceIterator& iR) {
+		const double r = iR.val(DIM_R);
+		double rB2 = r*sqrt(paso_r);
+		double rB1 = rB2/paso_r;
+		double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
+		double sumQ = 0.0;
+		double sumQ2 = 0.0;
+		p.ps.iterate([&](const SpaceIterator& iRE) {
+			const double E = iRE.val(DIM_E);
+			double dE = E*(pasoE-1.0);
+			// en donde pongo st.photon.injection debería ir el paramSpaceValue con la densidad de fotones no termicos
+			//double result = pairInjectionExact(E,st.photon.injection,st.photon.distribution,iRE,st.photon.emin(),st.photon.emax());
+			double result2 = pairInjection(E,st.photon.injection,st.photon.distribution,iRE,st.photon.emin(),st.photon.emax());
+			
+			//sumQ += result*dE;
+			sumQ2 += result2*dE;
+			//p.injection.set(iRE,result);
+			p.injection.set(iRE,result2);
+			//p.distribution.set(iRE,result2);  //en rclTabCtrlealidad son inyecciones ambas, lo hago asi para comparar las dos aproximaciones y ver cual usamos
+		},{-1,iR.coord[DIM_R],0});
+		sumQtot += sumQ*vol;
+		sumQ2tot += sumQ2*vol;
+	},{0,-1,0});
 	show_message(msgEnd, Module_pairInjection);
-	//cout << "Total power injected in " << p.id << " = " << sumQ << endl; 
+	cout << "Total power injected in " << p.id << " = " << sumQtot << "\t" << sumQ2tot << endl; 
 }

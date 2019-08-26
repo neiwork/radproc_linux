@@ -23,7 +23,7 @@ double fAux(double r, double pasoR, double E, double magfield)
 	double cos0 = costhetaH(r*sqrt(pasoR));
 	double dcos = cos2-cos1;
 	double tadv = r/abs(radialVel(r));
-	double Diffrate = diffusionRate(E,r,magfield);
+	double Diffrate = diffusionRate(E,r*costhetaH(r),magfield);
 	double q_times = tadv*Diffrate;
 	double d2cos = (cos2+cos1-2.0*cos0)/(paso_r-1.0);
 	return -((2.0-s-q_times)*(pasoR-1.0) + 4.0/3.0 * dcos) / (cos0 + 1.0/3.0 * dcos/ (paso_r-1.0)) - 
@@ -47,8 +47,9 @@ double effectiveE(double Ee, double Emax, double t, Particle& p, State& st, cons
 
 void distributionFast(Particle& p, State& st)
 {
-	if (p.id == "ntElectron") show_message(msgStart,Module_electronDistribution);
+	if (p.id == "ntElectron" || p.id == "ntPair") show_message(msgStart,Module_electronDistribution);
 	else if (p.id == "ntProton") show_message(msgStart,Module_protonDistribution);
+	
 	p.ps.iterate([&](const SpaceIterator& itR) {
 		
 		const double r = itR.val(DIM_R);
@@ -64,21 +65,28 @@ void distributionFast(Particle& p, State& st)
 					double rB2 = rB1*paso_r;
 					double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
 					double energy = itRRE.val(DIM_E);
-					if (p.id == "ntProton") {
-						double tcool = energy/losses(energy,p,st,itRRE);
-						Nle.set(itRRE,p.injection.get(itRRE)*min(tcell,tcool)*vol);
-					}
-					if (p.id == "ntElectron") {
+					//if (p.id == "ntProton") {
+					double tcool = energy/losses(energy,p,st,itRRE);
+					//Nle.set(itRRE,p.injection.get(itRRE)*min(tcell,tcool)*vol);
+					//}
+					if (tcell < tcool) {
+						Nle.set(itRRE,p.injection.get(itRRE)*tcell*vol);
+					} else {
 						double integ = RungeKuttaSimple(energy,p.emax()*0.99,[&](double e) {
 							return p.injection.interpolate({{0,e}},&itRR.coord);});
 						Nle.set(itRRE,integ/losses(energy,p,st,itRRE)*vol);
 					}
+					/*if (p.id == "ntElectron") {
+						double integ = RungeKuttaSimple(energy,p.emax()*0.99,[&](double e) {
+							return p.injection.interpolate({{0,e}},&itRR.coord);});
+						Nle.set(itRRE,integ/losses(energy,p,st,itRRE)*vol);
+					}*/
 				} else
 					Nle.set(itRRE,0.0);
 			},{-1,itRR.coord[DIM_R],0});
 		},{0,-1,0});
 		
-		if (p.id == "ntProton") {
+		if (1) { //p.id == "ntProton") {
 			for (int itRR=itR.coord[DIM_R]-1;itRR>=0;itRR--) {
 				double rprim = p.ps[DIM_R][itRR];
 				double delta_r = (rprim/sqrt(paso_r))*(paso_r-1.0);
@@ -100,7 +108,7 @@ void distributionFast(Particle& p, State& st)
 				},{-1,itRR,0});
 			}
 		}
-			
+		// REVISAR SI ESTO QUE SIGUE VA TMB PARA ELECTRONES
 		if (itR.coord[DIM_R] == nR-1) {
 			p.ps.iterate([&](const SpaceIterator& itRR) {
 				double r = itRR.val(DIM_R);
@@ -112,6 +120,7 @@ void distributionFast(Particle& p, State& st)
 				},{-1,itRR.coord[DIM_R],0});
 			},{0,-1,0});
 			if (p.id == "ntProton")	writeEandRParamSpace("linearEmitter_p",Nle,0);
+			if (p.id == "ntElectron")	writeEandRParamSpace("linearEmitter_e",Nle,0);
 		}
 
 		p.ps.iterate([&](const SpaceIterator& itRR) {
@@ -131,7 +140,7 @@ void distributionFast(Particle& p, State& st)
 		},{0,-1,0});
 	},{0,-1,0});
 	
-	if (p.id == "ntElectron") show_message(msgEnd,Module_electronDistribution);
+	if (p.id == "ntElectron" || p.id == "ntPair") show_message(msgEnd,Module_electronDistribution);
 	else if (p.id == "ntProton") show_message(msgEnd,Module_protonDistribution);
 }
 
@@ -146,9 +155,9 @@ void distributionDetailed(Particle& p, State& st)
 		const double v = abs(radialVel(r));
 		size_t nPoints = 50;
 		const double pasoRc = pow(p.ps[DIM_R].last()/r,1.0/nPoints);
-		
+		double sumNT = 0.0;
 		p.ps.iterate([&](const SpaceIterator& itRE) {
-			double e = itRE.val(DIM_E);
+			double e = itRE.val(DIM_E); // REVISAR SI ESTA E SIRVE PARA LAS PARTICULAS
 			Vector Rc(nPoints,r);
 			Vector Ec(nPoints,e);
 			
@@ -191,7 +200,15 @@ void distributionDetailed(Particle& p, State& st)
 				N += Qinj * mu * dRc;
 			}
 			N /= v;
+			double pasoE = pow(p.emax()/p.emin(),1.0/nE);
 			p.distribution.set(itRE,N);
+			double dE = e*(pasoE-1.0);
+			sumNT += N*e*dE;
 		},{-1,itR.coord[DIM_R],0});
+		double dens = st.denf_i.get(itR);
+		double norm_temp = boltzmann * st.tempIons.get(itR) / (p.mass*cLight2);
+		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp);
+		double uth = dens * norm_temp * p.mass * cLight2 * aTheta;
+		cout << "uThermal = " << uth << "\t uNonThermal = " << sumNT << endl;
 	},{0,-1,0});
 }

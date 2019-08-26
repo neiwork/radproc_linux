@@ -42,6 +42,7 @@ extern const int calculatePhotonDensityGap;
 extern const int calculateNonThermal;
 extern const int calculateLosses;
 extern const int calculateNTdistributions;
+extern const int calculateFlare;
 extern const int calculateNonThermalLum;
 extern const int calculateNeutrons;
 extern const int calculateComptonProbs;
@@ -50,6 +51,12 @@ extern const int comptonMethod;
 
 // PARAMETERS
 extern const double schwRadius;					// Gravitationl Radius [cm]
+
+// BLOB PARAMETERS
+extern double rBlob;
+extern double tAccBlob;
+extern double factorDensity;
+
 extern const int numProcesses;                  // Number of thermal processes
 
 extern const size_t nGammaCompton;
