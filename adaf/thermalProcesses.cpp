@@ -46,23 +46,23 @@ void localProcesses(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOu
 		lumSync1 = lumSync2 = 0.0;
 		size_t jR=0;
 		st.photon.ps.iterate([&](const SpaceIterator& itER) {
-			double r=itER.val(DIM_R);
+			double r = itER.val(DIM_R);
 			double thetaH = st.thetaH.get(itER);
-			double rB1=r/sqrt(paso_r);
-			double rB2=r*sqrt(paso_r);
-			double area=2.0*pi*rB2*rB2*(2.0*cos(thetaH)+sin(thetaH)*sin(thetaH));
-			double fluxToLum=area;
-			double vol=(rB2*rB2*rB2-rB1*rB1*rB1)*(4.0/3.0)*pi*cos(thetaH);
-			double emissToLum=vol*4.0*pi;
-			double lumBr=0.0;
-			double lumSy=0.0;
-			double lumRJ=0.0;
+			double rB1 = r/sqrt(paso_r);
+			double rB2 = r*sqrt(paso_r);
+			double area = 2.0*pi*rB2*rB2*(2.0*cos(thetaH)+sin(thetaH)*sin(thetaH));
+			double fluxToLum = area;
+			double vol = (rB2*rB2*rB2-rB1*rB1*rB1)*(4.0/3.0)*pi*cos(thetaH);
+			double emissToLum = vol*4.0*pi;
+			double lumBr = 0.0;
+			double lumSy = 0.0;
+			double lumRJ = 0.0;
 
-			double temp=st.tempElectrons.get(itER);
-			double temp_i=st.tempIons.get(itER);
-			double magf=st.magf.get(itER);
-			double dens_i=st.denf_i.get(itER);
-			double dens_e=st.denf_e.get(itER);
+			double temp = st.tempElectrons.get(itER);
+			double temp_i = st.tempIons.get(itER);
+			double magf = st.magf.get(itER);
+			double dens_i = st.denf_i.get(itER);
+			double dens_e = st.denf_e.get(itER);
 			if (flags[0]) {
 				double jSy = jSync(energies[jE],temp,magf,dens_e);
 				lumRJ = bb_RJ(frecuency,temp) * fluxToLum;
@@ -83,8 +83,8 @@ void localProcesses(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOu
 				lumSync1=lumSync2;
             }
 			if (flags[1]) {
-				if (flags[0] && frecuency < 1.0e8)
-					lumBr=min(lumBr,lumOutSy[jE][jR]);
+				if (flags[0] && frecuency < 1.0e12)
+					lumBr=min(lumBr,lumRJ);
 				lumOutBr[jE][jR]=lumBr;
 			}
 			lumOut[jE][jR] = lumOutSy[jE][jR]+lumOutBr[jE][jR]+lumOutpp[jE][jR];
@@ -454,8 +454,10 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 	file2.open("lumRadius.txt",ios::out);
 	
 	double lumSy,lumBr,lumIC,lumpp,lumTot,lumCD,lumRefl;
+	double lumThermalTot = 0.0;
+	double pasoF = pow(energies[nE-1]/energies[0],1.0/nE);
 	for (size_t jE=0;jE<nE;jE++) {
-		double frecuency = energies[jE]/planck;
+		double frequency = energies[jE]/planck;
 		double energyEV = energies[jE]/1.6e-12;
 		lumSy = lumBr = lumIC = lumpp = lumTot = lumCD = lumRefl = 0.0;
 		for (size_t jR=0;jR<nR;jR++) {
@@ -469,18 +471,21 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 			lumCD += lumOutCD[jE][jRcd] * escapeDi[jRcd];
 			lumRefl += lumOutRefl[jE][jRcd] * escapeDi[jRcd];
 		}
+		double dfreq = frequency*(pasoF-1.0);
+		lumThermalTot += (lumTot + lumCD + lumRefl)*dfreq;
         file1
-			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frecuency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frequency
 			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << energyEV
-			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumSy*frecuency
-			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumBr*frecuency
-			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumIC*frecuency
-			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumpp*frecuency
-			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumCD*frecuency
-			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumRefl*frecuency
-			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumTot*frecuency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumSy*frequency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumBr*frequency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumIC*frequency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumpp*frequency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumCD*frequency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumRefl*frequency
+			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << lumTot*frequency
 			<< endl;
 	};
+	cout << "Total thermal luminosity (power) = " << lumThermalTot << endl;
 	
 	double eVar = pow(energies[nE-1]/energies[0],1.0/nE);
 	size_t jR=0;
@@ -547,7 +552,7 @@ void targetField(State& st, Matrix lumOut, Matrix lumCD, Matrix lumRefl)
 			double thetaH = st.thetaH.get(itER);
 			double area = 4.0*pi*r*r*cos(thetaH);
 			double lumReachingShell = 0.0;
-			for (size_t jjR=0;jjR<nR;jjR++)
+			for (size_t jjR=0;jjR<jR;jjR++)      // solo celdas internas
 				lumReachingShell += reachAA[jjR][jR]*lumOut[jE][jjR];
 			for (size_t jjRcd=0;jjRcd<nRcd;jjRcd++)
 				lumReachingShell += reachDA[jjRcd][jR]*(lumCD[jE][jjRcd]+lumRefl[jE][jjRcd]);

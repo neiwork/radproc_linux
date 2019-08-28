@@ -4,8 +4,12 @@
 #include "globalVariables.h"
 #include "adafFunctions.h"
 
+#include <finjection/ppPionInj.h>
+#include <finjection/muonInj.h>
 #include <finjection/pairInjectionExact.h>
 #include <finjection/pairInjection.h>
+#include <finjection/pairMuonDecay.h>
+#include <finjection/pairBH.h>
 
 #include <fparameters/parameters.h>
 #include <fparameters/SpaceIterator.h>
@@ -143,13 +147,9 @@ void injectionBurst(Particle& p, State& st)
 	cout << "Total power injected in " << p.id << " = " << sumQ << endl; 
 }
 
-void injectionPair(Particle& p, State& st)
+void injectionChargedPion(Particle& p, State& st)
 {
-	//static const double etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction");
-	//double Emin = p.emin();   //esta es la primera que uso de prueba
-	
-    double sumQtot = 0.0;
-	double sumQ2tot = 0.0;
+	double sumQtot = 0.0;
 	double pasoE = pow(st.denf_e.ps[DIM_E][nE-1]/st.denf_e.ps[DIM_E][0],1.0/nE);
 	show_message(msgStart, Module_pairInjection);
 	p.ps.iterate([&](const SpaceIterator& iR) {
@@ -158,23 +158,71 @@ void injectionPair(Particle& p, State& st)
 		double rB1 = rB2/paso_r;
 		double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
 		double sumQ = 0.0;
-		double sumQ2 = 0.0;
 		p.ps.iterate([&](const SpaceIterator& iRE) {
 			const double E = iRE.val(DIM_E);
 			double dE = E*(pasoE-1.0);
-			// en donde pongo st.photon.injection debería ir el paramSpaceValue con la densidad de fotones no termicos
-			//double result = pairInjectionExact(E,st.photon.injection,st.photon.distribution,iRE,st.photon.emin(),st.photon.emax());
-			double result2 = pairInjection(E,st.photon.injection,st.photon.distribution,iRE,st.photon.emin(),st.photon.emax());
-			
-			//sumQ += result*dE;
-			sumQ2 += result2*dE;
-			//p.injection.set(iRE,result);
-			p.injection.set(iRE,result2);
-			//p.distribution.set(iRE,result2);  //en rclTabCtrlealidad son inyecciones ambas, lo hago asi para comparar las dos aproximaciones y ver cual usamos
+			double result = ppPionInj(E,st.ntProton,st.denf_i.get(iRE),iRE);
+			sumQ += result*E*dE;
+			p.injection.set(iRE,result);
 		},{-1,iR.coord[DIM_R],0});
 		sumQtot += sumQ*vol;
-		sumQ2tot += sumQ2*vol;
 	},{0,-1,0});
 	show_message(msgEnd, Module_pairInjection);
-	cout << "Total power injected in " << p.id << " = " << sumQtot << "\t" << sumQ2tot << endl; 
+	cout << "Total power injected in " << p.id << " = " << sumQtot << "\t" << endl; 
+}
+
+void injectionMuon(Particle& p, State& st)
+{
+    double sumQtot = 0.0;
+	double pasoE = pow(p.emax()/p.emin(),1.0/nE);
+	show_message(msgStart, Module_pairInjection);
+	p.ps.iterate([&](const SpaceIterator& iR) {
+		const double r = iR.val(DIM_R);
+		double rB2 = r*sqrt(paso_r);
+		double rB1 = rB2/paso_r;
+		double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
+		double sumQ = 0.0;
+		p.ps.iterate([&](const SpaceIterator& iRE) {
+			const double E = iRE.val(DIM_E);
+			double dE = E*(pasoE-1.0);
+			double result = muonInj(E,p,st.ntChargedPion,iRE);
+			sumQ += result*E*dE;
+			p.injection.set(iRE,result);
+		},{-1,iR.coord[DIM_R],0});
+		sumQtot += sumQ*vol;
+	},{0,-1,0});
+	show_message(msgEnd, Module_pairInjection);
+	cout << "Total power injected in " << p.id << " = " << sumQtot << "\t" << endl; 
+}
+
+void injectionPair(Particle& p, State& st)
+{
+	//static const double etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction");
+	//double Emin = p.emin();   //esta es la primera que uso de prueba
+	
+    double sumQtot = 0.0;
+	double pasoE = pow(p.emax()/p.emin(),1.0/nE);
+	show_message(msgStart, Module_pairInjection);
+	p.ps.iterate([&](const SpaceIterator& iR) {
+		const double r = iR.val(DIM_R);
+		double rB2 = r*sqrt(paso_r);
+		double rB1 = rB2/paso_r;
+		double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
+		double sumQ = 0.0;
+		p.ps.iterate([&](const SpaceIterator& iRE) {
+			const double E = iRE.val(DIM_E);
+			double dE = E*(sqrt(pasoE)-1.0/sqrt(pasoE));
+			double result = pairInjection(E,st.photon.injection,st.photon.distribution,
+								iRE,st.photon.emin(),st.photon.emax()) + 
+							pairMuonDecay(E,st.ntMuon,iRE); //+ 
+							//pairBH(E,st.ntProton,st.photon.distribution,iRE,st.photon.emin(),
+							//	st.photon.emax()); // [cm^⁻3 s^-1 erg^-1]
+			
+			sumQ += result*E*dE;
+			p.injection.set(iRE,result);
+		},{-1,iR.coord[DIM_R],0});
+		sumQtot += sumQ*vol;
+	},{0,-1,0});
+	show_message(msgEnd, Module_pairInjection);
+	cout << "Total power injected in " << p.id << " = " << sumQtot << endl; 
 }

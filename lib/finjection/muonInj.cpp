@@ -74,7 +74,7 @@ double muonInj(double E, const Particle& p, const Particle& c, const SpaceCoord&
 		return fQ_R(e, E, p, c,psc);
 	};
 
-	if (pName == "muon") {
+	if (pName == "ntMuon") {
 		injection = RungeKuttaSimple(E, sup, rk_fQl);
 		injection += RungeKuttaSimple(E, sup, rk_fQr);//*2; 
 		//el dos es por las dos particulas para cada caso

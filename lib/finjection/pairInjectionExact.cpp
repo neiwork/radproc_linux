@@ -11,15 +11,10 @@ double cAnnihilationExact(double e1, double E)
 {
 
 	double gamma = E/(electronMass*cLight2);
-
-	
 	double uno  = 1.0/e1;      //esta es la condicion sobre las energias de los
 	                           //fotones para que puedan crear pares 
-	double dos  = gamma+1.0-e1;   
-
-	double result1 = std::max(uno,dos);
-
-	return result1;
+	double dos  = gamma+1.0-e1;
+	return std::max(uno,dos);
 }
 
 double dAnnihilationExact(double e1, double targetPhotonEmax)

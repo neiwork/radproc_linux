@@ -90,7 +90,7 @@ int main()
 					writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
 					distributionFast(model.ntProton,model);
 					writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
-				
+					
 					if (calculateNeutrons) {
 						injectionNeutrons(model);
 					}
@@ -99,13 +99,21 @@ int main()
 						processes(model, "ntLuminosities.txt");
 					}
 					
+					injectionChargedPion(model.ntChargedPion,model);
+					writeEandRParamSpace("pionInj",model.ntChargedPion.injection,0);
+					distributionFast(model.ntChargedPion,model);
+					writeEandRParamSpace("pionDist",model.ntChargedPion.distribution,0);
+					injectionMuon(model.ntMuon,model);
+					writeEandRParamSpace("muonInj",model.ntMuon.injection,0);
+					distributionFast(model.ntMuon,model);
+					writeEandRParamSpace("muonDist",model.ntMuon.distribution,0);
+
 					injectionPair(model.ntPair,model);
 					writeEandRParamSpace("secondaryPairsInj",model.ntPair.injection,0);
-					writeEandRParamSpace("secondaryPairsInj2",model.ntPair.distribution,0);
+					//writeEandRParamSpace("secondaryPairsInj2",model.ntPair.distribution,0);
 					
 					distributionFast(model.ntPair, model);
 					writeEandRParamSpace("secondaryPairsDist",model.ntPair.distribution,0);
-					
 					pairProcesses(model, "ntPairtLum.txt");
 				}
 			}

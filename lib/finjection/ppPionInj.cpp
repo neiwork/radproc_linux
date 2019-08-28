@@ -36,9 +36,8 @@ double fPP(double x, double E, const Particle& creator, const SpaceCoord& psc)  
 double ppPionInj(double E, const Particle& creator,
 		const double density, const SpaceCoord& psc)
 {                                                                    //el proton es el creator del pion
-	double Emax = 1.6e-12*pow(10.0, creator.logEmax);
-
-
+	//double Emax = 1.6e-12*pow(10.0, creator.logEmax);
+	double Emax = creator.emax();
 	double integralP = RungeKuttaSimple(E, Emax, [&E, &creator, &psc](double x){
 		return fPP(x, E, creator, psc);
 	});

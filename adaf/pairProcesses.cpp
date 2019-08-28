@@ -32,7 +32,6 @@ void pairProcesses(State& st, const std::string& filename)
 		
 	double Emin = st.photon.emin();
 	double Emax = st.photon.emax();
-	int nE = st.photon.ps[DIM_E].size();
 	
 	Matrix tau_e;	matrixInit(tau_e,nE,nR,0.0);
 	//Matrix tau_p;	matrixInit(tau_p,nE,nR,0.0);

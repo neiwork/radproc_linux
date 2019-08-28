@@ -1,58 +1,50 @@
 #include "pairMuonDecay.h"
 
-#include "dataInjection.h"
+
 #include <fparameters/parameters.h>
-#include <fmath\RungeKutta.h>
-#include <fmath\interpolation.h>
-#include <fmath\physics.h>
-#include <algorithm>
+#include <fmath/RungeKutta.h>
+//#include <fmath\interpolation.h>
+#include <fmath/physics.h>
+//#include <algorithm>
 
-double cMuonDec(double Gep, double E)
+double cMuonDec(double Gep, double Ge)
 {
-	double Ge = E;  //esto es para usar el paquete data
+	//double Ge = E/(electronmass*cLight2); 
 
-	double c  = Ge*Gep-sqrt((P2(Ge)-1)*(P2(Gep)-1));
-		
-	double Emin_mu = pow(10.0,muonLogEmin)*1.6e-12;
+	double Gmu_min  = Ge*Gep-sqrt((P2(Ge)-1.0)*(P2(Gep)-1.0));
 
-	double Gmu_min = Emin_mu/(muonMass*cLight2);
-			
-	double inf = std::max(c,Gmu_min);  //idem pero energia minima									   	
-
-	return inf;
+	return Gmu_min;
 }
 
-double dMuonDec(double Gep, double E)     //Gep=gama E prima
+double dMuonDec(double Gep, double Ge)     //Gep=gama E prima
 {
-	double Ge = E;  //esto es para usar el paquete data
+	///double Ge = E/(electronmass*cLight2); 
 
-	double d = Ge*Gep+sqrt((P2(Ge)-1)*(P2(Gep)-1));
+	double Gmu_max = Ge*Gep+sqrt((P2(Ge)-1.0)*(P2(Gep)-1.0));
 
-	double Emax_mu = pow(10.0,muonLogEmax)*1.6e-12;
+	return Gmu_max;               
+}
 
-	double Gmu_max = Emax_mu/(muonMass*cLight2);
-
-	double sup = std::min(d,Gmu_max);  //esto no permite que el limite superior sea mayor que la energia max del muon
+double fMuonDec(double Gep, double Gmu, Particle& c, const SpaceCoord& distCoord)   //x=Gep; y=Gmu; c = muon
+{ 	
 	
-	return sup;               
-}
-
-double fMuonDec(double Gep, double Gmu, double E, Particle& creator)   //x=Ega; y=Eph
-{ 
-
-	double Tdec = muonMeanLife*E/(muonMass*cLight2);
-
 	double Emu = Gmu*muonMass*cLight2;
+	
+	double Tdec = muonMeanLife*Emu/(muonMass*cLight2);
+	
+	double Nmu = 0.0;
 
-	double Nmu = creator.dist(Emu);// interpol(Emu, Ecreator, Ncreator, Ncreator.size() - 1);
-
-	double Qmu = Nmu*muonMass*cLight2/Tdec;  
+	if (Emu > c.emin() && Emu < c.emax()){
+		Nmu = c.distribution.interpolate({ { 0, Emu} }, &distCoord);
+	}
+	
+	double Qmu = Nmu*muonMass*cLight2/Tdec;  //N(G) = N(E)*mc^2
 
 	double Gep_max = 104;
 		
-	double P = 2*P2(Gep)*(3.0-2*Gep/Gep_max)/P3(Gep_max);
+	double P = 2.0*P2(Gep)*(3.0-2.0*Gep/Gep_max)/P3(Gep_max);
 
-	double f = 0.5*P*Qmu/pow(((P2(Gep)-1.)*(P2(Gmu)-1.)),0.5);
+	double f = 0.5*P*Qmu/sqrt((P2(Gep)-1.0)*(P2(Gmu)-1.0));
 
 	return f;
 
@@ -60,25 +52,26 @@ double fMuonDec(double Gep, double Gmu, double E, Particle& creator)   //x=Ega; 
 
 
 
-double pairMuonDecay(double E, Particle& particle, Particle& creator)    
+double pairMuonDecay(double E, Particle& c, const SpaceCoord& distCoord)
 {	
-	using std::bind; using namespace std::placeholders; // para _1, _2, etc.
 	
+	double inf = 1.0;
+	double sup = 104.0;
 
-	double a = 1.0;
-	double b = 104.0;
-
-	double Erep	= electronMass*cLight2;
-
-	E /= Erep;
-
-	double integral  = RungeKutta(a,b,bind(cMuonDec,_1,E),bind(dMuonDec,_1,E),bind(fMuonDec,_1,_2,E,creator));
-
+	double Gmu_min = c.emin()/(muonMass*cLight2);
+	double Gmu_max = c.emax()/(muonMass*cLight2);
 	
+	double Ge = E /(electronMass*cLight2); //aparece solo en los limites
+
+		double integral  = RungeKutta(inf,sup, 
+		[Ge,Gmu_min](double Gep) {return max(Gmu_min,cMuonDec(Gep, Ge)); },  //limite inferior
+		[Ge,Gmu_max](double Gep) {return max(Gmu_max,dMuonDec(Gep, Ge)); },	 //limite superior
+		[&c,&distCoord](double Gep, double Gmu) {return fMuonDec(Gep, Gmu, c, distCoord); });
+		
+	//double integral  = RungeKutta(a,b,bind(cMuonDec,_1,E),bind(dMuonDec,_1,E),bind(fMuonDec,_1,_2,E,creator));
 
 
-
-	double inj = integral/Erep;
+	double inj = integral/(electronMass*cLight2);
 
 	return inj;
 

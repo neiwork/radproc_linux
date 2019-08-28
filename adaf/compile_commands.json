@@ -179,6 +179,42 @@
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairAnnihilation.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairAnnihilation.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/neutronDecay.h",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/neutronDecay.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/neutronDecay.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pgammaPionInj.cpp",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pgammaPionInj.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pgammaPionInj.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjection.h",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjection.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjection.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairMuonDecay.h",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairMuonDecay.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairMuonDecay.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjectionExact.h",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjectionExact.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjectionExact.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/ppPionInj.h",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/ppPionInj.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/ppPionInj.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairBH.cpp",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairBH.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairBH.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjectionExact.cpp",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjectionExact.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjectionExact.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
+  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairBH.h",
+  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
+  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairBH.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairBH.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
+ }, {
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/muonInj.cpp",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/muonInj.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/muonInj.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
@@ -203,10 +239,6 @@
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjection.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjection.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/neutronDecay.h",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/neutronDecay.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/neutronDecay.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/neutronPp.h",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/neutronPp.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/neutronPp.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
@@ -226,38 +258,6 @@
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pgammaPairInj.cpp",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
   "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pgammaPairInj.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pgammaPairInj.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairMuonDecay.h",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairMuonDecay.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairMuonDecay.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjectionExact.h",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjectionExact.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjectionExact.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pgammaPionInj.cpp",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pgammaPionInj.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pgammaPionInj.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjection.h",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjection.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjection.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/ppPionInj.h",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/ppPionInj.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/ppPionInj.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjectionExact.cpp",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjectionExact.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairInjectionExact.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairBH.cpp",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairBH.cpp -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairBH.cpp.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
- }, {
-  "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairBH.h",
-  "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/finjection",
-  "command": "clang  -c /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairBH.h -o /home/emgutierrez/Work/Codes/radproc_linux/lib/finjection/pairBH.h.o  -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include -I. -I. -I. -I../../lib -I../../external/include"
  }, {
   "file": "/home/emgutierrez/Work/Codes/radproc_linux/lib/fparameters/DimensionIterator.cpp",
   "directory": "/home/emgutierrez/Work/Codes/radproc_linux/lib/fparameters",

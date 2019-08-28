@@ -24,10 +24,10 @@ double losses(double E, Particle& p, State& st, const SpaceCoord& i)
 	double losses = 0.0;
 
 	if(p.id == "ntProton"){
-			losses = lossesSyn(E, B, p) + lossesHadronics(E, density, p);// + lossesPhotoHadronic(E, p, st.photon.distribution, i, st.photon.emin(), st.photon.emax());
+			losses = lossesSyn(E,B,p) + lossesHadronics(E,density,p);// + lossesPhotoHadronic(E, p, st.photon.distribution, i, st.photon.emin(), st.photon.emax());
 	}
 	else if(p.id == "ntElectron" || p.id == "ntPair"){	
-			losses = lossesSyn(E, B, p);//  + lossesIC(E, p, st.photon.distribution, i, st.photon.emin(), st.photon.emax());
+			losses = lossesSyn(E, B, p);//+lossesIC(E,p,st.photon.distribution,i,st.photon.emin(),st.photon.emax());
 	}
 	return losses;
 }

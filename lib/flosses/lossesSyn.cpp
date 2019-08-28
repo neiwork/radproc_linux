@@ -5,17 +5,12 @@
 #include <fmath/physics.h>
 
 
-double lossesSyn(double E, double magneticField, Particle& particle)
+double lossesSyn(double E, double magf, Particle& p)
 {
-	double mass = particle.mass;
-
-	double wmag = P2(magneticField) / (8 * pi);
-
-	double deSyn = 4*thomson*cLight*wmag*P3(electronMass/mass)*(1/(electronMass*cLight2))*
-		            (P2(E)/(mass*cLight2))/3;
-	return deSyn;
+	double gamma = E / (electronMass*cLight2);
+	double wmag = magf*magf / (8.0 * pi);
+	return (4.0/3.0)*thomson*cLight*wmag*P2(electronMass/p.mass) * gamma*gamma;
 }	
-
 
 /////////////////////////////////////////////////////////////////
 double fSynLosSec(double x, double magneticField, double E)         //funcion a integrar   x=Ega

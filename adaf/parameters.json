@@ -9,7 +9,7 @@
     "tAccBlob":"0",
     "factorDensity":"100",
       
-    "calculateComptonScatt":"0",
+    "calculateComptonScatt":"1",
     "scatt": {
         "nRandomPhot":"200",
         "nTheta":"5"
@@ -69,9 +69,9 @@
         "injection": {
             "energyFraction":"0.01",
             "accEfficiency":"0.1",
-            "primaryIndex":"3.0"
+            "primaryIndex":"2.0"
         },
-        "calculateLosses":"0",
+        "calculateLosses":"1",
 	"calculateFlare":"0",
 	"calculateDistributions":"1",
         "calculateLuminosities":"1",
@@ -87,22 +87,22 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":"80"
+						"samples":"60"
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":30
+						"samples":20
 					},
 					"radius_cd":{
-                        "samples":2
-                    }
+                        			"samples":2
+                    			}
 				}
 			},
 			"photon": {
 				"dim":{
 					"energy": {
-						"min":-6.0,
+						"min":-8.0,
 						"max":16.0
 					}
 				}
@@ -121,7 +121,7 @@
 				"dim":{
 					"energy": {
 						"min":9.0,
-						"max":19.0
+						"max":18.0
 					}
 				}
 			},
@@ -133,16 +133,34 @@
 						"max":18.0
 					}
 				}
-            },
+            		},
+			"ntChargedPion": {
+				"mass":2.4880187e-25,
+				"dim":{
+					"energy": {
+						"min":9.0,
+						"max":17.0
+					}
+				}
+			},
+			"ntMuon": {
+				"mass":1.8835327e-25,
+				"dim":{
+					"energy": {
+						"min":9.0,
+						"max":17.0
+					}
+				}
+			},
 			"ntPair": {
 				"mass":9.1094e-28,
 				"dim":{
 					"energy": {
 						"min":6.0,
-						"max":18.0
+						"max":16.0
 					}
 				}
-            }
+            		}
 
 		}
 	},
@@ -150,14 +168,14 @@
 	"math": {
 		"runge-kutta-1": {
 			"samples": {
-				"x": 30
+				"x": 50
 			}
 		},
 
 		"runge-kutta-2": {
 			"samples": { 
-				"x": 30,
-				"y": 30
+				"x": 50,
+				"y": 50
 			}
 		}
 	},

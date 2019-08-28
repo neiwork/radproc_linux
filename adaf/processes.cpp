@@ -31,9 +31,9 @@ void targetFieldNT(State& st, Matrix lumNT)
 			double thetaH = st.thetaH.get(itER);
 			double area = 4.0*pi*r*r*cos(thetaH);
 			double lumReachingShell = 0.0;
-			for (size_t jjR=0;jjR<nR;jjR++)
+			for (size_t jjR=0;jjR<jR;jjR++)    // solo celdas interiores
 				lumReachingShell += reachAA[jjR][jR]*lumNT[jE][jjR];
-			st.photon.injection.set(itER,lumReachingShell/(area*cLight*E*E)); //erg^⁻1 cm^-3
+			st.photon.injection.set(itER,lumReachingShell/(area*cLight*E*E)); // erg^⁻1 cm^-3
 			jR++;
 		},{itE.coord[DIM_E],-1,0});
 		jE++;
@@ -142,12 +142,12 @@ void processes(State& st, const std::string& filename)
 		 << "\t" << "pAbs"
 		 << std::endl;
 			
-	file2 << "Log(E/eV)" 
+	/*file2 << "Log(E/eV)" 
 		  << "\t" << "r [M]"
 		  << "\t" << "tau_e"
 		  << "\t" << "tau_p"
 		  << "\t" << "tau_gg"
-		  << std::endl;
+		  << std::endl;*/
 	
 	double Emin = st.photon.emin();
 	double Emax = st.photon.emax();
@@ -168,11 +168,18 @@ void processes(State& st, const std::string& filename)
 	Matrix tau_gg;	matrixInit(tau_gg,nE,nR,0.0);
 	
 	Vector energies(nE,0.0);
+	double lumLepSy = 0.0;
+	double lumLepIC = 0.0;
+	double lumHad = 0.0;
+	double pasoE = pow(st.photon.emax()/st.photon.emin(),1.0/nE);
 
 	#pragma omp parallel for
 	for (int E_ix=0;E_ix<nE;E_ix++) {
-		double E = st.photon.distribution.ps[DIM_E][E_ix];
+		double E = st.photon.ps[DIM_E][E_ix];
 		energies[E_ix] = E;
+		double lumLepSyLocal = 0.0;
+		double lumLepICLocal = 0.0;
+		double lumHadLocal = 0.0;
 		st.photon.ps.iterate([&](const SpaceIterator &i) {
 			double r = i.val(DIM_R);
 			double rB1 = r/sqrt(paso_r);
@@ -186,17 +193,16 @@ void processes(State& st, const std::string& filename)
 			double attenuation_gg = exp(-tau[0]);
 			double attenuation_ssae = (tau[1] > 1.0e-15) ? (1.0-exp(-tau[1]))/tau[1] : 1.0;
 			double attenuation_ssap = (tau[2] > 1.0e-15) ? (1.0-exp(-tau[2]))/tau[2] : 1.0;
-			//double attenuation_gg = (tau[0] > 1.0e-15) ? (1.0-exp(-tau[0]))/tau[0] : 1.0;
 			
-			double eSyLocal = luminositySynchrotron(E,st.ntElectron,i,st.magf);
-			double eICLocal,pSyLocal,pPPLocal,pPGLocal;
-			eICLocal = pSyLocal = pPPLocal = pPGLocal = 0.0;
+			double eSyLocal,eICLocal,pSyLocal,pPPLocal,pPGLocal;
+			eSyLocal = eICLocal = pSyLocal = pPPLocal = pPGLocal = 0.0;
+			eSyLocal = luminositySynchrotron(E,st.ntElectron,i,st.magf);
 			eICLocal = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);
 			pSyLocal = luminositySynchrotron(E,st.ntProton,i,st.magf);
 			pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
 			pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
 
-			eSy[E_ix] += eSyLocal*vol;
+			eSy[E_ix] += eSyLocal*vol;				// [erg s^-1]
 			eIC[E_ix] += eICLocal*vol;
 			pSy[E_ix] += pSyLocal*vol;
 			pPP[E_ix] += pPPLocal*vol;
@@ -209,12 +215,22 @@ void processes(State& st, const std::string& filename)
 			
 			lumNT_ssa[E_ix][i.coord[DIM_R]] = ( (eSyLocal+eICLocal)*attenuation_ssae + 
 												(pSyLocal+pPPLocal+pPGLocal)*attenuation_ssap ) * vol;
-			//lumNT_ssa[E_ix][i.coord[DIM_R]] = eSyLocal*vol/(E/planck);
-
+			//lumNT_ssa[E_ix][i.coord[DIM_R]] = (pPPLocal+pPGLocal) * vol;
+			lumLepSyLocal += eSyLocal*attenuation_ssae*vol;
+			lumLepICLocal += eICLocal*attenuation_ssae*vol;
+			lumHadLocal += (pSyLocal + pPPLocal + pPGLocal)*attenuation_ssap*vol;
 		},{E_ix,-1,0});
+		lumLepSy += lumLepSyLocal*(sqrt(pasoE)-1.0/sqrt(pasoE));
+		lumLepIC += lumLepICLocal*(sqrt(pasoE)-1.0/sqrt(pasoE));
+		lumHad += lumHadLocal*(sqrt(pasoE)-1.0/sqrt(pasoE));
 	}
 	
+	cout << "Leptonic Sync luminosity = " << lumLepSy << endl;
+	cout << "Leptonic IC luminosity = " << lumLepIC << endl;
+	cout << "Hadronic luminosity = " << lumHad << endl;
 	targetFieldNT(st,lumNT_ssa);
+	writeEandRParamSpace("nonThermalPhotonDensity.txt",st.photon.injection,0);
+	writeEandRParamSpace("thermalPhotonDensity.txt",st.photon.distribution,0);
 	
 	for (size_t jR=0;jR<nR;jR++) {
 		double r = st.photon.ps[DIM_R][jR] / schwRadius;

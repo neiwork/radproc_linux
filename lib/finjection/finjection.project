@@ -8,6 +8,10 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="pairMuonDecay.h"/>
+    <File Name="pairMuonDecay.cpp"/>
+    <File Name="pairBH.h"/>
+    <File Name="pairBH.cpp"/>
     <File Name="neutronDecay.h"/>
     <File Name="neutronDecay.cpp"/>
     <File Name="ppPionInj.h" ExcludeProjConfig=""/>
@@ -16,14 +20,10 @@
     <File Name="pgammaPionInj.cpp" ExcludeProjConfig=""/>
     <File Name="pgammaPairInj.h" ExcludeProjConfig="Release;Debug;"/>
     <File Name="pgammaPairInj.cpp" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="pairMuonDecay.h" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="pairMuonDecay.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="pairInjectionExact.h" ExcludeProjConfig=""/>
     <File Name="pairInjectionExact.cpp" ExcludeProjConfig=""/>
     <File Name="pairInjection.h" ExcludeProjConfig=""/>
     <File Name="pairInjection.cpp" ExcludeProjConfig=""/>
-    <File Name="pairBH.h" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="pairBH.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="pairAnnihilation.h" ExcludeProjConfig="Release;Debug;"/>
     <File Name="pairAnnihilation.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="neutronPp.h" ExcludeProjConfig=""/>

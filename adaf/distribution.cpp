@@ -47,7 +47,7 @@ double effectiveE(double Ee, double Emax, double t, Particle& p, State& st, cons
 
 void distributionFast(Particle& p, State& st)
 {
-	if (p.id == "ntElectron" || p.id == "ntPair") show_message(msgStart,Module_electronDistribution);
+	if (p.id == "ntElectron") show_message(msgStart,Module_electronDistribution);
 	else if (p.id == "ntProton") show_message(msgStart,Module_protonDistribution);
 	
 	p.ps.iterate([&](const SpaceIterator& itR) {
@@ -74,7 +74,8 @@ void distributionFast(Particle& p, State& st)
 					} else {
 						double integ = RungeKuttaSimple(energy,p.emax()*0.99,[&](double e) {
 							return p.injection.interpolate({{0,e}},&itRR.coord);});
-						Nle.set(itRRE,integ/losses(energy,p,st,itRRE)*vol);
+						//Nle.set(itRRE,integ/losses(energy,p,st,itRRE)*vol);
+						Nle.set(itRRE,p.injection.get(itRRE)*tcool*vol);
 					}
 					/*if (p.id == "ntElectron") {
 						double integ = RungeKuttaSimple(energy,p.emax()*0.99,[&](double e) {
@@ -86,7 +87,7 @@ void distributionFast(Particle& p, State& st)
 			},{-1,itRR.coord[DIM_R],0});
 		},{0,-1,0});
 		
-		if (1) { //p.id == "ntProton") {
+		if (p.id == "ntProton") {
 			for (int itRR=itR.coord[DIM_R]-1;itRR>=0;itRR--) {
 				double rprim = p.ps[DIM_R][itRR];
 				double delta_r = (rprim/sqrt(paso_r))*(paso_r-1.0);
@@ -108,6 +109,7 @@ void distributionFast(Particle& p, State& st)
 				},{-1,itRR,0});
 			}
 		}
+		
 		// REVISAR SI ESTO QUE SIGUE VA TMB PARA ELECTRONES
 		if (itR.coord[DIM_R] == nR-1) {
 			p.ps.iterate([&](const SpaceIterator& itRR) {
@@ -139,6 +141,29 @@ void distributionFast(Particle& p, State& st)
 			}
 		},{0,-1,0});
 	},{0,-1,0});
+	
+	///////////////////////////////////////////////////////////
+	/*if (p.id == "ntElectron" || p.id == "ntPair") {
+		p.ps.iterate([&](const SpaceIterator& i) {
+			double tcool = i.val(DIM_E)/losses(i.val(DIM_E),p,st,i);
+			p.distribution.set(i,p.injection.get(i)*tcool);
+		},{-1,-1,0});
+	}*/
+	///////////////////////////////////////////////////////////
+	if (p.id == "ntChargedPion" || p.id == "ntMuon") {
+		p.ps.iterate([&](const SpaceIterator& i) {
+			double r = i.val(DIM_R);
+			double rB1 = r/sqrt(paso_r);
+			double rB2 = rB1*paso_r;
+			double tcell = (rB2-rB1)/(-radialVel(r));
+			double tcool = i.val(DIM_E)/losses(i.val(DIM_E),p,st,i);
+			double gamma = i.val(DIM_E)/(p.mass*cLight2);
+			double tdecay;
+			if (p.id == "ntChargedPion") tdecay = gamma*chargedPionMeanLife;
+			if (p.id == "ntMuon") tdecay = gamma*muonMeanLife;
+			p.distribution.set(i,p.injection.get(i)*min(min(tcool,tcell),tdecay));
+		},{-1,-1,0});
+	}
 	
 	if (p.id == "ntElectron" || p.id == "ntPair") show_message(msgEnd,Module_electronDistribution);
 	else if (p.id == "ntProton") show_message(msgEnd,Module_protonDistribution);

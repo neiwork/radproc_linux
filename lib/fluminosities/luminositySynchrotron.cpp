@@ -12,20 +12,20 @@ double fSyn(double x, double E, const Particle& creator, const ParamSpaceValues&
 
 	const double magneticField = magf.get(psc);
 	double distCreator;
-	if (x < creator.emin() || x> creator.emax()){
+	if (x < creator.emin() || x > creator.emax()){
 		distCreator = 0.0;
 	}
 	else{
 		distCreator = creator.distribution.interpolate({ { 0, x } }, &psc); 
 	}
-
-	double cte = pow(3.0, 0.5)*P3(electronCharge)*magneticField / (planck*creator.mass*cLight2);
-
-	double Echar = 3.0 * electronCharge*planck*magneticField*P2(x) / (4.0 * pi*P3(creator.mass)*cLight*P2(cLight2));
+	double Erest = creator.mass*cLight2;
+	double cte = sqrt(3.0)*P3(electronCharge)*magneticField / (planck*Erest);
+	double Echar = 3.0*electronCharge*planck*magneticField*P2(x/Erest) / 
+					(4.0*pi*creator.mass*cLight);
 	
 	double aux = E/Echar;  //aca el aux es el x real
 
-	double result = cte*1.85*distCreator*pow(aux,(1.0/3.0))*exp(-aux);  
+	double result = cte*1.85*distCreator*pow(aux,1.0/3.0)*exp(-aux);  
 
 	return result;
 }
