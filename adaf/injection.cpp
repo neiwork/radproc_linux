@@ -214,9 +214,9 @@ void injectionPair(Particle& p, State& st)
 			double dE = E*(sqrt(pasoE)-1.0/sqrt(pasoE));
 			double result = pairInjection(E,st.photon.injection,st.photon.distribution,
 								iRE,st.photon.emin(),st.photon.emax()) + 
-							pairMuonDecay(E,st.ntMuon,iRE); //+ 
-							//pairBH(E,st.ntProton,st.photon.distribution,iRE,st.photon.emin(),
-							//	st.photon.emax()); // [cm^⁻3 s^-1 erg^-1]
+							pairMuonDecay(E,st.ntMuon,iRE); + 
+							pairBH(E,st.ntProton,st.photon.distribution,iRE,st.photon.emin(),
+								st.photon.emax()); // [cm^⁻3 s^-1 erg^-1]
 			
 			sumQ += result*E*dE;
 			p.injection.set(iRE,result);

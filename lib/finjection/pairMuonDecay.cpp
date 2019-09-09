@@ -43,7 +43,6 @@ double fMuonDec(double Gep, double Gmu, Particle& c, const SpaceCoord& distCoord
 	double Gep_max = 104;
 		
 	double P = 2.0*P2(Gep)*(3.0-2.0*Gep/Gep_max)/P3(Gep_max);
-
 	double f = 0.5*P*Qmu/sqrt((P2(Gep)-1.0)*(P2(Gmu)-1.0));
 
 	return f;
@@ -55,7 +54,7 @@ double fMuonDec(double Gep, double Gmu, Particle& c, const SpaceCoord& distCoord
 double pairMuonDecay(double E, Particle& c, const SpaceCoord& distCoord)
 {	
 	
-	double inf = 1.0;
+	double inf = 2.0;
 	double sup = 104.0;
 
 	double Gmu_min = c.emin()/(muonMass*cLight2);

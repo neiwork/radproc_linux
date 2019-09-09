@@ -20,6 +20,7 @@ void oneZoneDist(Particle& p, State& st) {
 	//double timeAfterFlare = GlobalConfig.get<double>("nonThermal.flare.timeAfterFlare");
 	double timeAfterFlare = tAccBlob;
 	double maxRadius = GlobalConfig.get<double>("nonThermal.flare.maxRadius")*schwRadius;
+	double minRadius = GlobalConfig.get<double>("nonThermal.flare.minRadius")*schwRadius;
 	static const double etaInj = GlobalConfig.get<double>("nonThermal.flare.injection.energyFraction");
 	static const double pIndex = GlobalConfig.get<double>("nonThermal.flare.injection.primaryIndex");
 	double Emin = p.emin();   //esta es la primera que uso de prueba
@@ -44,7 +45,8 @@ void oneZoneDist(Particle& p, State& st) {
 		p.ps.iterate([&](const SpaceIterator& iRE) {
 			double E = iRE.val(DIM_E);
 			double tSync = E/lossesSyn(E,magf,p);
-			double Ne = (timeAfterFlare < tSync && r < maxRadius) ? Q0p * cutOffPL2(E,Emin,Emax) * 
+			double Ne = (timeAfterFlare < tSync && r < maxRadius && r > minRadius) ? 
+							Q0p * cutOffPL2(E,Emin,Emax) * 
 							pow(1.0-timeAfterFlare/tSync,pIndex-2.0) : 0.0;
 			p.distribution.set(iRE,Ne);
 		},{-1,iR.coord[DIM_R],0});

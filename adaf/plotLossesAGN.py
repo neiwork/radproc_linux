@@ -18,7 +18,7 @@ y_e = [-10,15]
 
 nR = 20
 f = 5
-nE = 80
+nE = 50
 colors = np.arange(nR)/nR
 
 

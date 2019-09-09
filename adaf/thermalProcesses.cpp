@@ -568,15 +568,15 @@ void writeBlob(State& st, Vector energies, Matrix lum, double t)
 	double IRfreq = 1.4e14;
 	double frequency1 = energies[0]/planck;
 	double frequency2 = frequency1;
-	size_t jE = 1;
+	size_t jE = 0;
 	while (frequency2 < IRfreq) {
 		frequency1 = frequency2;
-		frequency2 = energies[jE++]/planck;
+		frequency2 = energies[++jE]/planck;
 	}
 	frequency1 = sqrt(frequency1*frequency2);
 	double IRlum = 0.0;
 	for (size_t jR=0;jR<nR;jR++)
-		IRlum += sqrt(lum[jE-1][jR]*lum[jE+1][jR]) * escapeAi[jR];
+		IRlum += sqrt(lum[jE-1][jR]*lum[jE][jR]) * escapeAi[jR];
 	
 	IRlum *= frequency1;
 	ofstream file;

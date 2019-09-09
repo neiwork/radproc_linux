@@ -30,20 +30,19 @@ int main()
 {
 	string folder{prepareOutputfolder()};
 	try {
+		GlobalConfig = readConfig();
+		prepareGlobalCfg();
 		
-		//tAccBlob = 0.0;
-		//double tMax = 6000;
-		//double dt = tMax/30;
-		//for (int i=0;i<30;i++) {
-
-			GlobalConfig = readConfig();
-			prepareGlobalCfg();
+		show_message(msgStart, Module_state);
+		State model(GlobalConfig.get_child("model"));
+		show_message(msgEnd, Module_state);
+		
+		tAccBlob = 0.0;
+		double tMax = 8000;
+		double dt = tMax/10;
+		for (int i=0;i<=10;i++) {
 			
-			show_message(msgStart, Module_state);
-			State model(GlobalConfig.get_child("model"));
-			show_message(msgEnd, Module_state);
-			
-			//blob(model);
+			blob(model);
 
 			if (calculateComptonScatt) {
 				show_message(msgStart,Module_comptonScattMatrix);
@@ -55,8 +54,8 @@ int main()
 			
 			if (calculateThermal)
 				thermalProcesses(model,"lum.txt");
-				
-		//blobEmission(model);
+					
+			//blobEmission(model);
 		
 //***********nonthermal particles**************		
 		
@@ -76,10 +75,12 @@ int main()
 				if (calculateNTdistributions) {
 
 					//nt electrons
+					/*
 					if (calculateFlare)
 						injectionBurst(model.ntElectron,model);
 					else
 						injection(model.ntElectron, model);
+					
 
 					writeEandRParamSpace("electronInj",model.ntElectron.injection,0);
 					distributionFast(model.ntElectron, model);
@@ -90,6 +91,7 @@ int main()
 					writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
 					distributionFast(model.ntProton,model);
 					writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
+					*/
 					
 					if (calculateNeutrons) {
 						injectionNeutrons(model);
@@ -99,6 +101,7 @@ int main()
 						processes(model, "ntLuminosities.txt");
 					}
 					
+					/*
 					injectionChargedPion(model.ntChargedPion,model);
 					writeEandRParamSpace("pionInj",model.ntChargedPion.injection,0);
 					distributionFast(model.ntChargedPion,model);
@@ -115,10 +118,12 @@ int main()
 					distributionFast(model.ntPair, model);
 					writeEandRParamSpace("secondaryPairsDist",model.ntPair.distribution,0);
 					pairProcesses(model, "ntPairtLum.txt");
+					*/
 				}
 			}
-			//tAccBlob += dt;
+			tAccBlob += dt;
 		}
+	}
 	catch (std::runtime_error& e)
 	{
 		std::cout << "ERROR: " << e.what() << std::endl;
