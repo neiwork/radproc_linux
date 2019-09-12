@@ -15,11 +15,11 @@ logeV,r,logpp,logpY = np.loadtxt('neutronInj.txt',unpack=True,skiprows=1)
 logerg = np.log10(np.power(10,logeV)*1.6e-12)
 
 x_eV = [logeV[0],logeV[-1]]
-y = [0,16]
+y = [-5,16]
 
-nR = 20
+nR = 30
 f = 2
-nE = 50
+nE = 100
 colors = np.arange(nR)/nR
 
 fig, ax1 = plt.subplots()

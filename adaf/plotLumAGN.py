@@ -11,10 +11,10 @@ import scipy.optimize as optimization
 nu,eV,Sy,Br,IC,pp,CD,Refl,Tot = np.loadtxt('lum.txt',unpack=True)
 NT_logeV,NT_logSye,NT_logSyp,NT_logIC,NT_logpp,NT_logpg,NT_logeAbs,NT_logpAbs = \
         np.loadtxt('ntLuminosities.txt',unpack=True,skiprows=1)
-NT_logeVpairs, NT_logSypairs, NT_logICpairs, NT_logAbsPairs = \
-        np.loadtxt('ntPairtLum.txt', unpack=True, skiprows=1)
+#NT_logeVpairs, NT_logSypairs, NT_logICpairs, NT_logAbsPairs = \
+#        np.loadtxt('ntPairtLum.txt', unpack=True, skiprows=1)
 x_eV = [-9,19]
-y_axis = [33,43]
+y_axis = [32,38]
 
 fig, ax1 = plt.subplots()
 
@@ -31,10 +31,9 @@ ax1.plot(NT_logeV,NT_logSyp,label='pSy')
 ax1.plot(NT_logeV,NT_logIC,label='IC')
 ax1.plot(NT_logeV,NT_logpp,label='pp')
 ax1.plot(NT_logeV,NT_logpg,label=r'p$\gamma$')
-ax1.plot(NT_logeVpairs,NT_logSypairs,label='seSy')
-ax1.plot(NT_logeVpairs,NT_logICpairs,label='seIC')
-ax1.plot(NT_logeV,np.log10(np.power(10,NT_logeAbs)+np.power(10,NT_logpAbs)+Tot+np.power(10,NT_logAbsPairs)),\
-         lw=3,label='Abs',color='k')
+#ax1.plot(NT_logeVpairs,NT_logSypairs,label='seSy')
+#ax1.plot(NT_logeVpairs,NT_logICpairs,label='seIC')
+ax1.plot(NT_logeV,np.log10(np.power(10,NT_logeAbs)+np.power(10,NT_logpAbs)+Tot),lw=3,label='Abs',color='k')
 ax1.legend(loc='best',fontsize=8)
 
 fig.savefig('nonThermalLum.pdf')

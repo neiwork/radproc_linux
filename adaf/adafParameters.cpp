@@ -99,6 +99,7 @@ void adafParameters()
 		calculateFlare = GlobalConfig.get<int>("nonThermal.calculateFlare");
         calculateNTdistributions = GlobalConfig.get<int>("nonThermal.calculateDistributions");
         calculateNonThermalLum = GlobalConfig.get<int>("nonThermal.calculateLuminosities");
-        calculateNeutrons = GlobalConfig.get<int>("nonThermal.calculateNeutrons");
+        calculateNeutronInj = GlobalConfig.get<int>("nonThermal.neutrons.calculateInjection");
+		calculateNeutronDis = GlobalConfig.get<int>("nonThermal.neutrons.calculatePropagation");
     }
 }

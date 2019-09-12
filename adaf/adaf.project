@@ -6,6 +6,8 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="non thermal">
+    <File Name="distributionNeutrons.h"/>
+    <File Name="distributionNeutrons.cpp"/>
     <File Name="pairProcesses.h"/>
     <File Name="pairProcesses.cpp"/>
     <File Name="oneZoneTimeDependent.h"/>

@@ -5,8 +5,6 @@
 #include <fmath/physics.h>
 
 
-
-
 double f_NeuDec(double Epi, double E, double mass, const Particle& neutron, const SpaceCoord& distCoord)         //funcion a integrar variable Epi
 {
 	

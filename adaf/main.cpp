@@ -12,6 +12,7 @@
 #include "radiativeLosses.h"
 #include "injection.h"
 #include "injectionNeutrons.h"
+#include "distributionNeutrons.h"
 #include "distribution.h"
 #include "processes.h"
 #include "absorption.h"
@@ -37,91 +38,93 @@ int main()
 		State model(GlobalConfig.get_child("model"));
 		show_message(msgEnd, Module_state);
 		
-		tAccBlob = 0.0;
-		double tMax = 8000;
-		double dt = tMax/10;
-		for (int i=0;i<=10;i++) {
-			
-			blob(model);
+		//tAccBlob = 0.0;
+		//double tMax = 8000;
+		//double dt = tMax/10;
+		//for (int i=0;i<=10;i++) {
+		
+		//blob(model);
 
-			if (calculateComptonScatt) {
-				show_message(msgStart,Module_comptonScattMatrix);
-				comptonScattMatrix(model);
-				show_message(msgEnd,Module_comptonScattMatrix);
-			} else {
-				comptonScattMatrixRead(model);
-			}
-			
-			if (calculateThermal)
-				thermalProcesses(model,"lum.txt");
-					
-			//blobEmission(model);
+		if (calculateComptonScatt) {
+			show_message(msgStart,Module_comptonScattMatrix);
+			comptonScattMatrix(model);
+			show_message(msgEnd,Module_comptonScattMatrix);
+		} else {
+			comptonScattMatrixRead(model);
+		}
+		
+		if (calculateThermal)
+			thermalProcesses(model,"lum.txt");
+		
+		//blobEmission(model);
 		
 //***********nonthermal particles**************		
 		
-			if (calculateNonThermal) {
+		if (calculateNonThermal) {
             
-				if (calculateLosses) {
-					show_message(msgStart, Module_radLosses);
-					radiativeLosses(model.ntElectron, model, "electronLosses.txt");
-					radiativeLosses(model.ntProton, model, "protonLosses.txt");
-					show_message(msgEnd, Module_radLosses);
-				}
-				
-				if (calculateFlare) {
-					oneZoneDist(model.ntElectron,model);
-				}
-			
-				if (calculateNTdistributions) {
-
-					//nt electrons
-					/*
-					if (calculateFlare)
-						injectionBurst(model.ntElectron,model);
-					else
-						injection(model.ntElectron, model);
-					
-
-					writeEandRParamSpace("electronInj",model.ntElectron.injection,0);
-					distributionFast(model.ntElectron, model);
-					writeEandRParamSpace("electronDis",model.ntElectron.distribution,0);
-				
-					//nt protons
-					injection(model.ntProton,model);
-					writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
-					distributionFast(model.ntProton,model);
-					writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
-					*/
-					
-					if (calculateNeutrons) {
-						injectionNeutrons(model);
-					}
-					
-					if (calculateNonThermalLum) {
-						processes(model, "ntLuminosities.txt");
-					}
-					
-					/*
-					injectionChargedPion(model.ntChargedPion,model);
-					writeEandRParamSpace("pionInj",model.ntChargedPion.injection,0);
-					distributionFast(model.ntChargedPion,model);
-					writeEandRParamSpace("pionDist",model.ntChargedPion.distribution,0);
-					injectionMuon(model.ntMuon,model);
-					writeEandRParamSpace("muonInj",model.ntMuon.injection,0);
-					distributionFast(model.ntMuon,model);
-					writeEandRParamSpace("muonDist",model.ntMuon.distribution,0);
-
-					injectionPair(model.ntPair,model);
-					writeEandRParamSpace("secondaryPairsInj",model.ntPair.injection,0);
-					//writeEandRParamSpace("secondaryPairsInj2",model.ntPair.distribution,0);
-					
-					distributionFast(model.ntPair, model);
-					writeEandRParamSpace("secondaryPairsDist",model.ntPair.distribution,0);
-					pairProcesses(model, "ntPairtLum.txt");
-					*/
-				}
+			if (calculateLosses) {
+				show_message(msgStart, Module_radLosses);
+				radiativeLosses(model.ntElectron, model, "electronLosses.txt");
+				radiativeLosses(model.ntProton, model, "protonLosses.txt");
+				show_message(msgEnd, Module_radLosses);
 			}
-			tAccBlob += dt;
+			
+			if (calculateFlare) {
+				oneZoneDist(model.ntElectron,model);
+			}
+		
+			if (calculateNTdistributions) {
+
+			//nt electrons
+
+				if (calculateFlare)
+					injectionBurst(model.ntElectron,model);
+				else
+					injection(model.ntElectron, model);
+				
+
+				writeEandRParamSpace("electronInj",model.ntElectron.injection,0);
+				distributionFast(model.ntElectron, model);
+				writeEandRParamSpace("electronDis",model.ntElectron.distribution,0);
+				
+				//nt protons
+				injection(model.ntProton,model);
+				writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
+				distributionFast(model.ntProton,model);
+				writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
+				
+				
+				if (calculateNeutronInj) {
+					injectionNeutrons(model);
+					if (calculateNeutronDis)
+						distributionNeutrons(model);
+					//if (calculateJetDecay)
+					//	jetNeutronDecay(model);
+				}
+				
+				if (calculateNonThermalLum) {
+					processes(model, "ntLuminosities.txt");
+				}
+				
+				/*
+				injectionChargedPion(model.ntChargedPion,model);
+				writeEandRParamSpace("pionInj",model.ntChargedPion.injection,0);
+				distributionFast(model.ntChargedPion,model);
+				writeEandRParamSpace("pionDist",model.ntChargedPion.distribution,0);
+				injectionMuon(model.ntMuon,model);
+				writeEandRParamSpace("muonInj",model.ntMuon.injection,0);
+				distributionFast(model.ntMuon,model);
+				writeEandRParamSpace("muonDist",model.ntMuon.distribution,0);
+
+				injectionPair(model.ntPair,model);
+				writeEandRParamSpace("secondaryPairsInj",model.ntPair.injection,0);
+				//writeEandRParamSpace("secondaryPairsInj2",model.ntPair.distribution,0);
+					
+				distributionFast(model.ntPair, model);
+				writeEandRParamSpace("secondaryPairsDist",model.ntPair.distribution,0);
+				pairProcesses(model, "ntPairtLum.txt");
+				*/
+			}
 		}
 	}
 	catch (std::runtime_error& e)

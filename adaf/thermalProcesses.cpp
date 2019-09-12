@@ -618,8 +618,8 @@ void thermalProcesses(State& st, const string& filename)
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,
 							lumOutIC,lumOut,lumOutCD,lumOutRefl,filename);
 		
-		if (calculateFlare)
-			writeBlob(st,energies,lumOut,tAccBlob);
+		//if (calculateFlare)
+		//	writeBlob(st,energies,lumOut,tAccBlob);
 		targetField(st,lumOut,lumOutCD,lumOutRefl);
 	}	
 	

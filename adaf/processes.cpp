@@ -188,7 +188,7 @@ void processes(State& st, const std::string& filename)
 			
 			Vector tau(3,0.0);
 			double fmtE  = safeLog10(i.val(DIM_E)/1.6e-12);
-			//if (fmtE < 0.0 || fmtE > 5.0) opticalDepth(tau,E_ix,st,i.coord[DIM_R]);
+			if (fmtE < 0.0 || fmtE > 5.0) opticalDepth(tau,E_ix,st,i.coord[DIM_R]);
 
 			double attenuation_gg = exp(-tau[0]);
 			double attenuation_ssae = (tau[1] > 1.0e-15) ? (1.0-exp(-tau[1]))/tau[1] : 1.0;
@@ -211,10 +211,10 @@ void processes(State& st, const std::string& filename)
 			//////////////////////////////////////////////////////
 			
 			eSyLocal = luminositySynchrotron(E,st.ntElectron,i,st.magf);
-			//eICLocal = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);
-			//pSyLocal = luminositySynchrotron(E,st.ntProton,i,st.magf);
-			//pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
-			//pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
+			eICLocal = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);
+			pSyLocal = luminositySynchrotron(E,st.ntProton,i,st.magf);
+			pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
+			pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
 
 			eSy[E_ix] += eSyLocal*vol;				// [erg s^-1]
 			eIC[E_ix] += eICLocal*vol;
@@ -229,7 +229,6 @@ void processes(State& st, const std::string& filename)
 			
 			lumNT_ssa[E_ix][i.coord[DIM_R]] = ( (eSyLocal+eICLocal)*attenuation_ssae + 
 												(pSyLocal+pPPLocal+pPGLocal)*attenuation_ssap ) * vol;
-			//lumNT_ssa[E_ix][i.coord[DIM_R]] = (pPPLocal+pPGLocal) * vol;
 			lumLepSyLocal += eSyLocal*attenuation_ssae*vol;
 			lumLepICLocal += eICLocal*attenuation_ssae*vol;
 			lumHadLocal += (pSyLocal + pPPLocal + pPGLocal)*attenuation_ssap*vol;

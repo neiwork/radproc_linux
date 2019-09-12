@@ -31,7 +31,8 @@ int calculateLosses;                    // If 1 calculate radiative losses for e
 int calculateNTdistributions;           // If 1 calculate non-thermal particle distributions.
 int calculateNonThermalLum;             // If 1 calculate non-thermal luminosities.
 int calculateFlare;						// If 1 calculate non-thermal flare distributions.
-int calculateNeutrons;                  // If 1 calculate processes for neutrons.
+int calculateNeutronInj;                // If 1 calculate neutron injection.
+int calculateNeutronDis;				// If 1 calculate neutron propagation.
 int calculateComptonRedMatrix;			// If 1 calculate the Comptonization energy redistribution
 										// matrices. It only works if comptonMethod=0 or 1.
 int comptonMethod;						// Method used to calculate the Comptonized spectrum.

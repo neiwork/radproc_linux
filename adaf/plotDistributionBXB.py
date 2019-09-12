@@ -20,9 +20,9 @@ x_eVp = [logeVp[0]+.5,logeVp[-1]]
 y_p = [0,14]
 y_e = [-4,10]
 
-nR = 20
-f = 1
-nE = 50
+nR = 30
+f = 2
+nE = 100
 colors = np.arange(nR)*f/nR
 
 

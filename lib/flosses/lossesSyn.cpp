@@ -7,7 +7,7 @@
 
 double lossesSyn(double E, double magf, Particle& p)
 {
-	double gamma = E / (electronMass*cLight2);
+	double gamma = E / (p.mass*cLight2);
 	double wmag = magf*magf / (8.0 * pi);
 	return (4.0/3.0)*thomson*cLight*wmag*P2(electronMass/p.mass) * gamma*gamma;
 }	
