@@ -16,15 +16,14 @@ logerge = np.log10(np.power(10,logeVe)*1.6e-12)
 logergp = np.log10(np.power(10,logeVp)*1.6e-12)
 
 x_eVe = [logeVe[0]+.5,12]
-x_eVp = [logeVp[0]+.5,logeVp[-1]]
-y_p = [0,14]
-y_e = [-4,10]
+x_eVp = [logeVp[0]+.5,17]
+y_p = [0,15]
+y_e = [-5,10]
 
 nR = 30
-f = 2
+f = 1
 nE = 100
 colors = np.arange(nR)*f/nR
-
 
 
 fig, ax1 = plt.subplots()
@@ -33,7 +32,7 @@ ax1.tick_params(axis='both',labelsize=14)
 ax1.set_xlim(x_eVp)
 ax1.set_ylim(y_p)
 ax1.set_xlabel(r'$\mathrm{Log}(E ~ [\mathrm{eV}])$',fontsize=14)
-ax1.set_ylabel(r'$\mathrm{Log}(E^2 N_\mathrm{p}(E) ~ [\mathrm{erg~cm^{-3}}])$',fontsize=14)
+ax1.set_ylabel(r'$\mathrm{Log}(E^2 N_\mathrm{p}(E) ~ [\mathrm{erg}~\mathrm{cm}^{-3}])$',fontsize=14)
 
 npTot = np.zeros(nE)
 for r1 in np.arange(nR//f):
@@ -44,11 +43,9 @@ for e in np.arange(nE):
     for r1 in np.arange(nR):
         npTot[e] = npTot[e] + np.power(10,lognp[r1*nE+e])
 
-ax1.plot(logeVp[:nE],2.0*logergp[:nE]+np.log10(npTot),ls='--',lw=3,label='Total', \
-            color = 'k')
-ax1.legend(loc='lower left',fontsize=15)
+#ax1.plot(logeVp[:nE],2.0*logergp[:nE]+np.log10(npTot),ls='--',lw=3,label='Total', \
+#            color = 'k')
 fig.savefig('protonDist.pdf')
-
 
 
 fig, ax1 = plt.subplots()
@@ -70,8 +67,8 @@ for r1 in np.arange(nR):
         neTot[e] = neTot[e] + np.power(10,logne[r1*nE+e])
 
     
-ax1.plot(logeVe[:nE],2.0*logerge[:nE]+np.log10(neTot),ls='--',lw=3,label='Total', \
-            color = 'k')
+#ax1.plot(logeVe[:nE],2.0*logerge[:nE]+np.log10(neTot),ls='--',lw=3,label='Total', \
+#            color = 'k')
 ax1.legend(loc='lower left',fontsize=15)
 fig.savefig('electronDist.pdf')
 

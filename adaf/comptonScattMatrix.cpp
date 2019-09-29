@@ -64,8 +64,6 @@ void comptonScattMatrix(State& st)
 	
 	double pasoprim = pow(rCellsBoundaries[nR]/rCellsBoundaries[0],1.0/((nR+1)*5.0));
 	
-    InitialiseRandom(RANDOM_GENERATOR);
-	
 	#pragma omp parallel for
 	for (int iR=0;iR<nR;iR++) {
 		double r0 = st.denf_e.ps[DIM_R][iR];

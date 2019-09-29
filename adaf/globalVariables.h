@@ -46,6 +46,7 @@ extern const int calculateFlare;
 extern const int calculateNonThermalLum;
 extern const int calculateNeutronInj;
 extern const int calculateNeutronDis;
+extern const int calculateJetDecay;
 extern const int calculateComptonProbs;
 extern const int calculateComptonRedMatrix;
 extern const int comptonMethod;
@@ -55,7 +56,7 @@ extern const double schwRadius;					// Gravitationl Radius [cm]
 
 // BLOB PARAMETERS
 extern double rBlob;
-extern double tAccBlob;
+extern double timeAfterFlare;
 extern double factorDensity;
 
 extern const int numProcesses;                  // Number of thermal processes

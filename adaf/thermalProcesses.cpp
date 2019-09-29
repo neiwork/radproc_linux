@@ -11,6 +11,7 @@
 #include <fluminosities/thermalSync.h>
 #include <fluminosities/thermalBremss.h>
 #include <fluminosities/luminosityHadronic.h>
+#include <fluminosities/luminositySynchrotron.h>
 #include <fluminosities/blackBody.h>
 #include <fluminosities/reflection.h>
 #include <fluminosities/probexact.h>
@@ -18,7 +19,7 @@
 #include <fmath/physics.h>
 #include <fmath/fbisection.h>
 #include <fparameters/Dimension.h>
-
+#include "absorption.h"
 // Project headers
 #include "globalVariables.h"
 #include "messages.h"
@@ -50,7 +51,8 @@ void localProcesses(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOu
 			double thetaH = st.thetaH.get(itER);
 			double rB1 = r/sqrt(paso_r);
 			double rB2 = r*sqrt(paso_r);
-			double area = 2.0*pi*rB2*rB2*(2.0*cos(thetaH)+sin(thetaH)*sin(thetaH));
+			//double area = 2.0*pi*rB2*rB2*(2.0*cos(thetaH)+sin(thetaH)*sin(thetaH));
+			double area = 4.0*pi*rB2*rB2*cos(thetaH);
 			double fluxToLum = area;
 			double vol = (rB2*rB2*rB2-rB1*rB1*rB1)*(4.0/3.0)*pi*cos(thetaH);
 			double emissToLum = vol*4.0*pi;
@@ -92,6 +94,95 @@ void localProcesses(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOu
 		},{jE,-1,0});
 	}
 }
+
+void localProcesses2(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOutpp,
+						Vector& energies, const int flags[], Matrix& lumOut)
+{
+	size_t jE=0;
+	st.photon.ps.iterate([&](const SpaceIterator& itE) {
+		energies[jE++] = itE.val(DIM_E);
+	},{-1,0,0});
+
+	#pragma omp parallel for
+	for (int jE=0;jE<nE;jE++) {
+		double frequency=energies[jE]/planck;
+		size_t jR=0;
+		st.photon.ps.iterate([&](const SpaceIterator& itER) {
+			double r = itER.val(DIM_R);
+			double redshift = sqrt(1.0-schwRadius/r)*(1.0-P2(radialVel(r)/cLight));
+			redshift = 1.0;
+			double reddendEnergy = energies[jE]/redshift;
+			double rB2 = r*sqrt(paso_r);
+			double area = 4.0*pi*rB2*rB2*costhetaH(r);
+			double fluxToLum = area;
+
+			double temp = st.tempElectrons.get(itER);
+			double magf = st.magf.get(itER);
+			double dens_i = st.denf_i.get(itER);
+			double dens_e = st.denf_e.get(itER);
+			double xSy,xBr;
+			xSy = xBr = 0.0;
+			if (flags[0])
+				xSy = jSync(reddendEnergy,temp,magf,dens_e)*4.0*pi;
+			if (flags[1])
+				xBr = jBremss(reddendEnergy,temp,dens_i,dens_e)*4.0*pi;
+			
+			SpaceCoord psc = {jE,jR,0};
+			double b_nu = bb(frequency/redshift,temp);
+			double kappa = (xSy+xBr)/(4.0*pi*b_nu);// + ssaAbsorptionCoeff(energies[jE],magf,st.ntElectron,psc);
+			double tau = 0.5*sqrt(pi)*kappa*height_fun(r);
+			double flux = (frequency < 0.5e15) ? 2.0*pi/sqrt(3.0)*b_nu*(1.0-exp(-2.0*sqrt(3.0)*tau)) :
+							 0.5*sqrt(pi)*height_fun(r)*(xSy+xBr);
+			lumOutSy[jE][jR] = (redshift > 0.0) ? 
+							flux*r*r*(paso_r-1.0) * (1.0-scattAA[jR][jR]) : 0.0;
+			lumOut[jE][jR] = lumOutSy[jE][jR];
+			jR++;
+		},{jE,-1,0});
+	}
+}
+
+void localProcesses3(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOutpp,
+						Vector& energies, const int flags[], Matrix& lumOut)
+{
+	size_t jE=0;
+	st.photon.ps.iterate([&](const SpaceIterator& itE) {
+		energies[jE++] = itE.val(DIM_E);
+	},{-1,0,0});
+
+	double pmin = exp(logr.front())*schwRadius;
+	double pmax = exp(logr.back())*schwRadius;
+	double paso_p = pow(pmax/pmin,1.0/nR);
+	
+	#pragma omp parallel for
+	for (int jE=0;jE<nE;jE++) {
+		double frequency=energies[jE]/planck;
+		size_t jR = 0.0;
+		st.photon.ps.iterate([&](const SpaceIterator& itR) {
+			double r = itR.val(DIM_R);
+			double magf = st.magf.get(itR);
+			double temp = st.tempElectrons.get(itR);
+			double dens_e = st.denf_e.get(itR);
+			double dens_i = st.denf_i.get(itR);
+			
+			double jv_th = jSync(energies[jE],temp,magf,dens_e)+jBremss(energies[jE],temp,dens_i,dens_e);
+			double jv_pl = luminositySynchrotron2(energies[jE],st.ntElectron,itR,magf)/frequency;
+			double av_th = jv_th / bb(frequency,temp);
+			SpaceCoord psc = {jE,jR,0};
+			double av_pl = ssaAbsorptionCoeff(energies[jE],magf,st.ntElectron,psc);
+			
+			double Sv = (jv_th+jv_pl)/(av_th+av_pl);
+			double Inup = (frequency < 1.0e14) ? Sv * (1.0-exp(-2.0*height_fun(r)*(av_th+av_pl))) :
+							2.0*height_fun(r)*(jv_th+jv_pl);
+			
+			double flux = 2.0*pi*r*r*(sqrt(paso_r)-1.0/sqrt(paso_r))*Inup;
+
+			lumOutSy[jE][jR] = flux * (1.0-scattAA[jR][jR]);
+			lumOut[jE][jR] = lumOutSy[jE][jR];
+			jR++;
+		},{jE,-1,0});
+	}
+}
+
 
 void reflectedSpectrum(Matrix lumOut, Matrix& lumOutRefl, Vector energies,
 						double pasoE)
@@ -352,7 +443,8 @@ void thermalCompton(State& st, Matrix& lumOut, Matrix& lumOutIC, Vector energies
 	show_message(msgEnd,Module_thermalCompton);
 }
 
-/*void gravRedshift(const State& st, Vector energies, Matrix lum, Matrix& lumRed)
+/*
+void gravRedshift(const State& st, Vector energies, Matrix lum, Matrix& lumRed)
 {
 	matrixInit(lumRed,nE,nR,0.0);
 
@@ -450,15 +542,17 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 						Matrix lumOutCD, Matrix lumOutRefl, const string& filename)
 {
 	ofstream file1,file2;
+	ofstream fileSync;
 	file1.open(filename.c_str(),ios::out);
 	file2.open("lumRadius.txt",ios::out);
+	fileSync.open("lumSy.txt",ios::out);
 	
 	double lumSy,lumBr,lumIC,lumpp,lumTot,lumCD,lumRefl;
 	double lumThermalTot = 0.0;
-	double pasoF = pow(energies[nE-1]/energies[0],1.0/nE);
+	double pasoF = pow(energies[nE-1]/energies[0],1.0/(nE-1));
 	for (size_t jE=0;jE<nE;jE++) {
 		double frequency = energies[jE]/planck;
-		double energyEV = energies[jE]/1.6e-12;
+		double energyEV = energies[jE]/EV_TO_ERG;
 		lumSy = lumBr = lumIC = lumpp = lumTot = lumCD = lumRefl = 0.0;
 		for (size_t jR=0;jR<nR;jR++) {
 			lumSy += lumOutSy[jE][jR] * escapeAi[jR];
@@ -493,12 +587,14 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 		double r = itR.val(DIM_R)/schwRadius;
 		lumSy = lumBr = lumIC = lumpp = lumTot = 0.0;
 		for (size_t jE=0;jE<nE;jE++)  {
-			double dfrecuency = energies[jE]/planck * (eVar-1.0);
-			lumSy += lumOutSy[jE][jR]*dfrecuency;
-			lumBr += lumOutBr[jE][jR]*dfrecuency;
-			lumIC += lumOutIC[jE][jR]*dfrecuency;
-			lumpp += lumOutpp[jE][jR]*dfrecuency;
+			double frequency = energies[jE]/planck;
+			double dfrequency = frequency * (eVar-1.0);
+			lumSy += lumOutSy[jE][jR]*dfrequency;
+			lumBr += lumOutBr[jE][jR]*dfrequency;
+			lumIC += lumOutIC[jE][jR]*dfrequency;
+			lumpp += lumOutpp[jE][jR]*dfrequency;
 			lumTot += lumOut[jE][jR];
+			fileSync << r/schwRadius << "\t" << energies[jE]/planck << "\t" << lumOutSy[jE][jR]*frequency << endl;
 		}
 		
 		file2
@@ -514,6 +610,7 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 	
 	file1.close();
 	file2.close();
+	fileSync.close();
 }
 
 void photonDensity(State& st, Vector energies, Matrix lumOut)
@@ -552,7 +649,7 @@ void targetField(State& st, Matrix lumOut, Matrix lumCD, Matrix lumRefl)
 			double thetaH = st.thetaH.get(itER);
 			double area = 4.0*pi*r*r*cos(thetaH);
 			double lumReachingShell = 0.0;
-			for (size_t jjR=0;jjR<jR;jjR++)      // solo celdas internas
+			for (size_t jjR=0;jjR<nR;jjR++)      // solo celdas internas
 				lumReachingShell += reachAA[jjR][jR]*lumOut[jE][jjR];
 			for (size_t jjRcd=0;jjRcd<nRcd;jjRcd++)
 				lumReachingShell += reachDA[jjRcd][jR]*(lumCD[jE][jjRcd]+lumRefl[jE][jjRcd]);
@@ -603,7 +700,7 @@ void thermalProcesses(State& st, const string& filename)
 	int processesFlags[numProcesses];	readThermalProcesses(processesFlags);
 	if (processesFlags[0] || processesFlags[1] || processesFlags[2] || processesFlags[3]) {
 		if (processesFlags[0] || processesFlags[1] || processesFlags[2])
-			localProcesses(st,lumOutSy,lumOutBr,lumOutpp,energies,processesFlags,lumOut);
+			localProcesses3(st,lumOutSy,lumOutBr,lumOutpp,energies,processesFlags,lumOut);
 		if (processesFlags[4]) {
 			if (comptonMethod == 2)
 				localCompton(st,lumOut,lumOutIC,energies);

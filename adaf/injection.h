@@ -6,10 +6,11 @@
 
 /* Returns Q(E,z) in units of 1/erg/s  (it is multiplied by the volume of each celd)*/
 
+double findGammaMin(double,double);
 void injection(Particle& p, State& st);
 void injectionBurst(Particle& p, State& st);
 
-double eEmax(Particle&,double,double,double);
+double eEmax(Particle&,double,double,double,double);
 
 void injectionChargedPion(Particle&, State&);
 void injectionMuon(Particle&, State&);

@@ -31,7 +31,7 @@ void targetFieldNT(State& st, Matrix lumNT)
 			double thetaH = st.thetaH.get(itER);
 			double area = 4.0*pi*r*r*cos(thetaH);
 			double lumReachingShell = 0.0;
-			for (size_t jjR=0;jjR<jR;jjR++)    // solo celdas interiores
+			for (size_t jjR=0;jjR<nR;jjR++)
 				lumReachingShell += reachAA[jjR][jR]*lumNT[jE][jjR];
 			st.photon.injection.set(itER,lumReachingShell/(area*cLight*E*E)); // erg^⁻1 cm^-3
 			jR++;
@@ -188,7 +188,7 @@ void processes(State& st, const std::string& filename)
 			
 			Vector tau(3,0.0);
 			double fmtE  = safeLog10(i.val(DIM_E)/1.6e-12);
-			if (fmtE < 0.0 || fmtE > 5.0) opticalDepth(tau,E_ix,st,i.coord[DIM_R]);
+			//if (fmtE < 0.0 || fmtE > 5.0) opticalDepth(tau,E_ix,st,i.coord[DIM_R]);
 
 			double attenuation_gg = exp(-tau[0]);
 			double attenuation_ssae = (tau[1] > 1.0e-15) ? (1.0-exp(-tau[1]))/tau[1] : 1.0;
@@ -210,11 +210,11 @@ void processes(State& st, const std::string& filename)
 			eSyLocal = luminositySynchrotron2(E,st.ntElectron,i,B);*/
 			//////////////////////////////////////////////////////
 			
-			eSyLocal = luminositySynchrotron(E,st.ntElectron,i,st.magf);
+			//eSyLocal = luminositySynchrotron(E,st.ntElectron,i,st.magf);
 			eICLocal = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);
-			pSyLocal = luminositySynchrotron(E,st.ntProton,i,st.magf);
-			pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
-			pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
+			//pSyLocal = luminositySynchrotron(E,st.ntProton,i,st.magf);
+			//pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
+			//pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
 
 			eSy[E_ix] += eSyLocal*vol;				// [erg s^-1]
 			eIC[E_ix] += eICLocal*vol;
@@ -272,7 +272,7 @@ void processes(State& st, const std::string& filename)
 	
 	if (calculateFlare) {
 		//double timeBurst = GlobalConfig.get<double>("nonThermal.flare.timeAfterFlare");
-		writeBlob(st,energies,lumNT_ssa,tAccBlob);
+		writeBlob(st,energies,lumNT_ssa,timeAfterFlare);
 	}
 
 	file.close();

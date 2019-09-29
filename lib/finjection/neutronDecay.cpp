@@ -52,6 +52,34 @@ double injNeutronDecay(double E, Particle& p, Particle& neutron, const SpaceCoor
 
 }
 
+double f3(double gamma_3, Particle& n, const SpaceCoord& distCoord)
+{
+	double En = gamma_3 * neutronMass * cLight2;
+	double Nn = (En > n.emin() && En < n.emax()) ? 
+				n.distribution.interpolate({{0,En}},&distCoord) : 0.0;
+	return (gamma_3 > 1.001) ? Nn / sqrt(gamma_3*gamma_3-1.0) / gamma_3 : 0.0;
+}
+
+double injElectronNeutronDecay(double Ee, Particle& n, const SpaceCoord& distCoord)
+{
+	double gamma_e = Ee/(electronMass*cLight2);
+	double C = 0.5*(neutronMass/electronMass)/neutronMeanLife;
+	double sup = 2.53;
+	double inf = 1.001;
+	size_t N1 = 20;
+	double dgamma_1 = (sup-inf)/N1;
+	double gamma_1 = inf;
+	double sum = 0.0;
+	for (size_t j=0;j<N1;j++) {
+		double gamma_2_minus = gamma_e*gamma_1 - sqrt((gamma_1*gamma_1-1.0)*(gamma_e*gamma_e-1.0));
+		double gamma_2_plus = gamma_e*gamma_1 + sqrt((gamma_1*gamma_1-1.0)*(gamma_e*gamma_e-1.0));
+		double secondInt = RungeKuttaSimple(gamma_2_minus,gamma_2_plus,[&n,&distCoord]
+							(double gamma_3) {return f3(gamma_3,n,distCoord);});
+		sum += 0.614*gamma_1*P2(2.53-gamma_1)*dgamma_1*secondInt;
+		gamma_1 += dgamma_1;
+	}
+	return C*sum;
+}
 
 
 

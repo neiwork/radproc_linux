@@ -53,9 +53,27 @@ int main()
 			comptonScattMatrixRead(model);
 		}
 		
+		//injection(model.ntElectron, model);
+		//distributionFast(model.ntElectron, model);
+		//writeEandRParamSpace("electronDis",model.ntElectron.distribution,0);
+		
 		if (calculateThermal)
 			thermalProcesses(model,"lum.txt");
 		
+		if (calculateFlare) {
+			timeAfterFlare = 0.0;
+			double tMax = 4.0*3600;
+			double dt = tMax/100;
+			ofstream file;
+			file.open("lightCurve.txt");
+			for (int i=0;i<=100;i++) {
+				oneZoneDist(model.ntPair,model);
+				flareEmission(model,model.ntPair,file);
+				timeAfterFlare += dt;
+				if (i==1) writeEandRParamSpace("electronDis",model.ntPair.distribution,0);
+			}
+			file.close();
+		}
 		//blobEmission(model);
 		
 //***********nonthermal particles**************		
@@ -65,12 +83,8 @@ int main()
 			if (calculateLosses) {
 				show_message(msgStart, Module_radLosses);
 				radiativeLosses(model.ntElectron, model, "electronLosses.txt");
-				radiativeLosses(model.ntProton, model, "protonLosses.txt");
+				//radiativeLosses(model.ntProton, model, "protonLosses.txt");
 				show_message(msgEnd, Module_radLosses);
-			}
-			
-			if (calculateFlare) {
-				oneZoneDist(model.ntElectron,model);
 			}
 		
 			if (calculateNTdistributions) {
@@ -81,29 +95,29 @@ int main()
 					injectionBurst(model.ntElectron,model);
 				else
 					injection(model.ntElectron, model);
-				
 
 				writeEandRParamSpace("electronInj",model.ntElectron.injection,0);
 				distributionFast(model.ntElectron, model);
+				//distributionSimplified(model.ntElectron,model);
 				writeEandRParamSpace("electronDis",model.ntElectron.distribution,0);
 				
 				//nt protons
-				injection(model.ntProton,model);
+				/*injection(model.ntProton,model);
 				writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
 				distributionFast(model.ntProton,model);
 				writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
-				
-				
+				*/
 				if (calculateNeutronInj) {
 					injectionNeutrons(model);
+					radiativeLossesNeutron(model.ntNeutron,model,"neutronLosses.txt");
 					if (calculateNeutronDis)
 						distributionNeutrons(model);
-					//if (calculateJetDecay)
-					//	jetNeutronDecay(model);
+					if (calculateJetDecay)
+						jetNeutronDecay(model);
 				}
 				
 				if (calculateNonThermalLum) {
-					processes(model, "ntLuminosities.txt");
+					processes(model,"ntLuminosities.txt");
 				}
 				
 				/*

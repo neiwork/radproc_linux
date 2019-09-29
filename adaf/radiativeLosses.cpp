@@ -38,44 +38,83 @@ void radiativeLosses(Particle& p, State& st, const std::string& filename)
 	double phEmax = st.photon.emax();
 	p.ps.iterate([&](const SpaceIterator& i) {
 		
-		double E = i.val(DIM_E);
-		double r = i.val(DIM_R);
-		const double B = st.magf.get(i);
-		double fmtE = log10(E/1.6e-12);
-		double delta_r = (r/sqrt(paso_r))*(paso_r-1.0);
-		double v = -radialVel(r);
-		
-		double eAdv = v/r;
-		double eCell = v/delta_r;
-		double eAcc = accelerationRate(E,B,accEfficiency);
-		double eDiff = diffusionRate(E,r,B);
-        double eSyn = lossesSyn(E,B,p)/E;
-        
-        double eMaxHillas = electronCharge*B*r*(pi-2.0*st.thetaH.get(i));
+		if (i.coord[DIM_R] % 5 == 0) {
+			double E = i.val(DIM_E);
+			double r = i.val(DIM_R);
+			const double B = st.magf.get(i);
+			double fmtE = log10(E/1.6e-12);
+			double delta_r = (r/sqrt(paso_r))*(paso_r-1.0);
+			double v = -radialVel(r);
+			
+			double eAdv = v/r;
+			double eCell = v/delta_r;
+			double eAcc = accelerationRate(E,B,accEfficiency);
+			double eDiff = diffusionRate(E,r,B);
+			double eSyn = lossesSyn(E,B,p)/E;
+			
+			double eMaxHillas = electronCharge*B*r*(pi-2.0*st.thetaH.get(i));
 
-		file << fmtE << "\t" << r/schwRadius
-					 << "\t" << safeLog10(eAcc)
-					 << "\t" << safeLog10(eCell)
-					 << "\t" << safeLog10(eAdv)
-				 	 << "\t" << safeLog10(eDiff)
-                     << "\t" << safeLog10(eMaxHillas/1.6e-12)
-					 << "\t" << safeLog10(eSyn);
-		
-		if (p.id == "ntElectron") {
-			double eIC = lossesIC(E,p,st.photon.distribution,i.coord,phEmin,phEmax)/E;
-			double eBrem = lossesBremss(E,st.denf_e.get(i)+st.denf_i.get(i),p)/E;  
-			file << "\t" << safeLog10(eIC)
-				 << "\t" << safeLog10(eBrem)
-				 << std::endl;
-		} else if(p.id == "ntProton") {
-			double pPP = lossesHadronics(E,st.denf_i.get(i),p)/E;
-			double pPG = lossesPhotoHadronic(E,p,st.photon.distribution,i,phEmin,phEmax)/E;
-			file << "\t" << safeLog10(pPP)
-				 << "\t" << safeLog10(pPG)
-				 << std::endl;
+			file << fmtE << "\t" << r/schwRadius
+						 << "\t" << safeLog10(eAcc)
+						 << "\t" << safeLog10(eCell)
+						 << "\t" << safeLog10(eAdv)
+						 << "\t" << safeLog10(eDiff)
+						 << "\t" << safeLog10(eMaxHillas/1.6e-12)
+						 << "\t" << safeLog10(eSyn);
+			
+			if (p.id == "ntElectron") {
+				double eIC = lossesIC(E,p,st.photon.distribution,i.coord,phEmin,phEmax)/E;
+				double eBrem = lossesBremss(E,st.denf_e.get(i)+st.denf_i.get(i),p)/E;  
+				file << "\t" << safeLog10(eIC)
+					 << "\t" << safeLog10(eBrem)
+					 << std::endl;
+			} else if(p.id == "ntProton") {
+				double pPP = lossesHadronics(E,st.denf_i.get(i),p)/E;
+				double pPG = lossesPhotoHadronic(E,p,st.photon.distribution,i,phEmin,phEmax)/E;
+				file << "\t" << safeLog10(pPP)
+					 << "\t" << safeLog10(pPG)
+					 << std::endl;
+			}
 		}
 	},{-1,-1,0});
 	file.close();
 }
 
+void radiativeLossesNeutron(Particle& n, State& st, const std::string& filename)
+{
+	static const double accEfficiency = GlobalConfig.get<double>("nonThermal.injection.accEfficiency");
+	std::ofstream file;
+	file.open(filename.c_str(), std::ios::out);
+
+	file << "Log(E/GeV)" 
+		<< "\t" << "r [M]"
+		<< "\t" << "Escape"
+		<< "\t" << "Decay"
+		<< "\t" << "pp"
+		<< "\t" << "pg"
+		<< std::endl;
+	
+	double phEmin = st.photon.emin();
+	double phEmax = st.photon.emax();
+	n.ps.iterate([&](const SpaceIterator& i) {
+		
+		double E = i.val(DIM_E);
+		double gamma = E/(neutronMass*cLight2);
+		double r = i.val(DIM_R);
+		double fmtE = log10(E/1.6e-3);
+		
+		double nEscape = cLight/r;
+		double nDecay = 1.0/(gamma*neutronMeanLife);
+		double nPP = lossesHadronics(E,st.denf_i.get(i),n)/E;
+		double nPG = lossesPhotoHadronic(E,n,st.photon.distribution,i,phEmin,phEmax)/E;
+
+		file << fmtE << "\t" << r/schwRadius
+					 << "\t" << safeLog10(nEscape)
+					 << "\t" << safeLog10(nDecay)
+					 << "\t" << safeLog10(nPP)
+				 	 << "\t" << safeLog10(nPG) << endl;
+	},{-1,-1,0});
+	file.close();
+	
+}
 

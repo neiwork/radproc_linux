@@ -14,7 +14,7 @@ NT_logeV,NT_logSye,NT_logSyp,NT_logIC,NT_logpp,NT_logpg,NT_logeAbs,NT_logpAbs = 
 #NT_logeVpairs, NT_logSypairs, NT_logICpairs, NT_logAbsPairs = \
 #        np.loadtxt('ntPairtLum.txt', unpack=True, skiprows=1)
 x_eV = [-9,19]
-y_axis = [32,38]
+y_axis = [36,42]
 
 fig, ax1 = plt.subplots()
 

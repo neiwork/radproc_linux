@@ -80,7 +80,6 @@ double luminositySynchrotron2(double E, const Particle& c, const SpaceCoord& psc
 
 }
 
-
 /*
 double luminositySynchrotron_conSSA(double E, const Particle& creator)
 {

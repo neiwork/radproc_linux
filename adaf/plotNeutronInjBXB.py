@@ -14,11 +14,11 @@ magma = cm.get_cmap('magma',12)
 logeV,r,logpp,logpY = np.loadtxt('neutronInj.txt',unpack=True,skiprows=1)
 logerg = np.log10(np.power(10,logeV)*1.6e-12)
 
-x_eV = [logeV[0],logeV[-1]]
-y = [-5,16]
+x_eV = [logeV[2],logeV[-10]]
+y = [28,36]
 
 nR = 30
-f = 2
+f = 1
 nE = 100
 colors = np.arange(nR)/nR
 
@@ -28,7 +28,7 @@ ax1.tick_params(axis='both',labelsize=14)
 ax1.set_xlim(x_eV)
 ax1.set_ylim(y)
 ax1.set_xlabel(r'$\mathrm{Log}(E ~ [\mathrm{eV}])$',fontsize=14)
-ax1.set_ylabel(r'$\mathrm{Log}(E^2Q_\mathrm{n}(E) ~ [\mathrm{erg~cm^{-3}s^{-1}}])$',fontsize=14)
+ax1.set_ylabel(r'$\mathrm{Log}(E^2Q_\mathrm{n}(E) ~ [\mathrm{erg~s^{-1}}])$',fontsize=14)
 
 qTot = np.zeros(nE)
 for r1 in np.arange(nR//f):
@@ -44,10 +44,8 @@ for e in np.arange(nE):
 ax1.plot(logeV[:nE],2.0*logerg[:nE]+np.log10(qTot),ls='--',lw=3,label='Total', \
             color = 'k')
 ax1.legend(loc='best',fontsize=15)
-fig.savefig('neutronInj_energy.pdf')
-
-
-
+fig.savefig('neutronInj_energy.eps')
+fig.savefig('neutronInj_energy.jpg')
 
 
 fig, ax1 = plt.subplots()
@@ -70,4 +68,5 @@ for e in np.arange(nE):
 ax1.plot(logeV[:nE],np.log10(qTot),ls='--',lw=3,label='Total', \
             color = 'k')
 ax1.legend(loc='best',fontsize=15)
-fig.savefig('neutronInj.pdf')
+fig.savefig('neutronInj.eps')
+fig.savefig('neutronInj.jpg')

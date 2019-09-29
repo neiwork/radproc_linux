@@ -14,7 +14,7 @@ void blob(State& st)
 	double sumt = 0.0;
 	double pasoRaux = pow(100.0,1.0/1000);
 	rBlob = schwRadius*1.1;
-	while ( sumt < tAccBlob) {
+	while ( sumt < timeAfterFlare) {
 		double dr = rBlob*(pasoRaux-1.0);
 		sumt += dr / (-radialVel(rBlob));
 		rBlob *= pasoRaux;

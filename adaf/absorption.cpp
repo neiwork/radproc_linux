@@ -8,6 +8,9 @@
 #include <fmath/RungeKutta.h>
 #include <fparameters/Dimension.h>
 #include <fparameters/SpaceIterator.h>
+#include <fluminosities/thermalSync.h>
+#include <fluminosities/luminositySynchrotron.h>
+#include <fluminosities/blackBody.h>
 #include <fmath/physics.h>
 #include <fluminosities/opticalDepthSSA.h>
 
@@ -161,20 +164,31 @@ void opticalDepth(Vector& tau, int E_ix, State& st, int iR)
 			double magneticField = ((r1 < rMax && r1 > rMin) && 
 							(theta1 > thetaMinLocal && theta1 < pi-thetaMinLocal)) ? 
 							st.magf.interpolate({{DIM_R,r1}},&psc) : 0.0;
-			
+			double temp = (r1 < rMax && r1 > rMin) && (theta1 > thetaMinLocal && 
+							theta1 < pi-thetaMinLocal) ? electronTemp(r1) : 0.0;
+			double dens_e = (r1 < rMax && r1 > rMin) && (theta1 > thetaMinLocal && 
+							theta1 < pi-thetaMinLocal) ? electronDensity(r1) : 0.0;
 			double ssaAbsCoeffe = 0.0;
 			double ssaAbsCoeffp = 0.0;
+			double ssaAbsCoeffeTh = 0.0;
 			double ggAbsCoeff = 0.0;
 			double fmtE = log10(E/1.6e-12);
 			
+			double frequency = E/planck;
 			if (fmtE < 0.0) {
 				ssaAbsCoeffe = ssaAbsorptionCoeff(E,magneticField,st.ntElectron,psc);
+				double bbody = bb(frequency,temp);
+				double jSy = jSync(E,temp,magneticField,dens_e);
+				//double jSy = luminositySynchrotron2(E,st.ntElectron,psc,magneticField)/frequency/(4.0*pi);
+				ssaAbsCoeffeTh = (bbody > 0.0) ? jSy/bbody : 0.0;
 				ssaAbsCoeffp = ssaAbsorptionCoeff(E,magneticField,st.ntProton,psc);
 			}
+			//cout << "bb = " << bb_RJ(frequency,temp) << "\t ssaAbsCoeffeTh = " << ssaAbsCoeffeTh << endl;
 			if (fmtE > 5.0) ggAbsCoeff = ggAbsorptionCoeff(E,r1,st,psc);
 			
 			tau[0] += ggAbsCoeff*drprim;
-			tau[1] += ssaAbsCoeffe*drprim;
+			tau[1] += (ssaAbsCoeffe+ssaAbsCoeffeTh)*drprim;
+			//tau[1] += ssaAbsCoeffe*drprim;
 			tau[2] += ssaAbsCoeffp*drprim;
 			
 			drprim = r1*(pasoprim-1.0);

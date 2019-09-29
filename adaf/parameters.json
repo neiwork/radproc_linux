@@ -2,7 +2,7 @@
     "id":"BXB",	
     "mu_i":"1.23",
     "mu_e":"1.14",
-    "inclination":"45",
+    "inclination":"0",
     "accretionRateCorona":"1.0",
     "rTr":"2.0e4",
     "rOutCD":"1.0e5",
@@ -23,7 +23,7 @@
 			"1":1,
 			"2":0,
 			"3":0,
-			"4":1
+			"4":0
         },
         
         "compton": {
@@ -52,16 +52,16 @@
     
     "calculateNonThermal":"1",
     "nonThermal": {
-	"calculateFlare":"0",
+	"calculateFlare":"1",
 	"flare": {
 		"injection": {
-			"energyFraction":"0.01",
+			"energyFraction":"0.2",
 			"accEfficiency":"0.1",
-			"primaryIndex":"2.0"
+			"primaryIndex":"2.2"
 		},
 		"timeAfterFlare":"1000",
-		"minRadius":"0",
-		"maxRadius":"10",
+		"minRadius":"12",
+		"maxRadius":"15",
 		"burst": {
 			"tRise":"160",
 			"tPlateau":"2400",
@@ -69,17 +69,24 @@
 		}
 	},
         "injection": {
-            "energyFraction":"0.01",
+            "energyFraction":"0.0015",
             "accEfficiency":"0.1",
-            "primaryIndex":"2.0"
+            "primaryIndex":"3.5"
         },
         "calculateLosses":"0",
-	"calculateDistributions":"1",
+	"calculateDistributions":"0",
         "calculateLuminosities":"0",
     	"neutrons":{
-		"calculateInjection":"1",
-        	"calculatePropagation":"1",
-		"calculateJetInjection":"1"
+		"calculateInjection":"0",
+        	"calculatePropagation":"0",
+		"calculateJetDecay":"0",
+		"jetDecay":{
+			"openingAngle":"6",
+			"zMin":"1.0",
+			"zMax":"1.0e10",
+			"nNeutrons":"1000",
+			"nTheta":"5"
+		}
 	}
     },	
     
@@ -89,12 +96,12 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":"100"
+						"samples":"60"
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":30
+						"samples":800
 					},
 					"radius_cd":{
                         			"samples":2
@@ -104,8 +111,8 @@
 			"photon": {
 				"dim":{
 					"energy": {
-						"min":-8.0,
-						"max":15.0
+						"min":-7.0,
+						"max":10.0
 					}
 				}
 			},
@@ -113,7 +120,7 @@
 				"mass":9.1094e-28,
 				"dim":{
 					"energy": {
-						"min":6.0,
+						"min":5.71,
 						"max":15.0
 					}
 				}
@@ -123,7 +130,7 @@
 				"dim":{
 					"energy": {
 						"min":9.0,
-						"max":18.0
+						"max":19.0
 					}
 				}
 			},
@@ -132,7 +139,7 @@
 				"dim":{
 					"energy": {
 						"min":9.0,
-						"max":18.0
+						"max":19.0
 					}
 				}
             		},
@@ -170,7 +177,7 @@
 	"math": {
 		"runge-kutta-1": {
 			"samples": {
-				"x": 30
+				"x": 40
 			}
 		},
 

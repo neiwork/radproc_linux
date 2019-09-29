@@ -15,6 +15,7 @@ void adafParameters()
 {	
 	ifstream adafFile,adafParams;
 	
+	//adafFile.open("adafFileSgr.txt"); adafParams.open("adafParametersSgr.txt");
 	adafFile.open("adafFile.txt"); adafParams.open("adafParameters.txt");
 	adafFile >> nRaux;
 	double accRateNorm;
@@ -44,7 +45,7 @@ void adafParameters()
 	nE = GlobalConfig.get<int>("model.particle.default.dim.energy.samples");
 	nRcd = GlobalConfig.get<int>("model.particle.default.dim.radius_cd.samples");
     
-    paso_r = pow(exp(logr.back())/exp(logr.front()),1.0/nR);
+    paso_r = pow(exp(logr.back())/exp(logr.front()),1.0/(nR-1.0));
 	paso_rCD = pow(exp(logr.back())*schwRadius/rTr,1.0/nRcd);
 
 	logMinEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.min");
@@ -101,5 +102,6 @@ void adafParameters()
         calculateNonThermalLum = GlobalConfig.get<int>("nonThermal.calculateLuminosities");
         calculateNeutronInj = GlobalConfig.get<int>("nonThermal.neutrons.calculateInjection");
 		calculateNeutronDis = GlobalConfig.get<int>("nonThermal.neutrons.calculatePropagation");
+		calculateJetDecay = GlobalConfig.get<int>("nonThermal.neutrons.calculateJetDecay");
     }
 }

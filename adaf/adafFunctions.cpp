@@ -11,7 +11,7 @@ double electronTemp(double r)
 {
 	double logr_actual = log(r/schwRadius);
 	double aux = logr.front();
-	size_t pos_r=0;
+	size_t pos_r = 0;
 	while (aux < logr_actual) {
 		pos_r++;
 		aux = logr[pos_r];
@@ -94,9 +94,10 @@ double accRateADAF(double r)
 
 double massDensityADAF(double r)
 {
-	double result = accRateADAF(r) / (4.0*pi*r*r*costhetaH(r)*(-radialVel(r)));
+	//double result = accRateADAF(r) / (4.0*pi*r*r*costhetaH(r)*(-radialVel(r)));
+	double result = accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r)));
 	
-	if (r < rBlob) result *= factorDensity;
+	//if (r < rBlob) result *= factorDensity;
 	return result;
 }
 

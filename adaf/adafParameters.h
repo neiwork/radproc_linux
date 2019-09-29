@@ -33,6 +33,7 @@ int calculateNonThermalLum;             // If 1 calculate non-thermal luminositi
 int calculateFlare;						// If 1 calculate non-thermal flare distributions.
 int calculateNeutronInj;                // If 1 calculate neutron injection.
 int calculateNeutronDis;				// If 1 calculate neutron propagation.
+int calculateJetDecay;					// If 1 calculate power injection in jet by neutron decay.
 int calculateComptonRedMatrix;			// If 1 calculate the Comptonization energy redistribution
 										// matrices. It only works if comptonMethod=0 or 1.
 int comptonMethod;						// Method used to calculate the Comptonized spectrum.
@@ -86,7 +87,7 @@ double schwRadius;						// Schwarzschild Radius [cm]
 
 // BLOB PARAMETERS
 double rBlob;
-double tAccBlob;
+double timeAfterFlare;
 double factorDensity;
 
 void adafParameters();

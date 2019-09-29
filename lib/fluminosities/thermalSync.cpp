@@ -46,7 +46,6 @@ double mAux(double xM, double temp) {
     double alpha, beta, gamma;
     
     auxiliaryFunction(alpha, beta, gamma, temp);
-
 	double result = (4.0505 * alpha / pow(xM, 1.0/6.0) ) * (1.0 + 0.4*beta / pow(xM, 0.25) + 
                 0.5316 * gamma / sqrt(xM) ) * exp(-1.8899 * pow(xM, 1.0/3.0));
 	    

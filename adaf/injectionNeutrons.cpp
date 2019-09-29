@@ -42,14 +42,14 @@ void injectionNeutrons(State& st)
 		double tcross = i.val(DIM_R) / cLight; //corregir porque deberia ser (Rmax(theta)-r)/cLight;
 		n.ps.iterate([&](const SpaceIterator& jE) {
 			const double E = jE.val(DIM_E);
-			//double n_pg = neutronPgamma(E,tcross,n,p,st.photon.distribution,jE,
-			//				st.photon.emin(),st.photon.emax());
+			double n_pg = neutronPgamma(E,tcross,n,p,st.photon.distribution,jE,
+							st.photon.emin(),st.photon.emax());
 			double n_pp = neutronPp(E,p,dens,i);
-			double total = n_pp; // + n_pg;
+			double total = n_pp + n_pg;
 			file << safeLog10(E/1.6e-12) << "\t"
 				 << i.val(DIM_R)/schwRadius << "\t"
-				 << safeLog10(n_pp) /* << "\t"
-				 << safeLog10(n_pg)*/ << std::endl;
+				 << safeLog10(n_pp*vol)  << "\t"
+				 << safeLog10(n_pg*vol) << endl;
 			n.injection.set(jE,total); //en unidades de erg^-1 s^-1 cm^{-3}
 		},{-1,i.coord[DIM_R],0});
 		sumQ += RungeKuttaSimple(n.emin(),n.emax(),[&](double e)
