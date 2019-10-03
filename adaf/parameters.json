@@ -55,13 +55,13 @@
 	"calculateFlare":"1",
 	"flare": {
 		"injection": {
-			"energyFraction":"0.2",
-			"accEfficiency":"0.1",
+			"energyFraction":"0.11",
+			"accEfficiency":"0.001",
 			"primaryIndex":"2.2"
 		},
 		"timeAfterFlare":"1000",
 		"minRadius":"12",
-		"maxRadius":"15",
+		"maxRadius":"16",
 		"burst": {
 			"tRise":"160",
 			"tPlateau":"2400",
@@ -96,12 +96,12 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":"60"
+						"samples":"100"
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":800
+						"samples":400
 					},
 					"radius_cd":{
                         			"samples":2

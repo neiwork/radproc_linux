@@ -96,9 +96,13 @@ double massDensityADAF(double r)
 {
 	//double result = accRateADAF(r) / (4.0*pi*r*r*costhetaH(r)*(-radialVel(r)));
 	double result = accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r)));
-	
 	//if (r < rBlob) result *= factorDensity;
 	return result;
+}
+
+double  magneticField(double r)
+{
+	return sqrt(8.0*pi*(1.0-magFieldPar)*massDensityADAF(r)*sqrdSoundVel(r));
 }
 
 double accRateColdDisk(double r)

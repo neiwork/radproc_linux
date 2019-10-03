@@ -90,4 +90,9 @@ double rBlob;
 double timeAfterFlare;
 double factorDensity;
 
+double maxRadius;
+double minRadius;
+double etaInj;
+double pIndex;
+
 void adafParameters();

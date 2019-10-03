@@ -61,18 +61,55 @@ int main()
 			thermalProcesses(model,"lum.txt");
 		
 		if (calculateFlare) {
+			
+			maxRadius = GlobalConfig.get<double>("nonThermal.flare.maxRadius")*schwRadius;
+			minRadius = GlobalConfig.get<double>("nonThermal.flare.minRadius")*schwRadius;
+			etaInj = GlobalConfig.get<double>("nonThermal.flare.injection.energyFraction");
+			pIndex = GlobalConfig.get<double>("nonThermal.flare.injection.primaryIndex");
+			
 			timeAfterFlare = 0.0;
 			double tMax = 4.0*3600;
-			double dt = tMax/100;
+			size_t nTime = 100;
+			double dt = tMax/nTime;
 			ofstream file;
+			multiZoneInjection(model.ntPair,model);
 			file.open("lightCurve.txt");
-			for (int i=0;i<=100;i++) {
-				oneZoneDist(model.ntPair,model);
-				flareEmission(model,model.ntPair,file);
+			for (size_t i=0;i<nTime;i++) {
 				timeAfterFlare += dt;
-				if (i==1) writeEandRParamSpace("electronDis",model.ntPair.distribution,0);
+				//////////////////////////////////////////////////////
+				
+				//oneZoneDist(model.ntPair,model);
+				multiZoneDist(model.ntPair,model,-timeAfterFlare);
+				
+				//////////////////////////////////////////////////////
+				flareEmission2(model,model.ntPair,file);
+
+				if (i==10) writeEandRParamSpace("electronDis",model.ntPair.distribution,0);
 			}
 			file.close();
+			
+			/*pIndex = 1.1;
+			double d_pIndex = (3.0-1.1)/9;
+			for (size_t jP=0;jP<10;jP++) {
+				etaInj = 0.05;
+				double d_etaInj = (0.3-0.05)/4;
+				for (size_t jE=0;jE<5;jE++) {
+					timeAfterFlare = 0.0;
+					double tMax = 4.0*3600;
+					double dt = tMax/100;
+					ofstream file;
+					file.open("lightCurve_p"+to_string(pIndex)+"_e"+to_string(etaInj)+".txt");
+					for (int i=0;i<=100;i++) {
+						oneZoneDist(model.ntPair,model);
+						flareEmission(model,model.ntPair,file);
+						timeAfterFlare += dt;
+						//if (i==1) writeEandRParamSpace("electronDis",model.ntPair.distribution,0);
+					}
+					file.close();
+					etaInj += d_etaInj;
+				}
+				pIndex += d_pIndex;
+			}*/
 		}
 		//blobEmission(model);
 		

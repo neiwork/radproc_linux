@@ -38,51 +38,48 @@ double eEmax(Particle& p, double r, double B, double v, double dens)
 
 double cutOffPL(double E, double Emin, double Emax)
 {
-	static const double primaryIndex = GlobalConfig.get<double>("nonThermal.injection.primaryIndex");
-	return pow(E,-primaryIndex)*exp(-E/Emax)*exp(-Emin/E);
+	return pow(E,-pIndex)*exp(-E/Emax)*exp(-Emin/E);
 }
 
-double auxFun(double g, double p, double gammaMax)
+double auxFun(double g, double gammaMax)
 {
-	if (p < 2.0) return pow(gammaMax,2.0-p)*pow(g,p+1.0);
-	else if (p > 2.0) return g*g*g;
+	if (pIndex < 2.0) return pow(gammaMax,2.0-pIndex)*pow(g,pIndex+1.0);
+	else if (pIndex > 2.0) return g*g*g;
 	else return log(gammaMax/g)*g*g;
 }
-double func(double g, double LHS, double norm_temp, double p, double gammaMax)
+double func(double g, double LHS, double norm_temp, double gammaMax)
 {
-	return LHS - auxFun(g,p,gammaMax)*sqrt(g*g-1.0)*exp(-g/norm_temp);
+	return LHS - auxFun(g,gammaMax)*sqrt(g*g-1.0)*exp(-g/norm_temp);
 }
 
 double findGammaMin(double temp, double Emax)
 {
 	double norm_temp = boltzmann*temp / (electronMass*cLight2);
 	double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
-	double etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction");
-	double p = GlobalConfig.get<double>("nonThermal.injection.primaryIndex");
-	double gammaMax = (p <= 2.0) ? Emax / (electronMass*cLight2) : 1.0;;
+	double gammaMax = (pIndex <= 2.0) ? Emax / (electronMass*cLight2) : 1.0;;
 	double g1,g2;
 	g2 = 100.0;
 	double LHS = etaInj*norm_temp*norm_temp*aTheta*gsl_sf_bessel_Kn(2,1.0/norm_temp)*
-					(p != 2 ? abs(p-2.0) : 1.0);
-	double RHS2 = auxFun(g2,p,gammaMax)*sqrt(g2*g2-1.0)*exp(-g2/norm_temp);
+					(pIndex != 2 ? abs(pIndex-2.0) : 1.0);
+	double RHS2 = auxFun(g2,gammaMax)*sqrt(g2*g2-1.0)*exp(-g2/norm_temp);
 	while (LHS < RHS2) {
 		g2 *= 2.0;
-		RHS2 = auxFun(g2,p,gammaMax)*sqrt(g2*g2-1.0)*exp(-g2/norm_temp);
+		RHS2 = auxFun(g2,gammaMax)*sqrt(g2*g2-1.0)*exp(-g2/norm_temp);
 	}
 	g1 = g2/1.1;
-	double RHS1 = auxFun(g1,p,gammaMax)*sqrt(g1*g1-1.0)*exp(-g1/norm_temp);
+	double RHS1 = auxFun(g1,gammaMax)*sqrt(g1*g1-1.0)*exp(-g1/norm_temp);
 	while ((LHS-RHS2)*(LHS-RHS1) > 0.0) {
 		g1 /= 1.1;
-		RHS1 = auxFun(g1,p,gammaMax)*sqrt(g1*g1-1.0)*exp(-g1/norm_temp);
+		RHS1 = auxFun(g1,gammaMax)*sqrt(g1*g1-1.0)*exp(-g1/norm_temp);
 	}
 	
 	double g = g1;
 	double tol = 1.0e-3;
 	while ((g2-g1) >= tol) {
 		g = (g1+g2)/2;
-		if (func(g,LHS,norm_temp,p,gammaMax) == 0.0)
+		if (func(g,LHS,norm_temp,gammaMax) == 0.0)
 			return g;
-		else if (func(g,LHS,norm_temp,p,gammaMax)*func(g1,LHS,norm_temp,p,gammaMax) < 0.0)
+		else if (func(g,LHS,norm_temp,gammaMax)*func(g1,LHS,norm_temp,gammaMax) < 0.0)
 			g2 = g;
 		else
 			g1 = g;

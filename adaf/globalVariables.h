@@ -74,6 +74,13 @@ extern const double nuPrimMaxCompton;
 extern const double nuMinCompton;
 extern const double nuMaxCompton;
 
+//FLARE
+
+extern double maxRadius;
+extern double minRadius;
+extern double etaInj;
+extern double pIndex;
+
 extern const DimensionCoord
 	DIM_E,
 	DIM_R,
