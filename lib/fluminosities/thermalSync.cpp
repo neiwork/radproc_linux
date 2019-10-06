@@ -44,8 +44,8 @@ double auxiliaryFunction(double& alpha, double& beta, double& gamma, double temp
 double mAux(double xM, double temp) {
     
     double alpha, beta, gamma;
-    
     auxiliaryFunction(alpha, beta, gamma, temp);
+
 	double result = (4.0505 * alpha / pow(xM, 1.0/6.0) ) * (1.0 + 0.4*beta / pow(xM, 0.25) + 
                 0.5316 * gamma / sqrt(xM) ) * exp(-1.8899 * pow(xM, 1.0/3.0));
 	    
@@ -53,6 +53,23 @@ double mAux(double xM, double temp) {
 }
 
 double jSync(double energy, double temp, double magfield, double dens_e)
+{
+	double frequency = energy / planck;
+    double norm_temp = boltzmann * temp / electronRestEnergy;
+	
+    double nu0 = (electronCharge * magfield) / (2.0 *pi * electronMass * cLight);
+    double xM = (2.0 * frequency) / (3.0 * nu0 * norm_temp*norm_temp);
+	
+	//double bessel = boost::math::cyl_bessel_k(2, 1.0/norm_temp);
+	double bessel = gsl_sf_bessel_Kn(2,1.0/norm_temp);
+	
+    double result = (bessel > 0.0) ? 4.437e-30 * dens_e * frequency / bessel * mAux(xM, temp) : 0.0;
+    
+	return result/(4*pi);
+} // esto debería tener unidades de erg cm^-3 ster^-1 s^-1 Hz^-1
+
+
+/*double jSync(double energy, double temp, double magfield, double dens_e)
 {
 	double frecuency = energy / planck;
     double norm_temp = boltzmann * temp / (electronMass * cLight2);
@@ -67,4 +84,4 @@ double jSync(double energy, double temp, double magfield, double dens_e)
 	dens_e * frecuency / bessel * mAux(xM, temp) : 0.0;
     
 	return result;
-} // esto debería tener unidades de erg cm^-3 ster^-1 s^-1 Hz^-1
+}*/ // esto debería tener unidades de erg cm^-3 ster^-1 s^-1 Hz^-1

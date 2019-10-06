@@ -55,13 +55,13 @@
 	"calculateFlare":"1",
 	"flare": {
 		"injection": {
-			"energyFraction":"0.11",
-			"accEfficiency":"0.001",
-			"primaryIndex":"2.2"
+			"energyFraction":"0.4",
+			"accEfficiency":"0.1",
+			"primaryIndex":"2.3"
 		},
 		"timeAfterFlare":"1000",
-		"minRadius":"12",
-		"maxRadius":"16",
+		"minRadius":"3",
+		"maxRadius":"15",
 		"burst": {
 			"tRise":"160",
 			"tPlateau":"2400",
@@ -69,8 +69,8 @@
 		}
 	},
         "injection": {
-            "energyFraction":"0.0015",
-            "accEfficiency":"0.1",
+            "energyFraction":"0.001",
+            "accEfficiency":"0.001",
             "primaryIndex":"3.5"
         },
         "calculateLosses":"0",
@@ -96,12 +96,12 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":"100"
+						"samples":"60"
 					},
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":400
+						"samples":200
 					},
 					"radius_cd":{
                         			"samples":2
@@ -121,7 +121,7 @@
 				"dim":{
 					"energy": {
 						"min":5.71,
-						"max":15.0
+						"max":17.0
 					}
 				}
 			},

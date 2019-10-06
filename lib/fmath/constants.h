@@ -53,6 +53,7 @@ const double electronRadius			=  2.8179e-13;             //Electron classical   
 //Particle rest mass energy (erg) mc^2
 																
 const double electronMass			= 9.1094e-28;   //(0.511e6);    
+const double electronRestEnergy		= 8.1871e-7;
 const double muonMass				= 1.8817e-25;   //(105.7e6);  
 const double protonMass				= 1.6726e-24;   //(938.3e6);
 const double chargedPionMass		= 2.4852e-25;   //(139.6e6);

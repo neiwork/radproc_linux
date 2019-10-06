@@ -42,7 +42,7 @@ void localProcesses(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOu
 
 	#pragma omp parallel for
 	for (int jE=0;jE<nE;jE++) {
-		double frecuency=energies[jE]/planck;
+		double frequency=energies[jE]/planck;
 		double lumSync1,lumSync2;
 		lumSync1 = lumSync2 = 0.0;
 		size_t jR=0;
@@ -51,7 +51,9 @@ void localProcesses(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOu
 			double thetaH = st.thetaH.get(itER);
 			double rB1 = r/sqrt(paso_r);
 			double rB2 = r*sqrt(paso_r);
-			//double area = 2.0*pi*rB2*rB2*(2.0*cos(thetaH)+sin(thetaH)*sin(thetaH));
+			double mu = costhetaH(rB2);
+			double sin2 = 1.0-mu*mu;
+			//double area = 2.0*pi*rB2*rB2*(2.0*mu+sin2);
 			double area = 4.0*pi*rB2*rB2*cos(thetaH);
 			double fluxToLum = area;
 			double vol = (rB2*rB2*rB2-rB1*rB1*rB1)*(4.0/3.0)*pi*cos(thetaH);
@@ -65,14 +67,14 @@ void localProcesses(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOu
 			double magf = st.magf.get(itER);
 			double dens_i = st.denf_i.get(itER);
 			double dens_e = st.denf_e.get(itER);
+			double jSy = jSync(energies[jE],temp,magf,dens_e);
 			if (flags[0]) {
-				double jSy = jSync(energies[jE],temp,magf,dens_e);
-				lumRJ = bb_RJ(frecuency,temp) * fluxToLum;
+				lumRJ = bb(frequency,temp)*fluxToLum;
 				lumSy = jSy*emissToLum;
 			}
 			if (flags[1])
 				lumBr = jBremss(energies[jE],temp,dens_i,dens_e)*emissToLum;
-			if (flags[2] && temp_i > 1.0e11 && frecuency > 1.0e20 && frecuency < 1.0e26) {
+			if (flags[2] && temp_i > 1.0e11 && frequency > 1.0e20 && frequency < 1.0e26) {
 				double jpp = luminosityHadronic(energies[jE],dens_i,temp_i);
 				lumOutpp[jE][jR] = jpp*emissToLum;
 			}
@@ -83,9 +85,10 @@ void localProcesses(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumOu
 				if (lumSync2>lumSync1)
 					lumOutSy[jE][jR]=lumSync2-lumSync1;
 				lumSync1=lumSync2;
+				
             }
 			if (flags[1]) {
-				if (flags[0] && frecuency < 1.0e12)
+				if (flags[0] && frequency < 1.0e12)
 					lumBr=min(lumBr,lumRJ);
 				lumOutBr[jE][jR]=lumBr;
 			}
@@ -110,7 +113,7 @@ void localProcesses2(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumO
 		st.photon.ps.iterate([&](const SpaceIterator& itER) {
 			double r = itER.val(DIM_R);
 			double redshift = sqrt(1.0-schwRadius/r)*(1.0-P2(radialVel(r)/cLight));
-			redshift = 1.0;
+			//redshift = 1.0;
 			double reddendEnergy = energies[jE]/redshift;
 			double rB2 = r*sqrt(paso_r);
 			double area = 4.0*pi*rB2*rB2*costhetaH(r);
@@ -129,12 +132,11 @@ void localProcesses2(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumO
 			
 			SpaceCoord psc = {jE,jR,0};
 			double b_nu = bb(frequency/redshift,temp);
-			double kappa = (xSy+xBr)/(4.0*pi*b_nu);// + ssaAbsorptionCoeff(energies[jE],magf,st.ntElectron,psc);
-			double tau = 0.5*sqrt(pi)*kappa*height_fun(r);
-			double flux = (frequency < 0.5e15) ? 2.0*pi/sqrt(3.0)*b_nu*(1.0-exp(-2.0*sqrt(3.0)*tau)) :
-							 0.5*sqrt(pi)*height_fun(r)*(xSy+xBr);
+			double kappa = (xSy+xBr)/(4.0*pi*b_nu);
+			double tau = 0.5*sqrt(pi)*kappa*r*costhetaH(r);
+			double flux = 2.0*pi/sqrt(3.0)*b_nu*(1.0-exp(-2.0*sqrt(3.0)*tau));
 			lumOutSy[jE][jR] = (redshift > 0.0) ? 
-							flux*r*r*(paso_r-1.0) * (1.0-scattAA[jR][jR]) : 0.0;
+							4.0*pi*flux*r*r*(paso_r-1.0) * (1.0-scattAA[jR][jR]) : 0.0;
 			lumOut[jE][jR] = lumOutSy[jE][jR];
 			jR++;
 		},{jE,-1,0});
@@ -148,10 +150,6 @@ void localProcesses3(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumO
 	st.photon.ps.iterate([&](const SpaceIterator& itE) {
 		energies[jE++] = itE.val(DIM_E);
 	},{-1,0,0});
-
-	double pmin = exp(logr.front())*schwRadius;
-	double pmax = exp(logr.back())*schwRadius;
-	double paso_p = pow(pmax/pmin,1.0/nR);
 	
 	#pragma omp parallel for
 	for (int jE=0;jE<nE;jE++) {
@@ -165,19 +163,25 @@ void localProcesses3(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumO
 			double dens_i = st.denf_i.get(itR);
 			
 			double jv_th = jSync(energies[jE],temp,magf,dens_e)+jBremss(energies[jE],temp,dens_i,dens_e);
-			double jv_pl = luminositySynchrotron2(energies[jE],st.ntElectron,itR,magf)/frequency;
+			//jv_th *= 4*pi;
+			double jv_pl = luminositySynchrotron2(energies[jE],st.ntElectron,itR,magf)/frequency/(4*pi);
 			double av_th = jv_th / bb(frequency,temp);
 			SpaceCoord psc = {jE,jR,0};
 			double av_pl = ssaAbsorptionCoeff(energies[jE],magf,st.ntElectron,psc);
 			
+			//double height = (r/schwRadius > 15) ? r*costhetaH(r) : height_fun(r);
+			double height = r*costhetaH(r);
 			double Sv = (jv_th+jv_pl)/(av_th+av_pl);
-			double Inup = (frequency < 1.0e14) ? Sv * (1.0-exp(-2.0*height_fun(r)*(av_th+av_pl))) :
-							2.0*height_fun(r)*(jv_th+jv_pl);
-			
-			double flux = 2.0*pi*r*r*(sqrt(paso_r)-1.0/sqrt(paso_r))*Inup;
-
-			lumOutSy[jE][jR] = flux * (1.0-scattAA[jR][jR]);
-			lumOut[jE][jR] = lumOutSy[jE][jR];
+			//double Sv = jv_pl/(av_th+av_pl);
+			double Inup = (frequency < 1.0e14) ? Sv * (1.0-exp(-2.0*height*(av_th+av_pl))) :
+							2.0*height*(jv_th+jv_pl);
+			//				2.0*height*jv_pl;
+			double flux = 2.0*pi*r*r*(paso_r-1.0)*Inup;
+			if (r/schwRadius <= 15)
+				lumOutpp[jE][jR] = 4*pi*flux* (1.0-scattAA[jR][jR]);
+			else
+				lumOutBr[jE][jR] = 4*pi*flux* (1.0-scattAA[jR][jR]);
+			lumOut[jE][jR] += lumOutpp[jE][jR]+lumOutBr[jE][jR];
 			jR++;
 		},{jE,-1,0});
 	}
@@ -700,6 +704,7 @@ void thermalProcesses(State& st, const string& filename)
 	int processesFlags[numProcesses];	readThermalProcesses(processesFlags);
 	if (processesFlags[0] || processesFlags[1] || processesFlags[2] || processesFlags[3]) {
 		if (processesFlags[0] || processesFlags[1] || processesFlags[2])
+			//localProcesses(st,lumOutSy,lumOutBr,lumOutpp,energies,processesFlags,lumOut);
 			localProcesses3(st,lumOutSy,lumOutBr,lumOutpp,energies,processesFlags,lumOut);
 		if (processesFlags[4]) {
 			if (comptonMethod == 2)

@@ -20,6 +20,7 @@
 #include <fmath/physics.h>
 #include <boost/property_tree/ptree.hpp>
 #include <iostream>
+#include <fstream>
 
 double eEmax(Particle& p, double r, double B, double v, double dens)
 {
@@ -89,26 +90,32 @@ double findGammaMin(double temp, double Emax)
 
 void injection(Particle& p, State& st)
 {
-	static const double etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction");
+	pIndex = GlobalConfig.get<double>("nonThermal.injection.primaryIndex");
 	double Emin = p.emin();   //esta es la primera que uso de prueba
     double sumQ = 0.0;
+	
+	std::ofstream file;
+	file.open("gammaMin.txt",ios::out);
+
 	p.ps.iterate([&](const SpaceIterator& i) {
+		etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction");
 		const double r = i.val(DIM_R);
 		double rB1 = r/sqrt(paso_r);
 		double rB2 = rB1*paso_r;
 		const double thetaH = st.thetaH.get(i);
 		const double vol = (4.0/3.0)*pi*cos(thetaH)*(rB2*rB2*rB2-rB1*rB1*rB1);
 		
+		double gammaMin = 1.0;
 		double Emax = eEmax(p,r,st.magf.get(i),-radialVel(r),st.denf_i.get(i));
 		if (p.id == "ntElectron") {
 			double temp = st.tempElectrons.get(i);
-			double gammaMin = findGammaMin(temp,Emax);
-			Emin = gammaMin*electronMass*cLight2;
+			gammaMin = findGammaMin(temp,Emax);
+			if (gammaMin > 100) gammaMin=100;
+			Emin = gammaMin*electronRestEnergy;
 		}
-		
-		double int_E = RungeKuttaSimple(Emin,p.emax(),[&Emax,&Emin](double E){
+		file << log10(r/schwRadius) << "\t" << gammaMin << "\t" << log10(st.tempElectrons.get(i)) << endl;
+		double int_E = RungeKuttaSimple(Emin,Emax,[&Emax,&Emin](double E){
 			return E*cutOffPL(E,Emin,Emax);});  //integra E*Q(E)  entre Emin y Emax
-        
         /*
 		double grpersecToSolarMassesperyear = 3600.0*24*265.25/solarMass;
 		double Wmr = 1.0e42*4.0*accRateADAF(r)*grpersecToSolarMassesperyear * 
@@ -130,7 +137,8 @@ void injection(Particle& p, State& st)
 			norm_temp = boltzmann*st.tempIons.get(i)/(p.mass*cLight2);
 			dens = st.denf_i.get(i);
 		}
-        
+		
+		if (r/schwRadius > 15) etaInj *= 10;
 		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
 		double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
 		double tCell = (rB2-rB1)/(-radialVel(r));
@@ -144,6 +152,7 @@ void injection(Particle& p, State& st)
 		},{-1,i.coord[DIM_R],0});
 		sumQ += Q0*vol;
 	},{0,-1,0});
+	file.close();
 	cout << "Total power injected in " << p.id << " = " << sumQ << endl; 
 }
 

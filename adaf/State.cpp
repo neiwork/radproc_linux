@@ -38,8 +38,8 @@ State::State(boost::property_tree::ptree& cfg):
         }
         magf.initialize();
         magf.fill([&](const SpaceIterator& i){
-            double r=i.val(DIM_R);
-            return sqrt( (1.0-magFieldPar)*8.0*pi*massDensityADAF(r)*sqrdSoundVel(r) );
+            double r = i.val(DIM_R);
+            return magneticField(r);
         });
         denf_i.initialize();
         denf_i.fill([&](const SpaceIterator& i) {

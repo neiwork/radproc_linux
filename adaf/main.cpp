@@ -6,6 +6,7 @@
 #include "State.h"
 #include "comptonScattMatrix.h"
 #include "thermalProcesses.h"
+#include "adafFunctions.h"
 #include "globalVariables.h"
 
 #include "thermalDistribution.h"
@@ -53,8 +54,8 @@ int main()
 			comptonScattMatrixRead(model);
 		}
 		
-		//injection(model.ntElectron, model);
-		//distributionFast(model.ntElectron, model);
+		injection(model.ntElectron, model);
+		distributionFast(model.ntElectron, model);
 		//writeEandRParamSpace("electronDis",model.ntElectron.distribution,0);
 		
 		if (calculateThermal)
@@ -66,6 +67,11 @@ int main()
 			minRadius = GlobalConfig.get<double>("nonThermal.flare.minRadius")*schwRadius;
 			etaInj = GlobalConfig.get<double>("nonThermal.flare.injection.energyFraction");
 			pIndex = GlobalConfig.get<double>("nonThermal.flare.injection.primaryIndex");
+			
+			model.photon.ps.iterate([&](const SpaceIterator& i) {
+				double r = i.val(DIM_R);
+				cout << r/schwRadius << "\t" << radialVel(r)/cLight << endl;
+			},{0,-1,0});
 			
 			timeAfterFlare = 0.0;
 			double tMax = 4.0*3600;

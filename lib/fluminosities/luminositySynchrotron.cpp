@@ -1,6 +1,6 @@
 #include "luminositySynchrotron.h"
 
-
+#include <gsl/gsl_sf_bessel.h>
 #include "opticalDepthSSA.h"
 #include <fparameters/parameters.h>
 #include <fmath/RungeKutta.h>
@@ -78,6 +78,36 @@ double luminositySynchrotron2(double E, const Particle& c, const SpaceCoord& psc
 	if (luminosityS > 0.0){ return luminosityS; }
 	else { return 0.0; }
 
+}
+
+double fSyn3(double Ee, double E, const Particle& creator, double magf, const SpaceCoord& psc)
+{
+	double distCreator = (Ee > creator.emin() && Ee < creator.emax()) ? 
+				creator.distribution.interpolate({{0,Ee}},&psc) : 0.0;
+	double gamma_e = Ee/(electronMass*cLight2);
+	double muMin = -0.999;
+	double muMax = 0.999;
+	size_t nMu = 30;
+	double dMu = (muMax-muMin)/nMu;
+	double sum = 0.0;
+	double mu = muMin;
+	double Constant = 3.0*planck*electronCharge*magf*gamma_e*gamma_e / (4.0*pi*electronMass*cLight);
+	for (size_t jMu=0;jMu<nMu;jMu++) {
+		double Ec = Constant * sqrt(1.0-mu*mu);
+		double x = E/Ec;
+		double integ = RungeKuttaSimple(x,10.0,[&](double xp) {return gsl_sf_bessel_Knu(5.0/3.0,xp);});
+		sum += dMu*integ;
+		mu += dMu;
+	}
+	return distCreator/(gamma_e*gamma_e) * sum;
+}
+
+double luminositySynchrotron3(double E, const Particle& c, const SpaceCoord& psc, double magf)
+{
+	double constant = 0.5*P2(electronCharge)*E/(planck*cLight*planck)/sqrt(3.0) * (4*pi);
+	double integralS = RungeKuttaSimple(c.emin(),c.emax(),[&](double Ee) {
+		return fSyn3(Ee,E,c,magf,psc);});
+	return (integralS > 0.0) ? constant*integralS*E : 0.0;
 }
 
 /*

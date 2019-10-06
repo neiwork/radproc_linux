@@ -34,7 +34,7 @@ void oneZoneDist(Particle& p, State& st) {
 		double rNow = rOriginal;
 		double dr = 0.1*schwRadius;
 		double tAccNow = 0.0;
-		while (tAccNow < timeAfterFlare && rNow > exp(logr.front())) {
+		while (tAccNow < timeAfterFlare && rNow > exp(logr.front())*schwRadius) {
 			tAccNow += dr/abs(radialVel(rNow));
 			rNow -= dr;
 		}
@@ -53,14 +53,14 @@ void oneZoneDist(Particle& p, State& st) {
 		p.ps.iterate([&](const SpaceIterator& iRE) {
 			double E = iRE.val(DIM_E);
 			
-			if (rNow < maxRadius && rNow > exp(logr.front()))
+			if (rNow < maxRadius && rNow > exp(logr.front())*schwRadius)
 				magf = magneticField(rNow);
 
 			double dr = 0.1*schwRadius;
 			double dEdt = 0.0;
 			double tAccNow = 0.0;
 			double rAux = rOriginal;
-			while (tAccNow < timeAfterFlare && rAux > exp(logr.front())) {
+			while (tAccNow < timeAfterFlare && rAux > exp(logr.front())*schwRadius) {
 				dEdt += (lossesSyn(E,magneticField(rAux),p)) * dr / abs(radialVel(rAux));
 				tAccNow += dr/abs(radialVel(rNow));
 				rAux -= dr;
@@ -83,32 +83,43 @@ void oneZoneDist(Particle& p, State& st) {
 
 void multiZoneInjection(Particle& p, State& st) {
 	
+	double sum = 0.0;
 	p.ps.iterate([&](const SpaceIterator& iR) {
 	
-		double norm_temp = boltzmann*st.tempElectrons.get(iR)/(p.mass*cLight2);
-		double dens = st.denf_e.get(iR);
-        
-		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
-		double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
-		double Q0 = etaInj*uth;   // energy injected in the burst in nt particles [erg cm^-3]
-		
 		double r = iR.val(DIM_R);
-		double magf = st.magf.get(iR);
-		double Emax = eEmax(p,r,magf,-radialVel(r),dens);
-		double gammaMin = findGammaMin(st.tempElectrons.get(iR),Emax);
-		double Emin = gammaMin*electronMass*cLight2;
-		
-		double int_E = RungeKuttaSimple(Emin,Emax,[&Emax,&Emin](double E){
-			return E*cutOffPL2(E,Emin,Emax);});  //integra E*Q(E)  entre Emin y Emax
-		
-		double Q0p = Q0/int_E;
-		
-		p.ps.iterate([&](const SpaceIterator& iRE) {
-			double E = iRE.val(DIM_E);
-			double Qe = Q0p * cutOffPL2(E,Emin,Emax);
-			p.injection.set(iRE,Qe);
-		},{-1,iR.coord[DIM_R],0});
+		if (r > minRadius && r < maxRadius) {
+			double norm_temp = boltzmann*st.tempElectrons.get(iR)/(p.mass*cLight2);
+			double dens = st.denf_e.get(iR);
+			double rB2 = r*sqrt(paso_r);
+			double rB1 = rB2/paso_r;
+			double vol = (4.0/3.0)*pi*(rB2*rB2*rB2-rB1*rB1*rB1)*costhetaH(r);
+			
+			double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
+			double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
+			double Q0 = etaInj*uth;   // energy injected in the burst in nt particles [erg cm^-3]
+			double magf = st.magf.get(iR);
+			double Emax = eEmax(p,r,magf,-radialVel(r),dens);
+			double gammaMin = findGammaMin(st.tempElectrons.get(iR),Emax);
+			double Emin = gammaMin*electronMass*cLight2;
+			
+			double int_E = RungeKuttaSimple(p.emin(),p.emax(),[&Emax,&Emin](double E){
+				return E*cutOffPL2(E,Emin,Emax);});  //integra E*Q(E)  entre Emin y Emax
+			
+			double Q0p = Q0/int_E;
+			
+			p.ps.iterate([&](const SpaceIterator& iRE) {
+				double E = iRE.val(DIM_E);
+				double Qe = Q0p * cutOffPL2(E,Emin,Emax);
+				p.injection.set(iRE,Qe);
+			},{-1,iR.coord[DIM_R],0});
+			sum += Q0*vol;
+		} else {
+			p.ps.iterate([&](const SpaceIterator& iRE) {
+				p.injection.set(iRE,0.0);
+			},{-1,iR.coord[DIM_R],0});
+		}
 	},{0,-1,0});
+	cout << "Total Flare power = " << sum << endl;
 }
 
 
@@ -143,7 +154,7 @@ void multiZoneDist(Particle& p, State& st, double dt) {
 						double vr = 1.0;
 						double be_e = 0.0;
 						double deriv = 0.0;
-						if (Rc[jEr-1] > exp(logr.front())) {
+						if (Rc[jEr-1] > exp(logr.front())*schwRadius) {
 							vr = radialVel(Rc[jEr-1]);
 							double magf = magneticField(Rc[jEr-1]);
 							be_e = -1.575e-3*magf*magf*exp(logEc[jEr-1]);
@@ -177,7 +188,7 @@ void multiZoneDist(Particle& p, State& st, double dt) {
 									return E*cutOffPL2(E,EminLast,EmaxLast);});  //integra E*Q(E)  entre Emin y Emax
 						double Q0p = Q0Last/int_E;
 					
-						double N = pow(rLast/r,2) * (vLast/v) * 
+						double N = pow(rLast/r,2) * (vLast/v) * (costhetaH(rLast)/costhetaH(r))*
 								pow(eLast/e,2.0) * Q0p*cutOffPL2(eLast,EminLast,EmaxLast);
 						p.distribution.set(iRE,N);
 					} else
@@ -194,7 +205,6 @@ void multiZoneDist(Particle& p, State& st, double dt) {
 }
 
 
-
 void flareEmission(State& st, Particle& p, ofstream &file)
 {
 	double frequency = cLight/2.15e-4;
@@ -205,11 +215,11 @@ void flareEmission(State& st, Particle& p, ofstream &file)
 		double rNow = rOriginal;
 		double dr = 0.1*schwRadius;
 		double tAccNow = 0.0;
-		while (tAccNow < timeAfterFlare && rNow > exp(logr.front())) {
+		while (tAccNow < timeAfterFlare && rNow > exp(logr.front())*schwRadius) {
 			tAccNow += dr/abs(radialVel(rNow));
 			rNow -= dr;
 		}
-		if (rNow < maxRadius && rNow > exp(logr.front())) {
+		if (rNow < maxRadius && rNow > exp(logr.front())*schwRadius) {
 			double magf = magneticField(rNow);
 			double jv = luminositySynchrotron2(energy,p,iR,magf);
 			double Inup = 2.0*height_fun(rNow)*jv;
@@ -234,8 +244,13 @@ void flareEmission2(State& st, Particle& p, ofstream &file)
 		if (r < maxRadius) {
 			double magf = magneticField(r);
 			double jv = luminositySynchrotron2(energy,p,iR,magf);
+			double rB2 = r*sqrt(paso_r);
+			double rB1 = rB2/paso_r;
+			double vol = (4.0/3.0)*pi*(rB2*rB2*rB2-rB1*rB1*rB1)*costhetaH(r);
+			double lumLocal = 4.0*pi*jv*vol;
 			double Inup = 2.0*height_fun(r)*jv;
-			lum += 2.0*pi*r*r*(sqrt(paso_r)-1.0/sqrt(paso_r))*Inup;
+			lum += 2.0*pi*r*r*(paso_r-1.0)*Inup;
+			//lum += lumLocal;
 		}
 	},{0,-1,0});
 	lum += pow(10.0,34.2);

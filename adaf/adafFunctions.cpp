@@ -18,7 +18,10 @@ double electronTemp(double r)
 	}
 	double m = (logTe[pos_r]-logTe[pos_r-1])/(logr[pos_r]-logr[pos_r-1]);
 	double logT = m*(logr_actual-logr[pos_r-1])+logTe[pos_r-1];
-	return eMeanMolecularWeight*exp(logT);
+	double temp = eMeanMolecularWeight*exp(logT);
+	double r_rg = r/(schwRadius/2.0);
+	return (r_rg <= 30) ? temp * 1.4/pow(r_rg,0.097) : temp;
+	//return temp;
 }
 
 // Ions
@@ -46,7 +49,9 @@ double radialVel(double r) {
 	}
 	double m = (logv[pos_r]-logv[pos_r-1])/(logr[pos_r]-logr[pos_r-1]);
 	double logrv = m*(logr_actual-logr[pos_r-1])+logv[pos_r-1];
-	return -exp(logrv);
+	double r_rg = r / (schwRadius/2.0);
+	double vel = -exp(logrv);
+	return (r_rg <= 30 ? vel / (0.93*exp(2.13/r_rg)) : vel);
 }
 
 double keplAngVel(double r)
@@ -75,7 +80,6 @@ double costhetaH(double r)
 	double cs = sqrt(sqrdSoundVel(r));
 	double omR = angularVel(r)*r;
 	double result = sqrt(pi/2.0) * cs/omR * erf(omR / (sqrt(2.0)*cs));
-	
 	return result;
 }
 
@@ -83,7 +87,8 @@ double accRateADAF(double r)
 {
 	double accRateCorona = GlobalConfig.get<double>("accretionRateCorona")*accRateOut;
 	double rOut = exp(logr.back())*schwRadius;
-	double result = accRateOut*pow(r/rOut,s);
+	//double result = accRateOut * (r/schwRadius > 5 ? pow(r/rOut,s) : pow(5*schwRadius/rOut,s));
+	double result = accRateOut * pow(r/rOut,s);
 	int processesFlags[numProcesses];
 	readThermalProcesses(processesFlags);
 	if (processesFlags[3]) {
@@ -100,7 +105,7 @@ double massDensityADAF(double r)
 	return result;
 }
 
-double  magneticField(double r)
+double magneticField(double r)
 {
 	return sqrt(8.0*pi*(1.0-magFieldPar)*massDensityADAF(r)*sqrdSoundVel(r));
 }
