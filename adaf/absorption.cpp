@@ -23,6 +23,14 @@ double ggCrossSection(double x, double E_ph, double E)
 					(3.0-pow(beta,4.0))*log((1.0+beta)/(1.0-beta))) : 0.0;
 }
 
+double ggCrossSection2(double Eph, double E)
+{
+	double s0 = Eph*E/(electronRestEnergy*electronRestEnergy);
+	double term1 = (s0+0.5*log(s0)-1.0/6.0+0.5/s0)*log(sqrt(s0)+sqrt(s0-1));
+	double term2 = (s0+4.0/9.0-1.0/(9.0*s0))*sqrt(1.0-1.0/s0);
+	return 1.5*thomson/(s0*s0) * (term1-term2);
+}
+
 double c_gg(double x, double E)  
 {    
 	double Erest = electronMass*cLight2;
@@ -89,6 +97,14 @@ double internalAbs(int E_ix, State& st, double r_current)
 	return 2.0*pi*opacity;
 }*/
 
+double ggAbsorptionCoeff2(double E, double rlocal, State& st, const SpaceCoord& distCoord)
+{
+	return (rlocal < st.photon.ps[DIM_R][nR-1] && rlocal > st.photon.ps[DIM_R][0]) ?
+			RungeKuttaSimple(st.photon.emin(),st.photon.emax(),[&E,&rlocal,&st,&distCoord](double Eph)
+				{return st.photon.distribution.interpolate({{DIM_E,Eph},{DIM_R,rlocal}},&distCoord)*
+						ggCrossSection2(Eph,E);}) : 0.0;
+}
+
 double ggAbsorptionCoeff(double E, double rlocal, State& st, const SpaceCoord& distCoord)  
 {
 	double xmin = -0.999;
@@ -133,7 +149,7 @@ void opticalDepth(Vector& tau, int E_ix, State& st, int iR)
 	double E = st.photon.ps[DIM_E][E_ix];
 	double rMax = st.photon.ps[DIM_R][nR-1];
 	double rMin = st.photon.ps[DIM_R][0];
-	double pasoprim = pow(rMax/rMin,1.0/(nR*2.0));
+	double pasoprim = pow(rMax/rMin,1.0/(nR*10.0));
 
 	double r0 = st.photon.ps[DIM_R][iR];
 	double drprim = r0*(pasoprim-1.0);
@@ -184,7 +200,7 @@ void opticalDepth(Vector& tau, int E_ix, State& st, int iR)
 				ssaAbsCoeffp = ssaAbsorptionCoeff(E,magneticField,st.ntProton,psc);
 			}
 			//cout << "bb = " << bb_RJ(frequency,temp) << "\t ssaAbsCoeffeTh = " << ssaAbsCoeffeTh << endl;
-			if (fmtE > 5.0) ggAbsCoeff = ggAbsorptionCoeff(E,r1,st,psc);
+			if (fmtE > 7.0) ggAbsCoeff = ggAbsorptionCoeff2(E,r1,st,psc);
 			
 			tau[0] += ggAbsCoeff*drprim;
 			tau[1] += (ssaAbsCoeffe+ssaAbsCoeffeTh)*drprim;

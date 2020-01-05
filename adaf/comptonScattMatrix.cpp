@@ -51,6 +51,7 @@ void comptonScattMatrix(State& st)
     for(size_t iR=1;iR<=nR;iR++) rCellsBoundaries[iR]=rCellsBoundaries[iR-1]*paso_r;
 	for(size_t iRcd=1;iRcd<=nRcd;iRcd++) rCellsBoundariesCD[iRcd]=rCellsBoundariesCD[iRcd-1]*paso_rCD;
 
+	double rBound = max(rCellsBoundaries[nR],rCellsBoundariesCD[nRcd]);
 	matrixInit(scattAA,nR,nR,0.0);
 	matrixInit(scattDA,nRcd,nR,0.0);
 	matrixInit(reachAD,nR,nRcd,0.0);
@@ -62,23 +63,33 @@ void comptonScattMatrix(State& st)
     InitialiseRandom(RANDOM_GENERATOR);
 	//ADAF SCATTERING MATRIX
 	
-	double pasoprim = pow(rCellsBoundaries[nR]/rCellsBoundaries[0],1.0/((nR+1)*5.0));
+	double pasoprim = pow(rCellsBoundaries[1]/rCellsBoundaries[0],1.0/5.0);
 	
 	#pragma omp parallel for
 	for (int iR=0;iR<nR;iR++) {
 		double r0 = st.denf_e.ps[DIM_R][iR];
-		double thetaMin = st.thetaH.get({0,iR,0});
+		double thetaMin;
+		if (height_method == 0)
+			thetaMin = st.thetaH.get({0,iR,0});
+		else
+			thetaMin = atan(r0/height_fun(r0));
 		double dyaux=(1.0-sin(thetaMin))/nTheta;
         for(size_t kTh=1;kTh<=nTheta;kTh++) {
             double yaux=sin(thetaMin)+kTh*dyaux;  // Theta distributed uniformly in sin(theta).
             double theta0=asin(yaux);
-			double y0=r0*sin(theta0);
-            double z0=r0*cos(theta0);
+			double y0,z0;
+			if (height_method == 0) {
+				y0=r0*sin(theta0);
+				z0=r0*cos(theta0);
+			} else {
+				y0 = r0;
+				z0 = r0/tan(theta0);
+			}
 			for(size_t jPh=1;jPh<=nPhot;jPh++) {
-                double random_number = gsl_rng_uniform(RandomNumberGenerator);
-                double phiprim = 2.0*pi*random_number;
-                random_number = gsl_rng_uniform(RandomNumberGenerator);
-                double thetaprim = acos(1.0-2.0*random_number);   // Photon directions
+				double random_number = gsl_rng_uniform(RandomNumberGenerator);
+				double phiprim = 2.0*pi*random_number;
+				random_number = gsl_rng_uniform(RandomNumberGenerator);
+				double thetaprim = acos(1.0-2.0*random_number);   // Photon directions
 																  // distributed
 																  // isotropically.
 				double pescap = 1.0;
@@ -87,21 +98,24 @@ void comptonScattMatrix(State& st)
 				double rprim=drprim;
 				vector<size_t> countAA(nR,0);
 				double r1 = r0;
+				double z1 = z0;
+				double r1aux = r1;
                 do {
 					double xprim=rprim*sin(thetaprim)*cos(phiprim);
 					double yprim=rprim*sin(thetaprim)*sin(phiprim);
 					double zprim=rprim*cos(thetaprim);
 					double x1=xprim;
 					double y1=y0+yprim;
-					double z1=z0+zprim;
+					z1=z0+zprim;
 					r1=sqrt(x1*x1+y1*y1+z1*z1);
+					r1aux = (height_method == 0) ? r1 : sqrt(x1*x1+y1*y1);
 					double theta1=atan(sqrt(x1*x1+y1*y1)/abs(z1));
 					double ne = electronDensityTheta(r1,theta1);
 					double exptau = exp(-ne*thomson*drprim);
                     double psc = 1.0-exptau;    // Probability of scattering.
-					if (r1 > rTr && z1*z1ant < 0.0) {
+					if (r1aux > rTr && z1*z1ant < 0.0) {
 						for(size_t jRcd=0;jRcd<=nRcd;jRcd++) {
-							if(r1 > rCellsBoundariesCD[jRcd] && r1 < rCellsBoundariesCD[jRcd+1]) {
+							if(r1aux > rCellsBoundariesCD[jRcd] && r1aux < rCellsBoundariesCD[jRcd+1]) {
 								reachAD[iR][jRcd] += pescap; 		// Add the probability of
 																	// absorption by the ring
 																	// jRcd of the thin disk.
@@ -110,8 +124,10 @@ void comptonScattMatrix(State& st)
 						}
                     }
 					z1ant = z1;
-                    for(size_t jR=0;jR<nR;jR++) {
-                        if(r1 > rCellsBoundaries[jR] && r1 < rCellsBoundaries[jR+1]) {
+					for(size_t jR=0;jR<nR;jR++) {
+						
+						if(r1aux > rCellsBoundaries[jR] && r1aux < rCellsBoundaries[jR+1]) {
+							
 							scattAA[iR][jR] += psc*pescap;
 							if (countAA[jR] == 0) {
 								reachAA[iR][jR] += pescap;
@@ -122,7 +138,7 @@ void comptonScattMatrix(State& st)
 					pescap *= exptau;
                     drprim=r1*(pasoprim-1.0);
                     rprim += drprim;
-                } while(r1 < rCellsBoundaries[nR] && (r1 > captureRadius || phiprim < pi));
+                } while(r1aux < rBound && z1 < rBound && r1 > schwRadius);
 				LOOP:;
             }
         }
@@ -142,35 +158,48 @@ void comptonScattMatrix(State& st)
 	for (int iR=0;iR<nR;iR++) {
 		double r0 = st.thetaH.ps[DIM_R][iR];
 		double drprim=r0*(pasoprim-1.0);
-		double thetaMin=st.thetaH.get({0,iR,0});
+		double thetaMin;
+		if (height_method == 0)
+			thetaMin = st.thetaH.get({0,iR,0});
+		else
+			thetaMin = atan(r0/height_fun(r0));
 		double dyaux=(1.0-sin(thetaMin))/nTheta;
         for(size_t kTh=1;kTh<=nTheta;kTh++) {
             double yaux=sin(thetaMin)+kTh*dyaux;  // Theta distributed uniformly in sin(theta).
             double theta0 = (yaux < 1.0 ? asin(yaux) : pi/2.0);
 			double phi0 = 0.0;
 			double dPhi = 2.0*pi/nPhot;
-			double x0=r0*sin(theta0)*cos(phi0);
-			double y0=r0*sin(theta0)*sin(phi0);
-            double z0=r0*cos(theta0);
+			
+			double x0,y0,z0;
+			if (height_method == 0) {
+				x0 = r0*sin(theta0)*cos(phi0);
+				y0 = r0*sin(theta0)*cos(phi0);
+				z0 = r0*cos(theta0);
+			} else {
+				x0 = r0*sin(phi0);
+				y0 = r0*cos(phi0);
+				z0 = r0/tan(theta0);
+			}
 			for(size_t jPh=1;jPh<=nPhot;jPh++) {
 				double thetaprim = inclination*(pi/180.0);
 				double rprim=drprim;
 				double r1 = r0;
+				double z1 = z0;
+				double r1aux = r1;
 				double pescap = 1.0;
 				do {
 					double xprim=rprim*sin(thetaprim);
 					double zprim=rprim*cos(thetaprim);
 					double x1=x0+xprim;
-					double z1=z0+zprim;
+					z1=z0+zprim;
 					r1=sqrt(x1*x1+y0*y0+z1*z1);
 					double theta1=atan(sqrt(x1*x1+y0*y0)/abs(z1));
-					double thetaMinLocal = acos(costhetaH(r1));
-					double ne = (theta1 > thetaMinLocal && theta1 < (pi-thetaMinLocal)) 
-													? electronDensity(r1) : 0.0;
+					r1aux = (height_method == 0) ? r1 : sqrt(x1*x1+y0*y0);
+					double ne = electronDensityTheta(r1,theta1);
 					pescap *= exp(-ne*thomson*drprim);
 					drprim=r1*(pasoprim-1.0);
 					rprim += drprim;
-				} while (r1 < rCellsBoundaries[nR]);
+				} while (r1aux < rCellsBoundaries[nR] && z1 < rCellsBoundaries[nR]);
 				escapeAi[iR] += pescap;
 				phi0 += dPhi;
             }
@@ -184,7 +213,7 @@ void comptonScattMatrix(State& st)
 	#pragma omp parallel for
 	for (int iRcd=0;iRcd<nRcd;iRcd++) {
 		double r0cd = st.denf_e.ps[DIM_Rcd][iRcd];
-		double drprim=r0cd*(pasoprim-1.0);             // Step for the photon path.
+		double drprim = schwRadius*(pasoprim-1.0);             // Step for the photon path.
 		for(size_t jPh=1;jPh<=nPhot;jPh++) {
 			double random_number = gsl_rng_uniform(RandomNumberGenerator);
 			double phiprim = 2.0*pi*random_number;
@@ -194,6 +223,8 @@ void comptonScattMatrix(State& st)
 			double rprim=drprim; 	                          // isotropically.
 			double pescap = 1.0;
 			double r1 = r0cd;
+			double r1aux = r1;
+			double z1 = 0.0;
 			vector<size_t> countDA(nR,0);
 			do {
 				double xprim=rprim*sin(thetaprim)*cos(phiprim);
@@ -201,28 +232,30 @@ void comptonScattMatrix(State& st)
 				double zprim=rprim*cos(thetaprim);
 				double x1=xprim;
 				double y1=r0cd+yprim;
-				double z1=zprim;
+				z1=zprim;
 				r1=sqrt(x1*x1+y1*y1+z1*z1);
 				double theta1=atan(sqrt(x1*x1+y1*y1)/abs(z1));
-				double thetaMinLocal = acos(costhetaH(r1));
-				double ne = (theta1 > thetaMinLocal && theta1 < (pi-thetaMinLocal)) 
-												? electronDensity(r1) : 0.0;
-				double exptau = exp(-ne*thomson*drprim);
-				double psc = 1.0-exptau;    // Probability of scattering.
-				for(size_t jR=0;jR<=nR;jR++) {
-					if(r1 > rCellsBoundaries[jR] && r1 < rCellsBoundaries[jR+1]) {
-						scattDA[iRcd][jR] += psc*pescap;
-						if (countDA[jR] == 0) {
-							reachDA[iRcd][jR] += pescap;
-							countDA[jR]++;
+				r1aux = (height_method == 0) ? r1 : sqrt(x1*x1+y1*y1);
+				double exptau = 1.0;
+				if (r1aux < rCellsBoundaries[nR]) {
+					double ne = electronDensityTheta(r1,theta1);
+					exptau = exp(-ne*thomson*drprim);
+					double psc = 1.0-exptau;    // Probability of scattering.
+					for(size_t jR=0;jR<=nR;jR++) {
+						if(r1aux > rCellsBoundaries[jR] && r1aux < rCellsBoundaries[jR+1]) {
+							scattDA[iRcd][jR] += psc*pescap;
+							if (countDA[jR] == 0) {
+								reachDA[iRcd][jR] += pescap;
+								countDA[jR]++;
+							}
 						}
 					}
 				}
-				drprim=r1*(pasoprim-1.0);
+				//drprim=r1*(pasoprim-1.0);
 				rprim += drprim;
 				pescap *= exptau;                // Probability that a photon reaches 
 												 // the previous position.
-			} while(r1 < rCellsBoundaries[nR] && r1 > captureRadius);
+			} while(r1aux < rBound && z1 < rBound && r1 > schwRadius);
         }
         for(size_t jR=0;jR<nR;jR++) {
             scattDA[iRcd][jR] /= nPhot;     // Dividing by the number of photons launched.
@@ -241,6 +274,8 @@ void comptonScattMatrix(State& st)
 			double thetaprim = inclination*(pi/180.0);
 			double rprim=drprim;
 			double r1 = r0cd;
+			double z1 = 0.0;
+			double r1aux = r1;
 			double pescap = 1.0;
 			do {
 				double xprim=rprim*sin(thetaprim)*cos(phiprim);
@@ -248,16 +283,15 @@ void comptonScattMatrix(State& st)
 				double zprim=rprim*cos(thetaprim);
 				double x1=xprim;
 				double y1=r0cd+yprim;
-				double z1=zprim;
+				z1=zprim;
 				r1=sqrt(x1*x1+y1*y1+z1*z1);
 				double theta1=atan(sqrt(x1*x1+y1*y1)/abs(z1));
-				double thetaMinLocal = acos(costhetaH(r1));
-				double ne = (theta1 > thetaMinLocal && theta1 < (pi-thetaMinLocal)) 
-												? electronDensity(r1) : 0.0;
+				r1aux = (height_method == 0) ? r1 : sqrt(x1*x1+y1*y1);
+				double ne = electronDensityTheta(r1,theta1);
 				pescap *= exp(-ne*thomson*drprim);
 				drprim=r1*(pasoprim-1.0);
 				rprim += drprim;
-			} while(r1 < rCellsBoundaries[nR]);     // Escape from the region.
+			} while(r1aux < rBound && z1 < rBound);     // Escape from the region.
 			escapeDi[iRcd] += pescap;
         }
         escapeDi[iRcd] /= nPhot;

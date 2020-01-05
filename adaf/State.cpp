@@ -113,7 +113,7 @@ void State::initializeParticle(Particle& p,boost::property_tree::ptree& cfg)
 							
 	// add dimension for rcd
 	p.ps.add(new Dimension(nRcd,bind(initGridLogarithmically,placeholders::_1,
-							rTr*sqrt(paso_rCD),edgeRadius/sqrt(paso_rCD)),l10,e10));
+							rTr*sqrt(paso_rCD),rOutCD/sqrt(paso_rCD)),l10,e10));
 	
 	p.initialize();
 }

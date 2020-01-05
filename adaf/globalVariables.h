@@ -12,10 +12,12 @@ extern const double magFieldPar;				// Magnetic field parameter (beta)
 extern const double accRateOut;					// Accretion rate at rOut
 extern const double s;							// Wind index
 extern const double alpha;
+extern const double delta;
 extern const double j;
 extern const double paso_r;
 extern const double paso_rCD;
 extern const double rTr;
+extern const double rOutCD;
 extern const double inclination;
 
 extern const double logMinEnergy;				// Logarithm of the minimum energy for photons
@@ -47,9 +49,12 @@ extern const int calculateNonThermalLum;
 extern const int calculateNeutronInj;
 extern const int calculateNeutronDis;
 extern const int calculateJetDecay;
+extern const int calculateJetEmission;
 extern const int calculateComptonProbs;
 extern const int calculateComptonRedMatrix;
 extern const int comptonMethod;
+extern const int calculateNewTemp;
+extern const int height_method;
 
 // PARAMETERS
 extern const double schwRadius;					// Gravitationl Radius [cm]

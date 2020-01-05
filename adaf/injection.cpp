@@ -27,12 +27,12 @@ double eEmax(Particle& p, double r, double B, double v, double dens)
 	double accE = GlobalConfig.get<double>("nonThermal.injection.accEfficiency");
 	double dr = r*(paso_r-1.0);
     double Emax_adv = accE*dr*cLight*electronCharge*B / v; 
-    double Emax_syn = p.mass*cLight2*sqrt(accE*6.0*pi*electronCharge / (thomson*B));
-    double Emax_Hillas = electronCharge*B*dr;
+    double Emax_syn = p.mass*cLight2*sqrt(accE*6.0*pi*electronCharge / (thomson*B)) * p.mass/electronMass;
+    double Emax_Hillas = electronCharge*B*height_fun(r);
 	if (p.id == "ntProton") {
 		double sigmapp = 34.3e-27;
 		double Emax_pp = accE*electronCharge*B/(0.5*dens*sigmapp);
-		return min(min(Emax_adv,Emax_pp),Emax_Hillas);
+		return min(min(Emax_adv,Emax_pp),min(Emax_Hillas,Emax_syn));
 	} else
 		return min(min(Emax_syn,Emax_adv),Emax_Hillas);
 }
@@ -95,25 +95,31 @@ void injection(Particle& p, State& st)
     double sumQ = 0.0;
 	
 	std::ofstream file;
-	file.open("gammaMin.txt",ios::out);
+	if (p.id == "ntElectron")
+		file.open("gammaMin.txt",ios::out);
 
 	p.ps.iterate([&](const SpaceIterator& i) {
-		etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction");
+		if (p.id == "ntProton")
+			etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction_i");
+		else
+			etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction_e");
+			
 		const double r = i.val(DIM_R);
 		double rB1 = r/sqrt(paso_r);
 		double rB2 = rB1*paso_r;
 		const double thetaH = st.thetaH.get(i);
 		const double vol = (4.0/3.0)*pi*cos(thetaH)*(rB2*rB2*rB2-rB1*rB1*rB1);
 		
-		double gammaMin = 1.0;
+		double gammaMin = 2.0;
 		double Emax = eEmax(p,r,st.magf.get(i),-radialVel(r),st.denf_i.get(i));
 		if (p.id == "ntElectron") {
 			double temp = st.tempElectrons.get(i);
 			gammaMin = findGammaMin(temp,Emax);
-			if (gammaMin > 100) gammaMin=100;
+			//gammaMin = 2.0;
 			Emin = gammaMin*electronRestEnergy;
+			file << r/schwRadius << "\t" << gammaMin << endl;
 		}
-		file << log10(r/schwRadius) << "\t" << gammaMin << "\t" << log10(st.tempElectrons.get(i)) << endl;
+		
 		double int_E = RungeKuttaSimple(Emin,Emax,[&Emax,&Emin](double E){
 			return E*cutOffPL(E,Emin,Emax);});  //integra E*Q(E)  entre Emin y Emax
         /*
@@ -138,7 +144,6 @@ void injection(Particle& p, State& st)
 			dens = st.denf_i.get(i);
 		}
 		
-		if (r/schwRadius > 15) etaInj *= 10;
 		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
 		double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
 		double tCell = (rB2-rB1)/(-radialVel(r));
@@ -148,6 +153,8 @@ void injection(Particle& p, State& st)
 		p.ps.iterate([&](const SpaceIterator& jE) {
 			const double E = jE.val(DIM_E);
 			double total = cutOffPL(E, Emin, Emax)*Q0p;
+			if (r/schwRadius > 50.0)
+				total = 0.0;
 			p.injection.set(jE,total); //en unidades de erg^-1 s^-1 cm^-3
 		},{-1,i.coord[DIM_R],0});
 		sumQ += Q0*vol;

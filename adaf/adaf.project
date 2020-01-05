@@ -6,12 +6,16 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="non thermal">
+    <File Name="flareTimeDependent.cpp"/>
+    <File Name="flareTimeDependent.h"/>
+    <File Name="flareProcesses.h"/>
+    <File Name="flareProcesses.cpp"/>
+    <File Name="jetEmission.h"/>
+    <File Name="jetEmission.cpp"/>
     <File Name="distributionNeutrons.h"/>
     <File Name="distributionNeutrons.cpp"/>
     <File Name="pairProcesses.h"/>
     <File Name="pairProcesses.cpp"/>
-    <File Name="oneZoneTimeDependent.h"/>
-    <File Name="oneZoneTimeDependent.cpp"/>
     <File Name="absorption.h"/>
     <File Name="absorption.cpp"/>
     <File Name="injectionNeutrons.h"/>

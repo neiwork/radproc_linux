@@ -28,12 +28,12 @@ void targetFieldNT(State& st, Matrix lumNT)
 		double E = itE.val(DIM_E);
 		st.photon.ps.iterate([&](const SpaceIterator& itER) {
 			double r = itER.val(DIM_R);
-			double thetaH = st.thetaH.get(itER);
-			double area = 4.0*pi*r*r*cos(thetaH);
+			double vol = volume(r);
 			double lumReachingShell = 0.0;
+			double tcross = r*(sqrt(paso_r)-1.0/sqrt(paso_r))/cLight;
 			for (size_t jjR=0;jjR<nR;jjR++)
 				lumReachingShell += reachAA[jjR][jR]*lumNT[jE][jjR];
-			st.photon.injection.set(itER,lumReachingShell/(area*cLight*E*E)); // erg^⁻1 cm^-3
+			st.photon.injection.set(itER,lumReachingShell*tcross/(vol*E*E)); // erg^⁻1 cm^-3
 			jR++;
 		},{itE.coord[DIM_E],-1,0});
 		jE++;
@@ -184,37 +184,25 @@ void processes(State& st, const std::string& filename)
 			double r = i.val(DIM_R);
 			double rB1 = r/sqrt(paso_r);
 			double rB2 = r*sqrt(paso_r);
-			double vol = (4.0/3.0)*pi*cos(st.thetaH.get(i))*(rB2*rB2*rB2-rB1*rB1*rB1);
+			double vol = volume(r);
 			
 			Vector tau(3,0.0);
 			double fmtE  = safeLog10(i.val(DIM_E)/1.6e-12);
 			if (fmtE < 0.0 || fmtE > 5.0) opticalDepth(tau,E_ix,st,i.coord[DIM_R]);
 
-			double attenuation_gg = exp(-tau[0]);
+			double attenuation_gg = (tau[0] > 1.0e-15) ? (1.0-exp(-tau[0]))/tau[0] : 1.0;
 			double attenuation_ssae = (tau[1] > 1.0e-15) ? (1.0-exp(-tau[1]))/tau[1] : 1.0;
 			double attenuation_ssap = (tau[2] > 1.0e-15) ? (1.0-exp(-tau[2]))/tau[2] : 1.0;
+			
 			
 			double eSyLocal,eICLocal,pSyLocal,pPPLocal,pPGLocal;
 			eSyLocal = eICLocal = pSyLocal = pPPLocal = pPGLocal = 0.0;
 			
-			//////////////////////////////////////////////////////
-			/*double r0 = r;
-			double dr = r/100;
-			double tAux = 0.0;
-			while (tAux < tAccBlob) {
-				r0 -= dr;
-				tAux += dr/(-radialVel(r0));
-			}
-			double B = (r0 > st.magf.ps[DIM_R][0]) ? 
-					sqrt( (1.0-magFieldPar)*8.0*pi*massDensityADAF(r0)*sqrdSoundVel(r0) ) : 0.0;
-			eSyLocal = luminositySynchrotron2(E,st.ntElectron,i,B);*/
-			//////////////////////////////////////////////////////
-			
 			eSyLocal = luminositySynchrotron(E,st.ntElectron,i,st.magf);
-			//eICLocal = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);
-			//pSyLocal = luminositySynchrotron(E,st.ntProton,i,st.magf);
-			//pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
-			//pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
+			eICLocal = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);
+			pSyLocal = luminositySynchrotron(E,st.ntProton,i,st.magf);
+			pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
+			pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
 
 			eSy[E_ix] += eSyLocal*vol;				// [erg s^-1]
 			eIC[E_ix] += eICLocal*vol;
@@ -269,15 +257,8 @@ void processes(State& st, const std::string& filename)
 			 << '\t' << safeLog10(pAbs[jE])
 			 << std::endl;
 	}
-	
-	if (calculateFlare) {
-		//double timeBurst = GlobalConfig.get<double>("nonThermal.flare.timeAfterFlare");
-		writeBlob(st,energies,lumNT_ssa,timeAfterFlare);
-	}
-
 	file.close();
 	file2.close();
-
 	show_message(msgEnd,Module_luminosities);
 }
 

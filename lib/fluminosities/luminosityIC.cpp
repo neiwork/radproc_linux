@@ -15,7 +15,7 @@ double cICemi(double u, double E, double mass, double phEmin)  //limite inferior
 {
 	double Erep = mass*cLight2;
 
-	double condition = E*u-P2(u);  //Ega*Ee-Ee^2
+	double condition = u*(u-E);
 
 	double inf = E*P2(Erep) / (4.0*condition);
 

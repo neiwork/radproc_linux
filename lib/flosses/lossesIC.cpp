@@ -32,7 +32,7 @@ double fIC(double u,double t, double E, double mass, const ParamSpaceValues& tpf
 	//double Nterm = tpf(u);
 
 	double result = (Nterm/u)*(t-u)*(2*r*log(r)+
-       	(1+2*r)*(1-r)+(P2((t/(E-t)))*(1-r))/(2*(1+(t/(E-t)))));
+       	(1+2*r)*(1-r)+(P2(t/(E-t))*(1-r))/(2*(1+(t/(E-t)))));
 
 	return  result;
 }
@@ -43,18 +43,16 @@ double lossesIC(double E, Particle& particle, const ParamSpaceValues& tpf, const
 	double mass = particle.mass;
 
 	double constant  = 3*crossSectionThomson(mass)*P2(mass)*pow(cLight,5)/4;
+	constant = 3.0*thomson*mass*mass*pow(cLight,5)/4.0;
 
 	double a  = phEmin;     //energia minima de los fotones en erg
 	double b  = phEmax;     //energia maxima de los fotones en erg
 
 	double integral = RungeKutta(a,b,&cIC,
 		[mass, E](double u){return dIC(u, E, mass);},
-		[&](double u, double t){ return fIC(u, t, E, mass, tpf, psc); });    //le asigno a la variable integral el resultado de la integracion   
-
-	double gamma = E/(mass*cLight2);
+		[&](double u, double t){ return fIC(u, t, E, mass, tpf, psc); });    //le asigno a la variable integral el resultado de la integracion
 
 	double de = constant*integral/P2(E);
-			
 	return de;
 
 	}

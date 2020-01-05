@@ -1,6 +1,9 @@
 #pragma once
+#include <fmath/physics.h>
+#include "State.h"
 
 double electronTemp(double);
+double electronTempOriginal(double);
 double ionTemp(double);
 double radialVel(double);
 double keplAngVel(double);
@@ -15,3 +18,9 @@ double electronDensityTheta(double,double);
 double ionDensity(double);
 double magneticField(double);
 double accRateADAF(double);
+double qie(double,double,double);
+double qie_beta(double,double,double);
+double dlogrho_dlogr(double);
+double Qplus(double,double,double);
+double Qmin_func(double,Matrix,Matrix,Vector,State&);
+double volume(double);

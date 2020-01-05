@@ -12,9 +12,12 @@ double eMeanMolecularWeight;			// Electron mean molecular weight.
 double magFieldPar;						// Magnetic field parameter (beta).
 double j;								// ADAF angular momentum at rS.
 double alpha;							// Viscosity parameter.
+double delta;							// Fraction of energy released by viscosity that directly
+										// heats electrons.
 double paso_r;							// logarithmic step in rADAF.
 double paso_rCD;						// logarithmic step in rCD.
 double rTr;								// Transition radius.
+double rOutCD;							// Outer radius of the cold disk.
 double inclination;						// Inclination of the line of sight.
 
 double logMinEnergy;					// Logarithm of the minimum energy for photons.
@@ -34,6 +37,7 @@ int calculateFlare;						// If 1 calculate non-thermal flare distributions.
 int calculateNeutronInj;                // If 1 calculate neutron injection.
 int calculateNeutronDis;				// If 1 calculate neutron propagation.
 int calculateJetDecay;					// If 1 calculate power injection in jet by neutron decay.
+int calculateJetEmission;				// If 1 calculate emission of a jet.
 int calculateComptonRedMatrix;			// If 1 calculate the Comptonization energy redistribution
 										// matrices. It only works if comptonMethod=0 or 1.
 int comptonMethod;						// Method used to calculate the Comptonized spectrum.
@@ -41,6 +45,9 @@ int comptonMethod;						// Method used to calculate the Comptonized spectrum.
 										// 1: Interpolation using precomputed P(v,v',Y).
 										// 2: Local Comptonization.
 										// 3: Compute the P(v,v',Te) at the energies required.
+int height_method;						// 0: Use r*costhetaH(r)
+										// 1: Use sqrt(cs/omK)
+int calculateNewTemp;					// If 1 calculate again the electron temperatures.
 
 size_t nGammaCompton;					// Number of points in Y  for the precomputed matrices
 										// (only if comptonMethod = 1).

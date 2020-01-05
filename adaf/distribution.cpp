@@ -177,7 +177,33 @@ void distributionFast(Particle& p, State& st)
 	}
 	
 	////////////////////////////////////////////////////////////////////////////
-	/*if (p.id == "ntElectron") {
+	if (p.id == "ntProton") {
+		p.ps.iterate([&](const SpaceIterator& iR) {
+			double sum = 0.0;
+			double pasoE = pow(p.emax()/p.emin(),1.0/(nE-1.0));
+			p.ps.iterate([&](const SpaceIterator& iRE) {
+				double E = iRE.val(DIM_E);
+				double dE = E*(pasoE-1.0);
+				sum += p.distribution.get(iRE)*E*dE;
+			},{-1,iR.coord[DIM_R],0});
+			
+			double norm_temp = boltzmann*st.tempIons.get(iR)/(protonMass*cLight2);
+			double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp);
+			double uth = st.denf_i.get(iR)*norm_temp*aTheta*p.mass*cLight2;
+			double eta = GlobalConfig.get<double>("nonThermal.injection.energyFraction_i");
+			double upl = eta*uth;
+			
+			double sum2 = 0.0;
+			p.ps.iterate([&](const SpaceIterator& iRE) {
+				double E = iRE.val(DIM_E);
+				double dE = E*(pasoE-1.0);
+				double N = p.distribution.get(iRE)*(upl/sum);
+				sum2 += N*E*dE;
+				p.distribution.set(iRE,N);
+			},{-1,iR.coord[DIM_R],0});
+			cout << "upl/uth = " << sum2 << "\t sum/uth = " << sum/uth << endl;
+		},{0,-1,0});
+	} else if (p.id == "ntElectron") {
 		p.ps.iterate([&](const SpaceIterator& iR) {
 			double sum = 0.0;
 			double pasoE = pow(p.emax()/p.emin(),1.0/(nE-1.0));
@@ -189,8 +215,8 @@ void distributionFast(Particle& p, State& st)
 			
 			double norm_temp = boltzmann*st.tempElectrons.get(iR)/(electronMass*cLight2);
 			double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp);
-			double uth = st.denf_e.get(iR)*norm_temp*aTheta*electronMass*cLight2;
-			double eta = GlobalConfig.get<double>("nonThermal.injection.energyFraction");
+			double uth = st.denf_e.get(iR)*norm_temp*aTheta*p.mass*cLight2;
+			double eta = GlobalConfig.get<double>("nonThermal.injection.energyFraction_e");
 			double upl = eta*uth;
 			
 			double sum2 = 0.0;
@@ -199,11 +225,11 @@ void distributionFast(Particle& p, State& st)
 				double dE = E*(pasoE-1.0);
 				double N = p.distribution.get(iRE)*(upl/sum);
 				sum2 += N*E*dE;
-				p.distribution.set(iRE,N);
+				//p.distribution.set(iRE,N);
 			},{-1,iR.coord[DIM_R],0});
-			cout << "upl/uth = " << sum2/uth << "\t sum/uth = " << sum/uth << endl;
+			cout << "upl/uth = " << sum2 << "\t sum/uth = " << sum/uth << endl;
 		},{0,-1,0});
-	}*/
+	}
 	////////////////////////////////////////////////////////////////////////////
 	
 	if (p.id == "ntElectron" || p.id == "ntPair") show_message(msgEnd,Module_electronDistribution);

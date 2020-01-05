@@ -11,6 +11,7 @@ double fSyn(double x, double E, const Particle& creator, const ParamSpaceValues&
 {
 
 	const double magneticField = magf.get(psc);
+
 	double distCreator;
 	if (x < creator.emin() || x > creator.emax()){
 		distCreator = 0.0;

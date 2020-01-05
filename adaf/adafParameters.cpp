@@ -19,7 +19,7 @@ void adafParameters()
 	adafFile.open("adafFile.txt"); adafParams.open("adafParameters.txt");
 	adafFile >> nRaux;
 	double accRateNorm;
-	adafParams >> blackHoleMass >> accRateNorm >> s >> magFieldPar >> alpha >> j;
+	adafParams >> blackHoleMass >> accRateNorm >> s >> magFieldPar >> alpha >> j >> delta;
 	adafParams.close();
 	
 	logr.resize(nRaux,0.0);
@@ -38,6 +38,7 @@ void adafParameters()
 	accRateOut = accRateNorm*eddAccRate;
     
 	rTr = GlobalConfig.get<double>("rTr") * schwRadius;
+	rOutCD = GlobalConfig.get<double>("rOutCD") * schwRadius;
 	eMeanMolecularWeight = GlobalConfig.get<double>("mu_e");
 	iMeanMolecularWeight = GlobalConfig.get<double>("mu_i");
 
@@ -46,7 +47,7 @@ void adafParameters()
 	nRcd = GlobalConfig.get<int>("model.particle.default.dim.radius_cd.samples");
     
     paso_r = pow(exp(logr.back())/exp(logr.front()),1.0/(nR-1.0));
-	paso_rCD = pow(exp(logr.back())*schwRadius/rTr,1.0/nRcd);
+	paso_rCD = pow(rOutCD/rTr,1.0/(nRcd-1));
 
 	logMinEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.min");
 	logMaxEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.max");
@@ -54,6 +55,7 @@ void adafParameters()
 	inclination = GlobalConfig.get<double>("inclination");
     
     calculateComptonScatt = GlobalConfig.get<int>("calculateComptonScatt");
+	height_method = GlobalConfig.get<int>("height_method");
     
     calculateThermal = GlobalConfig.get<int>("calculateThermal");
     if (calculateThermal) {
@@ -94,8 +96,10 @@ void adafParameters()
         calculatePhotonDensityGap = GlobalConfig.get<int>("thermal.calculatePhotonDensityGap");
     }
     
+	calculateNewTemp = GlobalConfig.get<int>("calculateNewTemp");
     calculateNonThermal = GlobalConfig.get<int>("calculateNonThermal");
     if (calculateNonThermal) {
+		calculateJetEmission = GlobalConfig.get<int>("nonThermal.calculateJetEmission");
         calculateLosses = GlobalConfig.get<int>("nonThermal.calculateLosses");
 		calculateFlare = GlobalConfig.get<int>("nonThermal.calculateFlare");
         calculateNTdistributions = GlobalConfig.get<int>("nonThermal.calculateDistributions");

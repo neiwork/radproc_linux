@@ -8,6 +8,7 @@
 #include "thermalProcesses.h"
 #include "adafFunctions.h"
 #include "globalVariables.h"
+#include "flareProcesses.h"
 
 #include "thermalDistribution.h"
 #include "radiativeLosses.h"
@@ -17,9 +18,8 @@
 #include "distribution.h"
 #include "processes.h"
 #include "absorption.h"
-#include "blob.h"
-#include "oneZoneTimeDependent.h"
 #include "pairProcesses.h"
+#include "jetEmission.h"
 
 #include <fparameters/parameters.h>
 #include <fparameters/SpaceIterator.h>
@@ -38,13 +38,6 @@ int main()
 		show_message(msgStart, Module_state);
 		State model(GlobalConfig.get_child("model"));
 		show_message(msgEnd, Module_state);
-		
-		//tAccBlob = 0.0;
-		//double tMax = 8000;
-		//double dt = tMax/10;
-		//for (int i=0;i<=10;i++) {
-		
-		//blob(model);
 
 		if (calculateComptonScatt) {
 			show_message(msgStart,Module_comptonScattMatrix);
@@ -54,70 +47,26 @@ int main()
 			comptonScattMatrixRead(model);
 		}
 		
-		injection(model.ntElectron, model);
-		distributionFast(model.ntElectron, model);
-		//writeEandRParamSpace("electronDis",model.ntElectron.distribution,0);
+		std::ofstream fields;
+		fields.open("fields.dat",std::ios::out);
+		model.photon.ps.iterate([&](const SpaceIterator& iR) {
+			double Te = model.tempElectrons.get(iR);
+			fields << safeLog10(iR.val(DIM_R)/schwRadius) << "\t" << safeLog10(Te) << "\t"
+				   << safeLog10(model.tempIons.get(iR)) << "\t"
+				   << safeLog10(model.denf_e.get(iR)) << "\t"
+				   << safeLog10(model.denf_i.get(iR)) << "\t"
+				   << safeLog10(model.magf.get(iR)) << endl;
+		},{0,-1,0});
+		fields.close();
 		
 		if (calculateThermal)
 			thermalProcesses(model,"lum.txt");
 		
-		if (calculateFlare) {
-			
-			maxRadius = GlobalConfig.get<double>("nonThermal.flare.maxRadius")*schwRadius;
-			minRadius = GlobalConfig.get<double>("nonThermal.flare.minRadius")*schwRadius;
-			etaInj = GlobalConfig.get<double>("nonThermal.flare.injection.energyFraction");
-			pIndex = GlobalConfig.get<double>("nonThermal.flare.injection.primaryIndex");
-			
-			model.photon.ps.iterate([&](const SpaceIterator& i) {
-				double r = i.val(DIM_R);
-				cout << r/schwRadius << "\t" << radialVel(r)/cLight << endl;
-			},{0,-1,0});
-			
-			timeAfterFlare = 0.0;
-			double tMax = 4.0*3600;
-			size_t nTime = 100;
-			double dt = tMax/nTime;
-			ofstream file;
-			multiZoneInjection(model.ntPair,model);
-			file.open("lightCurve.txt");
-			for (size_t i=0;i<nTime;i++) {
-				timeAfterFlare += dt;
-				//////////////////////////////////////////////////////
-				
-				//oneZoneDist(model.ntPair,model);
-				multiZoneDist(model.ntPair,model,-timeAfterFlare);
-				
-				//////////////////////////////////////////////////////
-				flareEmission2(model,model.ntPair,file);
-
-				if (i==10) writeEandRParamSpace("electronDis",model.ntPair.distribution,0);
-			}
-			file.close();
-			
-			/*pIndex = 1.1;
-			double d_pIndex = (3.0-1.1)/9;
-			for (size_t jP=0;jP<10;jP++) {
-				etaInj = 0.05;
-				double d_etaInj = (0.3-0.05)/4;
-				for (size_t jE=0;jE<5;jE++) {
-					timeAfterFlare = 0.0;
-					double tMax = 4.0*3600;
-					double dt = tMax/100;
-					ofstream file;
-					file.open("lightCurve_p"+to_string(pIndex)+"_e"+to_string(etaInj)+".txt");
-					for (int i=0;i<=100;i++) {
-						oneZoneDist(model.ntPair,model);
-						flareEmission(model,model.ntPair,file);
-						timeAfterFlare += dt;
-						//if (i==1) writeEandRParamSpace("electronDis",model.ntPair.distribution,0);
-					}
-					file.close();
-					etaInj += d_etaInj;
-				}
-				pIndex += d_pIndex;
-			}*/
-		}
-		//blobEmission(model);
+		if (calculateJetEmission)
+			jetProcesses(model,"lumJet.txt");
+		
+		if (calculateFlare)
+			flareProcesses(model);
 		
 //***********nonthermal particles**************		
 		
@@ -126,7 +75,7 @@ int main()
 			if (calculateLosses) {
 				show_message(msgStart, Module_radLosses);
 				radiativeLosses(model.ntElectron, model, "electronLosses.txt");
-				//radiativeLosses(model.ntProton, model, "protonLosses.txt");
+				radiativeLosses(model.ntProton, model, "protonLosses.txt");
 				show_message(msgEnd, Module_radLosses);
 			}
 		
@@ -145,11 +94,11 @@ int main()
 				writeEandRParamSpace("electronDis",model.ntElectron.distribution,0);
 				
 				//nt protons
-				/*injection(model.ntProton,model);
+				injection(model.ntProton,model);
 				writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
 				distributionFast(model.ntProton,model);
 				writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
-				*/
+				
 				if (calculateNeutronInj) {
 					injectionNeutrons(model);
 					radiativeLossesNeutron(model.ntNeutron,model,"neutronLosses.txt");

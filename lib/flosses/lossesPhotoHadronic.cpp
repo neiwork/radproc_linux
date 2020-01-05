@@ -38,6 +38,14 @@ double fPHPair(double u,double t, double E, double mass, const ParamSpaceValues&
 		   *crossSectionBetheHeitler(t)*inelasticityBetheHeitler(t)*t/P2(u);
 }
 
+double fBHPair2(double Ee, double Ep, const ParamSpaceValues& tpf, const SpaceCoord& psc)
+{
+	double gamma_p = Ep / (protonMass*cLight2);
+	double Nph = tpf.interpolate({{0,Ee}},&psc);
+	double a = 2.0*gamma_p * Ee / (electronMass*cLight2);
+	return (pow(a,1.5)*(log(a)-2.0/3.0)+2.0/3.0) * Nph / P2(Ee);
+}
+
 double lossesPhotoHadronic(double E, Particle& particle, const ParamSpaceValues& tpf, const SpaceCoord& psc, double phEmin, double phEmax)
 {  //E=Ep
 
@@ -60,14 +68,21 @@ double lossesPhotoHadronic(double E, Particle& particle, const ParamSpaceValues&
 		return fPHPion(u,t,E,mass,tpf,psc);
 	});
 
-		
+	/*
 	integral += RungeKutta(a_pa, b, &cPairPH,
 		[E, mass](double u){
 		return dPH(u, E, mass);
 	}, [E, mass, tpf, &psc](double u, double t){
 		return fPHPair(u, t, E, mass, tpf,psc);
 	});
-
-	return cte*integral/E;
+	*/
+	
+	double constant = 7.0*P3(electronRestEnergy)*fineStructConst*thomson*cLight / 
+						(9.0*sqrt(2.0)*pi*E*E/protonMass/cLight2);
+	double integral2 = constant*RungeKuttaSimple(P2(mass*cLight2)/E,phEmax,[&](double Ee) 
+	{return fBHPair2(Ee,E,tpf,psc);});
+	
+	return cte*integral/E + integral2;
+	//return integral2*E;
 }
 
