@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/Dimension.h>
+#include <fmath/RungeKutta.h>
 
 using namespace std;
 // Electrons
@@ -110,6 +111,11 @@ double radialVel(double r) {
 	double r_rg = r / (schwRadius/2.0);
 	double vel = -exp(logrv);
 	return (r_rg <= 30 ? vel / (0.93*exp(2.13/r_rg)) : vel);
+}
+
+double accretionTime(double r) {
+	return RungeKuttaSimple(r,exp(logr.front())*schwRadius,[&](double x) {
+							return 1.0/radialVel(x);});
 }
 
 double keplAngVel(double r)

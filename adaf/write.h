@@ -5,6 +5,7 @@
 #include <fstream>
 #include <map>
 
+#include "State.h"
 #include <fparticle/Particle.h>
 #include <fmath/physics.h>
 
@@ -71,3 +72,4 @@ void writeEnergyFunction(const std::string& filename, const ParamSpaceValues& da
 
 
 void writeMatrix(const std::string& filename, Particle& p, Matrix& a);
+void writeFields(State& st);

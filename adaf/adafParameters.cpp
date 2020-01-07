@@ -95,11 +95,12 @@ void adafParameters()
         }
         calculatePhotonDensityGap = GlobalConfig.get<int>("thermal.calculatePhotonDensityGap");
     }
-    
-	calculateNewTemp = GlobalConfig.get<int>("calculateNewTemp");
+	calculateJetEmission = GlobalConfig.get<int>("nonThermal.calculateJetEmission");
+	
     calculateNonThermal = GlobalConfig.get<int>("calculateNonThermal");
     if (calculateNonThermal) {
-		calculateJetEmission = GlobalConfig.get<int>("nonThermal.calculateJetEmission");
+		calculateNTprotons = GlobalConfig.get<int>("nonThermal.protons");
+		calculateNTelectrons = GlobalConfig.get<int>("nonThermal.electrons");
         calculateLosses = GlobalConfig.get<int>("nonThermal.calculateLosses");
 		calculateFlare = GlobalConfig.get<int>("nonThermal.calculateFlare");
         calculateNTdistributions = GlobalConfig.get<int>("nonThermal.calculateDistributions");

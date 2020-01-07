@@ -18,6 +18,7 @@ double electronDensityTheta(double,double);
 double ionDensity(double);
 double magneticField(double);
 double accRateADAF(double);
+double accretionTime(double);
 double qie(double,double,double);
 double qie_beta(double,double,double);
 double dlogrho_dlogr(double);

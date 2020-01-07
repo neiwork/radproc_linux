@@ -6,6 +6,8 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="non thermal">
+    <File Name="timescales.h"/>
+    <File Name="timescales.cpp"/>
     <File Name="flareTimeDependent.cpp"/>
     <File Name="flareTimeDependent.h"/>
     <File Name="flareProcesses.h"/>
@@ -24,8 +26,6 @@
     <File Name="losses.h"/>
     <File Name="losses.cpp"/>
     <File Name="distribution.cpp"/>
-    <File Name="radiativeLosses.h"/>
-    <File Name="radiativeLosses.cpp"/>
     <File Name="processes.h"/>
     <File Name="processes.cpp"/>
     <File Name="injection.h"/>
@@ -41,7 +41,7 @@
     <File Name="thermalDistribution.h"/>
     <File Name="thermalDistribution.cpp"/>
     <File Name="thermalComptonOld.cpp" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="thermalCompton.h"/>
+    <File Name="thermalCompton.h" ExcludeProjConfig="Debug;"/>
     <File Name="thermalCompton.cpp"/>
   </VirtualDirectory>
   <Description/>

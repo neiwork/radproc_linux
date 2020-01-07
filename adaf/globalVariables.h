@@ -46,6 +46,8 @@ extern const int calculateLosses;
 extern const int calculateNTdistributions;
 extern const int calculateFlare;
 extern const int calculateNonThermalLum;
+extern const int calculateNTprotons;
+extern const int calculateNTelectrons;
 extern const int calculateNeutronInj;
 extern const int calculateNeutronDis;
 extern const int calculateJetDecay;

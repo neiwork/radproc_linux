@@ -24,14 +24,15 @@
 int rangeE(double e, Particle& p)	{ return (e > p.emin() && e < p.emax()); }
 int rangeR(double r, Particle& p)	{ return (r > p.ps[DIM_R].first() && r < p.ps[DIM_R].last()); }
 
-double fAux(double r, double pasoR, double E, double magfield)
+double fAux(double r, double pasoR, double E, double magfield, Particle& p)
 {
 	double cos1 = costhetaH(r);
 	double cos2 = costhetaH(r*pasoR);
 	double cos0 = costhetaH(r*sqrt(pasoR));
 	double dcos = cos2-cos1;
 	double tadv = r/abs(radialVel(r));
-	double Diffrate = diffusionRate(E,r*costhetaH(r),magfield);
+	double height = height_fun(r);
+	double Diffrate = 1.0/diffusionTimeIso(E,r,p,magfield,height);
 	double q_times = tadv*Diffrate;
 	double d2cos = (cos2+cos1-2.0*cos0)/(paso_r-1.0);
 	return -((2.0-s-q_times)*(pasoR-1.0) + 4.0/3.0 * dcos) / (cos0 + 1.0/3.0 * dcos/ (paso_r-1.0)) - 
@@ -287,7 +288,7 @@ void distributionDetailed(Particle& p, State& st)
 					double vR = abs(radialVel(Rc[jj]));
 					double dRR = Rc[jj]*(pasoRc-1.0);
 					double magfield = rangeR(Rc[jj],p) ? st.magf.interpolate({{DIM_R,Rc[jj]}},&itRE.coord) : 0.0;
-					double f = fAux(Rc[jj],pasoRc,Ec[jj],magfield);
+					double f = fAux(Rc[jj],pasoRc,Ec[jj],magfield,p);
 					mu += f + dbde*(dRR/vR);
 				}
 				mu = exp(-mu);

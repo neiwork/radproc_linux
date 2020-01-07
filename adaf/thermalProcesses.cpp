@@ -152,11 +152,14 @@ void localProcesses2(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumO
 			double b_nu = bb(unrEnergy/planck,temp);
 			double kappa = (xSy+xBr)/(4.0*pi*b_nu);
 			double tau = 0.5*sqrt(pi)*kappa*height_fun(r);
-			double flux = (2.0*sqrt(3.0)*tau > 1.0e-5) ? 
+			double fluxSy = (2.0*sqrt(3.0)*tau > 1.0e-5) ? 
 							2.0*pi/sqrt(3.0)*b_nu*(1.0-exp(-2.0*sqrt(3.0)*tau)) :
-							0.5*sqrt(pi)*(xSy+xBr)*height_fun(r);
-			lumOutSy[jE][jR] = 2.0*pi*flux*r*r*(sqrt(paso_r)-sqrt(1.0/paso_r));
-			lumOut[jE][jR] = lumOutSy[jE][jR];
+							0.5*sqrt(pi)*xSy*height_fun(r);
+			double fluxBr = (2.0*sqrt(3.0)*tau < 1.0e-3) ? 0.5*sqrt(pi)*xBr*height_fun(r) : 0.0;
+							
+			lumOutSy[jE][jR] = 2.0*pi*fluxSy*r*r*(sqrt(paso_r)-sqrt(1.0/paso_r));
+			lumOutBr[jE][jR] = 2.0*pi*fluxBr*r*r*(sqrt(paso_r)-sqrt(1.0/paso_r));
+			lumOut[jE][jR] = lumOutSy[jE][jR]+lumOutBr[jE][jR];
 			jR++;
 		},{jE,-1,0});
 	}
@@ -331,8 +334,6 @@ void localCompton(const State& st, Matrix& lumOut, Matrix& lumOutIC, Vector ener
 						nNew[jE] = (1.0/denom) * integ * eDens;
 						if (nNew[jE] > nWithoutCompton[jE]) cond = 1;
 					}
-					//if (nNew[jE] > 0.0 && nOld[jE] > 0.0)
-					//	res += abs(log10(nNew[jE]/nOld[jE]));
 				}
 				
 				for (size_t jE=0;jE<nE;jE++) {
@@ -340,26 +341,8 @@ void localCompton(const State& st, Matrix& lumOut, Matrix& lumOutIC, Vector ener
 					lumOut[jE][jR] += nNew[jE]*energies[jE]*vol / tescap;
 					lumOutIC[jE][jR] = lumOut[jE][jR]-lumOutLocal[jE][jR];
 				}
-				/*
-				for (size_t jE=0;jE<nE;jE++) {
-					double frequency=energies[jE]/planck;
-					if (frequency > nuMinCompton && frequency < nuMaxCompton) {
-						double Rprom = eDens*rateThermal(normtemp,frequency);
-						lumNew[jE] = pow(1.0/tescap + Rprom,-1) * 
-							(comptonNewLocal(comptonProbVec,lumOld,normtemp,jE,
-								energies,nE)*eDens+cLight*lumOutLocal[jE][jR]*(area/vol));
-					}
-					if (lumNew[jE] > 0.0 && lumOld[jE] > 0.0 && it > 1)
-						res += abs(log10(lumNew[jE]/lumOld[jE]));
-				}
-				for (size_t jE=0;jE<nE;jE++) {
-					lumOld[jE] = lumNew[jE];
-					lumOut[jE][jR] = lumNew[jE];
-					lumOutIC[jE][jR] = lumNew[jE]-lumOutLocal[jE][jR];
-				}*/
 				cout << "Condition = " << cond << endl;
 				++it;
-			//} while (res > 1.0e-3 && it < 30);
 			} while (cond == 1 && it < 40);
 		}
 		jR++;
@@ -368,7 +351,7 @@ void localCompton(const State& st, Matrix& lumOut, Matrix& lumOutIC, Vector ener
 	show_message(msgEnd,Module_thermalCompton);
 }
 
-void thermalCompton(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOutIC, Vector energies, 
+void thermalCompton2(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOutIC, Vector energies, 
 						Vector redshift, int processesFlags[])
 {
 	show_message(msgStart,Module_thermalCompton);
@@ -393,6 +376,7 @@ void thermalCompton(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOutI
 	Matrix lumOutLocal,lumOutCD,lumOutRefl;
 	matrixInit(lumOutCD,nE,nRcd,0.0);
 	matrixInit(lumOutRefl,nE,nRcd,0.0);
+	matrixInit(lumOutIC,nE,nR,0.0);
 	Vector lumInIC(nE,0.0);
 	matrixInitCopy(lumOutLocal,nE,nR,lumOut);
 	Vector p(nR*nE*nE,0.0);
@@ -430,10 +414,6 @@ void thermalCompton(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOutI
 			// Compute the scattered luminosity.
 			fill(lumInIC.begin(),lumInIC.end(),0.0);
 			for (size_t jjE=0;jjE<nE;jjE++) {
-				// K-N correction:
-				//double Rprom = rateThermal(normtemp,energies[jjE])/(thomson*cLight);
-				//double Rprom=1.0;
-				//if (Rprom > 0.0 && Rprom < 1.001) {
 				for (size_t jjR=0;jjR<nR;jjR++)
 					lumInIC[jjE] += scattAA[jjR][jR] * lumOut[jjE][jjR];
 				
@@ -453,21 +433,13 @@ void thermalCompton(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOutI
 					double frequency = energies[jE]/planck;
 					double unrFrequency = unrEnergies_vec[jE]/planck;
 					if (comptonMethod == 3) {
-						if (it == 1) comptonNewNewNewPruebaVector(jR,unrEnergies_vec,jE,p,normtemp);
+						if (it == 1) 
+							comptonNewNewNewPruebaVector(jR,unrEnergies_vec,jE,p,normtemp);
 						if (unrFrequency > nuMinCompton && unrFrequency < nuMaxCompton)
-							lumOutIC[jE][jR] = comptonNewNewPrueba(p,lumInIC,jR,unrEnergies_vec,jE);
-							//lumOutIC[jE][jR] = comptonNewNewNew(lumInIC,normtemp,frequency,
-							//						energies,jE);
+							lumOutIC[jE][jR] = compton(p,lumInIC,jR,unrEnergies_vec,jE);
 					} else {
-						//if (it==1) comptonNewNewPruebaVector(tempVec,nuPrimVec,nuVec,comptonProbVec,jR,
-						//				energies,jE,p,normtemp);
-					
-						//if (frequency > nuMinCompton && frequency < nuMaxCompton)
-						//	lumOutIC[jE][jR] = comptonNewNew(tempVec,nuPrimVec,nuVec,
-						//								comptonProbVec,lumInIC,normtemp,
-						//								frequency,energies,jE);
 						if (unrFrequency > nuMinCompton && unrFrequency < nuMaxCompton)
-							lumOutIC[jE][jR] = comptonNewNewPrueba(p,lumInIC,jR,unrEnergies_vec,jE);
+							lumOutIC[jE][jR] = compton(p,lumInIC,jR,unrEnergies_vec,jE);
 					}
 				}
 			}
@@ -498,7 +470,7 @@ void thermalCompton(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOutI
 		cout << endl;
 		cout << "Total photons non-scattered per unit time = " 
 					 << nPhNS << " s^-1" << endl;
-		cout << "Total photons scattered per unit time, after scattering = " 
+		cout << "Total photons scattered per unit time, before scattering = " 
 					 << nPhBS << " s^-1" << endl;
 		cout << "Total photons scattered per unit time, after scattering = " 
 					 << nPhAS << " s^-1" << endl;
@@ -512,98 +484,121 @@ void thermalCompton(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOutI
 	show_message(msgEnd,Module_thermalCompton);
 }
 
-/*
-void gravRedshift(const State& st, Vector energies, Matrix lum, Matrix& lumRed)
-{
-	matrixInit(lumRed,nE,nR,0.0);
 
-	//DEFINO FRONTERAS PARA LAS CELDAS DE ENERGIA
-	double eVar = pow(energies[nE-1]/energies[0],1.0/(nE-1));
-	Vector benergies(nE+1,0.0);
-	benergies[0] = energies[0]/sqrt(eVar);
-	for (size_t jE=0;jE<nE;jE++){
-		benergies[jE+1] = energies[jE]*sqrt(eVar);
+void thermalCompton(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOutIC, Vector energies, 
+						Vector redshift, int processesFlags[])
+{
+	show_message(msgStart,Module_thermalCompton);
+	Vector tempVec(nTempCompton,0.0);
+	Vector nuPrimVec(nNuPrimCompton,0.0);
+	Vector nuVec(nNuCompton,0.0);
+	Vector comptonProbVec(nTempCompton*nNuPrimCompton*nNuCompton,0.0);
+	
+	if (comptonMethod == 0) {
+		if (calculateComptonRedMatrix) comptonMatrix2();
+		vectorRead("comptonProbMatrix2.dat",comptonProbVec,comptonProbVec.size());
+		vectorRead("tempComptonVec.dat",tempVec,tempVec.size());
+	} else {
+		if (calculateComptonRedMatrix) comptonMatrix();
+		vectorRead("comptonProbMatrix.dat",comptonProbVec,comptonProbVec.size());
 	}
-	
-	size_t jR=0;
-	st.photon.ps.iterate([&](const SpaceIterator& itR) {
-		double r = itR.val(DIM_R);
-		double redshift = sqrt(1.0-schwRadius/r)*(1.0-P2(radialVel(r)/cLight));
-		redshift = (redshift > 0.0) ? redshift : 1.0;
-		size_t items[nE];
-		for (size_t jE=0;jE<nE;jE++) {
-			double reddendEnergy = energies[jE]/redshift;
-			size_t count=0;
-			size_t jjE=0;
-			while(jjE < nE && count == 0) {
-				if (reddendEnergy > benergies[jjE] && renergy < benergies[jjE+1]) {
-					items[jE] = jjE;
-					count++;
-				}
-				jjE++;
-			}
-			if (count == 0) items[jE]=nE;
-		}
-		for (size_t jE=0;jE<nE;jE++) {
-			if (items[jE] < nE) {
-				double energy_new = energies[items[jE]];
-				lumRed[items[jE]][jR] += lum[jE][jR] * (gfactor*reddendEnergy/energy_new);
-			}
-		}
-		jR++;
-	},{0,-1,0});
-}*/
 
-/*void binEmissivities(const State& st, Vector esc, Vector energies, Matrix lumOut)
-{
-	ofstream filePar, fileLum;
-	FILE *fileEmissBin;
+	vectorRead("nuPrimComptonVec.dat",nuPrimVec,nuPrimVec.size());
+	vectorRead("nuComptonVec.dat",nuVec,nuVec.size());
 	
-	fileLum.open("emissivities.txt", ios::out);
-	filePar.open("parSpace.txt", ios::out);
-	fileEmissBin=fopen("emissivities.bin","wb");
+	Matrix lumOutCD,lumOutRefl,lumOutIC_local;
+	matrixInit(lumOutCD,nE,nRcd,0.0);
+	matrixInit(lumOutRefl,nE,nRcd,0.0);
+	Vector lumInIC(nE,0.0);
+	Vector lumBeforeCompton(nE,0.0);
+	matrixInitCopy(lumOutIC_local,nE,nR,lumOut);
+	Vector p(nR*nE*nE,0.0);
+	
+	for (size_t jE=0;jE<nE;jE++)
+		for (size_t jR=0;jR<nR;jR++)
+			lumBeforeCompton[jE] += lumOut[jE][jR];
+	
+	if (comptonMethod == 1) cNew(st,p,redshift);
+	
+	int cond = 1;		// Residual.
+	size_t it=1;	// Iterations.
+	do {
+		cout << "Iteration number = " << it << endl;
+		cond = 0;
+		if (processesFlags[3])
+			coldDiskLuminosity(st,lumOut,lumOutRefl,lumOutCD,energies);
 
-	float *emissivities;
-	emissivities=(float*)calloc(nE*nR*nTheta,sizeof(float));
-	
-	size_t jj=0;
-	double eVar = pow(energies[nE-1]/energies[0],1.0/nE);
-	for (size_t jE=0;jE<nE;jE++) {
-		double sum=0.0;
-        double denergy=energies[jE]*(eVar-1.0);
-        size_t jR=0;
+		Vector lumCompton(nE,0.0);
+		
+		// For each shell.
+		size_t jR=0;
 		st.photon.ps.iterate([&](const SpaceIterator& itR) {
-			double r = itR.val(DIM_R);
-			double rB1=r-dr/2.0;
-			double rB2=r+dr/2.0;
-			double vol=(rB2*rB2*rB2-rB1*rB1*rB1)*volFactor;
-			double emissToLum=vol*4.0*pi;
-			double sumFactor=0.0;
-			st.photon.ps.iterate([&](const SpaceIterator& itTheta) {
-				sumFactor += st.tempElectrons.get(itTheta);
-			},{0,itR.coord[DIM_R],-1});
-			st.photon.ps.iterate([&](const SpaceIterator& itTheta) {
-				double lum = lumOut[jE][jR]*esc[jR]*st.tempElectrons.get(itTheta)/(sumFactor*2.0);
-				fileLum << jE << "\t" << jR << "\t" 
-						  << lum << endl;
-				emissivities[jj++] = (float)(lum/emissToLum);
-			},{0,itR.coord[DIM_R],-1});
-            jR++;
+			double normtemp = boltzmann*st.tempElectrons.get(itR)/(electronMass*cLight2);
+			// Compute the scattered luminosity.
+			fill(lumInIC.begin(),lumInIC.end(),0.0);
+			for (size_t jjE=0;jjE<nE;jjE++) {
+				
+				for (size_t jjR=0;jjR<nR;jjR++)
+					lumInIC[jjE] += scattAA[jjR][jR] * lumOutIC_local[jjE][jjR];
+				
+				if (processesFlags[3]) {
+					for (size_t jRcd=0;jRcd<nRcd;jRcd++)
+						lumInIC[jjE] += scattDA[jRcd][jR] * 
+											(lumOutCD[jjE][jRcd]+lumOutRefl[jjE][jRcd]);
+				}
+				lumInICm[jjE][jR] = lumInIC[jjE];
+			}
+
+			for (size_t jE=0;jE<nE;jE++)
+				lumOutIC_local[jE][jR] = 0.0;
+
+			if (normtemp > tempMinCompton && normtemp < tempMaxCompton) {
+				double A = 1.0+4.0*normtemp*(1.0+4.0*normtemp);
+				Vector unrEnergies_vec(nE);
+				for (size_t jE=0;jE<nE;jE++)
+					unrEnergies_vec[jE] = energies[jE]/redshift[jR];
+				
+				for (size_t jE=0;jE<nE;jE++) {
+					double frequency = energies[jE]/planck;
+					double unrFrequency = unrEnergies_vec[jE]/planck;
+					if (unrFrequency > nuMinCompton && unrFrequency < nuMaxCompton) {
+						lumOutIC_local[jE][jR] = compton(p,lumInIC,jR,unrEnergies_vec,jE);
+						lumCompton[jE] += lumOutIC_local[jE][jR];
+					}
+				}
+			}
+			jR++;
 		},{0,-1,0});
-	}
-	fwrite(emissivities,sizeof(float),jj,fileEmissBin);
-	
-	float deltaLogE = log10(energies[1]/energies[0]);
-	filePar << nE << "\t" << nR << "\t" << nTheta << endl;
-	filePar << cuspRadius << "\t" << dr << "\t" << minPolarAngle << "\t"
-			<< dtheta << "\t" << log10(energies[0]) << "\t" << deltaLogE << endl;
-	filePar << gravRadius << "\t" << blackHoleSpinPar << "\t" 
-			<< specificAngMom << "\t" << torusCenterRadius << endl;
-	
-	fclose(fileEmissBin);
-	fileLum.close();
-	filePar.close();
-}*/
+		
+		for (size_t jE=0;jE<nE;jE++)
+			if (lumCompton[jE] > 0.01*lumBeforeCompton[jE]) cond = 1;
+		
+		
+		double pasoNuPrim = pow(energies[nE-1]/energies[0],1.0/(nE-1));
+		double nPhNS = 0.0;
+		double nPhBS = 0.0;
+		double nPhAS = 0.0;
+		for (size_t jE=0;jE<nE;jE++) {
+			double dNu = energies[jE]/planck * (sqrt(pasoNuPrim)-1.0/sqrt(pasoNuPrim));
+			for (size_t jR=0;jR<nR;jR++) {
+				nPhBS += lumInICm[jE][jR]/energies[jE] * dNu;
+				nPhAS += lumOutIC_local[jE][jR]/energies[jE] * dNu;
+				lumOut[jE][jR] += lumOutIC_local[jE][jR];
+				lumOutIC[jE][jR] += lumOutIC_local[jE][jR];
+			}
+		}
+		cout << endl;
+		cout << "Total photons scattered per unit time, before scattering = " 
+					 << nPhBS << " s^-1" << endl;
+		cout << "Total photons scattered per unit time, after scattering = " 
+					 << nPhAS << " s^-1" << endl;
+		cout << endl;
+		
+		cout << "Condition = " << cond << endl;
+		++it;
+	} while (cond);
+	show_message(msgEnd,Module_thermalCompton);
+}
 
 void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOutBr,
 						Matrix lumOutpp, Matrix lumInICm, Matrix lumOutIC, Matrix lumOut, 
@@ -735,28 +730,6 @@ void targetField(State& st, Matrix lumOut, Matrix lumCD, Matrix lumRefl)
 }
 
 /*
-void writeBlob(State& st, Vector energies, Matrix lum, double t)
-{
-	double IRfreq = 1.4e14;
-	double frequency1 = energies[0]/planck;
-	double frequency2 = frequency1;
-	size_t jE = 0;
-	while (frequency2 < IRfreq) {
-		frequency1 = frequency2;
-		frequency2 = energies[++jE]/planck;
-	}
-	frequency1 = sqrt(frequency1*frequency2);
-	double IRlum = 0.0;
-	for (size_t jR=0;jR<nR;jR++)
-		IRlum += sqrt(lum[jE-1][jR]*lum[jE][jR]) * escapeAi[jR];
-	
-	IRlum *= frequency1;
-	ofstream file;
-	file.open("lightCurveBlob.txt",ios::app);
-	file << t << "\t" << IRlum << endl;
-	file.close();
-}*/
-
 void calculateElectronTemp(State& st, Matrix lumOut, Matrix lumInICm, Vector energies, double& res)
 {
 	ofstream fileNewTemp_e, fileCooling;
@@ -801,7 +774,7 @@ void calculateElectronTemp(State& st, Matrix lumOut, Matrix lumInICm, Vector ene
 	}
 	fileNewTemp_e.close();
 	fileCooling.close();
-}
+}*/
 
 void thermalProcesses(State& st, const string& filename)
 {
@@ -842,8 +815,6 @@ void thermalProcesses(State& st, const string& filename)
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,lumInICm,
 							lumOutIC,lumOut,lumOutCD,lumOutRefl,filename);
 		targetField(st,lumOut,lumOutCD,lumOutRefl);
-		if (calculateNewTemp == 1)
-			calculateElectronTemp(st,lumOut,lumInICm,energies,res);
 	}	
 	show_message(msgEnd,Module_thermalLuminosities);
 }

@@ -30,6 +30,8 @@ int calculateComptonScatt;				// If 1 calculate the Compton scattering
 int calculateThermal;   				// If 1 calculate the thermal processes.
 int calculatePhotonDensityGap;          // If 1 calculate the photon density at zGap.
 int calculateNonThermal;   				// If 1 calculate the non-thermal processes.
+int calculateNTprotons;					// If 1 calculate the non-thermal processes for protons.
+int calculateNTelectrons;				// If 1 calculate the non-thermal processes for electrons.
 int calculateLosses;                    // If 1 calculate radiative losses for electrons and protons.
 int calculateNTdistributions;           // If 1 calculate non-thermal particle distributions.
 int calculateNonThermalLum;             // If 1 calculate non-thermal luminosities.

@@ -507,16 +507,15 @@ void comptonNewNewNewPruebaVector(size_t jR, Vector energies, size_t jE, Vector&
 	}
 }
 
-double comptonNewNewPrueba(Vector p, Vector lumIn, size_t jTemp, Vector energies, size_t jE)
+double compton(Vector p, Vector lumIn, size_t jTemp, Vector energies, size_t jE)
 {
 	double pasoNuPrim = pow(energies[nE-1]/energies[0],1.0/nE);
 	double sum = 0.0;
-	for (size_t jjNu=0;jjNu<nE-1;jjNu++) {
+	for (size_t jjNu=0;jjNu<nE;jjNu++) {
 		double nuPrim = energies[jjNu]/planck;
 		if (nuPrim > nuPrimMinCompton && nuPrim < nuPrimMaxCompton)
 		{
 			double dNuPrim = nuPrim * (sqrt(pasoNuPrim)-1.0/sqrt(pasoNuPrim));
-			//double dNuPrim = (energies[jjNu+1]-energies[jjNu])/planck;
 			double prob = p[(jTemp*nE+jjNu)*nE+jE];
 			sum += lumIn[jjNu]*dNuPrim*prob*(energies[jE]/energies[jjNu]);
 		}

@@ -1,9 +1,6 @@
 #include "nonThermalLosses.h"
-
 #include <fparameters/parameters.h>
-
 #include <fmath/physics.h>
-
 #include <boost/property_tree/ptree.hpp>
 
 double adiabaticLosses(double E, double z, double vel_lat, double gamma)  //en [erg/s]
@@ -18,16 +15,75 @@ double adiabaticLosses(double E, double z, double vel_lat, double gamma)  //en [
 }
 
 
-double diffusionRate(double E, double radius, double magneticField)   //en [s]^-1
+double diffusionTimeIso(double E, double r, Particle& p, double B, double height)   //en [s]^-1
 {
-	double D = cLight*E / (3.0*electronCharge*magneticField);  //cLight=v; D(E) in the Bohm regime
-	return (2.0 * D) / P2(radius);
+	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
+	double q = GlobalConfig.get<double>("nonThermal.injection.SDA.powerSpectrumIndex");
+	double larmorRadius = E/(electronCharge*B);
+	double gamma = E/(p.mass*cLight2);
+	double tEscape = height/cLight;
+	return 9.0*zeda*tEscape*pow(larmorRadius/height * gamma,q-2.0);
 }
 
-
-double accelerationRate(double E, double magneticField, double accEfficiency) //en [s]^-1
+double accelerationTimeSDA(double E, double r, Particle& p, double B, double height, double rho)
 {
-	return accEfficiency*cLight*electronCharge*magneticField/E;
+	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
+	double q = GlobalConfig.get<double>("nonThermal.injection.SDA.powerSpectrumIndex");
+	double larmorRadius = E/(electronCharge*B);
+	double gamma = E / (p.mass*cLight2);
+	double tEscape = height/cLight;
+	double alfvenVel = B*B/sqrt(4.0*pi*rho);
+	return (1.0/zeda) / P2(alfvenVel/cLight) * tEscape * pow(larmorRadius*gamma/height,2.0-q);
+}
+
+/*
+double relaxTime(double E, double r, Particle& p, int indicator) {
+	
+	double gamma = E / (p.mass*cLight2);
+	double lnLambda = 20.0;
+	double theta1 = 0.0;
+	double theta2 = 0.0;
+	double ne1,ne2;
+	if (indicator == 1) {
+		theta1 = boltzmann*electronTemp(r)/electronRestEnergy;
+		ne1 = electronDensity(r);
+		massRatio = 1.0;
+	} else if (indicator == 2) {
+		theta1 = boltzmann*ionTemp(r)/(protonMass*cLight2);
+		ne1 = ionDensity(r);
+		massRatio = P2(p.mass/electronMass);
+	} else if (indicator == 3) {
+		theta1 = boltzmann*electronTemp(r)/(electronMass*cLight2);
+		theta2 = boltzmann*ionTemp(r)/(protonMass*cLight2);
+		ne1 = electronDensity(r);
+		ne2 = ionDensity(r);
+		massRatio = protonMass/electronMass;
+	}
+	
+	if (p.id == "ntElectron" && gamma1 > 2.0 && theta > 0.3) {
+		double k1 = gsl_sf_bessel_K1(1.0/theta1);
+		double k2 = gsl_sf_bessel_Kn(2,1.0/theta1);
+		double factor = abs(k1/k2-1.0/gamma);
+		return 2.0/3.0 * gamma / (ne1*thomson*cLight*(lnLambda+9.0/16.0-log(sqrt(2.0)))) /
+				factor;
+	} else if (p.id == "ntProton" && gamma > 1.075 && gamma < 1.53) {
+		double beta = sqrt(1.0-1.0/(gamma*gamma));
+		double sigmaH = 2.3e-26;
+		return 4.0*beta*gamma*gamma/(ne1*sigmaH*cLight*(gamma*gamma-1.0));
+	} else if (p.id == "ntProton" && gamma > 4.0 && indicator == 3) {
+		double beta = sqrt(1.0-1.0/(gamma*gamma));
+		return 1.2e3 * (3.8*pow(theta1,1.5)+P3(beta))*(gamma-1.0) /
+				(ne2*thomson*cLight*beta*beta*lnLambda);
+	}
+	} else
+		return 4.0*sqrt(pi)*pow(0.5(theta1+theta2),1.5) * massRatio /
+			(ne1*thomson*cLight*lnLambda);
+}*/
+
+double accelerationRate(double E, double B) //en [s]^-1
+{
+	double accEff = GlobalConfig.get<double>("nonThermal.injection.PL.accEfficienty");
+	return accEff*cLight*electronCharge*B/E;
 }
 
 

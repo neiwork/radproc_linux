@@ -11,7 +11,7 @@
 #include "flareProcesses.h"
 
 #include "thermalDistribution.h"
-#include "radiativeLosses.h"
+#include "timescales.h"
 #include "injection.h"
 #include "injectionNeutrons.h"
 #include "distributionNeutrons.h"
@@ -39,6 +39,8 @@ int main()
 		State model(GlobalConfig.get_child("model"));
 		show_message(msgEnd, Module_state);
 
+		writeFields(model);
+
 		if (calculateComptonScatt) {
 			show_message(msgStart,Module_comptonScattMatrix);
 			comptonScattMatrix(model);
@@ -46,18 +48,6 @@ int main()
 		} else {
 			comptonScattMatrixRead(model);
 		}
-		
-		std::ofstream fields;
-		fields.open("fields.dat",std::ios::out);
-		model.photon.ps.iterate([&](const SpaceIterator& iR) {
-			double Te = model.tempElectrons.get(iR);
-			fields << safeLog10(iR.val(DIM_R)/schwRadius) << "\t" << safeLog10(Te) << "\t"
-				   << safeLog10(model.tempIons.get(iR)) << "\t"
-				   << safeLog10(model.denf_e.get(iR)) << "\t"
-				   << safeLog10(model.denf_i.get(iR)) << "\t"
-				   << safeLog10(model.magf.get(iR)) << endl;
-		},{0,-1,0});
-		fields.close();
 		
 		if (calculateThermal)
 			thermalProcesses(model,"lum.txt");
@@ -74,30 +64,27 @@ int main()
             
 			if (calculateLosses) {
 				show_message(msgStart, Module_radLosses);
-				radiativeLosses(model.ntElectron, model, "electronLosses.txt");
-				radiativeLosses(model.ntProton, model, "protonLosses.txt");
+				if (calculateNTelectrons)
+					timescales(model.ntElectron, model, "electronLosses.txt");
+				if (calculateNTprotons)
+					timescales(model.ntProton, model, "protonLosses.txt");
 				show_message(msgEnd, Module_radLosses);
 			}
 		
 			if (calculateNTdistributions) {
-
-			//nt electrons
-
-				if (calculateFlare)
-					injectionBurst(model.ntElectron,model);
-				else
+				if (calculateNTelectrons) {
 					injection(model.ntElectron, model);
-
-				writeEandRParamSpace("electronInj",model.ntElectron.injection,0);
-				distributionFast(model.ntElectron, model);
-				//distributionSimplified(model.ntElectron,model);
-				writeEandRParamSpace("electronDis",model.ntElectron.distribution,0);
+					writeEandRParamSpace("electronInj",model.ntElectron.injection,0);
+					distributionFast(model.ntElectron, model);
+					writeEandRParamSpace("electronDis",model.ntElectron.distribution,0);
+				}
 				
-				//nt protons
-				injection(model.ntProton,model);
-				writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
-				distributionFast(model.ntProton,model);
-				writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
+				if (calculateNTprotons) {
+					injection(model.ntProton,model);
+					writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
+					distributionFast(model.ntProton,model);
+					writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
+				}
 				
 				if (calculateNeutronInj) {
 					injectionNeutrons(model);
@@ -108,9 +95,8 @@ int main()
 						jetNeutronDecay(model);
 				}
 				
-				if (calculateNonThermalLum) {
+				if (calculateNonThermalLum)
 					processes(model,"ntLuminosities.txt");
-				}
 				
 				/*
 				injectionChargedPion(model.ntChargedPion,model);
