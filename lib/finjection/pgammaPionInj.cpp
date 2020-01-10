@@ -38,20 +38,19 @@ double f_t_PHPion(double u,double t, const ParamSpaceValues& tpf, const SpaceCoo
 }
 
 
-double omegaPH(double E, const Particle& particle, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax)  //E=Ep      fun1 -> const ParamSpaceValues& tpf
+double omegaPH(double E, const Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax)  //E=Ep      fun1 -> const ParamSpaceValues& tpf
 {
 	//using std::bind; using namespace std::placeholders; // para _1, _2, etc.
-
-	double mass = particle.mass;
-	double cte	= 0.5*P2(mass*cLight2)*cLight;
+	double g = E / (p.mass*cLight2);
+	double cte	= 0.5*P2(p.mass*cLight2)*cLight;
 
 	double b   = 10.0*tpEmax;   //energia maxima de los fotones en erg
 
-	double a1  = mass*P2(cLight)*pionThresholdPH/(2*E);
+	double a1  = p.mass*P2(cLight)*pionThresholdPH/(2*E);
 
 	double a = std::max(a1,tpEmin);
 
-	double integral = RungeKutta(a, b, &cPionPH, [E, mass](double u) {return dPH(u, E, mass); },
+	double integral = RungeKutta(a, b, &cPionPH, [g](double u) {return dPH(u, g); },
 		[tpf, &distCoord, tpEmin, tpEmax](double u, double t) {	return fOmegaPHPion(u, t, tpf, distCoord, tpEmin, tpEmax); });
 		//bind(dPH,_1, E, mass),
 		//bind(fOmegaPHPion,_1,_2,E,mass,tpf)
@@ -59,19 +58,18 @@ double omegaPH(double E, const Particle& particle, const ParamSpaceValues& tpf, 
 	return cte*integral/P2(E);
 }	
 
-double t_pion_PH(double E, const Particle& particle, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax)  //E=Ep
+double t_pion_PH(double E, const Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax)  //E=Ep
 {
-
-	double mass = particle.mass;
-	double cte	=	0.5*P2(mass*cLight2)*cLight;
+	double g = E/(p.mass*cLight2);
+	double cte	=	0.5*P2(p.mass*cLight2)*cLight;
 
 	double b   = 10*tpEmax;   //energia maxima de los fotones en erg
 
-	double a1  = mass*P2(cLight)*pionThresholdPH/(2*E);
+	double a1  = p.mass*P2(cLight)*pionThresholdPH/(2*E);
 
 	double a = std::max(a1,tpEmin);
 
- 	double integral = RungeKutta(a, b, &cPionPH, [E, mass](double u){return dPH(u, E, mass); }, 
+ 	double integral = RungeKutta(a, b, &cPionPH, [g](double u){return dPH(u,g); }, 
 		[tpf, &distCoord, tpEmin, tpEmax](double u, double t){ return f_t_PHPion(u, t, tpf, distCoord, tpEmin,tpEmax); });
 
 	return cte*integral/P2(E);

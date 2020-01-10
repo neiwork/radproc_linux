@@ -16,5 +16,6 @@ double RungeKutta(double a, double b, fun1 c, fun1 d, fun2 f, const RungeKuttaOp
 /** Esta función calcula una integral simple*/ 
 extern RungeKuttaOpt DefOpt_RungeKuttaSimple;
 double RungeKuttaSimple(double a, double b, fun1 f, const RungeKuttaOpt& opt = DefOpt_RungeKuttaSimple);
-
+double RungeKuttaStep(fun2 f, double x, double y, double dx, const RungeKuttaOpt& opt = DefOpt_RungeKutta);
+double integSimpson(double a, double b, fun1 f, size_t n, const RungeKuttaOpt& opt = DefOpt_RungeKutta);
 double intSimple(double a, double b, fun1 f, const RungeKuttaOpt& opt = DefOpt_RungeKuttaSimple);

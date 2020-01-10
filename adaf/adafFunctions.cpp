@@ -114,8 +114,13 @@ double radialVel(double r) {
 }
 
 double accretionTime(double r) {
-	return RungeKuttaSimple(r,exp(logr.front())*schwRadius,[&](double x) {
-							return 1.0/radialVel(x);});
+	return integSimpson(log(r/schwRadius),logr.front(),[&](double logrr)
+			{
+				double rr = exp(logrr)*schwRadius;
+				return rr/radialVel(rr);
+			},20);
+	//return RungeKuttaSimple(r,exp(logr.front())*schwRadius,[&](double x) {
+	//						return 1.0/radialVel(x);});
 }
 
 double keplAngVel(double r)

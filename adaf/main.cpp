@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #include "write.h"
 #include "messages.h"
 #include "modelParameters.h"
@@ -11,12 +10,12 @@
 #include "flareProcesses.h"
 
 #include "thermalDistribution.h"
-#include "timescales.h"
+#include "NTtimescales.h"
 #include "injection.h"
 #include "injectionNeutrons.h"
 #include "distributionNeutrons.h"
-#include "distribution.h"
-#include "processes.h"
+#include "NTdistribution.h"
+#include "NTradiation.h"
 #include "absorption.h"
 #include "pairProcesses.h"
 #include "jetEmission.h"
@@ -50,7 +49,9 @@ int main()
 		}
 		
 		if (calculateThermal)
-			thermalProcesses(model,"lum.txt");
+			thermalRadiation(model,"lumThermal.dat");
+		else
+			thermalTargetField(model.photon,"photonDensity");
 		
 		if (calculateJetEmission)
 			jetProcesses(model,"lumJet.txt");
@@ -59,36 +60,35 @@ int main()
 			flareProcesses(model);
 		
 //***********nonthermal particles**************		
-		
 		if (calculateNonThermal) {
             
 			if (calculateLosses) {
 				show_message(msgStart, Module_radLosses);
 				if (calculateNTelectrons)
-					timescales(model.ntElectron, model, "electronLosses.txt");
+					nonThermalTimescales(model.ntElectron, model, "electronCoolingTimes.dat");
 				if (calculateNTprotons)
-					timescales(model.ntProton, model, "protonLosses.txt");
+					nonThermalTimescales(model.ntProton, model, "protonCoolingTimes.dat");
 				show_message(msgEnd, Module_radLosses);
 			}
 		
 			if (calculateNTdistributions) {
 				if (calculateNTelectrons) {
 					injection(model.ntElectron, model);
-					writeEandRParamSpace("electronInj",model.ntElectron.injection,0);
-					distributionFast(model.ntElectron, model);
-					writeEandRParamSpace("electronDis",model.ntElectron.distribution,0);
+					writeEandRParamSpace("electronInjection",model.ntElectron.injection,0);
+					distributionNewE(model.ntElectron, model);
+					writeEandRParamSpace("electronDistribution",model.ntElectron.distribution,0);
 				}
 				
 				if (calculateNTprotons) {
 					injection(model.ntProton,model);
-					writeEandRParamSpace("protonInj", model.ntProton.injection, 0);
-					distributionFast(model.ntProton,model);
-					writeEandRParamSpace("protonDis", model.ntProton.distribution, 0);
+					writeEandRParamSpace("protonInjection", model.ntProton.injection, 0);
+					distributionNew(model.ntProton,model);
+					writeEandRParamSpace("protonDistribution", model.ntProton.distribution, 0);
 				}
 				
 				if (calculateNeutronInj) {
 					injectionNeutrons(model);
-					radiativeLossesNeutron(model.ntNeutron,model,"neutronLosses.txt");
+					radiativeLossesNeutron(model.ntNeutron,model,"neutronLosses.dat");
 					if (calculateNeutronDis)
 						distributionNeutrons(model);
 					if (calculateJetDecay)
@@ -96,7 +96,7 @@ int main()
 				}
 				
 				if (calculateNonThermalLum)
-					processes(model,"ntLuminosities.txt");
+					nonThermalRadiation(model,"lumNonThermal.dat");
 				
 				/*
 				injectionChargedPion(model.ntChargedPion,model);

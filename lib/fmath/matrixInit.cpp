@@ -20,6 +20,14 @@ void matrixInitCopy(Matrix& m, size_t height, size_t width, Matrix copy)
 		}
 }
 
+void matrixInitTwoVec(Matrix& m, size_t height, Vector x, Vector y)
+{
+	for (std::size_t i=0;i<height;i++) {
+		m[i][0] = x[i];
+		m[i][1] = y[1];
+	}
+}
+
 void matrixInitSum3(Matrix& m, size_t height, size_t width, Matrix sum1, Matrix sum2, Matrix sum3)
 {
 		Vector row(width,0.0);

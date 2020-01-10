@@ -10,3 +10,4 @@
 
 double losses(double E, Particle& p, State& st, const SpaceCoord& i);
 double b(double E, double r, Particle& p, State& st, const SpaceCoord& i);
+double t_cool(double E, double r, Particle& p);

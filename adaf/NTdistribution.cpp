@@ -1,4 +1,4 @@
-#include "distribution.h"
+#include "NTdistribution.h"
 #include "injection.h"
 #include "messages.h"
 #include "write.h"
@@ -32,7 +32,7 @@ double fAux(double r, double pasoR, double E, double magfield, Particle& p)
 	double dcos = cos2-cos1;
 	double tadv = r/abs(radialVel(r));
 	double height = height_fun(r);
-	double Diffrate = 1.0/diffusionTimeIso(E,r,p,magfield,height);
+	double Diffrate = 1.0/diffusionTimeTurbulence(E,height,p,magfield);
 	double q_times = tadv*Diffrate;
 	double d2cos = (cos2+cos1-2.0*cos0)/(paso_r-1.0);
 	return -((2.0-s-q_times)*(pasoR-1.0) + 4.0/3.0 * dcos) / (cos0 + 1.0/3.0 * dcos/ (paso_r-1.0)) - 
@@ -67,12 +67,12 @@ void distributionFast(Particle& p, State& st)
 		
 		ParamSpaceValues Nle(p.ps);
 		p.ps.iterate([&](const SpaceIterator& itRR) {
-			p.ps.iterate([&](const SpaceIterator& itRRE) {
-				if (itRR.coord[DIM_R] == itR.coord[DIM_R]) {
-					double r = itRR.val(DIM_R);
-					double rB1 = r/sqrt(paso_r);
-					double rB2 = rB1*paso_r;
-					double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
+			if (itRR.coord[DIM_R] == itR.coord[DIM_R]) {
+				double r = itRR.val(DIM_R);
+				double rB1 = r/sqrt(paso_r);
+				double rB2 = rB1*paso_r;
+				double vol = volume(r);
+				p.ps.iterate([&](const SpaceIterator& itRRE) {
 					double energy = itRRE.val(DIM_E);
 					double tcool = energy/losses(energy,p,st,itRRE);
 					if (p.id == "ntProton") {
@@ -82,19 +82,22 @@ void distributionFast(Particle& p, State& st)
 						if (tcell < tcool) {
 							Nle.set(itRRE,p.injection.get(itRRE)*tcell*vol);
 						} else {
-							double integ = RungeKuttaSimple(energy,p.emax()*0.99,[&](double e) {
-							return p.injection.interpolate({{0,e}},&itRR.coord);});
+							//double integ = RungeKuttaSimple(energy,p.emax()*0.99,[&](double e) {
+							//return p.injection.interpolate({{0,e}},&itRR.coord);});
+							//Nle.set(itRRE,integ/losses(energy,p,st,itRRE)*vol);
+							double integ = integSimpson(log(energy),log(p.emax()),[&](double loge)
+								{
+									double e = exp(loge);
+									return p.injection.interpolate({{0,e}},&itRRE.coord)*e;
+								},100);
 							Nle.set(itRRE,integ/losses(energy,p,st,itRRE)*vol);
 						}
 					}
-					/*if (p.id == "ntElectron") {
-						double integ = RungeKuttaSimple(energy,p.emax()*0.99,[&](double e) {
-							return p.injection.interpolate({{0,e}},&itRR.coord);});
-						Nle.set(itRRE,integ/losses(energy,p,st,itRRE)*vol);
-					}*/
-				} else
+				},{-1,itRR.coord[DIM_R],0});
+			} else
+				p.ps.iterate([&](const SpaceIterator& itRRE) {
 					Nle.set(itRRE,0.0);
-			},{-1,itRR.coord[DIM_R],0});
+				},{-1,itRR.coord[DIM_R],0});
 		},{0,-1,0});
 		
 		if (p.id == "ntProton") {
@@ -123,10 +126,7 @@ void distributionFast(Particle& p, State& st)
 		// REVISAR SI ESTO QUE SIGUE VA TMB PARA ELECTRONES
 		if (itR.coord[DIM_R] == nR-1) {
 			p.ps.iterate([&](const SpaceIterator& itRR) {
-				double r = itRR.val(DIM_R);
-				double rB1 = r/sqrt(paso_r);
-				double rB2 = rB1*paso_r;
-				double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
+				double vol = volume(itRR.val(DIM_R));
 				p.ps.iterate([&](const SpaceIterator& itRRE) {
 					Nle.set(itRRE,Nle.get(itRRE)/vol);
 				},{-1,itRR.coord[DIM_R],0});
@@ -136,32 +136,30 @@ void distributionFast(Particle& p, State& st)
 		}
 
 		p.ps.iterate([&](const SpaceIterator& itRR) {
-			double r = itRR.val(DIM_R);
-			double rB1 = r/sqrt(paso_r);
-			double rB2 = rB1*paso_r;
-			double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
+			double vol = volume(itRR.val(DIM_R));
 			if (itRR.coord[DIM_R] != nR-1) {
 				p.ps.iterate([&](const SpaceIterator& itRRE) {
 					p.distribution.set(itRRE,p.distribution.get(itRRE)+Nle.get(itRRE)/vol);
-					//p.distribution.set(itRRE,p.distribution.get(itRRE)+Nle.get(itRRE));
 				},{-1,itRR.coord[DIM_R],0});
 			} else {
 				p.ps.iterate([&](const SpaceIterator& itRRE) {
 					p.distribution.set(itRRE,p.distribution.get(itRRE)+Nle.get(itRRE));
-					//p.distribution.set(itRRE,p.distribution.get(itRRE)+Nle.get(itRRE)*vol);
 				},{-1,itRR.coord[DIM_R],0});
 			}
 		},{0,-1,0});
+		double dens = st.denf_i.get(itR);
+		double norm_temp = boltzmann * st.tempIons.get(itR) / (p.mass*cLight2);
+		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp);
+		double uth = dens * norm_temp * p.mass * cLight2 * aTheta;
+		double unth = integSimpson(log(p.emin()),log(p.emax()),[&](double loge)
+						{
+							double e = exp(loge);
+							return e*e*p.distribution.interpolate({{DIM_E,e}},&itR.coord);
+						},100);
+		cout << "uThermal = " << uth << "\t uNonThermal = " << scientific << unth/uth << endl;
+		
 	},{0,-1,0});
 	
-	///////////////////////////////////////////////////////////
-	/*if (p.id == "ntElectron" || p.id == "ntPair") {
-		p.ps.iterate([&](const SpaceIterator& i) {
-			double tcool = i.val(DIM_E)/losses(i.val(DIM_E),p,st,i);
-			p.distribution.set(i,p.injection.get(i)*tcool);
-		},{-1,-1,0});
-	}*/
-	///////////////////////////////////////////////////////////
 	if (p.id == "ntChargedPion" || p.id == "ntMuon") {
 		p.ps.iterate([&](const SpaceIterator& i) {
 			double r = i.val(DIM_R);
@@ -176,63 +174,7 @@ void distributionFast(Particle& p, State& st)
 			p.distribution.set(i,p.injection.get(i)*min(min(tcool,tcell),tdecay));
 		},{-1,-1,0});
 	}
-	
-	////////////////////////////////////////////////////////////////////////////
-	if (p.id == "ntProton") {
-		p.ps.iterate([&](const SpaceIterator& iR) {
-			double sum = 0.0;
-			double pasoE = pow(p.emax()/p.emin(),1.0/(nE-1.0));
-			p.ps.iterate([&](const SpaceIterator& iRE) {
-				double E = iRE.val(DIM_E);
-				double dE = E*(pasoE-1.0);
-				sum += p.distribution.get(iRE)*E*dE;
-			},{-1,iR.coord[DIM_R],0});
-			
-			double norm_temp = boltzmann*st.tempIons.get(iR)/(protonMass*cLight2);
-			double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp);
-			double uth = st.denf_i.get(iR)*norm_temp*aTheta*p.mass*cLight2;
-			double eta = GlobalConfig.get<double>("nonThermal.injection.energyFraction_i");
-			double upl = eta*uth;
-			
-			double sum2 = 0.0;
-			p.ps.iterate([&](const SpaceIterator& iRE) {
-				double E = iRE.val(DIM_E);
-				double dE = E*(pasoE-1.0);
-				double N = p.distribution.get(iRE)*(upl/sum);
-				sum2 += N*E*dE;
-				p.distribution.set(iRE,N);
-			},{-1,iR.coord[DIM_R],0});
-			cout << "upl/uth = " << sum2 << "\t sum/uth = " << sum/uth << endl;
-		},{0,-1,0});
-	} else if (p.id == "ntElectron") {
-		p.ps.iterate([&](const SpaceIterator& iR) {
-			double sum = 0.0;
-			double pasoE = pow(p.emax()/p.emin(),1.0/(nE-1.0));
-			p.ps.iterate([&](const SpaceIterator& iRE) {
-				double E = iRE.val(DIM_E);
-				double dE = E*(pasoE-1.0);
-				sum += p.distribution.get(iRE)*E*dE;
-			},{-1,iR.coord[DIM_R],0});
-			
-			double norm_temp = boltzmann*st.tempElectrons.get(iR)/(electronMass*cLight2);
-			double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp);
-			double uth = st.denf_e.get(iR)*norm_temp*aTheta*p.mass*cLight2;
-			double eta = GlobalConfig.get<double>("nonThermal.injection.energyFraction_e");
-			double upl = eta*uth;
-			
-			double sum2 = 0.0;
-			p.ps.iterate([&](const SpaceIterator& iRE) {
-				double E = iRE.val(DIM_E);
-				double dE = E*(pasoE-1.0);
-				double N = p.distribution.get(iRE)*(upl/sum);
-				sum2 += N*E*dE;
-				//p.distribution.set(iRE,N);
-			},{-1,iR.coord[DIM_R],0});
-			cout << "upl/uth = " << sum2 << "\t sum/uth = " << sum/uth << endl;
-		},{0,-1,0});
-	}
-	////////////////////////////////////////////////////////////////////////////
-	
+
 	if (p.id == "ntElectron" || p.id == "ntPair") show_message(msgEnd,Module_electronDistribution);
 	else if (p.id == "ntProton") show_message(msgEnd,Module_protonDistribution);
 }
@@ -309,6 +251,204 @@ void distributionDetailed(Particle& p, State& st)
 	},{0,-1,0});
 }
 
+
+double escapeRateNew(double E, double r, Particle& p)
+{
+	double B = magneticField(r);
+	double h = height_fun(r);
+	return 1.0/diffusionTimeTurbulence(E,h,p,B);
+}
+
+double logEaux(double logRaux, Vector logRc, Vector logEc)
+{
+	double aux = logRc[0];
+	size_t pos = 0;
+	while(aux < logRaux) {
+		pos++;
+		aux = logRc[pos];
+	}
+	double m = (logEc[pos]-logEc[pos-1])/(logRc[pos]-logRc[pos-1]);
+	return m*(logRaux-logRc[pos-1]) + logEc[pos-1];
+}
+
+double f1(double logr, double loge, Particle& p)
+{
+	double r = exp(logr);
+	double e = exp(loge);
+	double tacc = r/(-radialVel(r));
+	double tcool = t_cool(e,r,p);
+	return tacc/tcool;
+}
+
+double f2(double logr, Vector logRc, Vector logEc, Particle& p)
+{
+	double r = exp(logr);
+	double E = exp(logEaux(logr,logRc,logEc));
+	double tacc = r/(-radialVel(r));
+	double tesc = 1.0/escapeRateNew(E,r,p);
+	return tacc/tesc;
+}
+
+void distributionNew(Particle& p, State& st)
+{
+	if (p.id == "ntElectron") show_message(msgStart,Module_electronDistribution);
+	else if (p.id == "ntProton") show_message(msgStart,Module_protonDistribution);
+
+	p.ps.iterate([&](const SpaceIterator& itR) {
+		
+		const double logr = log(itR.val(DIM_R));
+		double r = exp(logr);
+		double h = height_fun(r);
+		size_t nPoints = 30;
+		const double pasoRc = pow(p.ps[DIM_R].last()/r,1.0/(nPoints-1));
+		double dlogRc = pasoRc-1.0;
+		p.ps.iterate([&](const SpaceIterator& itRE) {
+			double e = itRE.val(DIM_E);
+			double loge = log(e);
+			Vector logRc(nPoints,logr);
+			Vector logEc(nPoints,loge);
+			
+			// CHARACTERISTIC CURVE ///////////////////////////
+			for (size_t j=0;j<nPoints;j++) {
+				double d_logEc = 0.0;
+				if (rangeR(exp(logRc[j]),p))
+					d_logEc = RungeKuttaStep([&p](double logx, double logy)
+								{return f1(logx,logy,p);},logRc[j],logEc[j],dlogRc);
+				logEc[j+1] = logEc[j] + d_logEc;
+				logRc[j+1] = logRc[j] + dlogRc;
+			}
+			///////////////////////////////////////////////////
+			
+			double dist = 0.0;
+			for (size_t j=0;j<nPoints;j++) {
+				double Ec = exp(logEc[j]);
+				double Rc = exp(logRc[j]);
+				if (rangeE(Ec,p) && rangeR(Rc,p)) {
+					double Qinj = p.injection.interpolate({{DIM_E,Ec},{DIM_R,Rc}},&itRE.coord);
+					double mu = 0.0;
+					size_t nAux = 30;
+					mu = integSimpson(logr,logRc[j],[&logRc,&logEc,&p](double logx)
+								{return f2(logx,logRc,logEc,p);},nAux);
+					mu = exp(-mu);
+					double Hc = height_fun(Rc);
+					double tacc = Rc/(-radialVel(Rc));
+					dist += Qinj * tacc * pow(Rc/r,1.0-s) * (Hc/h) * mu * dlogRc;
+				}
+			}
+			p.distribution.set(itRE,dist);
+		},{-1,itR.coord[DIM_R],0});
+		double dens = st.denf_i.get(itR);
+		double norm_temp = boltzmann * st.tempIons.get(itR) / (p.mass*cLight2);
+		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp);
+		double uth = dens * norm_temp * p.mass * cLight2 * aTheta;
+		double unth = integSimpson(log(p.emin()),log(p.emax()),[&](double loge)
+						{
+							double e = exp(loge);
+							return e*e*p.distribution.interpolate({{DIM_E,e}},&itR.coord);
+						},100);
+		cout << "uNTh/uTh = " << unth/uth << endl;
+	},{0,-1,0});
+}
+
+double logRaux(double logEaux, Vector logEc, Vector logRc)
+{
+	double aux = logEc[0];
+	size_t pos = 0;
+	while(aux < logEaux) {
+		pos++;
+		aux = logEc[pos];
+	}
+	double m = (logRc[pos]-logRc[pos-1])/(logEc[pos]-logEc[pos-1]);
+	return m*(logEaux-logEc[pos-1]) + logRc[pos-1];
+}
+
+
+double f1_e(double loge, double logr, Particle& p)
+{
+	double r = exp(logr);
+	double e = exp(loge);
+	double tacc = r/(-radialVel(r));
+	double tcool = t_cool(e,r,p);
+	return tcool/tacc;
+}
+
+double f2_e(double loge, Vector logEc, Vector logRc, Particle& p)
+{
+	double e = exp(loge);
+	double R = exp(logRaux(loge,logEc,logRc));
+	double tcool = t_cool(e,R,p);
+	double tesc = 1.0/escapeRateNew(e,R,p);
+	return tcool/tesc;
+}
+
+
+void distributionNewE(Particle& p, State& st)
+{
+	if (p.id == "ntElectron") show_message(msgStart,Module_electronDistribution);
+	else if (p.id == "ntProton") show_message(msgStart,Module_protonDistribution);
+
+	p.ps.iterate([&](const SpaceIterator& itR) {
+		
+		const double logr = log(itR.val(DIM_R));
+		double r = exp(logr);
+		double h = height_fun(r);
+		size_t nPoints = 30;
+		p.ps.iterate([&](const SpaceIterator& itRE) {
+			double e = itRE.val(DIM_E);
+			const double pasoEc = pow(p.emax()/e,1.0/(nPoints-1));
+			double dlogEc = pasoEc-1.0;
+			double loge = log(e);
+			Vector logRc(nPoints,logr);
+			Vector logEc(nPoints,loge);
+			
+			// CHARACTERISTIC CURVE ///////////////////////////
+			for (size_t j=0;j<nPoints;j++) {
+				double d_logRc = 0.0;
+				if (rangeE(exp(logEc[j]),p))
+					d_logRc = RungeKuttaStep([&p](double logx, double logy)
+								{return f1_e(logx,logy,p);},logEc[j],logRc[j],dlogEc);
+				logEc[j+1] = logEc[j] + dlogEc;
+				logRc[j+1] = logRc[j] + d_logRc;
+			}
+			///////////////////////////////////////////////////
+			
+			double dist = 0.0;
+			for (size_t j=0;j<nPoints;j++) {
+				double Ec = exp(logEc[j]);
+				double Rc = exp(logRc[j]);
+				if (rangeE(Ec,p) && rangeR(Rc,p)) {
+					double Qinj = p.injection.interpolate({{DIM_E,Ec},{DIM_R,Rc}},&itRE.coord);
+					double mu = 0.0;
+					size_t nAux = 30;
+					mu = integSimpson(loge,logEc[j],[&logEc,&logRc,&p](double logx)
+								{return f2_e(logx,logEc,logRc,p);},nAux);
+					mu = exp(-mu);
+					double Hc = height_fun(Rc);
+					double tcool = t_cool(Ec,Rc,p);
+					dist += Qinj * tcool * pow(Rc/r,1.0-s) * (Hc/h) * mu * dlogEc;
+				}
+			}
+			p.distribution.set(itRE,dist);
+		},{-1,itR.coord[DIM_R],0});
+		double dens = st.denf_i.get(itR);
+		double norm_temp = boltzmann * st.tempIons.get(itR) / (p.mass*cLight2);
+		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp);
+		double uth = dens * norm_temp * p.mass * cLight2 * aTheta;
+		double unth = integSimpson(log(p.emin()),log(p.emax()),[&](double loge)
+						{
+							double e = exp(loge);
+							return e*e*p.distribution.interpolate({{DIM_E,e}},&itR.coord);
+						},100);
+		cout << "uNTh/uTh = " << unth/uth << endl;
+	},{0,-1,0});
+}
+
+
+
+
+
+
+
 double gammaMin(double g, void *params)
 {
   struct one_d_params *pa = (struct one_d_params *) params;
@@ -368,6 +508,41 @@ void distributionSimplified(Particle& p, State& st)
 			double dE = e*(pasoE-1.0);
 			sumNT += N*e*dE;
 		},{-1,itR.coord[DIM_R],0});;
-		cout << "uThermal = " << uThermal << "\t uNonThermal = " << sumNT << endl;
+		cout << "uNTh/uTh = " << sumNT << endl;
 	},{0,-1,0});
 }
+
+/*
+#include "Particles.h"
+#include "Radiation.h"
+void distributionGAMERA(Particle& p, State& st)
+{
+	ofstream file;
+	file.open("distributionGAMERA.dat");
+	p.ps.iterate([&](const SpaceIterator& iR) {
+		Vector e(nE,0.0);
+		Vector q(nE,0.0);
+		Particles *electron = new Particles();
+		double tacc = accretionTime(iR.val(DIM_R));
+		p.ps.iterate([&](const SpaceIterator& iRE) {
+			e[iRE.coord[DIM_E]] = iRE.val(DIM_E);
+			q[iRE.coord[DIM_E]] = p.injection.get(iRE);
+		},{-1,iR.coord[DIM_R],0});
+		Matrix eq;
+		matrixInit(eq,nE,2,0.0);
+		matrixInitTwoVec(eq,nE,e,q);
+		electron -> SetCustomInjectionSpectrum(eq);
+		electron -> SetBField(st.magf.get(iR));
+		//electron -> SetConstantEscapeTime(tacc);
+		electron -> SetTmin(1e-10);
+		electron -> SetAge(1.0e-8);
+		electron -> SetSolverMethod(1);
+		electron -> CalculateElectronSpectrum();
+		Matrix sed = electron -> GetParticleSpectrum();
+		p.ps.iterate([&](const SpaceIterator& iRE) {
+			file << safeLog10(sed[iRE.coord[DIM_E]][0]) << "\t" << safeLog10(sed[iRE.coord[DIM_E]][1]) << endl;
+		},{-1,iR.coord[DIM_R],0});
+	},{0,-1,0});
+	file.close();
+}
+*/

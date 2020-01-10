@@ -73,3 +73,4 @@ void writeEnergyFunction(const std::string& filename, const ParamSpaceValues& da
 
 void writeMatrix(const std::string& filename, Particle& p, Matrix& a);
 void writeFields(State& st);
+std::string dataName(std::string);

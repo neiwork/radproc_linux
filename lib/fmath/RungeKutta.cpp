@@ -85,6 +85,27 @@ double RungeKutta(double a, double b, fun1 c, fun1 d, fun2 f, const RungeKuttaOp
 
 RungeKuttaOpt DefOpt_RungeKuttaSimple{ 50, -1 };
 
+double RungeKuttaStep(fun2 f, double x, double y, double dx, const RungeKuttaOpt& opt)
+{
+	double k1 = dx*f(x,y);
+	double k2 = dx*f(x+0.5*dx,y+0.5*k1);
+	double k3 = dx*f(x+0.5*dx,y+0.5*k2);
+	double k4 = dx*f(x+dx,y+k3);
+	return (1.0/6.0)*(k1+2*k2+2*k3+k4);
+}
+
+double integSimpson(double a, double b, fun1 f, size_t n, const RungeKuttaOpt& opt)
+{
+	double dx = (b-a)/n;
+	double sum_even = 0.0;
+	for (size_t j=1; j <= n/2-1; j++)
+		sum_even += f(a+2*j*dx);
+	double sum_odd = 0.0;
+	for (size_t j=1; j <= n/2; j++)
+		sum_odd += f(a+(2*j-1)*dx);
+	return dx/3.0 * (f(a)+f(b)+2.0*sum_even+4.0*sum_odd);
+}
+
 double RungeKuttaSimple(double a, double b, fun1 f, const RungeKuttaOpt& opt)
 {
 	int RK_N = opt.samples_x;

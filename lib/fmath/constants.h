@@ -69,7 +69,7 @@ const double neutronMeanLife        =  881.5;  //s
 
 //Threshold energy
 
-const double pionThresholdPH	=  200.0e6*1.6e-12;	 //145  pongo 200 y no 145 porque a partir de esta 
+const double pionThresholdPH	=  200.0e6*1.602e-12;	 //145  pongo 200 y no 145 porque a partir de esta 
                                                      // energia esta parametrizada la seccion eficaz
 const double pairThresholdPH	=  2.0*electronMass*cLight2;
-const double pionThresholdH	    =  1.22e9*1.6e-12;
+const double pionThresholdH	    =  1.21793e9*1.602e-12;

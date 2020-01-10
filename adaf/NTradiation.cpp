@@ -1,4 +1,4 @@
-#include "processes.h"
+#include "NTradiation.h"
 #include "modelParameters.h"
 #include "write.h"
 #include "messages.h"
@@ -14,7 +14,8 @@
 #include <fluminosities/luminosityIC.h>
 #include <fluminosities/luminosityNTHadronic.h>
 #include <fluminosities/luminosityPhotoHadronic.h>
-
+#include <fluminosities/thermalSync.h>
+#include <fluminosities/blackBody.h>
 #include <fparameters/Dimension.h>
 #include <fparameters/parameters.h>
 #include <fparameters/SpaceIterator.h>
@@ -125,7 +126,7 @@ double opticalDepthSSA2(int E_ix, State& st, const Particle& p, int iR)
 }
 */
 
-void processes(State& st, const std::string& filename)
+void nonThermalRadiation(State& st, const std::string& filename)
 {
 	show_message(msgStart, Module_luminosities);
 
@@ -138,40 +139,22 @@ void processes(State& st, const std::string& filename)
 		 << "\t" << "eIC"
 		 << "\t" << "pPP"
 		 << "\t" << "pPG"
-		 << "\t" << "eAbs"
-		 << "\t" << "pAbs"
+		 << "\t" << "totAbs"
 		 << std::endl;
-			
-	/*file2 << "Log(E/eV)" 
-		  << "\t" << "r [M]"
-		  << "\t" << "tau_e"
-		  << "\t" << "tau_p"
-		  << "\t" << "tau_gg"
-		  << std::endl;*/
 	
-	double Emin = st.photon.emin();
-	double Emax = st.photon.emax();
-	int nE = st.photon.ps[DIM_E].size();
+	double Ephmin = st.photon.emin();
+	double Ephmax = st.photon.emax();
 	
 	Vector eSy(nE,0.0);
 	Vector eIC(nE,0.0);
 	Vector pSy(nE,0.0);
 	Vector pPP(nE,0.0);
 	Vector pPG(nE,0.0);
-	Vector eAbs(nE,0.0);
-	Vector pAbs(nE,0.0);
+	Vector totAbs(nE,0.0);
 	
-	Matrix lumNT_ssa;	matrixInit(lumNT_ssa,nE,nR,0.0);
-	
-	Matrix tau_e;	matrixInit(tau_e,nE,nR,0.0);
-	Matrix tau_p;	matrixInit(tau_p,nE,nR,0.0);
-	Matrix tau_gg;	matrixInit(tau_gg,nE,nR,0.0);
 	
 	Vector energies(nE,0.0);
-	double lumLepSy = 0.0;
-	double lumLepIC = 0.0;
-	double lumHad = 0.0;
-	double pasoE = pow(st.photon.emax()/st.photon.emin(),1.0/nE);
+	double pasoE = pow(st.photon.emax()/st.photon.emin(),1.0/(nE-1));
 
 	#pragma omp parallel for
 	for (int E_ix=0;E_ix<nE;E_ix++) {
@@ -180,81 +163,74 @@ void processes(State& st, const std::string& filename)
 		double lumLepSyLocal = 0.0;
 		double lumLepICLocal = 0.0;
 		double lumHadLocal = 0.0;
-		st.photon.ps.iterate([&](const SpaceIterator &i) {
-			double r = i.val(DIM_R);
+		st.photon.ps.iterate([&](const SpaceIterator &iR) {
+			double r = iR.val(DIM_R);
 			double rB1 = r/sqrt(paso_r);
 			double rB2 = r*sqrt(paso_r);
 			double vol = volume(r);
+			double magf = st.magf.get(iR);
+			SpaceCoord psc = {E_ix,iR.coord[DIM_R],0};
 			
-			Vector tau(3,0.0);
-			double fmtE  = safeLog10(i.val(DIM_E)/1.6e-12);
-			if (fmtE < 0.0 || fmtE > 5.0) opticalDepth(tau,E_ix,st,i.coord[DIM_R]);
+			double alpha_th = jSync(E,st.tempElectrons.get(iR),magf,st.denf_e.get(iR)) / 
+								bb(E/planck,st.tempElectrons.get(iR));
+			double kappa_ssa_e = ssaAbsorptionCoeff(E,magf,st.ntElectron,psc)+alpha_th;
+			double kappa_ssa_p = ssaAbsorptionCoeff(E,magf,st.ntProton,psc)+alpha_th;
+			double kappa_gg = RungeKuttaSimple(Ephmin,Ephmax,[&E,&psc,&st](double Eph)
+					{ return st.photon.distribution.interpolate({{0,Eph}},&psc)*ggCrossSection2(E,Eph);});
 
-			double attenuation_gg = (tau[0] > 1.0e-15) ? (1.0-exp(-tau[0]))/tau[0] : 1.0;
-			double attenuation_ssae = (tau[1] > 1.0e-15) ? (1.0-exp(-tau[1]))/tau[1] : 1.0;
-			double attenuation_ssap = (tau[2] > 1.0e-15) ? (1.0-exp(-tau[2]))/tau[2] : 1.0;
-			
+			double height = height_fun(r);
+			double tau_ssa_e = 0.5*sqrt(pi)*kappa_ssa_e*height;
+			double tau_ssa_p = 0.5*sqrt(pi)*kappa_ssa_p*height;
+			double tau_gg = 0.5*sqrt(pi)*kappa_gg*height;
 			
 			double eSyLocal,eICLocal,pSyLocal,pPPLocal,pPGLocal;
 			eSyLocal = eICLocal = pSyLocal = pPPLocal = pPGLocal = 0.0;
 			
-			eSyLocal = luminositySynchrotron(E,st.ntElectron,i,st.magf);
-			eICLocal = luminosityIC(E,st.ntElectron,i.coord,st.photon.distribution,Emin);
-			pSyLocal = luminositySynchrotron(E,st.ntProton,i,st.magf);
-			pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(i),i);
-			pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,i,Emin,Emax);
-
-			eSy[E_ix] += eSyLocal*vol;				// [erg s^-1]
-			eIC[E_ix] += eICLocal*vol;
+			eSyLocal = luminositySynchrotron(E,st.ntElectron,iR,st.magf)/E;
+			eICLocal = luminosityIC(E,st.ntElectron,iR.coord,st.photon.distribution,Ephmin)/E;
+			pSyLocal = luminositySynchrotron(E,st.ntProton,iR,st.magf)/E;
+			pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(iR),iR)/E;
+			pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,iR,Ephmin,Ephmax)/E;
+			
+			double factor = pi/sqrt(3.0)*(rB2*rB2-rB1*rB1) / vol;
+			eSyLocal = (tau_ssa_e > 1.0e-10) ?
+							factor*(eSyLocal/kappa_ssa_e)*(1.0-exp(-2.0*sqrt(3.0)*tau_ssa_e)) :
+							eSyLocal;
+			pSyLocal = (tau_ssa_p > 1.0e-10) ? 
+							factor*(pSyLocal/kappa_ssa_p)*(1.0-exp(-2.0*sqrt(3.0)*tau_ssa_p)) :
+							pSyLocal;
+			double eTot = eSyLocal+eICLocal+pSyLocal+pPPLocal+pPGLocal;
+	
+			eSy[E_ix] += eSyLocal*vol;
 			pSy[E_ix] += pSyLocal*vol;
+			eIC[E_ix] += eICLocal*vol;
 			pPP[E_ix] += pPPLocal*vol;
 			pPG[E_ix] += pPGLocal*vol;
-			eAbs[E_ix] += (eSyLocal+eICLocal)*vol*attenuation_ssae*attenuation_gg;
-			pAbs[E_ix] += (pSyLocal+pPPLocal+pPGLocal)*vol*attenuation_ssap*attenuation_gg;
-			tau_gg[E_ix][i.coord[DIM_R]] = tau[0];
-			tau_e[E_ix][i.coord[DIM_R]] = tau[1];
-			tau_p[E_ix][i.coord[DIM_R]] = tau[2];
+			double totLocal = (tau_gg > 1.0e-10) ? factor*vol*eTot/kappa_gg*(1.0-exp(-2.0*sqrt(3.0)*tau_gg)) : 
+								eTot*vol;
+			totLocal = eTot*vol*exp(-tau_gg);
+			double totLocalNA = eTot*vol;
+			totAbs[E_ix] += totLocal;
 			
-			lumNT_ssa[E_ix][i.coord[DIM_R]] = ( (eSyLocal+eICLocal)*attenuation_ssae + 
-												(pSyLocal+pPPLocal+pPGLocal)*attenuation_ssap ) * vol;
-			lumLepSyLocal += eSyLocal*attenuation_ssae*vol;
-			lumLepICLocal += eICLocal*attenuation_ssae*vol;
-			lumHadLocal += (pSyLocal + pPPLocal + pPGLocal)*attenuation_ssap*vol;
+			double tcross = height/cLight;
+			SpaceCoord iE = {E_ix,iR.coord[DIM_R],0};
+			//st.photon.distribution.set(iE,st.photon.distribution.get(iE)+totLocalNA/E * tcross);
 		},{E_ix,-1,0});
-		lumLepSy += lumLepSyLocal*(sqrt(pasoE)-1.0/sqrt(pasoE));
-		lumLepIC += lumLepICLocal*(sqrt(pasoE)-1.0/sqrt(pasoE));
-		lumHad += lumHadLocal*(sqrt(pasoE)-1.0/sqrt(pasoE));
 	}
-	
-	cout << "Leptonic Sync luminosity = " << lumLepSy << endl;
-	cout << "Leptonic IC luminosity = " << lumLepIC << endl;
-	cout << "Hadronic luminosity = " << lumHad << endl;
-	targetFieldNT(st,lumNT_ssa);
+
 	writeEandRParamSpace("nonThermalPhotonDensity.txt",st.photon.injection,0);
 	writeEandRParamSpace("thermalPhotonDensity.txt",st.photon.distribution,0);
 	
-	for (size_t jR=0;jR<nR;jR++) {
-		double r = st.photon.ps[DIM_R][jR] / schwRadius;
-		for (size_t jE=0;jE<nE;jE++) {
-			double fmtE = safeLog10(st.photon.ps[DIM_E][jE]/1.6e-12);
-			file2 << fmtE << "\t" << safeLog10(r)
-						  << "\t" << tau_e[jE][jR]
-						  << "\t" << tau_p[jE][jR]
-						  << "\t" << tau_gg[jE][jR]
-						  << std::endl;
-		}
-	}
-	
 	for (size_t jE=0;jE<nE;jE++) {
-		double fmtE = safeLog10(st.photon.ps[DIM_E][jE]/1.6e-12);
+		double E = st.photon.ps[DIM_E][jE];
+		double fmtE = safeLog10(E/1.6e-12);
 		file << fmtE
-			 << '\t' << safeLog10(eSy[jE])
-			 << '\t' << safeLog10(pSy[jE])
-			 << "\t" << safeLog10(eIC[jE])
-			 << "\t" << safeLog10(pPP[jE])
-			 << "\t" << safeLog10(pPG[jE])
-			 << '\t' << safeLog10(eAbs[jE])
-			 << '\t' << safeLog10(pAbs[jE])
+			 << '\t' << safeLog10(eSy[jE]*E)
+			 << '\t' << safeLog10(pSy[jE]*E)
+			 << "\t" << safeLog10(eIC[jE]*E)
+			 << "\t" << safeLog10(pPP[jE]*E)
+			 << "\t" << safeLog10(pPG[jE]*E)
+			 << '\t' << safeLog10(totAbs[jE]*E)
 			 << std::endl;
 	}
 	file.close();

@@ -12,27 +12,29 @@ using namespace std;
 
 State::State(boost::property_tree::ptree& cfg):
     photon{ "photon" },
+	ntPhoton{ "ntPhoton" },
     ntProton{ "ntProton" },
     ntElectron{ "ntElectron" },
     ntNeutron{ "ntNeutron" },
 	ntChargedPion{ "ntChargedPion" },
 	ntMuon{ "ntMuon" },
 	ntPair{ "ntPair" },
-    magf(photon.ps, false),
-    denf_i(photon.ps, false),
-    denf_e(photon.ps, false),
-    tempElectrons(photon.ps, false),
-    tempIons(photon.ps, false),
-    thetaH(photon.ps, false),
-    height(photon.ps, false)
+    magf(ntPhoton.ps, false),
+    denf_i(ntPhoton.ps, false),
+    denf_e(ntPhoton.ps, false),
+    tempElectrons(ntPhoton.ps, false),
+    tempIons(ntPhoton.ps, false),
+    thetaH(ntPhoton.ps, false),
+    height(ntPhoton.ps, false)
     {
+		particles.push_back(&photon);
+		particles.push_back(&ntPhoton);
         particles.push_back(&ntElectron);
         particles.push_back(&ntProton);
         particles.push_back(&ntNeutron);
 		particles.push_back(&ntChargedPion);
 		particles.push_back(&ntMuon);
 		particles.push_back(&ntPair);
-        particles.push_back(&photon);
         for (auto p : particles) {
             initializeParticle(*p, cfg);
         }

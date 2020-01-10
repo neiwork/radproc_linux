@@ -10,6 +10,7 @@ public:
 	std::vector<Particle*> particles;
 
 	Particle photon;
+	Particle ntPhoton;
     Particle ntElectron;
     Particle ntProton;
     Particle ntNeutron;

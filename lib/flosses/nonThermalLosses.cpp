@@ -14,8 +14,30 @@ double adiabaticLosses(double E, double z, double vel_lat, double gamma)  //en [
 	//termina quedando return 2.0*cLight*E / (3.0*z);
 }
 
+double BohmDiffusionCoeff(double E, double B)
+{
+	double larmorR = E/(electronCharge*B);
+	return 1.0/3.0 * larmorR * cLight;
+}
 
-double diffusionTimeIso(double E, double r, Particle& p, double B, double height)   //en [s]^-1
+double diffusionTimeParallel(double E, double height, double B)
+{
+	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
+	double diffCoeff = zeda * BohmDiffusionCoeff(E,B);
+	return height*height/diffCoeff;
+}
+
+double diffusionTimePerpendicular(double E, double height, double B)
+{
+	double larmorR = E/(electronCharge*B);
+	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
+	double q = GlobalConfig.get<double>("nonThermal.injection.SDA.powerSpectrumIndex");
+	double meanFreePath = larmorR/(3.0*zeda) * pow(height/larmorR,q-1.0);
+	double diffCoeff = zeda * BohmDiffusionCoeff(E,B) / (1.0 + P2(meanFreePath/larmorR));
+	return height*height/diffCoeff;
+}
+
+double diffusionTimeTurbulence(double E, double height, Particle& p, double B)   //en [s]^-1
 {
 	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
 	double q = GlobalConfig.get<double>("nonThermal.injection.SDA.powerSpectrumIndex");
@@ -82,7 +104,7 @@ double relaxTime(double E, double r, Particle& p, int indicator) {
 
 double accelerationRate(double E, double B) //en [s]^-1
 {
-	double accEff = GlobalConfig.get<double>("nonThermal.injection.PL.accEfficienty");
+	double accEff = GlobalConfig.get<double>("nonThermal.injection.PL.accEfficiency");
 	return accEff*cLight*electronCharge*B/E;
 }
 

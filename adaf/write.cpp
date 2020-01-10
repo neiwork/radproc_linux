@@ -2,6 +2,7 @@
 #include "State.h"
 #include "modelParameters.h"
 #include "globalVariables.h"
+#include "adafFunctions.h"
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/Dimension.h>
 #include <fparameters/parameters.h>
@@ -14,7 +15,7 @@
 //}
 
 std::string dataName(std::string id) {
-	return id + ".txt";
+	return id + ".dat";
 }
 
 void generateViewScript(std::string path) {
@@ -63,9 +64,9 @@ void writeEandRParamSpace(const std::string& filename, const ParamSpaceValues& d
 	
 	data.ps.iterate([&](const SpaceIterator& i){
 
-		double logE = log10(i.val(DIM_E) / 1.6e-12);
+		double logE = log10(i.val(DIM_E) / EV_TO_ERG);
 		double r = i.val(DIM_R);
-		double logQ = safeLog10(data.get(i));
+		double logQ = safeLog10(data.get(i)*volume(r));
 		file << logE << '\t' << i.coord[DIM_R] << '\t' << logQ << std::endl;
 			
 	}, { -1, -1, t });  

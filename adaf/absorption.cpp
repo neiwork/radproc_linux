@@ -23,9 +23,9 @@ double ggCrossSection(double x, double E_ph, double E)
 					(3.0-pow(beta,4.0))*log((1.0+beta)/(1.0-beta))) : 0.0;
 }
 
-double ggCrossSection2(double Eph, double E)
+double ggCrossSection2(double E, double Eph)
 {
-	double s0 = Eph*E/(electronRestEnergy*electronRestEnergy);
+	double s0 = E*Eph/(electronRestEnergy*electronRestEnergy);
 	double term1 = (s0+0.5*log(s0)-1.0/6.0+0.5/s0)*log(sqrt(s0)+sqrt(s0-1));
 	double term2 = (s0+4.0/9.0-1.0/(9.0*s0))*sqrt(1.0-1.0/s0);
 	return 1.5*thomson/(s0*s0) * (term1-term2);

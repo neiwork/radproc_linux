@@ -9,7 +9,6 @@
 double lossesHadronics(double E, double density, Particle& particle)
 {
 	double inelasticity = 0.5; 
-	
 	if(particle.id == "pion"){
 		return (2.0/3.0)*cLight*density*inelasticity*crossSectionHadronic(E)*E;  //mb
 	}

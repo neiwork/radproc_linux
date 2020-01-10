@@ -24,17 +24,22 @@
 
 double eEmax(Particle& p, double r, double B, double v, double dens)
 {
-	double accE = GlobalConfig.get<double>("nonThermal.injection.accEfficiency");
+	double accE = GlobalConfig.get<double>("nonThermal.injection.PL.accEfficiency");
 	double dr = r*(paso_r-1.0);
+	double h = height_fun(r);
     double Emax_adv = accE*dr*cLight*electronCharge*B / v; 
     double Emax_syn = p.mass*cLight2*sqrt(accE*6.0*pi*electronCharge / (thomson*B)) * p.mass/electronMass;
-    double Emax_Hillas = electronCharge*B*height_fun(r);
+    double Emax_Hillas = electronCharge*B*h;
+	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
+	double q = GlobalConfig.get<double>("nonThermal.injection.SDA.powerSpectrumIndex");
+	double Emax_diff = pow(h*electronCharge*B,(q-3)/(2*q-5)) * pow(p.mass*cLight2,(q-2)/(2*q-5)) / 
+							pow(9*zeda*accE,1.0/(2*q-5));
 	if (p.id == "ntProton") {
 		double sigmapp = 34.3e-27;
 		double Emax_pp = accE*electronCharge*B/(0.5*dens*sigmapp);
-		return min(min(Emax_adv,Emax_pp),min(Emax_Hillas,Emax_syn));
+		return min(min(min(Emax_adv,Emax_pp),min(Emax_Hillas,Emax_syn)),Emax_diff);
 	} else
-		return min(min(Emax_syn,Emax_adv),Emax_Hillas);
+		return min(min(min(Emax_syn,Emax_adv),Emax_Hillas),Emax_diff);
 }
 
 double cutOffPL(double E, double Emin, double Emax)
@@ -91,127 +96,65 @@ double findGammaMin(double temp, double Emax)
 void injection(Particle& p, State& st)
 {
 	pIndex = GlobalConfig.get<double>("nonThermal.injection.primaryIndex");
-	double Emin = p.emin();   //esta es la primera que uso de prueba
     double sumQ = 0.0;
 	
 	std::ofstream file;
 	if (p.id == "ntElectron")
 		file.open("gammaMin.txt",ios::out);
 
-	p.ps.iterate([&](const SpaceIterator& i) {
+	p.ps.iterate([&](const SpaceIterator& iR) {
 		if (p.id == "ntProton")
 			etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction_i");
 		else
 			etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction_e");
 			
-		const double r = i.val(DIM_R);
+		const double r = iR.val(DIM_R);
 		double rB1 = r/sqrt(paso_r);
 		double rB2 = rB1*paso_r;
-		const double thetaH = st.thetaH.get(i);
-		const double vol = (4.0/3.0)*pi*cos(thetaH)*(rB2*rB2*rB2-rB1*rB1*rB1);
+		const double vol = volume(r);
 		
 		double gammaMin = 2.0;
-		double Emax = eEmax(p,r,st.magf.get(i),-radialVel(r),st.denf_i.get(i));
+		double Emax = eEmax(p,r,st.magf.get(iR),-radialVel(r),st.denf_i.get(iR));
+
+		double Emin = gammaMin*p.mass*cLight2;
 		if (p.id == "ntElectron") {
-			double temp = st.tempElectrons.get(i);
+			double temp = st.tempElectrons.get(iR);
 			gammaMin = findGammaMin(temp,Emax);
-			//gammaMin = 2.0;
 			Emin = gammaMin*electronRestEnergy;
 			file << r/schwRadius << "\t" << gammaMin << endl;
 		}
 		
-		double int_E = RungeKuttaSimple(Emin,Emax,[&Emax,&Emin](double E){
-			return E*cutOffPL(E,Emin,Emax);});  //integra E*Q(E)  entre Emin y Emax
-        /*
-		double grpersecToSolarMassesperyear = 3600.0*24*265.25/solarMass;
-		double Wmr = 1.0e42*4.0*accRateADAF(r)*grpersecToSolarMassesperyear * 
-					(st.tempIons.get(i)/st.tempElectrons.get(i)); // [erg s^{-1}]
-                    
-        sumWmr += accRateADAF(r);
-        
-		double Q0 = 0.0;
-		double delta = 0.1;
-		if (p.id == "ntElectron") Q0 = delta * Wmr;
-		else if (p.id == "ntProton") Q0 = (1.0-delta)* Wmr;*/
-		
+		//double int_E = RungeKuttaSimple(Emin,Emax,[&Emax,&Emin](double E){
+		//	return E*cutOffPL(E,Emin,Emax);});
+		double int_E = integSimpson(log(Emin),log(Emax),[Emin,Emax](double loge)
+				{
+					double e = exp(loge);
+					return e*e*cutOffPL(e,Emin,Emax);
+				},100);
         
         double norm_temp, dens;
 		if(p.id == "ntElectron") {
-			norm_temp = boltzmann*st.tempElectrons.get(i)/(p.mass*cLight2);
-			dens = st.denf_e.get(i);
+			norm_temp = boltzmann*st.tempElectrons.get(iR)/(p.mass*cLight2);
+			dens = st.denf_e.get(iR);
 		} else if(p.id == "ntProton") {
-			norm_temp = boltzmann*st.tempIons.get(i)/(p.mass*cLight2);
-			dens = st.denf_i.get(i);
+			norm_temp = boltzmann*st.tempIons.get(iR)/(p.mass*cLight2);
+			dens = st.denf_i.get(iR);
 		}
 		
 		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
 		double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
-		double tCell = (rB2-rB1)/(-radialVel(r));
-		double Q0 = etaInj*uth / tCell;   // power injected in nt particles [erg s^-1 cm^-3]
-        
+		double area = 4.0*pi*r*height_fun(r);
+		double Q0 = etaInj * uth * area/vol * (-radialVel(r));   // power injected in nt particles [erg cm^-3 s^-1]
 		double Q0p = Q0/int_E;
-		p.ps.iterate([&](const SpaceIterator& jE) {
-			const double E = jE.val(DIM_E);
-			double total = cutOffPL(E, Emin, Emax)*Q0p;
-			if (r/schwRadius > 50.0)
-				total = 0.0;
-			p.injection.set(jE,total); //en unidades de erg^-1 s^-1 cm^-3
-		},{-1,i.coord[DIM_R],0});
+		
+		p.ps.iterate([&](const SpaceIterator& iRE) {
+			const double E = iRE.val(DIM_E);
+			double total = cutOffPL(E,Emin,Emax)*Q0p;
+			p.injection.set(iRE,total); //en unidades de erg^-1 s^-1 cm^-3
+		},{-1,iR.coord[DIM_R],0});
 		sumQ += Q0*vol;
 	},{0,-1,0});
 	file.close();
-	cout << "Total power injected in " << p.id << " = " << sumQ << endl; 
-}
-
-double burstFunction(double t)
-{
-	double tRise = GlobalConfig.get<double>("nonThermal.flare.burst.tRise");
-	double tPlateau = GlobalConfig.get<double>("nonThermal.flare.burst.tPlateau");
-	double tDecay = GlobalConfig.get<double>("nonThermal.flare.burst.tDecay");
-	
-	return (1.0 - exp(-t/tRise)) * (0.5*pi - atan((t-tPlateau)/tDecay));
-}
-
-void injectionBurst(Particle& p, State& st)
-{
-	static const double etaInj = GlobalConfig.get<double>("nonThermal.flare.injection.energyFraction");
-	double Emin = p.emin();   //esta es la primera que uso de prueba
-	
-    double sumQ = 0.0;
-	p.ps.iterate([&](const SpaceIterator& i) {
-		const double r = i.val(DIM_R);
-		double rB1 = r/sqrt(paso_r);
-		double rB2 = rB1*paso_r;
-		const double thetaH = st.thetaH.get(i);
-		const double vol = (4.0/3.0)*pi*cos(thetaH)*(rB2*rB2*rB2-rB1*rB1*rB1);
-
-		double Emax = eEmax(p,r,st.magf.get(i),-radialVel(r),st.denf_i.get(i));
-		double int_E = RungeKuttaSimple(Emin,p.emax(),[&Emax,&Emin](double E){
-			return E*cutOffPL(E,Emin,Emax);});  //integra E*Q(E)  entre Emin y Emax
-        
-		double timeBurst = GlobalConfig.get<double>("nonThermal.flare.timeAfterFlare");
-        double norm_temp, dens;
-		if(p.id == "ntElectron") {
-			norm_temp = boltzmann*st.tempElectrons.get(i)/(p.mass*cLight2);
-			dens = st.denf_e.get(i);
-		} else if(p.id == "ntProton") {
-			norm_temp = boltzmann*st.tempIons.get(i)/(p.mass*cLight2);
-			dens = st.denf_i.get(i);
-		}
-        
-		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
-		double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
-		double tCell = (rB2-rB1)/(-radialVel(r));
-		double Q0 = etaInj*uth / tCell;   // power injected in nt particles [erg s^-1 cm^-3]
-        
-		double Q0p = Q0/int_E;
-		p.ps.iterate([&](const SpaceIterator& jE) {
-			const double E = jE.val(DIM_E);
-			double total = cutOffPL(E, Emin, Emax)*Q0p * burstFunction(timeAfterFlare);//burstFunction(timeBurst);
-			p.injection.set(jE,total); //en unidades de erg^-1 s^-1 cm^-3
-		},{-1,i.coord[DIM_R],0});
-		sumQ += Q0*vol;
-	},{0,-1,0});
 	cout << "Total power injected in " << p.id << " = " << sumQ << endl; 
 }
 

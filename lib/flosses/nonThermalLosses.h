@@ -7,7 +7,8 @@
 double adiabaticLosses(double E, double z, double vel_lat, double gamma);  //en [erg/s]
 
 /*Diffusion rate in the Bohm regime*/
-double diffusionTimeIso(double E, double r, Particle& p, double B, double h);   //en [s]^-1
+double diffusionTimeTurbulence(double E, double h, Particle& p, double B);   //en [s]^-1
+double diffusionTimeParallel(double E, double h, double B);   //en [s]^-1
 
 double accelerationRate(double E, double magneticField); //en [s]^-1
 

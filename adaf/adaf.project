@@ -6,8 +6,12 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="non thermal">
-    <File Name="timescales.h"/>
-    <File Name="timescales.cpp"/>
+    <File Name="NTradiation.h"/>
+    <File Name="NTradiation.cpp"/>
+    <File Name="NTdistribution.h"/>
+    <File Name="NTdistribution.cpp"/>
+    <File Name="NTtimescales.h"/>
+    <File Name="NTtimescales.cpp"/>
     <File Name="flareTimeDependent.cpp"/>
     <File Name="flareTimeDependent.h"/>
     <File Name="flareProcesses.h"/>
@@ -22,12 +26,8 @@
     <File Name="absorption.cpp"/>
     <File Name="injectionNeutrons.h"/>
     <File Name="injectionNeutrons.cpp"/>
-    <File Name="distribution.h"/>
     <File Name="losses.h"/>
     <File Name="losses.cpp"/>
-    <File Name="distribution.cpp"/>
-    <File Name="processes.h"/>
-    <File Name="processes.cpp"/>
     <File Name="injection.h"/>
     <File Name="injection.cpp"/>
   </VirtualDirectory>
@@ -102,6 +102,7 @@
         <IncludePath Value="../lib"/>
         <IncludePath Value="../external/include"/>
         <IncludePath Value="../gsl/include"/>
+        <IncludePath Value="/home/emgutierrez/Work/Codes/gamera/GAMERA/include"/>
         <Preprocessor Value="BOOST_SYSTEM_NO_DEPRECATED"/>
         <Preprocessor Value="BOOST_NO_CXX11_SCOPED_ENUMS"/>
       </Compiler>
@@ -116,6 +117,7 @@
         <LibraryPath Value="../lib/finjection/Debug"/>
         <LibraryPath Value="../lib/fluminosities/Debug"/>
         <LibraryPath Value="../lib/inout/Debug"/>
+        <LibraryPath Value="/home/emgutierrez/Work/Codes/gamera/GAMERA/lib"/>
         <Library Value="fparameters"/>
         <Library Value="fparticle"/>
         <Library Value="fluminosities"/>
@@ -128,6 +130,7 @@
         <Library Value="boost_system"/>
         <Library Value="gsl"/>
         <Library Value="gslcblas"/>
+        <Library Value="gamera"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="./$(IntermediateDirectory)/$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -169,6 +172,7 @@
         <IncludePath Value="../lib"/>
         <IncludePath Value="../external/include"/>
         <IncludePath Value="../gsl/include"/>
+        <IncludePath Value="/home/emgutierrez/Work/Codes/gamera/GAMERA/include"/>
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="-fopenmp;$(shell pkg-config --libs gtkmm-3.0)" Required="yes">
@@ -182,6 +186,7 @@
         <LibraryPath Value="../lib/finjection/Release"/>
         <LibraryPath Value="../lib/fluminosities/Release"/>
         <LibraryPath Value="../lib/inout/Release"/>
+        <LibraryPath Value="/home/emgutierrez/Work/Codes/gamera/GAMERA/lib"/>
         <Library Value="fparameters"/>
         <Library Value="fparticle"/>
         <Library Value="fluminosities"/>
@@ -194,6 +199,7 @@
         <Library Value="boost_system"/>
         <Library Value="gsl"/>
         <Library Value="gslcblas"/>
+        <Library Value="gamera"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="./$(IntermediateDirectory)/$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>

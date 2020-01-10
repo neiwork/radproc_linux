@@ -12,7 +12,7 @@ double inelasticityBetheHeitler(double t);
 
 
 /*Cross section for pion production in pp/pip interactions*/ 
-double crossSectionHadronic(double E);
+double crossSectionHadronic(double E);		// Kafexhiu et al. (2014)
 
 /*Cross section for pion production in pp/pip interactions in delta aproximation*/ 
 double crossSectionHadronicDelta(double Ekin);
