@@ -52,18 +52,12 @@ double fQ_R(double Epi, double E, const Particle& p, const Particle& c, const Sp
 }
 
 
-
 double muonInj(double E, const Particle& p, const Particle& c, const SpaceCoord& psc)  //el proton es el creator del pion
 {        
 	
 	std::string pName = p.id;
-
-	//ParticleType particleName = p.type; 
-		
-	double injection = 0.0;
-
 	double rpi = P2(muonMass/chargedPionMass);
-
+	double injection=0.0;
 	double sup = std::min(c.emax(),E/rpi);  // transformo la condicion de la heaviside en un limite superior
 
 	fun1 rk_fQl = [&p,&c,E,&psc](double e){
@@ -74,15 +68,15 @@ double muonInj(double E, const Particle& p, const Particle& c, const SpaceCoord&
 		return fQ_R(e, E, p, c,psc);
 	};
 
-	if (pName == "ntMuon") {
+	if (p.id == "ntMuon") {
 		injection = RungeKuttaSimple(E, sup, rk_fQl);
 		injection += RungeKuttaSimple(E, sup, rk_fQr);//*2; 
 		//el dos es por las dos particulas para cada caso
 	}
-	else if (pName == "muon_L_minus" && pName == "muon_R_plus") {  //muon_L- y muon_R+
+	else if (p.id == "muon_L_minus" && pName == "muon_R_plus") {  //muon_L- y muon_R+
 		injection = RungeKuttaSimple(E, sup, rk_fQl);
 	}
-	else if (pName == "muon_R_minus" && pName == "muon_L_plus") {  //muon_L+ y muon_R-
+	else if (p.id == "muon_R_minus" && pName == "muon_L_plus") {  //muon_L+ y muon_R-
 		injection = RungeKuttaSimple(E, sup, rk_fQr);
 	}
 	return injection;
@@ -105,3 +99,28 @@ double muonInj(double E, const Particle& p, const Particle& c, const SpaceCoord&
 	}*/
 
 
+double fQ_L2(double Epi, double Emu, const Particle& p)  //funcion a integrar variable Epi
+{
+	double r = P2(p.mass/chargedPionMass);
+	double x = Emu/Epi;
+	return (x > r) ? r*(1.0-x)/(Epi*x*P2(1.0-r)) : 0.0;
+}
+
+double fQ_R2(double Epi, double Emu, const Particle& p)
+{
+	double r = P2(p.mass/chargedPionMass);
+	double x = Emu/Epi;
+	return (x > r) ? (x-r)/(Epi*x*P2(1.0-r)) : 0.0;
+}
+
+double muonInjNew(double Emu, const Particle& p, const Particle& c, const SpaceCoord& psc)  //el proton es el creator del pion
+{        
+	double injection = integSimpson(log(Emu),log(c.emax()),[Emu,&p,&c,&psc](double logEpi)
+						{
+							double Epi = exp(logEpi);
+							double tDecay = chargedPionMeanLife*(Epi/(chargedPionMass*cLight2));
+							double nPi = c.distribution.interpolate({{0,Epi}},&psc);
+							return Epi*nPi/tDecay * (fQ_R2(Epi,Emu,p)+fQ_L2(Epi,Emu,p));
+						},50);
+	return injection;
+}

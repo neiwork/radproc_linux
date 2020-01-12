@@ -18,8 +18,7 @@ double fOmegaPHPion(double u,double t, const ParamSpaceValues& tpf, const SpaceC
 		nph = tpf.interpolate({ { 0, u } }, &distCoord); //tpf(u);
 	}
 	
-	return (nph)
-		     *crossSectionPHPion(t)*t/P2(u);
+	return nph*crossSectionPHPion(t)*t/P2(u);
 }
 
 double f_t_PHPion(double u,double t, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax)//  fun1 tpf)   //funcion a integrar
@@ -33,12 +32,12 @@ double f_t_PHPion(double u,double t, const ParamSpaceValues& tpf, const SpaceCoo
 		nph = tpf.interpolate({ { 0, u } }, &distCoord); //tpf(u);
 	}
 	
-	return (nph)
-		     *crossSectionPHPion(t)*inelasticityPHPion(t)*t/P2(u);
+	return nph*crossSectionPHPion(t)*inelasticityPHPion(t)*t/P2(u);
 }
 
 
-double omegaPH(double E, const Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax)  //E=Ep      fun1 -> const ParamSpaceValues& tpf
+double omegaPH(double E, const Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& distCoord,
+				double tpEmin, double tpEmax)  //E=Ep      fun1 -> const ParamSpaceValues& tpf
 {
 	//using std::bind; using namespace std::placeholders; // para _1, _2, etc.
 	double g = E / (p.mass*cLight2);
@@ -58,7 +57,8 @@ double omegaPH(double E, const Particle& p, const ParamSpaceValues& tpf, const S
 	return cte*integral/P2(E);
 }	
 
-double t_pion_PH(double E, const Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax)  //E=Ep
+double t_pion_PH(double E, const Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, 
+					double tpEmin, double tpEmax)
 {
 	double g = E/(p.mass*cLight2);
 	double cte	=	0.5*P2(p.mass*cLight2)*cLight;
@@ -77,7 +77,8 @@ double t_pion_PH(double E, const Particle& p, const ParamSpaceValues& tpf, const
 
 
 //double pgammaPionInj(double E, Vector Nproton, Particle& particle, Particle& proton, fun1 tpf)  
-double pgammaPionInj(double E, const Particle& creator,	const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax)
+double pgammaPionInj(double E, const Particle& creator,	const ParamSpaceValues& tpf, 
+						const SpaceCoord& distCoord, double tpEmin, double tpEmax)
 {
 	double cincoE = 5.0*E;
 	double protonDist = creator.distribution.interpolate({ { 0, cincoE } }, &distCoord); //proton.dist(cincoE);

@@ -135,9 +135,18 @@ void show_module(ProgramModule module)
 			printf("Non-thermal luminosities");
 			break;
 			
+		case Module_pionInjection:
+			printf("Charged pion injection");
+			break;
+		
+		case Module_muonInjection:
+			printf("Muon injection");
+			break;
+		
 		case Module_pairInjection:
 			printf("Secondary pair injection");
 			break;
+			
   /*      default:
             printf("\n");
             show_error(Invalid_Module, Module_Message);

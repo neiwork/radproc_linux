@@ -24,7 +24,7 @@
         "processNumber": {
 			"0":1,
 			"1":1,
-			"2":1,
+			"2":0,
 			"3":0,
 			"4":1
         },
@@ -55,8 +55,8 @@
     
     "calculateNonThermal":"1",
     "nonThermal": {
-	"protons":"1",
-	"electrons":"1",
+	"protons":"0",
+	"electrons":"0",
         "injection": {
 	    "calculateMagneticReconnection":"0",
 	    "calculateDSA":"0",
@@ -71,9 +71,9 @@
 		"fractionTurbulent":"1.0",
 		"powerSpectrumIndex":"1.666"
 	    },
-            "primaryIndex":"1.5"
+            "primaryIndex":"2.0"
         },
-        "calculateLosses":"1",
+        "calculateLosses":"0",
 	"calculateDistributions":"1",
         "calculateLuminosities":"1",
 	"calculateJetEmission":"0",
@@ -100,6 +100,7 @@
 		"electronEnergyFraction":"1.0e-1",
 		"pIndex":"2.3"
 	},
+	"calculateSecondaries":"1",
 	"calculateFlare":"0",
 	"flare": {
 		"injection": {
@@ -140,8 +141,8 @@
 				"dim":{
 					"energy": {
 						"min":-5.0,
-						"max":16.0,
-						"sample":200
+						"max":8.0,
+						"samples":"70"
 					}
 				}
 			},
@@ -185,7 +186,7 @@
 				"dim":{
 					"energy": {
 						"min":8.2,
-						"max":17.0
+						"max":16.9
 					}
 				}
 			},
@@ -194,7 +195,7 @@
 				"dim":{
 					"energy": {
 						"min":8.1,
-						"max":17.0
+						"max":16.8
 					}
 				}
 			},
@@ -202,8 +203,8 @@
 				"mass":9.1094e-28,
 				"dim":{
 					"energy": {
-						"min":6.0,
-						"max":17.0
+						"min":5.71,
+						"max":16.7
 					}
 				}
             		}
@@ -214,7 +215,7 @@
 	"math": {
 		"runge-kutta-1": {
 			"samples": {
-				"x": 20
+				"x": 30
 			}
 		},
 

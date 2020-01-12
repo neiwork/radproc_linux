@@ -6,6 +6,10 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="non thermal">
+    <File Name="secondariesProcesses.h"/>
+    <File Name="secondariesProcesses.cpp"/>
+    <File Name="NTinjection.h"/>
+    <File Name="NTinjection.cpp"/>
     <File Name="NTradiation.h"/>
     <File Name="NTradiation.cpp"/>
     <File Name="NTdistribution.h"/>
@@ -20,16 +24,12 @@
     <File Name="jetEmission.cpp"/>
     <File Name="distributionNeutrons.h"/>
     <File Name="distributionNeutrons.cpp"/>
-    <File Name="pairProcesses.h"/>
-    <File Name="pairProcesses.cpp"/>
     <File Name="absorption.h"/>
     <File Name="absorption.cpp"/>
     <File Name="injectionNeutrons.h"/>
     <File Name="injectionNeutrons.cpp"/>
     <File Name="losses.h"/>
     <File Name="losses.cpp"/>
-    <File Name="injection.h"/>
-    <File Name="injection.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="thermal">
     <File Name="thermalProcesses.cpp"/>

@@ -36,6 +36,9 @@ void adafParameters()
 	schwRadius = 2.0*gravitationalConstant*blackHoleMass / cLight2;
 	double eddAccRate = 1.39e18 * blackHoleMass/solarMass;
 	accRateOut = accRateNorm*eddAccRate;
+	cout << "Total outer accretion power = " << accRateOut*cLight2 << " erg s^{-1}" << endl;
+	cout << "Total inner accretion power = " << accRateOut*pow(1.0/exp(logr.back()),s)*cLight2 
+		 << " erg s^{-1}" << endl;
     
 	rTr = GlobalConfig.get<double>("rTr") * schwRadius;
 	rOutCD = GlobalConfig.get<double>("rOutCD") * schwRadius;
@@ -43,7 +46,7 @@ void adafParameters()
 	iMeanMolecularWeight = GlobalConfig.get<double>("mu_i");
 
 	nR = GlobalConfig.get<int>("model.particle.default.dim.radius.samples");
-	nE = GlobalConfig.get<int>("model.particle.default.dim.energy.samples");
+	nE = GlobalConfig.get<int>("model.particle.photon.dim.energy.samples");
 	nRcd = GlobalConfig.get<int>("model.particle.default.dim.radius_cd.samples");
     
     paso_r = pow(exp(logr.back())/exp(logr.front()),1.0/(nR-1.0));
@@ -108,5 +111,6 @@ void adafParameters()
         calculateNeutronInj = GlobalConfig.get<int>("nonThermal.neutrons.calculateInjection");
 		calculateNeutronDis = GlobalConfig.get<int>("nonThermal.neutrons.calculatePropagation");
 		calculateJetDecay = GlobalConfig.get<int>("nonThermal.neutrons.calculateJetDecay");
-    }
+		calculateSecondaries = GlobalConfig.get<int>("nonThermal.calculateSecondaries");
+	}
 }

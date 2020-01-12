@@ -12,7 +12,8 @@
 
 
 
-double psiEsc(double E, double tcross, Particle& neutron, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax)  //E=Ep
+double psiEsc(double E, double tcross, Particle& neutron, const ParamSpaceValues& tpf, const SpaceCoord& distCoord,
+				double tpEmin, double tpEmax)  //E=Ep
 {
 
 	double seda_pn = 0.5;  //probabilidad de que el n se convierta en proton psi_np = 1-psi_nn
@@ -39,11 +40,12 @@ double psiEsc(double E, double tcross, Particle& neutron, const ParamSpaceValues
 }
 
 
-double neutronPgamma(double E, double tcross, Particle& neutron, Particle& proton, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax)  
+double neutronPgamma(double E, double tcross, Particle& neutron, Particle& proton, const ParamSpaceValues& tpf,
+						const SpaceCoord& distCoord, double tpEmin, double tpEmax)  
 {
 	//double protonDist = proton.dist(E);// interpol(E, proton.energyPoints, Nproton, Nproton.size() - 1);
-	double t_1   = t_pion_PH(E, proton, tpf, distCoord, tpEmin, tpEmax);     //esto no es lossesPH porque son perdidas solo del canal de produccion de piones
-	double omega = omegaPH(E, proton, tpf, distCoord, tpEmin, tpEmax);
+	double t_1   = t_pion_PH(E,proton,tpf,distCoord,tpEmin,tpEmax);     //esto no es lossesPH porque son perdidas solo del canal de produccion de piones
+	double omega = omegaPH(E,proton,tpf,distCoord,tpEmin,tpEmax);
 	
 	double emissivity;
 	if (t_1 > 0.0 && omega > 0.0)	{

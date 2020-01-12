@@ -1,5 +1,5 @@
 #include "NTdistribution.h"
-#include "injection.h"
+#include "NTinjection.h"
 #include "messages.h"
 #include "write.h"
 #include "adafFunctions.h"
@@ -131,8 +131,8 @@ void distributionFast(Particle& p, State& st)
 					Nle.set(itRRE,Nle.get(itRRE)/vol);
 				},{-1,itRR.coord[DIM_R],0});
 			},{0,-1,0});
-			if (p.id == "ntProton")	writeEandRParamSpace("linearEmitter_p",Nle,0);
-			if (p.id == "ntElectron")	writeEandRParamSpace("linearEmitter_e",Nle,0);
+			if (p.id == "ntElectron")	writeEandRParamSpace("linearEmitter_e",Nle,0,1);
+			if (p.id == "ntProton")	writeEandRParamSpace("linearEmitter_p",Nle,0,1);
 		}
 
 		p.ps.iterate([&](const SpaceIterator& itRR) {
@@ -519,15 +519,33 @@ void distributionGAMERA(Particle& p, State& st)
 {
 	ofstream file;
 	file.open("distributionGAMERA.dat");
+	
+	Vector t(nR,0.001);
+	Vector B(nR,0.0);
+	Vector Q(nR,0.0);
+	Vector e(nE,0.0);
+	
+	p.ps.iterate([&](const SpaceIterator& iE) {
+		e[iRE.coord[DIM_E]] = iE.val(DIM_E);
+	},{-1,0,0});
+	
+	for (iR=0;iR<nR-1;iR++) {
+		size_t jR = nR-1-iR;
+		double r = p.ps[DIM_R][jR];
+		double dr = r*(paso_r-1.0);
+		double dt = dr/abs(radialVel(r));
+		t[iR+1] = t[iR]+dT; 
+		B[iR+1] = magneticField(r);
+		p.ps.iterate([&](const SpaceIterator& iRE) {
+			Q[][iRE.coord[DIM_E]] = p.injection.get(iRE);
+		},{-1,iR,0});
+	},{0,-1,0});
+	
 	p.ps.iterate([&](const SpaceIterator& iR) {
 		Vector e(nE,0.0);
-		Vector q(nE,0.0);
-		Particles *electron = new Particles();
-		double tacc = accretionTime(iR.val(DIM_R));
-		p.ps.iterate([&](const SpaceIterator& iRE) {
-			e[iRE.coord[DIM_E]] = iRE.val(DIM_E);
-			q[iRE.coord[DIM_E]] = p.injection.get(iRE);
-		},{-1,iR.coord[DIM_R],0});
+		Matrix q;
+		matrixInit(q,nE,)
+		Particles *proton = new Particles();
 		Matrix eq;
 		matrixInit(eq,nE,2,0.0);
 		matrixInitTwoVec(eq,nE,e,q);

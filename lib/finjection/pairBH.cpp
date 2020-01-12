@@ -49,16 +49,32 @@ double omegaBH(double E, const Particle& particle, const ParamSpaceValues& tpf, 
 	return cte*integral/P2(E);
 }
 
-
-double pairBH(double E, const Particle& creator, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax)
+double omegaBH2(double e, const Particle& c, const ParamSpaceValues& tpf, const SpaceCoord& distCoord,
+					double phEmin, double phEmax)
 {
-	double evalE = E*protonMass/electronMass;
+	double inf = pairThresholdPH*protonMass*cLight2/(2.0*e);
+	double integ = integSimpson(log(inf),log(phEmax),[e,&c,&tpf,&distCoord](double logEph)
+		{
+			double Eph = exp(logEph);
+			double nPh = tpf.interpolate({{0,Eph}},&distCoord);
+			double inf2 = pairThresholdPH;
+			double sup2 = 2.0*Eph*e/(protonMass*cLight2);
+			double integ2 = integSimpson(log(inf2),log(sup2),[&](double logep)
+						{
+							double ep = exp(logep);
+							return ep*ep*crossSectionBetheHeitler(ep);
+						},30);
+			return nPh/Eph * integ2;
+		},30);
+	return 0.5*P2(protonMass)*pow(cLight,5)/(e*e) * integ;
+}
+
+double pairBH(double Eee, const Particle& creator, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, double tpEmin, double tpEmax)
+{
+	double evalE = Eee*protonMass/electronMass;
 	double protonDist = (evalE > creator.emin() && evalE < creator.emax()) ? 
 			creator.distribution.interpolate({ { 0, evalE } }, &distCoord) : 0.0;
 	
-	double omega = omegaBH(evalE, creator, tpf, distCoord, tpEmin, tpEmax);
-	
-	double emissivity = 2.0*protonMass*omega*protonDist/electronMass;
-
-	return emissivity;
+	double omega = omegaBH2(evalE,creator,tpf,distCoord,tpEmin,tpEmax);
+	return 2.0*protonMass*omega*protonDist/electronMass;
 }

@@ -5,6 +5,7 @@
 #include <fparameters/ParamSpaceValues.h>
 #include "globalVariables.h"
 #include "read.h"
+#include "adafFunctions.h"
 #include "write.h"
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/Dimension.h>
@@ -18,15 +19,16 @@ void readThermalProcesses(int flags[])
 	}
 }
 
-void readEandRParamSpace(const std::string& filename, ParamSpaceValues& data, int t)
+void readEandRParamSpace(const std::string& filename, ParamSpaceValues& data, int t, int vol)
 {
 	std::ifstream file;
 	file.open(dataName(filename).c_str(), std::ios::in);
 	
 	data.ps.iterate([&](const SpaceIterator& i){
+		double voll = (vol) ? volume(i.val(DIM_R)) : 1.0;
 		double aux1,aux2,dist;
 		file >> aux1 >> aux2 >> dist;
-		data.set(i,pow(10,dist));
+		data.set(i,pow(10,dist)/voll);
 	},{-1,-1,t});  
 	file.close();
 }

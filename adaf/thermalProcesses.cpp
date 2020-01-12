@@ -136,7 +136,10 @@ void localProcesses2(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumO
 		size_t jR=0;
 		st.photon.ps.iterate([&](const SpaceIterator& itER) {
 			double r = itER.val(DIM_R);
-			double temp = st.tempElectrons.get(itER);
+			double rB2 = r*sqrt(paso_r);
+			double rB1 = rB2/paso_r;
+			double temp_e = st.tempElectrons.get(itER);
+			double temp_i = st.tempIons.get(itER);
 			double magf = st.magf.get(itER);
 			double dens_i = st.denf_i.get(itER);
 			double dens_e = st.denf_e.get(itER);
@@ -144,12 +147,12 @@ void localProcesses2(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumO
 			double unrEnergy = energies[jE]/redshift[jR];
 			xSy = xBr = 0.0;
 			if (flags[0])
-				xSy = jSync(unrEnergy,temp,magf,dens_e)*4.0*pi;
+				xSy = jSync(unrEnergy,temp_e,magf,dens_e)*4.0*pi;
 			if (flags[1])
-				xBr = jBremss(unrEnergy,temp,dens_i,dens_e)*4.0*pi;
+				xBr = jBremss(unrEnergy,temp_e,dens_i,dens_e)*4.0*pi;
 			
 			SpaceCoord psc = {jE,jR,0};
-			double b_nu = bb(unrEnergy/planck,temp);
+			double b_nu = bb(unrEnergy/planck,temp_e);
 			double kappa = (xSy+xBr)/(4.0*pi*b_nu);
 			double tau = 0.5*sqrt(pi)*kappa*height_fun(r);
 			double fluxSy = (2.0*sqrt(3.0)*tau > 1.0e-5) ? 
@@ -157,9 +160,9 @@ void localProcesses2(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumO
 							0.5*sqrt(pi)*xSy*height_fun(r);
 			double fluxBr = (2.0*sqrt(3.0)*tau < 1.0e-3) ? 0.5*sqrt(pi)*xBr*height_fun(r) : 0.0;
 							
-			lumOutSy[jE][jR] = 2.0*pi*fluxSy*r*r*(sqrt(paso_r)-sqrt(1.0/paso_r));
-			lumOutBr[jE][jR] = 2.0*pi*fluxBr*r*r*(sqrt(paso_r)-sqrt(1.0/paso_r));
-			lumOut[jE][jR] = lumOutSy[jE][jR]+lumOutBr[jE][jR];
+			lumOutSy[jE][jR] = pi*fluxSy*(rB2*rB2-rB1*rB1);
+			lumOutBr[jE][jR] = pi*fluxBr*(rB2*rB2-rB1*rB1);
+			lumOut[jE][jR] = lumOutSy[jE][jR]+lumOutBr[jE][jR]+lumOutpp[jE][jR];
 			jR++;
 		},{jE,-1,0});
 	}
@@ -722,13 +725,13 @@ void targetField(State& st, Matrix lumOut, Matrix lumCD, Matrix lumRefl)
 			double vol = volume(r);
 			double lumReachingShell = 0.0;
 			double height = height_fun(r);
-			double tescape = height/cLight;
-			double tcross = (rB2-rB1)/cLight;
 			double tau_es_1 = st.denf_e.get(itER)*thomson*height;
 			double tau_es_2 = tau_es_1 * (rB2-rB1)/height;
+			double tescape = height/cLight * tau_es_1;
+			double tcross = (rB2-rB1)/cLight * tau_es_2;
 			for (size_t jjR=0;jjR<nR;jjR++)
-				lumReachingShell += ( (jjR == jR) ? lumOut[jE][jR]*tescape*(1.0+tau_es_1) : 
-									reachAA[jjR][jR]*lumOut[jE][jjR]*tcross*(1.0+tau_es_2) );
+				lumReachingShell += ( (jjR == jR) ? lumOut[jE][jR]*tescape : 
+									reachAA[jjR][jR]*lumOut[jE][jjR]*tcross );
 			for (size_t jjRcd=0;jjRcd<nRcd;jjRcd++)
 				lumReachingShell += reachDA[jjRcd][jR]*(lumCD[jE][jjRcd]+lumRefl[jE][jjRcd])*tcross;
 			st.photon.distribution.set(itER,lumReachingShell/(vol*planck*E)); //erg^⁻1 cm^-3
@@ -824,11 +827,6 @@ void calculateElectronTemp(State& st, Matrix lumOut, Matrix lumInICm, Vector ene
 	fileCooling.close();
 }*/
 
-void thermalTargetField(Particle& photon, const string& filename)
-{
-	readEandRParamSpace(filename,photon.distribution,0);
-}
-
 void thermalRadiation(State& st, const string& filename)
 {
 	show_message(msgStart,Module_thermalLuminosities);
@@ -869,7 +867,7 @@ void thermalRadiation(State& st, const string& filename)
 		absorptionLumThermal(st,lumOut,lumOutCD,lumOutRefl,lumOut_gg);
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,lumInICm,
 							lumOutIC,lumOut_gg,lumOutCD,lumOutRefl,filename);
-		writeEandRParamSpace("photonDensity",st.photon.distribution,0);
+		writeEandRParamSpace("photonDensity",st.photon.distribution,0,0);
 	}	
 	show_message(msgEnd,Module_thermalLuminosities);
 }

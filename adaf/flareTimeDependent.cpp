@@ -12,7 +12,7 @@
 #include <fmath/RungeKutta.h>
 #include <fmath/physics.h>
 #include <flosses/lossesSyn.h>
-#include "injection.h"
+#include "NTinjection.h"
 #include "absorption.h"
 #include "write.h"
 

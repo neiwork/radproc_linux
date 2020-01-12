@@ -6,6 +6,7 @@
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/Dimension.h>
 #include <fparameters/parameters.h>
+#include <fmath/RungeKutta.h>
 #include <boost/property_tree/ptree.hpp>
 
 //namespace {
@@ -53,7 +54,7 @@ void writeAllSpaceParam(const std::string& filename, const ParamSpaceValues& dat
 	generateViewScript(filename);
 }
 
-void writeEandRParamSpace(const std::string& filename, const ParamSpaceValues& data, int t)
+void writeEandRParamSpace(const std::string& filename, const ParamSpaceValues& data, int t,int vol)
 {
 
 	std::ofstream file;
@@ -62,15 +63,37 @@ void writeEandRParamSpace(const std::string& filename, const ParamSpaceValues& d
 	// version acotada
 	//double time = log10(data.ps[1][t]);
 	
-	data.ps.iterate([&](const SpaceIterator& i){
-
+	data.ps.iterate([&](const SpaceIterator& i) {
+		
 		double logE = log10(i.val(DIM_E) / EV_TO_ERG);
 		double r = i.val(DIM_R);
-		double logQ = safeLog10(data.get(i)*volume(r));
+		double voll = (vol) ? volume(r) : 1.0;
+		double logQ = safeLog10(data.get(i)*voll);
 		file << logE << '\t' << i.coord[DIM_R] << '\t' << logQ << std::endl;
 			
 	}, { -1, -1, t });  
 
+	file.close();
+	generateViewScript(filename);
+}
+
+void writeRParamSpace(const std::string& filename, const ParamSpaceValues& data, int t, int s)
+{
+
+	std::ofstream file;
+	file.open(dataName(filename).c_str(), std::ios::out);
+	double Emin = data.ps[DIM_E].first();
+	double Emax = data.ps[DIM_E].last();
+	data.ps.iterate([&](const SpaceIterator& iR) {
+		double tot = integSimpson(log(Emin),log(Emax),
+						[&](double loge)
+						{
+							double e = exp(loge);
+							double nPh = data.interpolate({{DIM_E,e}},&iR.coord);
+							return e*nPh;
+						},100);
+		file << safeLog10(iR.val(DIM_R)/schwRadius) << '\t' << safeLog10(tot) << std::endl;
+	},{t,-1,s});  
 	file.close();
 	generateViewScript(filename);
 }

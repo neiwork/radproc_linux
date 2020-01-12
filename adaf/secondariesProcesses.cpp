@@ -1,4 +1,4 @@
-#include "pairProcesses.h"
+#include "secondariesProcesses.h"
 #include "modelParameters.h"
 #include "write.h"
 #include "messages.h"
@@ -11,11 +11,12 @@
 #include <fluminosities/luminositySynchrotron.h>
 #include <fluminosities/opticalDepthSSA.h>
 #include <fluminosities/luminosityIC.h>
-
+#include "NTinjection.h"
+#include "NTdistribution.h"
 #include <fparameters/Dimension.h>
 #include <fparameters/SpaceIterator.h>
 
-void pairProcesses(State& st, const std::string& filename)
+void secondariesRadiationProcesses(State& st, const std::string& filename)
 {
 	show_message(msgStart, Module_luminosities);
 
@@ -77,7 +78,7 @@ void pairProcesses(State& st, const std::string& filename)
 			//double attenuation_ssap = (tau[2] > 1.0e-15) ? (1.0-exp(-tau[2]))/tau[2] : 1.0;
 			
 			double eSyLocal = luminositySynchrotron(E,st.ntPair,i,st.magf);
-			double eICLocal = luminosityIC(E,st.ntPair,i.coord,st.photon.distribution,Emin);
+			double eICLocal = luminosityIC(E,st.ntPair,i.coord,st.photon.distribution,Emin,Emax);
 			
 
 			eSy[E_ix] += eSyLocal*vol;
@@ -105,4 +106,16 @@ void pairProcesses(State& st, const std::string& filename)
 	file2.close();
 
 	show_message(msgEnd,Module_luminosities);
+}
+
+
+void secondariesProcesses(State& st)
+{
+	injectionChargedPion(st.ntChargedPion,st);
+	//distributionFast(st.ntChargedPion,st);
+	injectionMuon(st.ntMuon,st);
+	//distributionFast(st.ntMuon,st);
+	injectionPair(st.ntPair,st);
+	distributionFast(st.ntPair,st);
+	//secondariesRadiationProcesses(st,"secondariesRadiation");
 }

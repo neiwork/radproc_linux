@@ -1,13 +1,16 @@
-#include "injection.h"
-
+#include "NTinjection.h"
+#include "write.h"
 #include "messages.h"
 #include "globalVariables.h"
 #include "adafFunctions.h"
-
+#include "absorption.h"
 #include <finjection/ppPionInj.h>
+#include <finjection/pgammaPionInj.h>
 #include <finjection/muonInj.h>
+#include <flosses/lossesHadronics.h>
+#include <flosses/lossesSyn.h>
 #include <finjection/pairInjectionExact.h>
-#include <finjection/pairInjection.h>
+#include <finjection/pairgg.h>
 #include <finjection/pairMuonDecay.h>
 #include <finjection/pairBH.h>
 #include <gsl/gsl_sf_bessel.h>
@@ -160,80 +163,97 @@ void injection(Particle& p, State& st)
 
 void injectionChargedPion(Particle& p, State& st)
 {
-	double sumQtot = 0.0;
-	double pasoE = pow(st.denf_e.ps[DIM_E][nE-1]/st.denf_e.ps[DIM_E][0],1.0/nE);
-	show_message(msgStart, Module_pairInjection);
+	show_message(msgStart,Module_pionInjection);
+	
+	double sumTot = 0.0;
 	p.ps.iterate([&](const SpaceIterator& iR) {
-		const double r = iR.val(DIM_R);
-		double rB2 = r*sqrt(paso_r);
-		double rB1 = rB2/paso_r;
-		double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
-		double sumQ = 0.0;
 		p.ps.iterate([&](const SpaceIterator& iRE) {
-			const double E = iRE.val(DIM_E);
-			double dE = E*(pasoE-1.0);
-			double result = ppPionInj(E,st.ntProton,st.denf_i.get(iRE),iRE);
-			sumQ += result*E*dE;
-			p.injection.set(iRE,result);
+			double Epi = iRE.val(DIM_E);
+			double injection = ppPionInj(Epi,st.ntProton,st.denf_i.get(iRE),iRE);
+			injection += pgammaPionInj(Epi,st.ntProton,st.photon.distribution,iRE,
+										st.photon.emin(),st.photon.emax());
+			p.injection.set(iRE,injection);
+			double tdecay = chargedPionMeanLife*(Epi/(chargedPionMass*cLight2));
+			double ratecool = lossesHadronics(Epi,st.denf_i.get(iR),p)/Epi;
+			p.distribution.set(iRE,injection*pow(ratecool+pow(tdecay,-1),-1));
 		},{-1,iR.coord[DIM_R],0});
-		sumQtot += sumQ*vol;
+		
+		sumTot += integSimpson(log(p.emin()),log(p.emax()),[&](double loge)
+					{
+						double e = exp(loge);
+						return e*e*p.injection.interpolate({{DIM_E,e}},&iR.coord);
+					},100)*volume(iR.val(DIM_R));
 	},{0,-1,0});
-	show_message(msgEnd, Module_pairInjection);
-	cout << "Total power injected in " << p.id << " = " << sumQtot << "\t" << endl; 
+	cout << "Total power injected in " << p.id << " = " << sumTot << "\t" << endl; 
+	writeEandRParamSpace("pionInjection",p.injection,0,1);
+	writeEandRParamSpace("pionDistribution",p.distribution,0,1);
+	show_message(msgEnd,Module_pionInjection);
 }
 
 void injectionMuon(Particle& p, State& st)
 {
-    double sumQtot = 0.0;
-	double pasoE = pow(p.emax()/p.emin(),1.0/nE);
-	show_message(msgStart, Module_pairInjection);
+    double sumTot = 0.0;
+	show_message(msgStart, Module_muonInjection);
 	p.ps.iterate([&](const SpaceIterator& iR) {
-		const double r = iR.val(DIM_R);
-		double rB2 = r*sqrt(paso_r);
-		double rB1 = rB2/paso_r;
-		double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
-		double sumQ = 0.0;
 		p.ps.iterate([&](const SpaceIterator& iRE) {
-			const double E = iRE.val(DIM_E);
-			double dE = E*(pasoE-1.0);
-			double result = muonInj(E,p,st.ntChargedPion,iRE);
-			sumQ += result*E*dE;
-			p.injection.set(iRE,result);
+			const double Emu = iRE.val(DIM_E);
+			double injection = muonInjNew(Emu,p,st.ntChargedPion,iRE);
+			p.injection.set(iRE,injection);
+			double ratecool = lossesSyn(Emu,st.magf.get(iR),p)/Emu;
+			double tdecay = muonMeanLife*(Emu/(muonMass*cLight2));
+			p.distribution.set(iRE,injection*pow(ratecool+pow(tdecay,-1),-1));
 		},{-1,iR.coord[DIM_R],0});
-		sumQtot += sumQ*vol;
+		
+		sumTot += integSimpson(log(p.emin()),log(p.emax()),[&](double loge)
+					{
+						double e = exp(loge);
+						return e*e*p.injection.interpolate({{DIM_E,e}},&iR.coord);
+					},100)*volume(iR.val(DIM_R));
+		
 	},{0,-1,0});
-	show_message(msgEnd, Module_pairInjection);
-	cout << "Total power injected in " << p.id << " = " << sumQtot << "\t" << endl; 
+	cout << "Total power injected in " << p.id << " = " << sumTot << "\t" << endl;
+	writeEandRParamSpace("muonInjection",p.injection,0,1);
+	writeEandRParamSpace("muonDistribution",p.distribution,0,1);
+	show_message(msgEnd, Module_muonInjection);
 }
 
 void injectionPair(Particle& p, State& st)
 {
-	//static const double etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction");
-	//double Emin = p.emin();   //esta es la primera que uso de prueba
-	
-    double sumQtot = 0.0;
-	double pasoE = pow(p.emax()/p.emin(),1.0/nE);
 	show_message(msgStart, Module_pairInjection);
+	double sumTot = 0.0;
+	double sumTotPh = 0.0;
 	p.ps.iterate([&](const SpaceIterator& iR) {
-		const double r = iR.val(DIM_R);
-		double rB2 = r*sqrt(paso_r);
-		double rB1 = rB2/paso_r;
-		double vol = (4.0/3.0)*pi*costhetaH(r)*(rB2*rB2*rB2-rB1*rB1*rB1);
-		double sumQ = 0.0;
 		p.ps.iterate([&](const SpaceIterator& iRE) {
-			const double E = iRE.val(DIM_E);
-			double dE = E*(sqrt(pasoE)-1.0/sqrt(pasoE));
-			double result = pairInjection(E,st.photon.injection,st.photon.distribution,
-								iRE,st.photon.emin(),st.photon.emax()) + 
-							pairMuonDecay(E,st.ntMuon,iRE); + 
-							pairBH(E,st.ntProton,st.photon.distribution,iRE,st.photon.emin(),
-								st.photon.emax()); // [cm^⁻3 s^-1 erg^-1]
-			
-			sumQ += result*E*dE;
-			p.injection.set(iRE,result);
+			double Eee = iRE.val(DIM_E);
+			double injection = 	pairMuonDecayNew(Eee,st.ntMuon,iRE)
+							+	pairBH(Eee,st.ntProton,st.photon.distribution,iRE,st.photon.emin(),st.photon.emax())
+							+	pairGammaGammaNew(Eee,st.ntPhoton.distribution,st.photon.distribution,
+								iRE,st.photon.emin(),st.photon.emax(),st.ntPhoton.emin(),st.ntPhoton.emax());
+			p.injection.set(iRE,injection);
 		},{-1,iR.coord[DIM_R],0});
-		sumQtot += sumQ*vol;
+		sumTot += integSimpson(log(p.emin()),log(p.emax()),[&](double loge)
+					{
+						double e = exp(loge);
+						return e*e*p.injection.interpolate({{DIM_E,e}},&iR.coord);
+					},100)*volume(iR.val(DIM_R));
+		sumTotPh += integSimpson(log(st.ntPhoton.emin()),log(st.ntPhoton.emax()),
+					[&st,&iR](double logEg)
+					{
+						double Eg = exp(logEg);
+						double ntPh = st.ntPhoton.distribution.interpolate({{DIM_E,Eg}},&iR.coord);
+						double rategg = cLight*integSimpson(log(st.photon.emin()),log(st.photon.emax()),
+								[Eg,&st,&iR](double logEph)
+								{
+									double Eph = exp(logEph);
+									double nPh = st.photon.distribution.interpolate({{DIM_E,Eph}},&iR.coord);
+									return ggCrossSection2(Eg,Eph)*nPh*Eph;
+								},30);
+						return Eg*Eg*ntPh*rategg;
+					},100)*volume(iR.val(DIM_R));
 	},{0,-1,0});
+	cout << "Total photon power absorbed to create pairs = " << sumTotPh << "\t" << endl;
+	cout << "Total power injected in " << p.id << " = " << sumTot << "\t" << endl;
+	writeEandRParamSpace("secondaryPairInjection",p.injection,0,1);
+	writeEandRParamSpace("secondaryPairDistribution",p.distribution,0,1); 
 	show_message(msgEnd, Module_pairInjection);
-	cout << "Total power injected in " << p.id << " = " << sumQtot << endl; 
 }

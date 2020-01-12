@@ -9,13 +9,9 @@ rc('text',usetex = True)
 import scipy.optimize as optimization
 
 nu,eV,Sy,Br,IC,pp,CD,Refl,Tot,ICin = np.loadtxt('lumThermal.dat',unpack=True)
-nu2,eV2,Sy2,Br2,IC2,pp2,CD2,Refl2,Tot2,ICin2 = np.loadtxt('lum.txt',unpack=True)
-NT_logeV,NT_logSye,NT_logSyp,NT_logIC,NT_logpp,NT_logpg,NT_logAbs = \
-        np.loadtxt('lumNonThermal.dat',unpack=True,skiprows=1)
-#NT_logeVpairs, NT_logSypairs, NT_logICpairs, NT_logAbsPairs = \
-#        np.loadtxt('ntPairtLum.txt', unpack=True, skiprows=1)
-x_eV = [-4,16]
-y_axis = [35,45]
+NT_logeV,NT_logSye,NT_logSyp,NT_logIC,NT_logpp,NT_logpg,NT_logAbs = np.loadtxt('lumNonThermal.dat',unpack=True,skiprows=1)
+x_eV = [-5,17]
+y_axis = [37,45]
 
 fig, ax1 = plt.subplots()
 
@@ -26,16 +22,13 @@ ax1.set_ylim(y_axis)
 ax1.set_xlabel(r'$\mathrm{Log}(E/\mathrm{eV})$',fontsize=13)
 ax1.set_ylabel(r'$\mathrm{Log}(\nu L_\nu / \mathrm{erg~s}^{-1})$',fontsize=13)
 
-ax1.plot(np.log10(eV),np.log10(Tot),label='Thermal')
-ax1.plot(np.log10(eV2),np.log10(Tot2),label='Thermal')
-ax1.plot(NT_logeV,NT_logSye,label='eSy')
-ax1.plot(NT_logeV,NT_logSyp,label='pSy')
-ax1.plot(NT_logeV,NT_logIC,label='IC')
-ax1.plot(NT_logeV,NT_logpp,label='pp')
-ax1.plot(NT_logeV,NT_logpg,label=r'p$\gamma$')
-#ax1.plot(NT_logeVpairs,NT_logSypairs,label='seSy')
-#ax1.plot(NT_logeVpairs,NT_logICpairs,label='seIC')
-ax1.plot(NT_logeV,NT_logAbs,lw=3,label='Abs',color='k')
+ax1.plot(np.log10(eV),np.log10(Tot),label='Thermal',lw=2,ls='solid')
+ax1.plot(NT_logeV,NT_logSye,label='eSy',lw=1.3,ls='--',marker='s',markevery=4,markersize=5)
+ax1.plot(NT_logeV,NT_logSyp,label='pSy',lw=1.3,ls='--',marker='o',markevery=4,markersize=5)
+ax1.plot(NT_logeV,NT_logIC,label='IC',lw=1.3,ls='-.',marker='*',markevery=4,markersize=5)
+ax1.plot(NT_logeV,NT_logpp,label='pp',lw=1.3,ls=':',marker='v',markevery=4,markersize=5)
+ax1.plot(NT_logeV,NT_logpg,label=r'p$\gamma$',lw=1.3,ls=':',marker='^',markevery=4,markersize=5)
+ax1.plot(NT_logeV,NT_logAbs,lw=3,label='Abs',color='k',ls='solid')
 ax1.legend(loc='best',fontsize=8)
 
 fig.savefig('nonThermalLum.pdf')

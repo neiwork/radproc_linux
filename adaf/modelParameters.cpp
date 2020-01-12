@@ -14,9 +14,9 @@ void prepareGlobalCfg()
 
 void initEnergyPoints(Vector& v, double logEmin, double logEmax)
 {
-	double Emax=1.6e-12*pow(10,logEmax);
-	double Emin=1.6e-12*pow(10,logEmin);
-	double E_int=pow(Emax/Emin,1.0/(v.size()-1));
+	double Emax = EV_TO_ERG*pow(10.0,logEmax);
+	double Emin = EV_TO_ERG*pow(10.0,logEmin);
+	double E_int = pow(Emax/Emin,1.0/(v.size()-1));
     v[0]=Emin;
 	for (size_t i=1;i<v.size();++i) {
 		v[i]=v[i-1]*E_int;

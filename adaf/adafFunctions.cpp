@@ -34,7 +34,7 @@ double electronTemp(double r)
 		double logr_actual = log10(r/schwRadius);
 		size_t pos_r = 0;
 		double aux = logr_aux.front();
-		while (aux < logr_actual) {
+		while (aux < logr_actual && pos_r < logr.size()-1) {
 			pos_r++;
 			aux = logr_aux[pos_r];
 		}
@@ -49,7 +49,7 @@ double electronTemp(double r)
 		double logr_actual = log(r/schwRadius);
 		double aux = logr.front();
 		size_t pos_r = 0;
-		while (aux < logr_actual) {
+		while (aux < logr_actual && pos_r < logr.size()-1) {
 			pos_r++;
 			aux = logr[pos_r];
 		}
@@ -68,7 +68,7 @@ double electronTempOriginal(double r)
 	double logr_actual = log(r/schwRadius);
 	double aux = logr.front();
 	size_t pos_r = 0;
-	while (aux < logr_actual) {
+	while (aux < logr_actual && pos_r < logr.size()-1) {
 		pos_r++;
 		aux = logr[pos_r];
 	}
@@ -85,7 +85,7 @@ double ionTemp(double r) {
 	double logr_actual = log(r/schwRadius);
 	double aux = logr.front();
 	size_t pos_r=0;
-	while (aux < logr_actual) {
+	while (aux < logr_actual && pos_r < logr.size()-1) {
 		pos_r++;
 		aux = logr[pos_r];
 	}
@@ -102,7 +102,7 @@ double radialVel(double r) {
 	double logr_actual = log(r/schwRadius);
 	double aux = logr.front();
 	size_t pos_r=0;
-	while (aux < logr_actual) {
+	while (aux < logr_actual && pos_r < logr.size()-1) {
 		pos_r++;
 		aux = logr[pos_r];
 	}

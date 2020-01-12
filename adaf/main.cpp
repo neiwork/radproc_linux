@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "write.h"
+#include "read.h"
 #include "messages.h"
 #include "modelParameters.h"
 #include "State.h"
@@ -11,13 +12,13 @@
 
 #include "thermalDistribution.h"
 #include "NTtimescales.h"
-#include "injection.h"
+#include "NTinjection.h"
 #include "injectionNeutrons.h"
 #include "distributionNeutrons.h"
 #include "NTdistribution.h"
 #include "NTradiation.h"
 #include "absorption.h"
-#include "pairProcesses.h"
+#include "secondariesProcesses.h"
 #include "jetEmission.h"
 
 #include <fparameters/parameters.h>
@@ -48,10 +49,12 @@ int main()
 			comptonScattMatrixRead(model);
 		}
 		
-		if (calculateThermal)
+		if (calculateThermal) {
 			thermalRadiation(model,"lumThermal.dat");
-		else
-			thermalTargetField(model.photon,"photonDensity");
+			writeEandRParamSpace("photonDensity",model.photon.distribution,0,0);
+			writeRParamSpace("photonDensity_R",model.photon.distribution,0,0);
+		} else
+			readEandRParamSpace("photonDensity",model.photon.distribution,0,0);
 		
 		if (calculateJetEmission)
 			jetProcesses(model,"lumJet.txt");
@@ -74,16 +77,26 @@ int main()
 			if (calculateNTdistributions) {
 				if (calculateNTelectrons) {
 					injection(model.ntElectron, model);
-					writeEandRParamSpace("electronInjection",model.ntElectron.injection,0);
+					writeEandRParamSpace("electronInjection",model.ntElectron.injection,0,1);
+					writeRParamSpace("electronInjection_R", model.ntElectron.injection, 0, 0);
 					distributionNewE(model.ntElectron, model);
-					writeEandRParamSpace("electronDistribution",model.ntElectron.distribution,0);
+					writeEandRParamSpace("electronDistribution",model.ntElectron.distribution,0,1);
+					writeRParamSpace("electronDistribution_R", model.ntElectron.distribution, 0, 0);
+				} else {
+					readEandRParamSpace("electronInjection",model.ntElectron.injection,0,1);
+					readEandRParamSpace("electronDistribution",model.ntElectron.distribution,0,1);
 				}
 				
 				if (calculateNTprotons) {
 					injection(model.ntProton,model);
-					writeEandRParamSpace("protonInjection", model.ntProton.injection, 0);
+					writeEandRParamSpace("protonInjection", model.ntProton.injection, 0,1);
+					writeRParamSpace("protonInjection_R", model.ntProton.injection, 0, 0);
 					distributionNew(model.ntProton,model);
-					writeEandRParamSpace("protonDistribution", model.ntProton.distribution, 0);
+					writeEandRParamSpace("protonDistribution", model.ntProton.distribution, 0,1);
+					writeRParamSpace("protonDistribution_R", model.ntProton.distribution, 0, 0);
+				} else {
+					readEandRParamSpace("protonInjection",model.ntProton.injection,0,1);
+					readEandRParamSpace("protonDistribution",model.ntProton.distribution,0,1);
 				}
 				
 				if (calculateNeutronInj) {
@@ -95,27 +108,19 @@ int main()
 						jetNeutronDecay(model);
 				}
 				
-				if (calculateNonThermalLum)
+				if (calculateNonThermalLum) {
 					nonThermalRadiation(model,"lumNonThermal.dat");
+					writeEandRParamSpace("photonDensity",model.photon.distribution,0,0);
+					writeRParamSpace("photonDensity_R",model.photon.distribution,0,0);
+					writeEandRParamSpace("NTphotonDensity",model.ntPhoton.distribution,0,0);
+					writeRParamSpace("NTphotonDensity_R",model.ntPhoton.distribution,0,0);
+				} else {
+					readEandRParamSpace("photonDensity",model.photon.distribution,0,0);
+					readEandRParamSpace("NTphotonDensity",model.ntPhoton.distribution,0,0);
+				}
 				
-				/*
-				injectionChargedPion(model.ntChargedPion,model);
-				writeEandRParamSpace("pionInj",model.ntChargedPion.injection,0);
-				distributionFast(model.ntChargedPion,model);
-				writeEandRParamSpace("pionDist",model.ntChargedPion.distribution,0);
-				injectionMuon(model.ntMuon,model);
-				writeEandRParamSpace("muonInj",model.ntMuon.injection,0);
-				distributionFast(model.ntMuon,model);
-				writeEandRParamSpace("muonDist",model.ntMuon.distribution,0);
-
-				injectionPair(model.ntPair,model);
-				writeEandRParamSpace("secondaryPairsInj",model.ntPair.injection,0);
-				//writeEandRParamSpace("secondaryPairsInj2",model.ntPair.distribution,0);
-					
-				distributionFast(model.ntPair, model);
-				writeEandRParamSpace("secondaryPairsDist",model.ntPair.distribution,0);
-				pairProcesses(model, "ntPairtLum.txt");
-				*/
+				if (calculateSecondaries)
+					secondariesProcesses(model);
 			}
 		}
 	}

@@ -96,6 +96,8 @@ double RungeKuttaStep(fun2 f, double x, double y, double dx, const RungeKuttaOpt
 
 double integSimpson(double a, double b, fun1 f, size_t n, const RungeKuttaOpt& opt)
 {
+	a += 0.0001*abs(a);
+	b -= 0.0001*abs(b);
 	double dx = (b-a)/n;
 	double sum_even = 0.0;
 	for (size_t j=1; j <= n/2-1; j++)

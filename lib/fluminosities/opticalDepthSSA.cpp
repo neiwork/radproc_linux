@@ -62,16 +62,16 @@ double fSSA(double x, double E, const Particle& p, const double magneticField, c
 	return P2(x)*Psyn*deriv;  // funcion a integrar
 }
 
-double fSSA2(double x, double E, const Particle& p, const double magneticField, 
+double fSSA2(double x, double E, const Particle& p, const double magf, 
 				const SpaceCoord& psc)
 {
-	double cte = pow(3.0, 0.5)*P3(electronCharge)*magneticField/(planck*p.mass*cLight2);
+	double cte = pow(3.0, 0.5)*P3(electronCharge)*magf/(planck*p.mass*cLight2);
 
 	////////////// calculo el Psyn
-	double Echar = 3.0*electronCharge*planck*magneticField*P2(x)/(4.0*pi*P3(p.mass)*cLight*P2(cLight2));
+	double Echar = 3.0*electronCharge*planck*magf*P2(x)/(4.0*pi*P3(p.mass)*cLight*P2(cLight2));
 	double aux = E/Echar;  //aca el aux es el x real
 
-	double Psyn = (magneticField > 0.0) ? cte*1.85*pow(aux, (1.0 / 3.0))*exp(-aux) : 0.0;
+	double Psyn = (magf > 0.0) ? cte*1.85*pow(aux, (1.0 / 3.0))*exp(-aux) : 0.0;
 	//////////////////////////////////
 	
 //****  calculo la derivada de N(E)

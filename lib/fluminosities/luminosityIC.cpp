@@ -22,15 +22,15 @@ double cICemi(double u, double E, double mass, double phEmin)  //limite inferior
 	return std::max(phEmin,inf);  //puse la condicion Ega < s*Ee/1+s
 }
 
-double dICemi(double u, double E)         //limite superior   
+double dICemi(double u, double E, double phEmax)         //limite superior   
 {          
-
-	return E;  //esta es la condicion epsilon < Ega	                                 
+	return std::min(E,phEmax);  //esta es la condicion epsilon < Ega                               
 }
 
 
 
-double fICemi(double u, double t, double E, const Particle& creator, const SpaceCoord& distCoord, const ParamSpaceValues& tpf)   //funcion a integrar  u=Ee
+double fICemi(double u, double t, double E, const Particle& creator, const SpaceCoord& distCoord,
+				const ParamSpaceValues& tpf)   //funcion a integrar  u=Ee
 {    
 	double distCreator;
 	if (u < creator.emin() || u> creator.emax()){
@@ -58,19 +58,19 @@ double fICemi(double u, double t, double E, const Particle& creator, const Space
 	return function;
 }
 
-double luminosityIC(double E, const Particle& creator, const SpaceCoord& distCoord, const ParamSpaceValues& tpf, double phEmin)
+double luminosityIC(double E, const Particle& creator, const SpaceCoord& distCoord, const ParamSpaceValues& tpf,
+					double phEmin, double phEmax)
 {
 	
 	double mass = creator.mass;
-	
 	double cte  = 3.0*crossSectionThomson(creator.mass)*P2(creator.mass)*pow(cLight,5)/4;
 
 	double integral = RungeKutta(creator.emin(), creator.emax(),
 		[E,mass,phEmin](double u){
 			return cICemi(u,E,mass,phEmin);
 		}, 
-		[E](double u){
-			return dICemi(u,E);
+		[E,phEmax](double u){
+			return dICemi(u,E,phEmax);
 		}, 
 		[E,&creator,&distCoord, tpf](double u, double t){
 			return fICemi(u, t,E,creator, distCoord, tpf); 

@@ -19,6 +19,8 @@ enum ProgramModule {Module_Main,
 					Module_thermalLuminosities,
 					Module_thermalCompton,
 					Module_luminosities,
+					Module_pionInjection,
+					Module_muonInjection,
 					Module_pairInjection,
 					Module_Message}; 
 

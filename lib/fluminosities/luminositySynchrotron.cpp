@@ -64,7 +64,7 @@ double fSyn2(double x, double E, const Particle& creator, double magf, const Spa
 	
 	double aux = E/Echar;  //aca el aux es el x real
 
-	double result = cte*1.85*distCreator*pow(aux,1.0/3.0)*exp(-aux);  
+	double result = cte*1.85*distCreator*pow(aux,1.0/3.0)*exp(-aux);
 
 	return result;
 }
@@ -96,7 +96,11 @@ double fSyn3(double Ee, double E, const Particle& creator, double magf, const Sp
 	for (size_t jMu=0;jMu<nMu;jMu++) {
 		double Ec = Constant * sqrt(1.0-mu*mu);
 		double x = E/Ec;
-		double integ = RungeKuttaSimple(x,10.0,[&](double xp) {return gsl_sf_bessel_Knu(5.0/3.0,xp);});
+		double integ = (x < 10.0) ? integSimpson(log(x),log(10.0),[&](double logxp)
+						{
+							double xp = exp(logxp);
+							return gsl_sf_bessel_Knu(5.0/3.0,xp)*xp;
+						},50) : 0.0;
 		sum += dMu*integ;
 		mu += dMu;
 	}
@@ -106,8 +110,11 @@ double fSyn3(double Ee, double E, const Particle& creator, double magf, const Sp
 double luminositySynchrotron3(double E, const Particle& c, const SpaceCoord& psc, double magf)
 {
 	double constant = 0.5*P2(electronCharge)*E/(planck*cLight*planck)/sqrt(3.0) * (4*pi);
-	double integralS = RungeKuttaSimple(c.emin(),c.emax(),[&](double Ee) {
-		return fSyn3(Ee,E,c,magf,psc);});
+	double integralS = integSimpson(log(c.emin()),log(c.emax()),[&](double logEe) 
+			{
+				double Ee = exp(logEe);
+				return Ee*fSyn3(Ee,E,c,magf,psc);
+			},50);
 	return (integralS > 0.0) ? constant*integralS*E : 0.0;
 }
 

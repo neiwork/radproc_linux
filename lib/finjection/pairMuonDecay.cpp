@@ -49,11 +49,8 @@ double fMuonDec(double Gep, double Gmu, Particle& c, const SpaceCoord& distCoord
 
 }
 
-
-
 double pairMuonDecay(double E, Particle& c, const SpaceCoord& distCoord)
 {	
-	
 	double inf = 2.0;
 	double sup = 104.0;
 
@@ -76,9 +73,111 @@ double pairMuonDecay(double E, Particle& c, const SpaceCoord& distCoord)
 
 }
 
-
+double pairMuonDecayNew(double Eee, Particle& c, const SpaceCoord& distCoord)
+{	
+	double inf = 1.0;
+	double sup = 104.0;
+	double gg = Eee/electronRestEnergy;
+	double ss = sqrt(gg*gg-1.0);
 	
+	double integ1 = integSimpson(0.0,1.0,[gg,ss,sup,&c,&distCoord](double sp)
+		{
+			double gg_p = sqrt(sp*sp+1.0);
+			double Pfun = 2.0*gg_p*gg_p/P3(sup) * (3.0-2.0*gg_p/sup);
+			double inf2 = gg*gg_p-ss*sp;
+			double sup2 = gg*gg_p+ss*sp;
+			double infgm = c.emin()/(muonMass*cLight2);
+			double supgm = c.emax()/(muonMass*cLight2);
+			double integ11 = 0.0;
+			double integ12 = 0.0;
+			double spMax = sqrt(P2(min(sup2,supgm))-1.0);
+			if (inf2 < infgm) {
+				integ11 = integSimpson(0.0,1.0,[&c,&distCoord](double t)
+				{
+					double gmu = sqrt(t*t+1.0);
+					double Emu = gmu*muonMass*cLight2;
+					double Nmu = (Emu < c.emax()) ? c.distribution.interpolate({{0,Emu}},&distCoord) : 0.0;
+					double tdecay = muonMeanLife*gmu;
+					double Qmu = Nmu / tdecay;
+					return Qmu / gmu;
+				},5);
+				integ12 = integSimpson(0.0,log(spMax),[&c,&distCoord](double logt)
+				{
+					double gmu = sqrt(exp(2.0*logt)+1.0);
+					double Emu = gmu*muonMass*cLight2;
+					double Nmu = (Emu < c.emax()) ? c.distribution.interpolate({{0,Emu}},&distCoord) : 0.0;
+					double tdecay = muonMeanLife*gmu;
+					double Qmu = Nmu / tdecay;
+					return exp(logt) * Qmu / gmu;
+				},30);
+			} else {
+				double spMin = sqrt(P2(inf2)-1.0);
+				integ12 = integSimpson(log(spMin),log(spMax),[&c,&distCoord](double logt)
+				{
+					double gmu = sqrt(exp(2.0*logt)+1.0);
+					double Emu = gmu*muonMass*cLight2;
+					double Nmu = (Emu < c.emax()) ? c.distribution.interpolate({{0,Emu}},&distCoord) : 0.0;
+					double tdecay = muonMeanLife*gmu;
+					double Qmu = Nmu / tdecay;
+					return exp(logt) * Qmu / gmu;
+				},30);
+			}
+			return (integ11+integ12) * Pfun / gg_p;
+		},5);
+	double spMax = sqrt(P2(sup)-1.0);
+	double integ2 = integSimpson(0.0,log(spMax),[gg,ss,sup,&c,&distCoord](double logsp)
+		{
+			double sp = exp(logsp);
+			double gg_p = sqrt(sp*sp+1.0);
+			double Pfun = 2.0*gg_p*gg_p/P3(sup) * (3.0-2.0*gg_p/sup);
+			double inf2 = gg*gg_p-ss*sp;
+			double sup2 = gg*gg_p+ss*sp;
+			double infgm = c.emin()/(muonMass*cLight2);
+			double supgm = c.emax()/(muonMass*cLight2);
+			double integ11 = 0.0;
+			double integ12 = 0.0;
+			double spMax = sqrt(P2(min(sup2,supgm))-1.0);
+			if (inf2 < infgm) {
+				integ11 = integSimpson(0.0,1.0,[&c,&distCoord](double t)
+				{
+					double gmu = sqrt(t*t+1.0);
+					double Emu = gmu*muonMass*cLight2;
+					double Nmu = (Emu < c.emax()) ? c.distribution.interpolate({{0,Emu}},&distCoord) : 0.0;
+					double tdecay = muonMeanLife*gmu;
+					double Qmu = Nmu / tdecay;
+					return Qmu / gmu;
+				},5);
+				integ12 = integSimpson(0.0,log(spMax),[&c,&distCoord](double logt)
+				{
+					double gmu = sqrt(exp(2.0*logt)+1.0);
+					double Emu = gmu*muonMass*cLight2;
+					double Nmu = (Emu < c.emax()) ? c.distribution.interpolate({{0,Emu}},&distCoord) : 0.0;
+					double tdecay = muonMeanLife*gmu;
+					double Qmu = Nmu / tdecay;
+					return exp(logt) * Qmu / gmu;
+				},30);
+			} else {
+				double spMin = sqrt(P2(inf2)-1.0);
+				integ12 = integSimpson(log(spMin),log(spMax),[&c,&distCoord](double logt)
+				{
+					double gmu = sqrt(exp(2.0*logt)+1.0);
+					double Emu = gmu*muonMass*cLight2;
+					double Nmu = (Emu < c.emax()) ? c.distribution.interpolate({{0,Emu}},&distCoord) : 0.0;
+					double tdecay = muonMeanLife*gmu;
+					double Qmu = Nmu / tdecay;
+					return exp(logt) * Qmu / gmu;
+				},30);
+			}
+			return sp * (integ11+integ12) * Pfun / gg_p;
+		},30);
+	return (muonMass/electronMass)*(integ1+integ2);
+}
 
+double pairMuonDecayNew2(double Eee, Particle& c, const SpaceCoord& distCoord)
+{	
+	double factor = 3.0;
+	double Qmu = (Eee*factor > c.emin() && Eee*factor < c.emax()) ?
+					c.injection.interpolate({{0,Eee*factor}},&distCoord) : 0.0;
+	return factor*2.0*Qmu;
+}
 
-	
-	

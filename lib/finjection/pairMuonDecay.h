@@ -8,3 +8,5 @@
  
 //double pairMuonDecay(double E, Particle& particle, Particle& creator) ;
 double pairMuonDecay(double E, Particle& c, const SpaceCoord& distCoord);
+double pairMuonDecayNew(double E, Particle& c, const SpaceCoord& distCoord);
+double pairMuonDecayNew2(double E, Particle& c, const SpaceCoord& distCoord);

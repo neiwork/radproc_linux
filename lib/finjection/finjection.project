@@ -8,6 +8,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="pairgg.h"/>
+    <File Name="pairgg.cpp"/>
     <File Name="pairMuonDecay.h"/>
     <File Name="pairMuonDecay.cpp"/>
     <File Name="pairBH.h"/>
@@ -22,8 +24,6 @@
     <File Name="pgammaPairInj.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="pairInjectionExact.h" ExcludeProjConfig=""/>
     <File Name="pairInjectionExact.cpp" ExcludeProjConfig=""/>
-    <File Name="pairInjection.h" ExcludeProjConfig=""/>
-    <File Name="pairInjection.cpp" ExcludeProjConfig=""/>
     <File Name="pairAnnihilation.h" ExcludeProjConfig="Release;Debug;"/>
     <File Name="pairAnnihilation.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="neutronPp.h" ExcludeProjConfig=""/>

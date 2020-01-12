@@ -124,7 +124,7 @@ void flareProcesses(State& st) {
 		//////////////////////////////////////////////////////
 		flareEmission2(st,st.ntPair,file_cm,file_mm,fileNIR,fileX);
 			
-		if (i==10) writeEandRParamSpace("electronDis",st.ntPair.distribution,0);
+		if (i==10) writeEandRParamSpace("electronDis",st.ntPair.distribution,0,0);
 	}
 	cout << "Total energy radiated = " << Eradiated << endl;
 
