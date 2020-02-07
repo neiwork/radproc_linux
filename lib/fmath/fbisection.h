@@ -4,7 +4,4 @@
 #include "physics.h"
 #include <math.h>
 
-
-
-
-double fbisection(fun1,double,double,double);
+int Bisect(fun1,double,double,double&);

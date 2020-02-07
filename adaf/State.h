@@ -16,6 +16,7 @@ public:
     Particle ntNeutron;
 	Particle ntChargedPion;
 	Particle ntMuon;
+	Particle neutrino;
 	Particle ntPair;
     
 	ParamSpaceValues magf;
@@ -23,6 +24,7 @@ public:
     ParamSpaceValues denf_e;
     ParamSpaceValues tempElectrons, tempIons;
 	ParamSpaceValues thetaH, height;
+	ParamSpaceValues tau_gg;
 
 	State(boost::property_tree::ptree& cfg);
 	

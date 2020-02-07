@@ -115,6 +115,10 @@ void show_module(ProgramModule module)
             printf("Electron Distribution ");
             break;
 		
+		case Module_protonInjection:
+            printf("Proton Injection ");
+            break;
+		
 		case Module_protonDistribution:
             printf("Proton Distribution ");
             break;
@@ -130,21 +134,49 @@ void show_module(ProgramModule module)
 		case Module_neutronInjection:
 			printf("Neutron Injection");
 			break;
+		
+		case Module_neutronDistribution:
+			printf("Neutron Distribution");
+			break;
 			
 		case Module_luminosities:
 			printf("Non-thermal luminosities");
+			break;
+		
+		case Module_secondariesTimescales:
+			printf("Secondary particles timescales");
+			break;
+		
+		case Module_secondariesLuminosities:
+			printf("Secondary particles luminosities");
 			break;
 			
 		case Module_pionInjection:
 			printf("Charged pion injection");
 			break;
+			
+		case Module_pionDistribution:
+			printf("Charged pion distribution");
+			break;
 		
 		case Module_muonInjection:
 			printf("Muon injection");
 			break;
+			
+		case Module_muonDistribution:
+			printf("Muon distribution");
+			break;
+			
+		case Module_neutrinoInjection:
+			printf("Neutrino injection");
+			break;
 		
 		case Module_pairInjection:
 			printf("Secondary pair injection");
+			break;
+			
+		case Module_pairDistribution:
+			printf("Secondary pair distribution");
 			break;
 			
   /*      default:

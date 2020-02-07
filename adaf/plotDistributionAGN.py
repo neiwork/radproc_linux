@@ -19,7 +19,8 @@ logeVpion,r,lognpion = np.loadtxt('pionDistribution.dat',unpack=True)
 logeVmuon,r,logqmuon = np.loadtxt('muonInjection.dat',unpack=True)
 logeVmuon,r,lognmuon = np.loadtxt('muonDistribution.dat',unpack=True)
 logeVpair,r,logqpair = np.loadtxt('secondaryPairInjection.dat',unpack=True)
-NT_logeV,NT_logSye,NT_logSyp,NT_logIC,NT_logpp,NT_logpg,NT_logAbs = np.loadtxt('lumNonThermal.dat',unpack=True,skiprows=1)
+NT_logeV,NT_logSyp,NT_logIC,NT_logpp,NT_logpg,NT_logAbs = np.loadtxt('lumNonThermal.dat',unpack=True,skiprows=1)
+NT_logeVs,NT_logSys,NT_logSymu,NT_logSypi,NT_logICs,NT_logpip,NT_logpig,NT_logAbs = np.loadtxt('secondariesLum.dat',unpack=True,skiprows=1)
 logeVpairBH,r,logqpairBH = np.loadtxt('secondaryPairInjection_BH.dat',unpack=True)
 
 logerge = np.log10(np.power(10,logeVe)*1.6e-12)
@@ -35,7 +36,7 @@ log_gpion = logeVpion - 8.145
 
 x_ge = [log_ge[0]+.5,log_ge[-1]]
 x_gp = [log_gp[0]+.5,log_gp[-1]]
-y_p = [30,50]
+y_p = [35,55]
 y_pq = [35,44]
 y_e = [30,45]
 y_eq = [35,44]
@@ -44,6 +45,34 @@ nR = 30
 f = 1
 nE = 100
 colors = np.arange(nR)/nR
+
+fig, ax1 = plt.subplots()
+
+ax1.tick_params(axis='both',labelsize=15)
+ax1.set_xlim(x_gp)
+ax1.set_ylim(y_p)
+ax1.set_xlabel(r'$\mathrm{Log}~\gamma_p$',fontsize=19)
+ax1.set_ylabel(r'$\mathrm{Log}(E^2 N_\mathrm{p}(E) ~ [\mathrm{erg~cm^{-3}}])$',fontsize=19)
+
+npTot = np.zeros(nE)
+npionTot = np.zeros(nE)
+nmuonTot = np.zeros(nE)
+
+for r1 in np.arange(nR//f):
+    ax1.plot(log_gp[f*r1*nE:(f*r1+1)*nE],2.0*logergp[f*r1*nE:(f*r1+1)*nE] +
+             lognp[f*r1*nE:(f*r1+1)*nE],color=viridis(colors[r1*f]))
+
+for r1 in np.arange(nR):
+     for e in np.arange(nE):
+        #npionTot[e] = npionTot[e] + np.power(10,lognpion[r1*nE+e])
+        npTot[e] = npTot[e] + np.power(10,lognp[r1*nE+e])
+        #nmuonTot[e] = nmuonTot[e] + np.power(10,lognmuon[r1*nE+e])
+
+ax1.plot(log_gp[:nE],2.0*logergp[:nE]+np.log10(npTot),ls='-',lw=4,color='red',label='Total')
+ax1.legend(loc='best',fontsize=15)
+plt.tight_layout()
+
+fig.savefig('protonDist.pdf')
 
 fig, ax1 = plt.subplots()
 
@@ -70,33 +99,6 @@ plt.tight_layout()
 
 fig.savefig('electronDist.pdf')
 
-fig, ax1 = plt.subplots()
-
-ax1.tick_params(axis='both',labelsize=15)
-ax1.set_xlim(x_gp)
-ax1.set_ylim(y_p)
-ax1.set_xlabel(r'$\mathrm{Log}~\gamma_p$',fontsize=19)
-ax1.set_ylabel(r'$\mathrm{Log}(E^2 N_\mathrm{p}(E) ~ [\mathrm{erg~cm^{-3}}])$',fontsize=19)
-
-npTot = np.zeros(nE)
-npionTot = np.zeros(nE)
-nmuonTot = np.zeros(nE)
-
-for r1 in np.arange(nR//f):
-    ax1.plot(log_gp[f*r1*nE:(f*r1+1)*nE],2.0*logergp[f*r1*nE:(f*r1+1)*nE] +
-             lognp[f*r1*nE:(f*r1+1)*nE],color=viridis(colors[r1*f]))
-
-for r1 in np.arange(nR):
-     for e in np.arange(nE):
-        npionTot[e] = npionTot[e] + np.power(10,lognpion[r1*nE+e])
-        npTot[e] = npTot[e] + np.power(10,lognp[r1*nE+e])
-        nmuonTot[e] = nmuonTot[e] + np.power(10,lognmuon[r1*nE+e])
-
-ax1.plot(log_gp[:nE],2.0*logergp[:nE]+np.log10(npTot),ls='-',lw=4,color='red',label='Total')
-ax1.legend(loc='best',fontsize=15)
-plt.tight_layout()
-
-fig.savefig('protonDist.pdf')
 
 
 fig, ax1 = plt.subplots()
@@ -215,10 +217,11 @@ ax1.plot(logeVe[:nE],2.0*logerge[:nE]+np.log10(qeTot),ls='-',lw=4,color='cyan',l
 ax1.plot(logeVpion[:nE],2.0*logergpion[:nE]+np.log10(qpionTot),ls='-.',lw=3,color='blue',label='Pions')
 ax1.plot(logeVmuon[:nE],2.0*logergmuon[:nE]+np.log10(qmuonTot),ls=':',lw=3,color='green',label='Muons')
 ax1.plot(logeVpair[:nE],2.0*logergpair[:nE]+np.log10(qpairTot),ls='-',lw=4,color='yellow',label='Pairs')
-ax1.plot(logeVpairBH[:nE],2.0*logergpairBH[:nE]+np.log10(qpairTotBH),ls='-',lw=4,color='purple',label='PairsBH')
 ax1.plot(NT_logeV,NT_logpp,ls='--',lw=2,color='purple',label='pp')
+ax1.plot(NT_logeVs,NT_logSys,ls='--',lw=2,color='red',label='SyPairs')
+ax1.plot(NT_logeVs,NT_logICs,ls='--',lw=2,color='orange',label='ICPairs')
 ax1.plot(NT_logeV,NT_logpg,ls=':',lw=2,color='cyan',label='pg')
-ax1.legend(loc='best',fontsize=15)
+ax1.legend(loc='best',fontsize=10)
 plt.tight_layout()
 
 fig.savefig('protonCascades.pdf')

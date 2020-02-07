@@ -19,6 +19,10 @@ double pgammaPionInj(double E, const Particle& creator, const ParamSpaceValues& 
 
 double omegaPH(double E, const Particle& particle, const ParamSpaceValues& tpf, const SpaceCoord& distCoord,
 					double tpEmin, double tpEmax);  //E=Ep  
+double omegaPHsimple(double E, const Particle& particle, const ParamSpaceValues& tpf, const SpaceCoord& distCoord,
+					double tpEmin, double tpEmax);  //E=Ep  
 
 double t_pion_PH(double E, const Particle& particle, const ParamSpaceValues& tpf, const SpaceCoord& distCoord,
+					double tpEmin, double tpEmax);
+double t_pion_PHsimple(double E, const Particle& particle, const ParamSpaceValues& tpf, const SpaceCoord& distCoord,
 					double tpEmin, double tpEmax);

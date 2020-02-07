@@ -390,11 +390,7 @@ void cNew(State& st, Vector& p, Vector redshift)
 	st.photon.ps.iterate([&](const SpaceIterator& iR) {
 		double lognt = log10(boltzmann*st.tempElectrons.get(iR)/electronRestEnergy);
 		double aux = ntVec[0];
-		size_t pos_r = 0;
-		while (aux < lognt) {
-			pos_r++;
-			aux = ntVec[pos_r];
-		}
+		size_t pos_r = fbinarySearch(ntVec,0,nTempCompton,lognt)+1;
 		double lognt1 = ntVec[pos_r-1];
 		double lognt2 = ntVec[pos_r];
 		size_t jE = 0;
@@ -402,11 +398,7 @@ void cNew(State& st, Vector& p, Vector redshift)
 			double logom = log10(iRE.val(DIM_E)/redshift[jR]/electronRestEnergy);
 			if (logom > omVec[0] && logom < omVec[nNuCompton-1]) {
 				double aux = omVec[0];
-				size_t pos_om = 0;
-				while (aux < logom) {
-					pos_om++;
-					aux = omVec[pos_om];
-				}
+				size_t pos_om = fbinarySearch(omVec,0,nNuCompton,logom)+1;
 				double logom1 = omVec[pos_om-1];
 				double logom2 = omVec[pos_om];
 				size_t jjE = 0;
@@ -414,11 +406,7 @@ void cNew(State& st, Vector& p, Vector redshift)
 					double logomp = log10(iREE.val(DIM_E)/redshift[jR]/electronRestEnergy);
 					if (logomp > ompVec[0] && logomp < ompVec[nNuCompton-1]) {
 						double aux = ompVec[0];
-						size_t pos_omp = 0;
-						while (aux < logomp) {
-							pos_omp++;
-							aux = ompVec[pos_omp];
-						}
+						size_t pos_omp = fbinarySearch(ompVec,0,nNuPrimCompton,logomp)+1;
 						double logomp1 = ompVec[pos_omp-1];
 						double logomp2 = ompVec[pos_omp];
 						

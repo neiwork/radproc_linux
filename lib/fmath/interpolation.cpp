@@ -80,6 +80,40 @@ int binarySearch(const Vector& array, int lowerbound, int upperbound, double key
 
 }
 
+
+int fbinarySearch(float *array, int lowerbound, int upperbound, double key)
+{                               
+	/*array es el arreglo de la dimension en la que interpolo
+	key es el valor en el que interpolo
+	*/
+
+	int position = 0;
+	int comparisonCount = 1;    //count the number of comparisons (optional)
+
+	// To start, find the subscript of the middle position.
+	
+//  i=0
+//	while (E > key[i] && i < (size - 1))
+	//	i = i + 1;
+
+	while (!(array[position] < key && array[position + 1] > key))
+	{
+		position = (lowerbound + upperbound) / 2;
+		if (array[position] > key){
+			upperbound = position;
+		}
+		else{
+			lowerbound = position;
+		}
+	}
+
+	return position;
+
+	/*if (array[position] < key) return position;
+	else if (array[position] > key) return position-1; //me quedo con el anterior al valor de la key
+	else std::cout << "error";*/ 
+}
+
 //double interpol(double& E, const Vector& ener, const Vector& lum, const int last, const int first=0);
 double interpol(double& E, const Vector& key, const Vector& val, const int size, const int base) //const int first=0)
 {                                                                             //el igual indica q puedo llamar sin poner

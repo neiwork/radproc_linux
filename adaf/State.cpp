@@ -18,7 +18,9 @@ State::State(boost::property_tree::ptree& cfg):
     ntNeutron{ "ntNeutron" },
 	ntChargedPion{ "ntChargedPion" },
 	ntMuon{ "ntMuon" },
+	neutrino{ "neutrino" },
 	ntPair{ "ntPair" },
+	tau_gg(ntPhoton.ps, false),
     magf(ntPhoton.ps, false),
     denf_i(ntPhoton.ps, false),
     denf_e(ntPhoton.ps, false),
@@ -34,6 +36,7 @@ State::State(boost::property_tree::ptree& cfg):
         particles.push_back(&ntNeutron);
 		particles.push_back(&ntChargedPion);
 		particles.push_back(&ntMuon);
+		particles.push_back(&neutrino);
 		particles.push_back(&ntPair);
         for (auto p : particles) {
             initializeParticle(*p, cfg);
@@ -74,6 +77,7 @@ State::State(boost::property_tree::ptree& cfg):
             double r=i.val(DIM_R);
             return height_fun(r);
         });
+		tau_gg.initialize();
 }
 
 Dimension* State::createDimension(Particle& p, string dimid, 

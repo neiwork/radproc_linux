@@ -75,6 +75,7 @@ int main()
 			}
 		
 			if (calculateNTdistributions) {
+
 				if (calculateNTelectrons) {
 					injection(model.ntElectron, model);
 					writeEandRParamSpace("electronInjection",model.ntElectron.injection,0,1);
@@ -91,7 +92,8 @@ int main()
 					injection(model.ntProton,model);
 					writeEandRParamSpace("protonInjection", model.ntProton.injection, 0,1);
 					writeRParamSpace("protonInjection_R", model.ntProton.injection, 0, 0);
-					distributionNew(model.ntProton,model);
+					//distributionMultiZone(model.ntProton,model);
+					distributionFokkerPlanckMultiZone(model.ntProton,model);
 					writeEandRParamSpace("protonDistribution", model.ntProton.distribution, 0,1);
 					writeRParamSpace("protonDistribution_R", model.ntProton.distribution, 0, 0);
 				} else {
@@ -114,9 +116,12 @@ int main()
 					writeRParamSpace("photonDensity_R",model.photon.distribution,0,0);
 					writeEandRParamSpace("NTphotonDensity",model.ntPhoton.distribution,0,0);
 					writeRParamSpace("NTphotonDensity_R",model.ntPhoton.distribution,0,0);
+					writeEandRParamSpace("opticalDepth_gg",model.tau_gg,0,0);
 				} else {
 					readEandRParamSpace("photonDensity",model.photon.distribution,0,0);
 					readEandRParamSpace("NTphotonDensity",model.ntPhoton.distribution,0,0);
+					readEandRParamSpace("NTphotonDensity",model.ntPhoton.injection,0,0);
+					readEandRParamSpace("opticalDepth_gg",model.tau_gg,0,0);
 				}
 				
 				if (calculateSecondaries)

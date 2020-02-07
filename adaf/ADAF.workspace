@@ -13,15 +13,14 @@
     <WorkspaceConfiguration Name="Debug" Selected="no">
       <Environment/>
       <Project Name="adaf" ConfigName="Debug"/>
+      <Project Name="finjection" ConfigName="Debug"/>
+      <Project Name="flosses" ConfigName="Debug"/>
       <Project Name="fluminosities" ConfigName="Debug"/>
       <Project Name="fmath" ConfigName="Debug"/>
       <Project Name="fparameters" ConfigName="Debug"/>
       <Project Name="fparticle" ConfigName="Debug"/>
-      <Project Name="adaf" ConfigName="Debug"/>
-      <Project Name="nrMath" ConfigName="Debug"/>
       <Project Name="inout" ConfigName="Debug"/>
-      <Project Name="flosses" ConfigName="Debug"/>
-      <Project Name="finjection" ConfigName="Debug"/>
+      <Project Name="nrMath" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>

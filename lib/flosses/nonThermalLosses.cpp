@@ -1,6 +1,7 @@
 #include "nonThermalLosses.h"
 #include <fparameters/parameters.h>
 #include <fmath/physics.h>
+#include <gsl/gsl_math.h>
 #include <boost/property_tree/ptree.hpp>
 
 double adiabaticLosses(double E, double z, double vel_lat, double gamma)  //en [erg/s]
@@ -37,25 +38,45 @@ double diffusionTimePerpendicular(double E, double height, double B)
 	return height*height/diffCoeff;
 }
 
+double diffCoeff_p(double E, Particle& p, double height, double B, double rho)
+{
+	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
+	double q = GlobalConfig.get<double>("nonThermal.injection.SDA.powerSpectrumIndex");
+	double g = E / (p.mass*cLight2);
+	double kMin = 1.0/height;
+	double vA = B / sqrt(4.0*pi*rho);
+	double rL = E/(electronCharge*B);
+	return zeda * gsl_pow_2(p.mass*cLight)* (cLight*kMin) *gsl_pow_2(vA/cLight) * pow(rL*kMin,q-2) * g*g;
+}
+
+double diffCoeff_g(double g, Particle& p, double height, double B, double rho)
+{
+	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
+	double q = GlobalConfig.get<double>("nonThermal.injection.SDA.powerSpectrumIndex");
+	double kMin = 1.0/height;
+	double vA = B / sqrt(4.0*pi*rho);
+	double rL = g*p.mass*cLight2/(electronCharge*B);
+	return zeda * (cLight*kMin) *gsl_pow_2(vA/cLight) * pow(rL*kMin,q-2) * g*g;
+}
+
+
 double diffusionTimeTurbulence(double E, double height, Particle& p, double B)   //en [s]^-1
 {
 	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
 	double q = GlobalConfig.get<double>("nonThermal.injection.SDA.powerSpectrumIndex");
 	double larmorRadius = E/(electronCharge*B);
-	double gamma = E/(p.mass*cLight2);
 	double tEscape = height/cLight;
-	return 9.0*zeda*tEscape*pow(larmorRadius/height * gamma,q-2.0);
+	return 9.0*zeda*tEscape*pow(larmorRadius/height, q-2.0);
 }
 
-double accelerationTimeSDA(double E, double r, Particle& p, double B, double height, double rho)
+double accelerationTimeSDA(double E, Particle& p, double B, double height, double rho)
 {
 	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
 	double q = GlobalConfig.get<double>("nonThermal.injection.SDA.powerSpectrumIndex");
 	double larmorRadius = E/(electronCharge*B);
-	double gamma = E / (p.mass*cLight2);
 	double tEscape = height/cLight;
-	double alfvenVel = B*B/sqrt(4.0*pi*rho);
-	return (1.0/zeda) / P2(alfvenVel/cLight) * tEscape * pow(larmorRadius*gamma/height,2.0-q);
+	double alfvenVel = B/sqrt(4.0*pi*rho);
+	return (1.0/zeda) / P2(alfvenVel/cLight) * tEscape * pow(larmorRadius/height,2.0-q);
 }
 
 /*

@@ -26,24 +26,29 @@ int zbrac2(fun1 func,double& x1,double& x2)
 
 #define JMAX 40
 
-double fbisection(fun1 func,double x1,double x2,double xacc)
-    /* Using bisection, find the root of a function func known to lie between x1 and x2. The root,
-    returned as rtbis, will be refined until its accuracy is ±xacc. */
+//===========================================================================
+int Bisect(fun1 Func, double a, double b, double &x)
+//---------------------------------------------------------------------------
+// Determines a real root x of function Func isolated in interval [a,b] by
+// the bisection method
+// Error code: 0 - normal execution
 {
-    void nrerror(char error_text[]);
-    int j;
-    double dx,f,fmid,xmid,rtb;
-    
-    //zbrac2(func,x1,x2);  //ver si esto va comentado
-    f=func(x1);
-    fmid=func(x2);
-    if (f*fmid >= 0.0) nrerror("Root must be bracketed for bisection in rtbis");
-    rtb = f < 0.0 ? (dx=x2-x1,x1) : (dx=x1-x2,x2);            // Orient the search so that f>0
-    for (j=1;j<=JMAX;j++) {                                                   // lies at x+dx.
-        fmid=func(xmid=rtb+(dx *= 0.5));                             // Bisection loop.
-        if (fmid <= 0.0) rtb=xmid;
-        if (fabs(dx) < xacc || fmid == 0.0) return rtb;
-    }
-    nrerror("Too many bisections in rtbis");
-    return 0.0;                                                                              // Never get here.
+	const double eps = 1e-10;		// relative precision of root
+	const int itmax = 100;			// max. no. of iterations
+	double fa, fb, fx;
+	int it;
+	x = a; fa = Func(x);
+	if (fabs(fa) == 0e0) return 0;	// is a the root?
+	x = b; fb = Func(x);
+	if (fabs(fb) == 0e0) return 0;	// is b the root?
+	if (fa*fb > 0) return 1;		// [a,b] does not contain a root
+									// or contains several roots
+	for (it=1; it<=itmax; it++) {
+		x = 0.5e0 * (a + b);		// new approximation
+		fx = Func(x);
+		if (fa*fx > 0) a = x; else b = x;	// choose new bounding interval
+		if (((b-a) <= eps*fabs(x)) || (fabs(fx) <= eps)) return 0;
+	}
+	cout << "Bisect: max. no. of iterations exceeded !" << endl;
+	return 2;
 }

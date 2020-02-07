@@ -8,6 +8,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="neutrinoInj.cpp"/>
+    <File Name="neutrinoInj.h"/>
     <File Name="pairgg.h"/>
     <File Name="pairgg.cpp"/>
     <File Name="pairMuonDecay.h"/>
@@ -30,8 +32,6 @@
     <File Name="neutronPp.cpp" ExcludeProjConfig=""/>
     <File Name="neutronPgamma.h" ExcludeProjConfig=""/>
     <File Name="neutronPgamma.cpp" ExcludeProjConfig=""/>
-    <File Name="neutrinoInjection.h" ExcludeProjConfig="Release;Debug;"/>
-    <File Name="neutrinoInjection.cpp" ExcludeProjConfig="Release;Debug;"/>
     <File Name="muonInj.h" ExcludeProjConfig=""/>
     <File Name="muonInj.cpp" ExcludeProjConfig=""/>
   </VirtualDirectory>

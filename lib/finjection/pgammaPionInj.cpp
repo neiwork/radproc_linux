@@ -55,6 +55,40 @@ double omegaPH(double E, const Particle& p, const ParamSpaceValues& tpf, const S
 		//bind(fOmegaPHPion,_1,_2,E,mass,tpf)
 
 	return cte*integral/P2(E);
+}
+
+double integSigmaPG(double Eph, double g)
+{
+	double var = 2.0*Eph*g;
+	if (var > 3.2e-4 && var < 8.0e-4)
+		return 3.4e-28 * (var*var-1.03e-7);
+	else if (var > 8.0e-4)
+		return 1.83e-34 + 1.2e-28 * (var*var-6.42e-7);
+	else
+		return 0.0;
+}
+
+double integKSigmaPG(double Eph, double g)
+{
+	double var = 2.0*Eph*g;
+	if (var > 3.2e-4 && var < 8.0e-4)
+		return 0.2 * 3.4e-28 * (var*var-1.03e-7);
+	else if (var > 8.0e-4)
+		return 0.2 * 1.83e-34 + 0.6 * 1.2e-28 * (var*var-6.42e-7);
+	else
+		return 0.0;
+}
+
+double omegaPHsimple(double E, const Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& distCoord,
+				double tpEmin, double tpEmax)
+{
+	double g = E / (p.mass*cLight2);
+	double inf = pionThresholdPH/(2.0*g);
+	return 0.25*cLight/(g*g) * integSimpsonLog(inf,tpEmax,[g,&tpf,&distCoord](double Eph)
+				{
+					double nPh = tpf.interpolate({{0,Eph}},&distCoord);
+					return nPh/(Eph*Eph) * integSigmaPG(Eph,g);
+				},30);
 }	
 
 double t_pion_PH(double E, const Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, 
@@ -75,16 +109,29 @@ double t_pion_PH(double E, const Particle& p, const ParamSpaceValues& tpf, const
 	return cte*integral/P2(E);
 }
 
+double t_pion_PHsimple(double E, const Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& distCoord, 
+					double tpEmin, double tpEmax)
+{
+	double g = E/(p.mass*cLight2);
+	double inf = pionThresholdPH/(2.0*g);
+	return 0.25*cLight/(g*g) * integSimpsonLog(inf,tpEmax,[g,&tpf,&distCoord](double Eph)
+				{
+					double nPh = tpf.interpolate({{0,Eph}},&distCoord);
+					return nPh/(Eph*Eph) * integSigmaPG(Eph,g);
+				},30);
+	
+}
 
 //double pgammaPionInj(double E, Vector Nproton, Particle& particle, Particle& proton, fun1 tpf)  
 double pgammaPionInj(double E, const Particle& creator,	const ParamSpaceValues& tpf, 
 						const SpaceCoord& distCoord, double tpEmin, double tpEmax)
 {
 	double cincoE = 5.0*E;
-	double protonDist = creator.distribution.interpolate({ { 0, cincoE } }, &distCoord); //proton.dist(cincoE);
+	double protonDist = (cincoE > creator.emin() && cincoE < creator.emax()) ? 
+					creator.distribution.interpolate({ { 0, cincoE } }, &distCoord) : 0.0; //proton.dist(cincoE);
 
-	double t_1   = t_pion_PH(cincoE, creator, tpf, distCoord, tpEmin, tpEmax);     //esto no es lossesPH porque son perdidas solo del canal de produccion de piones
-	double omega = omegaPH(cincoE, creator, tpf, distCoord, tpEmin, tpEmax);
+	double t_1   = t_pion_PHsimple(cincoE, creator, tpf, distCoord, tpEmin, tpEmax);     //esto no es lossesPH porque son perdidas solo del canal de produccion de piones
+	double omega = omegaPHsimple(cincoE, creator, tpf, distCoord, tpEmin, tpEmax);
 	
 	double emissivity;
 

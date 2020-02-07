@@ -114,6 +114,26 @@ double inclusiveSigma(double sGeV)
 	}
 	return 1.0e-27 * sigma;     // [cm^2]
 }
+/*
+double dsigma(double gx, double gr, double sGeV)
+{
+	double GammaGeV = 0.0575;
+	double pGeV = protonMass*cLight2/1.6e-3;
+	double piGeV = neutralPionMass * cLight2 / 1.6e-3;
+	double isoGeV = 1.236;
+	double atan1 = atan((sqrt(sGeV)-pGeV-isoGeV)/GammaGeV);
+	double atan2 = atan((pGeV+piGeV-isoGeV)/GammaGeV);
+	double aux1 = GammaGeV/(atan1-atan2);
+	
+	double Min = pGeV+piGeV;
+	double Max = sqrt(sGeV)-pGeV;
+	double integ= integSimpson(log(Min),log(Max),[&](double log_dGeV)
+					{
+						double dGeV = exp(log_dGeV);
+						return auxf3(dGeV,sGeV,gx,GammaGeV,isoGeV)*dGeV;
+					},30);
+	return inclusiveSigma(sGeV)*aux1*integ*piGeV;  // [cm^2]
+}*/
 
 double dsigma(double gx, double gr, double sGeV)
 {
@@ -147,6 +167,7 @@ double auxf2(double gx, double gr, double epi, double normtemp, double sGeV)
 	return f1/(betax*gx) * dsigma(gx,gr,sGeV);
 }
 
+/*
 double auxf(double gr, double epi, double normtemp)
 {
 	double piGeV = neutralPionMass*cLight2 / 1.6e-3;
@@ -154,10 +175,41 @@ double auxf(double gr, double epi, double normtemp)
 	double sGeV = 2.0*P2(pGeV)*(gr+1.0);
 	double ji = (sGeV-4.0*P2(pGeV)+P2(piGeV))/(2.0*sqrt(sGeV));
 	double Max = ji/piGeV;
-	double integral = RungeKuttaSimple(1.0,Max,[&](double gx)
+	double integral = integSimpson(0.0,log(Max),[gr,epi,normtemp,sGeV](double log_gx)
+						{
+							double gx = exp(log_gx);
+							return auxf2(gx,gr,epi,normtemp,sGeV)*gx;
+						},30);
+	double result = (gr*gr-1.0) / sqrt(2.0*(gr+1.0)) * integral;
+}*/
+
+double auxf(double gr, double epi, double normtemp)
+{
+	double piGeV = neutralPionMass*cLight2 / 1.6e-3;
+	double pGeV = protonMass*cLight2/1.6e-3;
+	double sGeV = 2.0*P2(pGeV)*(gr+1.0);
+	double ji = (sGeV-4.0*P2(pGeV)+P2(piGeV))/(2.0*sqrt(sGeV));
+	double Max = ji/piGeV;
+	double integral = RungeKuttaSimple(1.0,Max,[gr,epi,normtemp,sGeV](double gx)
 						{return auxf2(gx,gr,epi,normtemp,sGeV);});
+	//double integral = qMidPointLog(1.0,Max,[gr,epi,normtemp,sGeV](double gx)
+	//					{return auxf2(gx,gr,epi,normtemp,sGeV);},1.0e-2);
 	double result = (gr*gr-1.0) / sqrt(2.0*(gr+1.0)) * integral;
 }
+
+/*
+double fPion(double epi, double density, double temp)
+{
+	double normtemp = boltzmann* temp / (protonMass*cLight2);
+	double k2 = boost::math::cyl_bessel_k(2, 1.0/normtemp);
+	double piGeV = neutralPionMass*cLight2/1.6e-3;
+	double constant = cLight*density*density/(4.0*piGeV*normtemp*k2*k2);
+	return constant * integSimpson(0.0,log(1.0e3),[epi,normtemp](double log_gr)
+						{
+							double gr = exp(log_gr);
+							return auxf(gr,epi,normtemp)*gr;
+						},30);	//  [cm-3 s-1 GeV-1]
+}*/
 
 double fPion(double epi, double density, double temp)
 {
@@ -166,9 +218,12 @@ double fPion(double epi, double density, double temp)
 	double piGeV = neutralPionMass*cLight2/1.6e-3;
 	double constant = cLight*density*density/(4.0*piGeV*normtemp*k2*k2);
 	
-	return constant * RungeKuttaSimple(1.0,1.0e3,[&](double gr)
-						{return auxf(gr,epi,normtemp);});         //  [cm-3 s-1 GeV-1]
+	//return constant * RungeKuttaSimple(1.0,1.0e3,[&](double gr)
+	//					{return auxf(gr,epi,normtemp);});         //  [cm-3 s-1 GeV-1]
+	return constant * qImpropLog(1.0,1.0e3,[epi,normtemp](double gr)
+						{return auxf(gr,epi,normtemp);},1.0e-2);
 }
+
 
 double fHadron(double epi, double density, double temp)
 {
@@ -177,6 +232,29 @@ double fHadron(double epi, double density, double temp)
 	return qpi / sqrt(P2(epi)-P2(piGeV));   // [cm-3 s-1 GeV-2]
 }
 
+/*
+double luminosityHadronic(double E,
+	const double density, double temp)
+{
+	double Kpi = 0.17;
+	double thr = 0.0016; //1GeV
+
+	//double Max  = dHadron();   //esto es un infinito 
+	double Min  = cHadron(E);
+	//double Min = E+P2(0.5*neutralPionMass*cLight2)/E;
+	Min = Min / 1.6e-3;
+	double Max = 1.0e3;
+	double integral = 2.0*integSimpson(log(Min),log(Max),[density,temp](double logepi)
+						{
+							double epi = exp(logepi);
+							return fHadron(epi,density,temp)*epi;
+						},30); // [cm-3 s-1 GeV-1]
+		
+	double jpp = integral * E*planck * 0.25/pi; // [erg s^-1 Hz^-1 cm^-3]
+	jpp = jpp / (1.6e-3);
+	return jpp;
+}
+*/
 
 double luminosityHadronic(double E,
 	const double density, double temp)
@@ -195,7 +273,9 @@ double luminosityHadronic(double E,
 	
 	double integral = 2.0*RungeKuttaSimple(Min,Max,[&](double epi)
 							{return fHadron(epi,density,temp);}); // [cm-3 s-1 GeV-1]
-	
+	//double integral = 2.0*qMidPointLog(Min,Max,[density,temp](double epi)
+	//						{return fHadron(epi,density,temp);},1.0e-2);
+	//double integral = 2.0*qromoLog(Min,Max,[density,temp](double epi){return fHadron(epi,density,temp);});
 	/*double integral = 2.0*cLight*density*RungeKutta(p.emin(), p.emax(),
 		[E](double u){
 			return cHadron(u,E);
@@ -211,6 +291,8 @@ double luminosityHadronic(double E,
 	jpp = jpp / (1.6e-3);
 	return jpp;
 }
+
+
 
 /*
 double fPP(double x, double E, Particle& creator )         //funcion a integrar   x=Eproton; E=Epion

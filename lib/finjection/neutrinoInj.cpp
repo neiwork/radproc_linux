@@ -1,10 +1,10 @@
-#include "neutrinoInjection.h"
+#include "neutrinoInj.h"
 
-#include "dataInjection.h"
-#include <fparameters\parameters.h>
-#include <fmath\RungeKutta.h>
-#include <fmath\interpolation.h>
-#include <fmath\physics.h>
+//#include "dataInjection.h"
+#include <fparameters/parameters.h>
+#include <fmath/RungeKutta.h>
+#include <fmath/interpolation.h>
+#include <fmath/physics.h>
 #include <algorithm>
 
 
@@ -27,8 +27,58 @@
 //
 //
 //
-//double muonNeuInj(double E, int pos_E, int pos_t, Particle& creator)
-//{
+
+double Fmu_1(double x)
+{
+	return 5.0/3.0-3*x*x+4.0/3.0*x*x*x + (-1.0/3.0+3*x*x-8.0/3.0*x*x*x);
+}
+
+double Fmu_2(double x)
+{
+	return 5.0/3.0-3*x*x+4.0/3.0*x*x*x - (-1.0/3.0+3*x*x-8.0/3.0*x*x*x);
+}
+
+double Fmu_e1(double x)
+{
+	return 2.0-6*x*x+4*x*x*x + (2.0-12*x+18*x*x-8*x*x*x);
+}
+
+double Fmu_e2(double x)
+{
+	return 2.0-6*x*x+4*x*x*x - (2.0-12*x+18*x*x-8*x*x*x);
+}
+
+double muonNeutrinoInjection(double Enu, Particle& nu, Particle& mu, Particle& pi, const SpaceCoord& psc)
+{
+	double rpi = P2(muonMass/chargedPionMass);
+	double inf = max(pi.emin(),Enu/(1.0-rpi));
+	double injTau_Neutrino = integSimpsonLog(inf,pi.emax(),[Enu,rpi,&pi,&psc](double Epi)
+								{
+									double Npi = pi.distribution.interpolate({{0,Epi}},&psc);
+									double tDecay = chargedPionMeanLife*(Epi/(chargedPionMass*cLight2));
+									return Npi/tDecay/(Epi*(1.0-rpi));
+								},30);
+	inf = max(mu.emin(),Enu);
+	double injMuon_Neutrino = 0.5*integSimpsonLog(inf,mu.emax(),[Enu,&mu,&psc](double Emu)
+								{
+									double Nmu = mu.distribution.interpolate({{0,Emu}},&psc);
+									double tDecay = muonMeanLife*(Emu/(muonMass*cLight2));
+									return Nmu/tDecay * (Fmu_1(Enu/Emu)+Fmu_2(Enu/Emu)) / Emu;
+								},30);
+	return injTau_Neutrino + injMuon_Neutrino;
+}
+
+double electronNeutrinoInjection(double Enu, Particle& nu, Particle& mu, const SpaceCoord& psc)
+{
+	double inf = max(mu.emin(),Enu);
+	return 0.5*integSimpsonLog(inf,mu.emax(),[Enu,&mu,&psc](double Emu)
+								{
+									double Nmu = mu.distribution.interpolate({{0,Emu}},&psc);
+									double tDecay = muonMeanLife*(Emu/(muonMass*cLight2));
+									return Nmu/tDecay * (Fmu_e1(Enu/Emu)+Fmu_e2(Enu/Emu)) / Emu;
+								},30);
+}
+
 //	ParticleType particleName = creator.type;
 //
 //	double Emax = 1.6e-12*pow(10.0,creator.logEmax);  
@@ -230,8 +280,8 @@
 //
 //	double Q_pion;  
 //
-////	if(1 > (r+x))	{  //esta condiciÛn es por la funciÛn de Heaviside
-//                       //esta comentada porque la transforme en una concidicion para el lÌmite
+////	if(1 > (r+x))	{  //esta condici√≥n es por la funci√≥n de Heaviside
+//                       //esta comentada porque la transforme en una concidicion para el l√≠mite
 //	                   //inferior de la integrl
 //		Q_pion = distCreator/(Ec*(1-r)*decayTime);
 ////	}

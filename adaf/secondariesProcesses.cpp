@@ -1,14 +1,17 @@
 #include "secondariesProcesses.h"
+#include "absorption.h"
 #include "modelParameters.h"
 #include "write.h"
 #include "messages.h"
 #include "globalVariables.h"
 #include "adafFunctions.h"
-//#include "absorption.h"
+#include "NTtimescales.h"
 
 #include <fmath/RungeKutta.h>
 
 #include <fluminosities/luminositySynchrotron.h>
+#include <fluminosities/luminosityPhotoHadronic.h>
+#include <fluminosities/luminosityNTHadronic.h>
 #include <fluminosities/opticalDepthSSA.h>
 #include <fluminosities/luminosityIC.h>
 #include "NTinjection.h"
@@ -18,104 +21,130 @@
 
 void secondariesRadiationProcesses(State& st, const std::string& filename)
 {
-	show_message(msgStart, Module_luminosities);
+	show_message(msgStart, Module_secondariesLuminosities);
 
 	std::ofstream file;
 	file.open(filename.c_str(),std::ios::out);
-	std::ifstream file2;
-	file2.open("opticalDepth.txt", std::ios::in);
 	file << "log(E/eV)"
 		 << '\t' << "eSyn"
 		 << "\t" << "eIC"
-		 << "\t" << "eAbs"
+		 << "\t" << "muSy"
+		 << "\t" << "muIC"
+		 << "\t" << "piPP"
+		 << "\t" << "piPG"
+		 << "\t" << "totAbs"
 		 << std::endl;
-		
-		
-	double Emin = st.photon.emin();
-	double Emax = st.photon.emax();
 	
-	Matrix tau_e;	matrixInit(tau_e,nE,nR,0.0);
-	//Matrix tau_p;	matrixInit(tau_p,nE,nR,0.0);
-	Matrix tau_gg;	matrixInit(tau_gg,nE,nR,0.0);
+	double Ephmin = st.photon.emin();
+	double Ephmax = st.photon.emax();
 	
-	for (size_t jR=0;jR<nR;jR++) {
-		double logr; // = st.photon.ps[DIM_R][jR] / schwRadius;
-		for (size_t jE=0;jE<nE;jE++) {
-			double fmtE; // = safeLog10(st.photon.ps[DIM_E][jE]/1.6e-12);
-			double tau_p;
-			file2 >> fmtE >> logr
-						  >> tau_e[jE][jR]
-						  >> tau_p //tau_p[jE][jR]
-						  >> tau_gg[jE][jR];  
-		}
-	}
+	Particle &ntPh = st.ntPhoton;
+	size_t nEnt = ntPh.ps[DIM_E].size();
+	Matrix eSyLocal;
+	matrixInit(eSyLocal,nEnt,nR,0.0);
 	
-	
-	Vector eSy(nE,0.0);
-	Vector eIC(nE,0.0);
-	Vector eAbs(nE,0.0);
-	
-	Matrix lumNT_ssa;	matrixInit(lumNT_ssa,nE,nR,0.0);
-	
-	
+	Vector eSy(nEnt,0.0);
+	Vector eIC(nEnt,0.0);
+	Vector muSy(nEnt,0.0);
+	Vector piSy(nEnt,0.0);
+	Vector piPP(nEnt,0.0);
+	Vector piPG(nEnt,0.0);
+	Vector totAbs(nEnt,0.0);
 
 	#pragma omp parallel for
-	for (int E_ix=0;E_ix<nE;E_ix++) {
-		double E = st.photon.distribution.ps[DIM_E][E_ix];
-		st.photon.ps.iterate([&](const SpaceIterator &i) {
-			double r = i.val(DIM_R);
+	for (int E_ix=0;E_ix<nEnt;E_ix++) {
+		double E = ntPh.ps[DIM_E][E_ix];
+		st.ntPhoton.ps.iterate([&](const SpaceIterator& iR) {
+			double r = iR.val(DIM_R);
 			double rB1 = r/sqrt(paso_r);
 			double rB2 = r*sqrt(paso_r);
-			double vol = (4.0/3.0)*pi*cos(st.thetaH.get(i))*(rB2*rB2*rB2-rB1*rB1*rB1);
+			double vol = volume(r);
+			double magf = st.magf.get(iR);
+			SpaceCoord psc = {E_ix,iR.coord[DIM_R],0};
 			
-			Vector tau(3,0.0);
-			double fmtE  = safeLog10(i.val(DIM_E)/1.6e-12);
-			tau[1] = tau_e[E_ix][i.coord[DIM_R]];
-			tau[0] = tau_gg[E_ix][i.coord[DIM_R]];
+			double height = height_fun(r);
+			double tau_gg = st.tau_gg.get(psc);
+			double kappa_gg = 2.0/sqrt(pi)*tau_gg/height;
 			
-			double attenuation_gg = exp(-tau[0]);
-			double attenuation_ssae = (tau[1] > 1.0e-15) ? (1.0-exp(-tau[1]))/tau[1] : 1.0;
-			//double attenuation_ssap = (tau[2] > 1.0e-15) ? (1.0-exp(-tau[2]))/tau[2] : 1.0;
+			double eICLocal,eSyLocal,piPPLocal,piPGLocal,piSyLocal,muSyLocal;
+			eICLocal = eSyLocal = piPPLocal = piPGLocal = piSyLocal = muSyLocal = 0.0;
+			//eICLocal = luminosityIC(E,st.ntPair,iR.coord,st.photon.distribution,Ephmin,Ephmax)/E;
+			//eICLocal += luminosityIC(E,st.ntPair,iR.coord,st.ntPhoton.distribution,
+			//							st.ntPhoton.emin(),st.ntPhoton.emax())/E;
+			eSyLocal = luminositySynchrotronExact(E,st.ntPair,iR,magf)/E;
+			//muSyLocal = luminositySynchrotron2(E,st.ntMuon,iR,magf)/E;
+			//piSyLocal = luminositySynchrotron2(E,st.ntChargedPion,iR,magf)/E;
 			
-			double eSyLocal = luminositySynchrotron(E,st.ntPair,i,st.magf);
-			double eICLocal = luminosityIC(E,st.ntPair,i.coord,st.photon.distribution,Emin,Emax);
-			
+			if (E/EV_TO_ERG > 1.0e7) {
+				//piPGLocal = luminosityPhotoHadronic(E,st.ntChargedPion,st.photon.distribution,iR,Ephmin,Ephmax)/E;
+				//piPPLocal = luminosityNTHadronic(E,st.ntChargedPion,st.denf_i.get(iR),iR)/E;
+			}
+
+			double factor = pi/sqrt(3.0)*(rB2*rB2-rB1*rB1) / vol;
+			double eTot = eSyLocal+eICLocal+muSyLocal+piSyLocal+piPPLocal+piPGLocal;
 
 			eSy[E_ix] += eSyLocal*vol;
+			muSy[E_ix] += muSyLocal*vol;
+			piSy[E_ix] += piSyLocal*vol;
 			eIC[E_ix] += eICLocal*vol;
-			eAbs[E_ix] += (eSyLocal+eICLocal)*vol*attenuation_ssae*attenuation_gg;
-					
+			piPP[E_ix] += piPPLocal*vol;
+			piPG[E_ix] += piPGLocal*vol;
+			double totLocal = (tau_gg > 1.0e-10) ? factor*vol*eTot/kappa_gg*(1.0-exp(-2.0*sqrt(3.0)*tau_gg)) : 
+								eTot*vol;
+			double totLocalNA = eTot;
+			totAbs[E_ix] += totLocal;
 			
-			lumNT_ssa[E_ix][i.coord[DIM_R]] = ( (eSyLocal+eICLocal)*attenuation_ssae) * vol;
-
+			double tau_es = st.denf_e.get(iR)*thomson*height;
+			double tescape = height/cLight * (1.0+tau_es);
+			SpaceCoord iE = {E_ix,iR.coord[DIM_R],0};
+			double rate_gg = kappa_gg * cLight;
+			double NTphot = st.ntPhoton.injection.get(iE);
+			st.ntPhoton.distribution.set(iE,NTphot + eTot/E*pow(rate_gg+pow(tescape,-1),-1));
 		},{E_ix,-1,0});
 	}
 	
-	//targetFieldNT(st,lumNT_ssa);
-	
-	for (size_t jE=0;jE<nE;jE++) {
-		double fmtE = safeLog10(st.photon.ps[DIM_E][jE]/1.6e-12);
+	for (size_t jE=0;jE<nEnt;jE++) {
+		double E = st.ntPhoton.ps[DIM_E][jE];
+		double fmtE = safeLog10(E/EV_TO_ERG);
 		file << fmtE
-			 << '\t' << safeLog10(eSy[jE])
-			 << "\t" << safeLog10(eIC[jE])
-			 << '\t' << safeLog10(eAbs[jE])
+			 << '\t' << safeLog10(eSy[jE]*E)
+			 << '\t' << safeLog10(muSy[jE]*E)
+			 << '\t' << safeLog10(piSy[jE]*E)
+			 << "\t" << safeLog10(eIC[jE]*E)
+			 << "\t" << safeLog10(piPP[jE]*E)
+			 << "\t" << safeLog10(piPG[jE]*E)
+			 << '\t' << safeLog10(totAbs[jE]*E)
 			 << std::endl;
 	}
-	
 	file.close();
-	file2.close();
-
-	show_message(msgEnd,Module_luminosities);
+	show_message(msgEnd,Module_secondariesLuminosities);
 }
 
 
 void secondariesProcesses(State& st)
 {
+	/*
+	show_message(msgStart,Module_secondariesTimescales);
+	secondariesTimescales(st.ntChargedPion,st,"pionCoolingTimes.dat");
+	secondariesTimescales(st.ntMuon,st,"muonCoolingTimes.dat");
+	show_message(msgEnd,Module_secondariesTimescales);
+	*/
+	
 	injectionChargedPion(st.ntChargedPion,st);
-	//distributionFast(st.ntChargedPion,st);
+	distributionOneZone(st.ntChargedPion,st);
+	writeEandRParamSpace("pionDistribution",st.ntChargedPion.distribution,0,1);
 	injectionMuon(st.ntMuon,st);
-	//distributionFast(st.ntMuon,st);
-	injectionPair(st.ntPair,st);
-	distributionFast(st.ntPair,st);
-	//secondariesRadiationProcesses(st,"secondariesRadiation");
+	distributionOneZone(st.ntMuon,st);
+	writeEandRParamSpace("muonDistribution",st.ntMuon.distribution,0,1);
+	injectionNeutrino(st.neutrino,st);
+	int cond = 0;
+	int it = 0;
+	do {
+		it++;
+		injectionPair(st.ntPair,st,it);
+		distributionOneZone(st.ntPair,st);
+		writeEandRParamSpace("secondaryPairDistribution",st.ntPair.distribution,0,1);
+		secondariesRadiationProcesses(st,"secondariesLum.dat");
+		cout << "Iteration = " << it << "\t Cond = " << cond << endl;
+	} while (it<=1);
 }

@@ -6,6 +6,8 @@
 //double lossesPhotoHadronic(double E, Particle& particle, fun1 tpf);
 double lossesPhotoHadronic(double E, Particle& particle, const ParamSpaceValues& tpf, 
 							const SpaceCoord& psc, double phEmin, double phEmax);
+double lossesPhotoHadronic_simple(double E, Particle& particle, const ParamSpaceValues& tpf, 
+							const SpaceCoord& psc, double phEmin, double phEmax);
 double lossesPhotoMeson(double E, Particle& particle, const ParamSpaceValues& tpf, 
 							const SpaceCoord& psc, double phEmin, double phEmax);
 double lossesPhotoPair(double E, Particle& particle, const ParamSpaceValues& tpf, 

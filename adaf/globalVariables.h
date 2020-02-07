@@ -19,6 +19,7 @@ extern const double paso_rCD;
 extern const double rTr;
 extern const double rOutCD;
 extern const double inclination;
+extern double Ainjection;
 
 extern const double logMinEnergy;				// Logarithm of the minimum energy for photons
 extern const double logMaxEnergy;				// Logarithm of the maximum energy for photons

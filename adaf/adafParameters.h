@@ -19,6 +19,7 @@ double paso_rCD;						// logarithmic step in rCD.
 double rTr;								// Transition radius.
 double rOutCD;							// Outer radius of the cold disk.
 double inclination;						// Inclination of the line of sight.
+double Ainjection;						// Ainj;
 
 double logMinEnergy;					// Logarithm of the minimum energy for photons.
 double logMaxEnergy;					// Logarithm of the maximum energy for photons.

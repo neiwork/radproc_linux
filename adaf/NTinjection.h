@@ -14,4 +14,5 @@ double eEmax(Particle&,double,double,double,double);
 
 void injectionChargedPion(Particle&, State&);
 void injectionMuon(Particle&, State&);
-void injectionPair(Particle& p, State& st);
+void injectionNeutrino(Particle&, State&);
+void injectionPair(Particle& p, State& st, int);

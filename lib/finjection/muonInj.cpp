@@ -115,12 +115,18 @@ double fQ_R2(double Epi, double Emu, const Particle& p)
 
 double muonInjNew(double Emu, const Particle& p, const Particle& c, const SpaceCoord& psc)  //el proton es el creator del pion
 {        
-	double injection = integSimpson(log(Emu),log(c.emax()),[Emu,&p,&c,&psc](double logEpi)
+	/*double injection = integSimpson(log(Emu),log(c.emax()),[Emu,&p,&c,&psc](double logEpi)
 						{
 							double Epi = exp(logEpi);
 							double tDecay = chargedPionMeanLife*(Epi/(chargedPionMass*cLight2));
 							double nPi = c.distribution.interpolate({{0,Epi}},&psc);
 							return Epi*nPi/tDecay * (fQ_R2(Epi,Emu,p)+fQ_L2(Epi,Emu,p));
+						},50);*/
+	double injection = integSimpsonLog(Emu,c.emax(),[Emu,&p,&c,&psc](double Epi)
+						{
+							double tDecay = chargedPionMeanLife*(Epi/(chargedPionMass*cLight2));
+							double nPi = c.distribution.interpolate({{0,Epi}},&psc);
+							return nPi/tDecay * (fQ_R2(Epi,Emu,p)+fQ_L2(Epi,Emu,p));
 						},50);
 	return injection;
 }

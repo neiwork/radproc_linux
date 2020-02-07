@@ -3,6 +3,7 @@
 #include "crossSectionInel.h"
 #include <fmath/RungeKutta.h>
 #include <fparameters/parameters.h>
+#include <finjection/pgammaPionInj.h>
 #include <fmath/physics.h>
 //#include <algorithm>
 
@@ -109,3 +110,8 @@ double lossesPhotoPair(double E, Particle& p, const ParamSpaceValues& tpf,
 	return cte*integral*E;
 }
 
+double lossesPhotoHadronic_simple(double E, Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& psc,
+							double phEmin, double phEmax)
+{
+	return E * t_pion_PHsimple(E,p,tpf,psc,phEmin,phEmax);
+}

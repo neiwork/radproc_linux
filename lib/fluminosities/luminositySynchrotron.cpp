@@ -1,6 +1,8 @@
 #include "luminositySynchrotron.h"
 
 #include <gsl/gsl_sf_bessel.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_sf_synchrotron.h>
 #include "opticalDepthSSA.h"
 #include <fparameters/parameters.h>
 #include <fmath/RungeKutta.h>
@@ -107,16 +109,32 @@ double fSyn3(double Ee, double E, const Particle& creator, double magf, const Sp
 	return distCreator/(gamma_e*gamma_e) * sum;
 }
 
-double luminositySynchrotron3(double E, const Particle& c, const SpaceCoord& psc, double magf)
+double phiSy(double x, double si)
 {
-	double constant = 0.5*P2(electronCharge)*E/(planck*cLight*planck)/sqrt(3.0) * (4*pi);
-	double integralS = integSimpson(log(c.emin()),log(c.emax()),[&](double logEe) 
-			{
-				double Ee = exp(logEe);
-				return Ee*fSyn3(Ee,E,c,magf,psc);
-			},50);
-	return (integralS > 0.0) ? constant*integralS*E : 0.0;
+	return (x < 800) ? si*gsl_sf_synchrotron_1(x) : 0.0;
 }
+
+
+double luminositySynchrotronExact(double Eph, const Particle& c, const SpaceCoord& psc, double magf)
+{
+	double integralS = integSimpsonLog(c.emin(),c.emax(),[Eph,magf,&c,&psc](double Ee)
+			{
+				double g = Ee/(c.mass*cLight2);
+				double integAng = integSimpson(0.0,0.9999,[&](double mu)
+				//double integAng = qromo(0.0,0.9999,[&](double mu)
+						{
+							double si = sqrt(1.0-mu*mu);
+							double Ec = 3.0*electronCharge*planck*magf*si*g*g/(4*pi*c.mass*cLight);
+							double x = Eph/Ec;
+							return phiSy(x,si);
+						//});
+						},10);
+				return c.distribution.interpolate({{0,Ee}},&psc)*integAng;
+			},50);
+	double constant = sqrt(3.0)*gsl_pow_3(electronCharge)*magf/(planck*c.mass*cLight2);
+	return (integralS > 0.0) ? constant*integralS*Eph : 0.0;
+}
+
 
 /*
 double luminositySynchrotron_conSSA(double E, const Particle& creator)
