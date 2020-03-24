@@ -16,6 +16,7 @@
 #include <finjection/pairMuonDecay.h>
 #include <finjection/pairBH.h>
 #include <gsl/gsl_sf_bessel.h>
+#include "losses.h"
 
 #include <fparameters/parameters.h>
 #include <fparameters/SpaceIterator.h>
@@ -105,7 +106,7 @@ void injection(Particle& p, State& st)
 	
 	if (p.id == "ntProton")
 		etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction_i");
-	else
+	else if (p.id == "ntElectron")
 		etaInj = GlobalConfig.get<double>("nonThermal.injection.energyFraction_e");
 	
 	std::ofstream file;
@@ -115,22 +116,20 @@ void injection(Particle& p, State& st)
 	double sum = 0.0;
 	p.ps.iterate([&](const SpaceIterator& iR) {
 		double r = iR.val(DIM_R);
-		double vR = abs(radialVel(r));
 		double vol = volume(r);
 		double norm_temp, dens;
-		if(p.id == "ntElectron") {
+		if (p.id == "ntElectron") {
 			norm_temp = boltzmann*st.tempElectrons.get(iR)/(p.mass*cLight2);
 			dens = st.denf_e.get(iR);
-		} else if(p.id == "ntProton") {
+		} else if (p.id == "ntProton") {
 			norm_temp = boltzmann*st.tempIons.get(iR)/(p.mass*cLight2);
 			dens = st.denf_i.get(iR);
 		}
 		
-		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
-		double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
-		sum += uth*vol*vR/r;
+		sum += dens * vol * norm_temp * abs(radialVel(r))/r;
 	},{0,-1,0});
-	Ainjection = etaInj*accRateOut*cLight2/sum;
+	Ainjection = etaInj*accRateOut*cLight2 / sum;
+	cout << "Ainj = " << Ainjection << endl;
 
 	p.ps.iterate([&](const SpaceIterator& iR) {
 		
@@ -150,9 +149,7 @@ void injection(Particle& p, State& st)
 			file << r/schwRadius << "\t" << gammaMin << endl;
 		}
 		
-		//double int_E = RungeKuttaSimple(Emin,Emax,[&Emax,&Emin](double E){
-		//	return E*cutOffPL(E,Emin,Emax);});
-		double int_E = integSimpsonLog(Emin,Emax,[Emin,Emax](double e)
+		double int_E = integSimpsonLog(p.emin(),p.emax(),[Emin,Emax](double e)
 				{
 					return e*cutOffPL(e,Emin,Emax);
 				},100);
@@ -168,18 +165,17 @@ void injection(Particle& p, State& st)
 		
 		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
 		double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
-		double Q0 = Ainjection * uth * (-radialVel(r))/r;   // power injected in nt particles [erg cm^-3 s^-1]
-		double Q0p = Q0/int_E;
+		//double Q0 = Ainjection * uth * (-radialVel(r))/r;   // power injected in nt particles [erg cm^-3 s^-1]
+		double Q0p = Ainjection * dens * norm_temp * abs(radialVel(r)) / r / int_E;
 		
 		p.ps.iterate([&](const SpaceIterator& iRE) {
 			const double E = iRE.val(DIM_E);
 			double total = cutOffPL(E,Emin,Emax)*Q0p;
 			p.injection.set(iRE,total); //en unidades de erg^-1 s^-1 cm^-3
 		},{-1,iR.coord[DIM_R],0});
-		sumQ += Q0*vol;
 	},{0,-1,0});
 	file.close();
-	cout << "Total power injected in " << p.id << " = " << sumQ << endl; 
+	cout << "etaInj Mdot c^2 = " << etaInj*accRateOut*cLight2 << endl;
 }
 
 void injectionChargedPion(Particle& p, State& st)

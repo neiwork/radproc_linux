@@ -67,6 +67,7 @@ extern const double schwRadius;					// Gravitationl Radius [cm]
 extern double rBlob;
 extern double timeAfterFlare;
 extern double factorDensity;
+extern const double uth_power;
 
 extern const int numProcesses;                  // Number of thermal processes
 

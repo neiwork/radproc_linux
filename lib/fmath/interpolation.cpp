@@ -96,23 +96,31 @@ int fbinarySearch(float *array, int lowerbound, int upperbound, double key)
 //	while (E > key[i] && i < (size - 1))
 	//	i = i + 1;
 
-	while (!(array[position] < key && array[position + 1] > key))
-	{
-		position = (lowerbound + upperbound) / 2;
-		if (array[position] > key){
-			upperbound = position;
+	if (position < upperbound-1) {
+		while (!(array[position] < key && array[position + 1] > key))
+		{
+			cout << position << "\t" << array[position] << "\t" << array[position+1] << "\t" << key << endl;
+			cout << lowerbound << "\t" << upperbound << endl;	
+			position = (lowerbound + upperbound) / 2;
+			if (array[position] > key){
+				upperbound = position;
+			}
+			else{
+				lowerbound = position;
+			}
 		}
-		else{
-			lowerbound = position;
-		}
+		return position;
+	} else {
+		cout << "ERROR RETURN -1" << endl;
+		return -1;
 	}
-
-	return position;
-
+	
 	/*if (array[position] < key) return position;
 	else if (array[position] > key) return position-1; //me quedo con el anterior al valor de la key
 	else std::cout << "error";*/ 
 }
+
+
 
 //double interpol(double& E, const Vector& ener, const Vector& lum, const int last, const int first=0);
 double interpol(double& E, const Vector& key, const Vector& val, const int size, const int base) //const int first=0)

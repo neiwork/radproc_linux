@@ -131,10 +131,10 @@ void secondariesProcesses(State& st)
 	*/
 	
 	injectionChargedPion(st.ntChargedPion,st);
-	distributionOneZone(st.ntChargedPion,st);
+	distributionOneZone_analytical(st.ntChargedPion,st);
 	writeEandRParamSpace("pionDistribution",st.ntChargedPion.distribution,0,1);
 	injectionMuon(st.ntMuon,st);
-	distributionOneZone(st.ntMuon,st);
+	distributionOneZone_analytical(st.ntMuon,st);
 	writeEandRParamSpace("muonDistribution",st.ntMuon.distribution,0,1);
 	injectionNeutrino(st.neutrino,st);
 	int cond = 0;
@@ -142,7 +142,7 @@ void secondariesProcesses(State& st)
 	do {
 		it++;
 		injectionPair(st.ntPair,st,it);
-		distributionOneZone(st.ntPair,st);
+		distributionOneZone_analytical(st.ntPair,st);
 		writeEandRParamSpace("secondaryPairDistribution",st.ntPair.distribution,0,1);
 		secondariesRadiationProcesses(st,"secondariesLum.dat");
 		cout << "Iteration = " << it << "\t Cond = " << cond << endl;

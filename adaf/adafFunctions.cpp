@@ -17,50 +17,19 @@ using namespace std;
 
 double electronTemp(double r)
 {
-	if (calculateNewTemp) {
-		ifstream adafNewTemps;
-		adafNewTemps.open("output.txt");
-		
-		Vector logr_aux(200,0.0);
-		Vector logTe_aux(200,0.0);
-	
-		size_t i=0;
-		while( ! adafNewTemps.eof() ) {
-			adafNewTemps >> logr_aux[i] >> logTe_aux[i];
-			i++;
-		}
-		adafNewTemps.close();
-		
-		double logr_actual = log10(r/schwRadius);
-		size_t pos_r = 0;
-		double aux = logr_aux.front();
-		while (aux < logr_actual && pos_r < logr.size()-1) {
-			pos_r++;
-			aux = logr_aux[pos_r];
-		}
-		double m = (logTe_aux[pos_r]-logTe_aux[pos_r-1])/(logr_aux[pos_r]-logr_aux[pos_r-1]);
-		double logT = m*(logr_actual-logr_aux[pos_r-1])+logTe_aux[pos_r-1];
-		double temp = pow(10,logT);
-		double r_rg = r/(schwRadius/2.0);
-		//return (r_rg <= 30) ? temp * 1.4/pow(r_rg,0.097) : temp;
-		return temp;
-		
-	} else {
-		double logr_actual = log(r/schwRadius);
-		double aux = logr.front();
-		size_t pos_r = 0;
-		while (aux < logr_actual && pos_r < logr.size()-1) {
-			pos_r++;
-			aux = logr[pos_r];
-		}
-		double m = (logTe[pos_r]-logTe[pos_r-1])/(logr[pos_r]-logr[pos_r-1]);
-		double logT = m*(logr_actual-logr[pos_r-1])+logTe[pos_r-1];
-		double temp = eMeanMolecularWeight*exp(logT);
-		double r_rg = r/(schwRadius/2.0);
-		return (r_rg <= 30) ? temp * 1.4/pow(r_rg,0.097) : temp;
-		//return temp;
+	double logr_actual = log(r/schwRadius);
+	double aux = logr.front();
+	size_t pos_r = 0;
+	while (aux < logr_actual && pos_r < logr.size()-1) {
+		pos_r++;
+		aux = logr[pos_r];
 	}
-	//return temp;
+	double m = (logTe[pos_r]-logTe[pos_r-1])/(logr[pos_r]-logr[pos_r-1]);
+	double logT = m*(logr_actual-logr[pos_r-1])+logTe[pos_r-1];
+	double temp = eMeanMolecularWeight*exp(logT);
+	//double r_rg = r/(schwRadius/2.0);
+	//return (r_rg <= 30) ? temp * 1.4/pow(r_rg,0.097) : temp;
+	return temp;
 }
 
 double electronTempOriginal(double r)
@@ -75,13 +44,14 @@ double electronTempOriginal(double r)
 	double m = (logTe[pos_r]-logTe[pos_r-1])/(logr[pos_r]-logr[pos_r-1]);
 	double logT = m*(logr_actual-logr[pos_r-1])+logTe[pos_r-1];
 	double temp = eMeanMolecularWeight*exp(logT);
-	double r_rg = r/(schwRadius/2.0);
+	//double r_rg = r/(schwRadius/2.0);
 	//return (r_rg <= 30) ? temp * 1.4/pow(r_rg,0.097) : temp;
 	return temp;
 }
 
 // Ions
-double ionTemp(double r) {
+double ionTemp(double r)
+{
 	double logr_actual = log(r/schwRadius);
 	double aux = logr.front();
 	size_t pos_r=0;
@@ -93,12 +63,13 @@ double ionTemp(double r) {
 	double logT = m*(logr_actual-logr[pos_r-1])+logTi[pos_r-1];
 	
 	double temp = iMeanMolecularWeight*exp(logT);
-	double r_rg = r/(schwRadius/2.0);
 	return temp;
+	//double r_rg = r/(schwRadius/2.0);
 	//return (r_rg <= 30) ? temp * 1.4/pow(r_rg,0.097) : temp;
 }
 
-double radialVel(double r) {
+double radialVel(double r)
+{
 	double logr_actual = log(r/schwRadius);
 	double aux = logr.front();
 	size_t pos_r=0;
@@ -108,19 +79,19 @@ double radialVel(double r) {
 	}
 	double m = (logv[pos_r]-logv[pos_r-1])/(logr[pos_r]-logr[pos_r-1]);
 	double logrv = m*(logr_actual-logr[pos_r-1])+logv[pos_r-1];
-	double r_rg = r / (schwRadius/2.0);
 	double vel = -exp(logrv);
+	double r_rg = r / (schwRadius/2.0);
 	return (r_rg <= 30 ? vel / (0.93*exp(2.13/r_rg)) : vel);
 }
 
-double accretionTime(double r) {
-	return integSimpson(log(r/schwRadius),logr.front(),[&](double logrr)
+double accretionTime(double r)
+{
+	return integSimpsonLog(exp(logr.front()),r/schwRadius,[&](double rr)
 			{
-				double rr = exp(logrr)*schwRadius;
-				return rr/radialVel(rr);
-			},20);
-	//return RungeKuttaSimple(r,exp(logr.front())*schwRadius,[&](double x) {
-	//						return 1.0/radialVel(x);});
+				rr *= schwRadius;
+				double vr = -radialVel(rr);
+				return rr/vr;
+			},30);
 }
 
 double keplAngVel(double r)
@@ -130,7 +101,7 @@ double keplAngVel(double r)
 
 double sqrdSoundVel(double r)
 {
-    return boltzmann / (magFieldPar*atomicMassUnit) * ( ionTemp(r) / iMeanMolecularWeight 
+	return boltzmann / (magFieldPar*atomicMassUnit) * ( ionTemp(r) / iMeanMolecularWeight 
 							+ electronTemp(r) / eMeanMolecularWeight );
 }
 
@@ -183,7 +154,7 @@ double massDensityADAF(double r)
 	if (height_method == 0)
 		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r)));
 	else 
-		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*sqrt(0.5*pi)*(-radialVel(r)));
+		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r))); // / sqrt(0.5*pi)
 }
 
 double magneticField(double r)

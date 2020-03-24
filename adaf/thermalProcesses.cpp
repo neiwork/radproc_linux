@@ -160,8 +160,8 @@ void localProcesses2(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumO
 							0.5*sqrt(pi)*xSy*height_fun(r);
 			double fluxBr = (2.0*sqrt(3.0)*tau < 1.0e-3) ? 0.5*sqrt(pi)*xBr*height_fun(r) : 0.0;
 							
-			lumOutSy[jE][jR] = pi*fluxSy*(rB2*rB2-rB1*rB1);
-			lumOutBr[jE][jR] = pi*fluxBr*(rB2*rB2-rB1*rB1);
+			lumOutSy[jE][jR] = 2*pi*fluxSy*(rB2*rB2-rB1*rB1);
+			lumOutBr[jE][jR] = 2*pi*fluxBr*(rB2*rB2-rB1*rB1);
 			lumOut[jE][jR] = lumOutSy[jE][jR]+lumOutBr[jE][jR]+lumOutpp[jE][jR];
 			jR++;
 		},{jE,-1,0});
@@ -385,7 +385,7 @@ void thermalCompton2(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOut
 	Vector p(nR*nE*nE,0.0);
 	
 	if (comptonMethod == 1) cNew(st,p,redshift);
-	
+
 	double res;		// Residual.
 	size_t it=1;	// Iterations.
 	do {
@@ -695,10 +695,13 @@ void photonDensity(State& st, Vector energies, Matrix lumOut)
 	ofstream file;
 	file.open("photonDensity_gap.dat",ios::out);
 
+	double Uph = 0.0;
 	size_t jE=0;
+	double pasoE = pow(energies.back()/energies.front(),1.0/(energies.size()-1));
 	st.photon.ps.iterate([&](const SpaceIterator& itE) {
 		double nPh = 0.0;
 		double energy = itE.val(DIM_E);
+		double dE = energy * (pasoE - 1.0);
 		size_t jR=0;
 		st.photon.ps.iterate([&](const SpaceIterator& itER) {
 			double r = itER.val(DIM_R);
@@ -706,9 +709,13 @@ void photonDensity(State& st, Vector energies, Matrix lumOut)
 			nPh += ( lumOut[jE][jR] / (4*pi*dist2*cLight*energy*planck) );
 			jR++;
 		},{itE.coord[DIM_E],-1,0});
-		file << safeLog10(energy) << "\t" << safeLog10(nPh) << endl;
+		Uph += nPh * energy * dE;
+		file << energy << "\t" << nPh << endl;
 		jE++;
 	},{-1,0,0});
+	cout << "Uph = " << Uph << "erg cm**-3" << endl;
+	double Ub = P2(magneticField(st.denf_e.ps[DIM_R][0]))/(8*pi);
+	cout << "Uph/Ub = " << Uph/Ub << endl;
 	file.close();
 }
 
@@ -858,7 +865,7 @@ void thermalRadiation(State& st, const string& filename)
 				if (comptonMethod == 2)
 					localCompton(st,lumOut,lumOutIC,energies);
 				else
-					thermalCompton(st,lumOut,lumInICm,lumOutIC,energies,redshift,processesFlags);
+					thermalCompton2(st,lumOut,lumInICm,lumOutIC,energies,redshift,processesFlags);
 			}
 			if (processesFlags[3])
 				coldDiskLuminosity(st,lumOut,lumOutRefl,lumOutCD,energies);

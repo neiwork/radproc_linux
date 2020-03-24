@@ -385,12 +385,16 @@ void cNew(State& st, Vector& p, Vector redshift)
 	fclose(ntFile);
 	fclose(omFile);
 	fclose(ompFile);
-	
+		
 	size_t jR = 0;
 	st.photon.ps.iterate([&](const SpaceIterator& iR) {
 		double lognt = log10(boltzmann*st.tempElectrons.get(iR)/electronRestEnergy);
 		double aux = ntVec[0];
-		size_t pos_r = fbinarySearch(ntVec,0,nTempCompton,lognt)+1;
+		size_t pos_r = 0;
+		while (aux < lognt) {
+			pos_r++;
+			aux = ntVec[pos_r];
+		}
 		double lognt1 = ntVec[pos_r-1];
 		double lognt2 = ntVec[pos_r];
 		size_t jE = 0;
@@ -398,7 +402,11 @@ void cNew(State& st, Vector& p, Vector redshift)
 			double logom = log10(iRE.val(DIM_E)/redshift[jR]/electronRestEnergy);
 			if (logom > omVec[0] && logom < omVec[nNuCompton-1]) {
 				double aux = omVec[0];
-				size_t pos_om = fbinarySearch(omVec,0,nNuCompton,logom)+1;
+				size_t pos_om = 0;
+				while (aux < logom) {
+					pos_om++;
+					aux = omVec[pos_om];
+				}
 				double logom1 = omVec[pos_om-1];
 				double logom2 = omVec[pos_om];
 				size_t jjE = 0;
@@ -406,31 +414,39 @@ void cNew(State& st, Vector& p, Vector redshift)
 					double logomp = log10(iREE.val(DIM_E)/redshift[jR]/electronRestEnergy);
 					if (logomp > ompVec[0] && logomp < ompVec[nNuCompton-1]) {
 						double aux = ompVec[0];
-						size_t pos_omp = fbinarySearch(ompVec,0,nNuPrimCompton,logomp)+1;
+						size_t pos_omp = 0;
+						while (aux < logomp) {
+							pos_omp++;
+							aux = ompVec[pos_omp];
+						}
 						double logomp1 = ompVec[pos_omp-1];
 						double logomp2 = ompVec[pos_omp];
 						
-						double prob111 = probVec[((pos_r-1)*nNuPrimCompton+(pos_omp-1))*nNuCompton+(pos_om-1)];
-						double prob112 = probVec[((pos_r-1)*nNuPrimCompton+(pos_omp-1))*nNuCompton+pos_om];
-						double prob121 = probVec[((pos_r-1)*nNuPrimCompton+pos_omp)*nNuCompton+(pos_om-1)];
-						double prob122 = probVec[((pos_r-1)*nNuPrimCompton+pos_omp)*nNuCompton+pos_om];
-						double prob211 = probVec[(pos_r*nNuPrimCompton+(pos_omp-1))*nNuCompton+(pos_om-1)];
-						double prob212 = probVec[(pos_r*nNuPrimCompton+(pos_omp-1))*nNuCompton+pos_om];
-						double prob221 = probVec[(pos_r*nNuPrimCompton+pos_omp)*nNuCompton+(pos_om-1)];
-						double prob222 = probVec[(pos_r*nNuPrimCompton+pos_omp)*nNuCompton+pos_om];
-						
-						double prob11 = (prob112-prob111)/(logom2-logom1) * (logom-logom1) + prob111;
-						double prob12 = (prob122-prob121)/(logom2-logom1)*(logom-logom1) + prob121;
-						double prob1 = (prob12-prob11)/(logomp2-logomp1)*(logomp-logomp1)+prob11;
-						
-						double prob21 = (prob212-prob211)/(logom2-logom1) * (logom-logom1) + prob211;
-						double prob22 = (prob222-prob221)/(logom2-logom1) * (logom-logom1) + prob221;
-						double prob2 = (prob22-prob21)/(logomp2-logomp1)*(logomp-logomp1)+prob21;
-						
-						double prob = (prob2-prob1)/(lognt2-lognt1)*(lognt-lognt1) + prob1;
-						p[(jR*nE+jjE)*nE+jE] = pow(10.0,prob);
-					} else
+						if (pos_omp < nNuPrimCompton-1) {
+							double prob111 = probVec[((pos_r-1)*nNuPrimCompton+(pos_omp-1))*nNuCompton+(pos_om-1)];
+							double prob112 = probVec[((pos_r-1)*nNuPrimCompton+(pos_omp-1))*nNuCompton+pos_om];
+							double prob121 = probVec[((pos_r-1)*nNuPrimCompton+pos_omp)*nNuCompton+(pos_om-1)];
+							double prob122 = probVec[((pos_r-1)*nNuPrimCompton+pos_omp)*nNuCompton+pos_om];
+							double prob211 = probVec[(pos_r*nNuPrimCompton+(pos_omp-1))*nNuCompton+(pos_om-1)];
+							double prob212 = probVec[(pos_r*nNuPrimCompton+(pos_omp-1))*nNuCompton+pos_om];
+							double prob221 = probVec[(pos_r*nNuPrimCompton+pos_omp)*nNuCompton+(pos_om-1)];
+							double prob222 = probVec[(pos_r*nNuPrimCompton+pos_omp)*nNuCompton+pos_om];
+							
+							double prob11 = (prob112-prob111)/(logom2-logom1) * (logom-logom1) + prob111;
+							double prob12 = (prob122-prob121)/(logom2-logom1)*(logom-logom1) + prob121;
+							double prob1 = (prob12-prob11)/(logomp2-logomp1)*(logomp-logomp1)+prob11;
+							
+							double prob21 = (prob212-prob211)/(logom2-logom1) * (logom-logom1) + prob211;
+							double prob22 = (prob222-prob221)/(logom2-logom1) * (logom-logom1) + prob221;
+							double prob2 = (prob22-prob21)/(logomp2-logomp1)*(logomp-logomp1)+prob21;
+							
+							double prob = (prob2-prob1)/(lognt2-lognt1)*(lognt-lognt1) + prob1;
+							p[(jR*nE+jjE)*nE+jE] = pow(10.0,prob);
+						} else	
+							p[(jR*nE+jjE)*nE+jE] = 0.0;
+					} else {
 						p[(jR*nE+jjE)*nE+jE] = 0.0;
+					}
 					jjE++;
 				},{-1,0,0});
 			} else

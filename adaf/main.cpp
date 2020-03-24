@@ -80,7 +80,7 @@ int main()
 					injection(model.ntElectron, model);
 					writeEandRParamSpace("electronInjection",model.ntElectron.injection,0,1);
 					writeRParamSpace("electronInjection_R", model.ntElectron.injection, 0, 0);
-					distributionNewE(model.ntElectron, model);
+					distributionMultiZone(model.ntElectron, model);
 					writeEandRParamSpace("electronDistribution",model.ntElectron.distribution,0,1);
 					writeRParamSpace("electronDistribution_R", model.ntElectron.distribution, 0, 0);
 				} else {
@@ -92,8 +92,7 @@ int main()
 					injection(model.ntProton,model);
 					writeEandRParamSpace("protonInjection", model.ntProton.injection, 0,1);
 					writeRParamSpace("protonInjection_R", model.ntProton.injection, 0, 0);
-					//distributionMultiZone(model.ntProton,model);
-					distributionFokkerPlanckMultiZone(model.ntProton,model);
+					distributionMultiZone(model.ntProton,model);
 					writeEandRParamSpace("protonDistribution", model.ntProton.distribution, 0,1);
 					writeRParamSpace("protonDistribution_R", model.ntProton.distribution, 0, 0);
 				} else {

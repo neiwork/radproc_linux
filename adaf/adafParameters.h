@@ -100,6 +100,7 @@ double schwRadius;						// Schwarzschild Radius [cm]
 double rBlob;
 double timeAfterFlare;
 double factorDensity;
+double uth_power;
 
 double maxRadius;
 double minRadius;

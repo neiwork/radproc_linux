@@ -230,8 +230,8 @@ void nonThermalRadiation(State& st, const std::string& filename)
 			double eICLocal,pSyLocal,pPPLocal,pPGLocal;
 			eICLocal = pSyLocal = pPPLocal = pPGLocal = 0.0;
 			eICLocal = luminosityIC(E,st.ntElectron,iR.coord,st.photon.distribution,Ephmin,Ephmax)/E;
-			//pSyLocal = luminositySynchrotron(E,st.ntProton,iR,st.magf)/E;
-			pSyLocal = luminositySynchrotronExact(E,st.ntProton,iR,st.magf.get(iR))/E;
+			pSyLocal = luminositySynchrotron(E,st.ntProton,iR,st.magf)/E;
+			//pSyLocal = luminositySynchrotronExact(E,st.ntProton,iR,st.magf.get(iR))/E;
 			
 			if (E/EV_TO_ERG > 1.0e7) {
 				pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,iR,Ephmin,Ephmax)/E;

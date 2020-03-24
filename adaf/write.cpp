@@ -231,11 +231,12 @@ void writeFields(State& st) {
 	std::ofstream fields;
 	fields.open("fields.dat",std::ios::out);
 	st.photon.ps.iterate([&](const SpaceIterator& iR) {
-		fields << safeLog10(iR.val(DIM_R)/schwRadius) << "\t"
+		double r = iR.val(DIM_R);
+		fields << safeLog10(r/schwRadius) << "\t"
 			   << safeLog10(st.tempElectrons.get(iR)) << "\t"
 			   << safeLog10(st.tempIons.get(iR)) << "\t"
-			   << safeLog10(st.denf_e.get(iR)) << "\t"
-			   << safeLog10(st.denf_i.get(iR)) << "\t"
+			   << height_fun(r)/r << "\t"
+			   << safeLog10(2.0*massDensityADAF(r)*height_fun(r)) << "\t"
 			   << safeLog10(st.magf.get(iR)) << endl;
 	},{0,-1,0});
 	fields.close();

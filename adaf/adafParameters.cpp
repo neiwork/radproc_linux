@@ -102,6 +102,7 @@ void adafParameters()
 	
     calculateNonThermal = GlobalConfig.get<int>("calculateNonThermal");
     if (calculateNonThermal) {
+		uth_power = GlobalConfig.get<double>("nonThermal.uth_power");
 		calculateNTprotons = GlobalConfig.get<int>("nonThermal.protons");
 		calculateNTelectrons = GlobalConfig.get<int>("nonThermal.electrons");
         calculateLosses = GlobalConfig.get<int>("nonThermal.calculateLosses");

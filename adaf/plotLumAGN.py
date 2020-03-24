@@ -14,7 +14,7 @@ NT_logeVSy,NT_logSye = np.loadtxt('lumSy.dat',unpack=True,skiprows=1)
 NT_logeVs,NT_logSys,NT_logSymu,NT_logSypi,NT_logICp,NT_logpip,NT_logpig,NT_logAbss = np.loadtxt('secondariesLum.dat',unpack=True,skiprows=1)
 
 x_eV = [-5,17]
-y_axis = [37,45]
+y_axis = [35,41]
 
 fig, ax1 = plt.subplots(figsize=(15,7))
 
@@ -35,9 +35,9 @@ ax1.plot(NT_logeV,NT_logIC,label='IC',lw=3,ls='-.',marker='*',markevery=4,marker
 ax1.plot(NT_logeV,NT_logpp,label='pp',lw=3,ls=':',marker='v',markevery=4,markersize=5)
 ax1.plot(NT_logeV,NT_logpg,label=r'p$\gamma$',lw=3,ls=':',marker='^',markevery=4,markersize=5)
 logTotSoft = np.log10( np.power(10,NT_logSye) + Tot)
-logTotHard = np.log10(np.power(10,NT_logAbs)+np.power(10,NT_logAbss))
-ax1.plot(NT_logeV[45:],logTotHard[45:],lw=8,label='Total Abs',color='k',ls='solid')
-ax1.plot(NT_logeVSy[:90],logTotSoft[:90],lw=8,label='Total Abs',color='k',ls='solid')
+logTotHard = np.log10(np.power(10,NT_logAbs))#+np.power(10,NT_logAbss))
+ax1.plot(NT_logeV,logTotHard,lw=8,label='Total Abs',color='k',ls='solid')
+ax1.plot(NT_logeVSy,logTotSoft,lw=8,label='Total Abs',color='k',ls='solid')
 ax1.legend(loc='best',fontsize=20)
 
 plt.tight_layout()

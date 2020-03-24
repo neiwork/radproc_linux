@@ -35,9 +35,9 @@ log_ge = logeVe - 5.71
 log_gpion = logeVpion - 8.145
 
 x_ge = [log_ge[0]+.5,log_ge[-1]]
-x_gp = [log_gp[0]+.5,log_gp[-1]]
-y_p = [35,55]
-y_pq = [35,44]
+x_gp = [0,log_gp[-1]]
+y_p = [33,50]
+y_pq = [30,40]
 y_e = [30,45]
 y_eq = [35,44]
 
