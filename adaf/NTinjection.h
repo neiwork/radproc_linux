@@ -10,7 +10,9 @@ double findGammaMin(double,double);
 void injection(Particle& p, State& st);
 void injectionBurst(Particle& p, State& st);
 
-double eEmax(Particle&,double,double,double,double);
+double eEmax(Particle&,double,double,double,double,int);
+double eEmax_numerical(Particle& p, double r, double B, double v, double dens, int jR, State& st,
+						SpaceCoord i);
 
 void injectionChargedPion(Particle&, State&);
 void injectionMuon(Particle&, State&);

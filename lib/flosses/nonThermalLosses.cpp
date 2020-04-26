@@ -59,6 +59,20 @@ double diffCoeff_g(double g, Particle& p, double height, double B, double rho)
 	return zeda * (cLight*kMin) *gsl_pow_2(vA/cLight) * pow(rL*kMin,q-2) * g*g;
 }
 
+double diffCoeff_r(double g, Particle& p, double height, double B)
+{
+	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
+	double q = GlobalConfig.get<double>("nonThermal.injection.SDA.powerSpectrumIndex");
+	double kMin = 1.0/height;
+	double rL = g*p.mass*cLight2/(electronCharge*B);
+	return 1.0/9.0 * cLight / zeda * rL * pow(kMin*rL,1-q);
+}
+
+double diffLength(double g, Particle& p, double r, double height, double B, double vR)
+{
+	return diffCoeff_r(g,p,height,B)/abs(vR);
+}
+
 
 double diffusionTimeTurbulence(double E, double height, Particle& p, double B)   //en [s]^-1
 {

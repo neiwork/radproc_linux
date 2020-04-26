@@ -53,8 +53,10 @@ int main()
 			thermalRadiation(model,"lumThermal.dat");
 			writeEandRParamSpace("photonDensity",model.photon.distribution,0,0);
 			writeRParamSpace("photonDensity_R",model.photon.distribution,0,0);
-		} else
+		} else {
 			readEandRParamSpace("photonDensity",model.photon.distribution,0,0);
+			writeEandRParamSpace("photonDensity",model.photon.distribution,0,0);
+		}
 		
 		if (calculateJetEmission)
 			jetProcesses(model,"lumJet.txt");
@@ -80,7 +82,10 @@ int main()
 					injection(model.ntElectron, model);
 					writeEandRParamSpace("electronInjection",model.ntElectron.injection,0,1);
 					writeRParamSpace("electronInjection_R", model.ntElectron.injection, 0, 0);
-					distributionMultiZone(model.ntElectron, model);
+					if (accMethod == 0)
+						distributionMultiZone(model.ntElectron, model);
+					else
+						distributionFokkerPlanckMultiZone(model.ntElectron, model);
 					writeEandRParamSpace("electronDistribution",model.ntElectron.distribution,0,1);
 					writeRParamSpace("electronDistribution_R", model.ntElectron.distribution, 0, 0);
 				} else {
@@ -92,7 +97,10 @@ int main()
 					injection(model.ntProton,model);
 					writeEandRParamSpace("protonInjection", model.ntProton.injection, 0,1);
 					writeRParamSpace("protonInjection_R", model.ntProton.injection, 0, 0);
-					distributionMultiZone(model.ntProton,model);
+					if (accMethod == 0)
+						distributionMultiZone(model.ntProton, model);
+					else
+						distributionFokkerPlanckMultiZone(model.ntProton,model);
 					writeEandRParamSpace("protonDistribution", model.ntProton.distribution, 0,1);
 					writeRParamSpace("protonDistribution_R", model.ntProton.distribution, 0, 0);
 				} else {

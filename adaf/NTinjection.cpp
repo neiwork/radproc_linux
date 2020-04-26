@@ -17,6 +17,7 @@
 #include <finjection/pairBH.h>
 #include <gsl/gsl_sf_bessel.h>
 #include "losses.h"
+#include <flosses/nonThermalLosses.h>
 
 #include <fparameters/parameters.h>
 #include <fparameters/SpaceIterator.h>
@@ -28,12 +29,21 @@
 #include <iostream>
 #include <fstream>
 
-double eEmax(Particle& p, double r, double B, double v, double dens)
+double eEmax(Particle& p, double r, double B, double v, double dens, int jR)
 {
 	double accE = GlobalConfig.get<double>("nonThermal.injection.PL.accEfficiency");
 	double dr = r*(paso_r-1.0);
 	double h = height_fun(r);
-    double Emax_adv = accE*dr*cLight*electronCharge*B / v; 
+	double sumAdvTime = 0.0;
+	for (int jj=nR-1;jj>=jR;jj--) {
+		double rAux = p.ps[DIM_R][jj];
+		double Baux = magneticField(rAux);
+		double drAux = rAux*(sqrt(paso_r)-1.0/sqrt(paso_r));
+		double tCellAux = drAux / abs(radialVel(rAux));
+		sumAdvTime += Baux * tCellAux;
+	}
+
+    double Emax_adv = accE*cLight*electronCharge*sumAdvTime; 
     double Emax_syn = p.mass*cLight2*sqrt(accE*6.0*pi*electronCharge / (thomson*B)) * p.mass/electronMass;
     double Emax_Hillas = electronCharge*B*h;
 	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
@@ -43,14 +53,44 @@ double eEmax(Particle& p, double r, double B, double v, double dens)
 	if (p.id == "ntProton") {
 		double sigmapp = 34.3e-27;
 		double Emax_pp = accE*electronCharge*B/(0.5*dens*sigmapp);
-		return min(min(min(Emax_adv,Emax_pp),min(Emax_Hillas,Emax_syn)),Emax_diff);
+		return min(min(Emax_adv,Emax_pp),min(Emax_Hillas,Emax_syn));
 	} else
 		return min(min(min(Emax_syn,Emax_adv),Emax_Hillas),Emax_diff);
 }
 
+double eEmax_numerical(Particle& p, double r, double B, double v, double dens, int jR, State& st,
+						SpaceCoord i)
+{
+	double accE = GlobalConfig.get<double>("nonThermal.injection.PL.accEfficiency");
+	double dr = r*(paso_r-1.0);
+	double h = height_fun(r);
+	double sumAdvTime = 0.0;
+	for (int jj=nR-1;jj>=jR;jj--) {
+		double rAux = p.ps[DIM_R][jj];
+		double Baux = magneticField(rAux);
+		double drAux = rAux*(sqrt(paso_r)-1.0/sqrt(paso_r));
+		double tCellAux = drAux / abs(radialVel(rAux));
+		sumAdvTime += Baux * tCellAux;
+	}
+    double Emax_adv = accE*cLight*electronCharge*sumAdvTime;
+	double Emax_Hillas = electronCharge*B*h;
+							
+	fun1 rate_cool_acc = [&p,&st,&i,accE,B] (double E)
+						{
+							double rate_cool = losses(E,p,st,i)/E;
+							double rate_acc = accE*cLight*electronCharge*B/E;
+							return rate_cool - rate_acc;
+						};
+	double Emax_cool = 10*p.emin()*cLight2;
+	Bisect(rate_cool_acc,2.0*p.emin(),p.emax()/2.0,Emax_cool);
+	
+	return min(Emax_cool, min(Emax_Hillas,Emax_adv));
+}
+
+
 double cutOffPL(double E, double Emin, double Emax)
 {
-	return pow(E,-pIndex)*exp(-E/Emax)*exp(-3.0*Emin/E);
+	return pow(E,-pIndex)*exp(-E/Emax)*exp(-Emin/E);
 }
 
 double auxFun(double g, double gammaMax)
@@ -113,7 +153,10 @@ void injection(Particle& p, State& st)
 	if (p.id == "ntElectron")
 		file.open("gammaMin.txt",ios::out);
 
+
+	// CALCULATION OF THE NORMALIZATION FACTOR
 	double sum = 0.0;
+	double Qfactor = 1.0;
 	p.ps.iterate([&](const SpaceIterator& iR) {
 		double r = iR.val(DIM_R);
 		double vol = volume(r);
@@ -125,12 +168,20 @@ void injection(Particle& p, State& st)
 			norm_temp = boltzmann*st.tempIons.get(iR)/(p.mass*cLight2);
 			dens = st.denf_i.get(iR);
 		}
-		
-		sum += dens * vol * norm_temp * abs(radialVel(r))/r;
+		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
+		double uth = aTheta * dens * p.mass*cLight2 * norm_temp;
+		double vA = st.magf.get(iR)/sqrt(4.0*pi*massDensityADAF(r));
+		double h = height_fun(r);
+		Qfactor = (accMethod == 0) ? st.magf.get(iR) * uth * abs(radialVel(r))/cLight / (r/schwRadius) :
+										dens * vA/h * p.mass*cLight2;
+		sum += vol * Qfactor;
 	},{0,-1,0});
 	Ainjection = etaInj*accRateOut*cLight2 / sum;
-	cout << "Ainj = " << Ainjection << endl;
+	cout << Ainjection << endl;
+	
+////////////////////////////////////////////////////////
 
+	int jR = 0;
 	p.ps.iterate([&](const SpaceIterator& iR) {
 		
 		const double r = iR.val(DIM_R);
@@ -138,9 +189,8 @@ void injection(Particle& p, State& st)
 		double rB2 = rB1*paso_r;
 		const double vol = volume(r);
 		
-		double gammaMin = 2.0;
-		double Emax = eEmax(p,r,st.magf.get(iR),-radialVel(r),st.denf_i.get(iR));
-
+		double gammaMin = 6.0;
+		double Emax = eEmax_numerical(p,r,st.magf.get(iR),-radialVel(r),st.denf_i.get(iR),jR,st,iR.coord);
 		double Emin = gammaMin*p.mass*cLight2;
 		if (p.id == "ntElectron") {
 			double temp = st.tempElectrons.get(iR);
@@ -154,25 +204,14 @@ void injection(Particle& p, State& st)
 					return e*cutOffPL(e,Emin,Emax);
 				},100);
         
-        double norm_temp, dens;
-		if(p.id == "ntElectron") {
-			norm_temp = boltzmann*st.tempElectrons.get(iR)/(p.mass*cLight2);
-			dens = st.denf_e.get(iR);
-		} else if(p.id == "ntProton") {
-			norm_temp = boltzmann*st.tempIons.get(iR)/(p.mass*cLight2);
-			dens = st.denf_i.get(iR);
-		}
-		
-		double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
-		double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
-		//double Q0 = Ainjection * uth * (-radialVel(r))/r;   // power injected in nt particles [erg cm^-3 s^-1]
-		double Q0p = Ainjection * dens * norm_temp * abs(radialVel(r)) / r / int_E;
+		double Q0p = Ainjection * Qfactor / int_E;
 		
 		p.ps.iterate([&](const SpaceIterator& iRE) {
 			const double E = iRE.val(DIM_E);
 			double total = cutOffPL(E,Emin,Emax)*Q0p;
 			p.injection.set(iRE,total); //en unidades de erg^-1 s^-1 cm^-3
 		},{-1,iR.coord[DIM_R],0});
+		jR++;
 	},{0,-1,0});
 	file.close();
 	cout << "etaInj Mdot c^2 = " << etaInj*accRateOut*cLight2 << endl;
@@ -202,7 +241,6 @@ void injectionChargedPion(Particle& p, State& st)
 					},100)*volume(iR.val(DIM_R));
 	},{0,-1,0});
 	cout << "Total power injected in " << p.id << " = " << sumTot << "\t" << endl; 
-	writeEandRParamSpace("pionInjection",p.injection,0,1);
 	show_message(msgEnd,Module_pionInjection);
 }
 

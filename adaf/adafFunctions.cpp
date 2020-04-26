@@ -17,6 +17,8 @@ using namespace std;
 
 double electronTemp(double r)
 {
+	if (r > exp(logr.back())*schwRadius) return eMeanMolecularWeight*exp(logTe.back());
+	if (r < exp(logr.front())*schwRadius) return eMeanMolecularWeight*exp(logTe.front());
 	double logr_actual = log(r/schwRadius);
 	double aux = logr.front();
 	size_t pos_r = 0;
@@ -35,6 +37,8 @@ double electronTemp(double r)
 double electronTempOriginal(double r)
 {
 	double logr_actual = log(r/schwRadius);
+	if (r > exp(logr.back())*schwRadius) return eMeanMolecularWeight*exp(logTe.back());
+	if (r < exp(logr.front())*schwRadius) return eMeanMolecularWeight*exp(logTe.front());
 	double aux = logr.front();
 	size_t pos_r = 0;
 	while (aux < logr_actual && pos_r < logr.size()-1) {
@@ -52,6 +56,8 @@ double electronTempOriginal(double r)
 // Ions
 double ionTemp(double r)
 {
+	if (r > exp(logr.back())*schwRadius) return iMeanMolecularWeight*exp(logTi.back());
+	if (r < exp(logr.front())*schwRadius) return iMeanMolecularWeight*exp(logTi.front());
 	double logr_actual = log(r/schwRadius);
 	double aux = logr.front();
 	size_t pos_r=0;
@@ -71,6 +77,8 @@ double ionTemp(double r)
 double radialVel(double r)
 {
 	double logr_actual = log(r/schwRadius);
+	if (r > exp(logr.back())*schwRadius) return -exp(logv.back());
+	if (r < exp(logr.front())*schwRadius) return -exp(logv.front());
 	double aux = logr.front();
 	size_t pos_r=0;
 	while (aux < logr_actual && pos_r < logr.size()-1) {
@@ -136,15 +144,47 @@ double costhetaH(double r)
 	return result;
 }
 
+double fAcc(double r)
+{
+	double powerTransition = GlobalConfig.get<double>("powerTransition");
+	double rOut = exp(logr.back())*schwRadius;
+	return (r < rTr) ? 0.0 :
+			(r > rOut ? 1.0 :
+			(1.0-pow(rTr/r,powerTransition)) / (1.0-pow(rTr/rOut,powerTransition)) );
+}
+
+double gAcc(double r)
+{
+	return 1.0-fAcc(r);
+}
+
+double hAccAux(double r)
+{
+	double powerTransition = GlobalConfig.get<double>("powerTransition");
+	double rOutADAF = exp(logr.back())*schwRadius;
+	return -s / (pow(rOutADAF,s) * (1.0 - pow(rTr/rOutADAF,powerTransition))) * (
+			pow(rTr,powerTransition)/(s-powerTransition) * (pow(r,s-powerTransition) - pow(rOutADAF,s-powerTransition)) 
+			- 1.0/s * pow(rTr/rOutADAF,powerTransition) * (pow(r,s) - pow(rOutADAF,s)));
+}
+
+double hAcc(double r)
+{
+	double MdotWind = hAccAux(r);
+	double Mdot_rTr = 1.0 - hAccAux(rTr);
+	double rOutADAF = exp(logr.back())*schwRadius;
+	return (r < rTr ? Mdot_rTr * pow(r/rTr,s) :
+						( (r < rOutADAF) ? 1.0-MdotWind : 1.0 ));
+}
+
 double accRateADAF(double r)
 {
-	double accRateCorona = GlobalConfig.get<double>("accretionRateCorona")*accRateOut;
+	double coronaFraction = GlobalConfig.get<double>("accRateCorona");
 	double rOut = exp(logr.back())*schwRadius;
 	double result = accRateOut * (r < rOut ? pow(r/rOut,s) : 0.0);
 	int processesFlags[numProcesses];
 	readThermalProcesses(processesFlags);
 	if (processesFlags[3]) {
-		if (r > rTr) result = accRateCorona*pow(r/rOut,s)*(rTr/r);
+		result = accRateOut * gAcc(r) * hAcc(r) * coronaFraction;
 	}
 	return result;
 }
@@ -154,19 +194,25 @@ double massDensityADAF(double r)
 	if (height_method == 0)
 		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r)));
 	else 
-		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r))); // / sqrt(0.5*pi)
+		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r))) / sqrt(0.5*pi);
 }
 
 double magneticField(double r)
 {
-	return sqrt(8.0*pi*(1.0-magFieldPar)*massDensityADAF(r)*sqrdSoundVel(r));
+	double rad = r;
+	if (r > exp(logr.back())*schwRadius) rad = exp(logr.back())*schwRadius/1.01;
+	if (r < exp(logr.front())*schwRadius) rad = exp(logr.front())*schwRadius*1.01;
+	return sqrt(8.0*pi*(1.0-magFieldPar)*massDensityADAF(rad)*sqrdSoundVel(rad));
 }
 
 double accRateColdDisk(double r)
 {
 	double rOutADAF = exp(logr.back())*schwRadius;
-	int processesFlags[numProcesses];
-	return (r < rOutADAF ? accRateOut*pow(r/rOutADAF,s)*(1.0-rTr/r) : accRateOut);
+	double result = 0.0;
+	if (r > rTr) {
+		result = accRateOut * fAcc(r);
+	}
+	return result;
 }
 
 double auxCD(double r)

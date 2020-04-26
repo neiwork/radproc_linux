@@ -68,16 +68,16 @@ void secondariesRadiationProcesses(State& st, const std::string& filename)
 			
 			double eICLocal,eSyLocal,piPPLocal,piPGLocal,piSyLocal,muSyLocal;
 			eICLocal = eSyLocal = piPPLocal = piPGLocal = piSyLocal = muSyLocal = 0.0;
-			//eICLocal = luminosityIC(E,st.ntPair,iR.coord,st.photon.distribution,Ephmin,Ephmax)/E;
-			//eICLocal += luminosityIC(E,st.ntPair,iR.coord,st.ntPhoton.distribution,
-			//							st.ntPhoton.emin(),st.ntPhoton.emax())/E;
-			eSyLocal = luminositySynchrotronExact(E,st.ntPair,iR,magf)/E;
-			//muSyLocal = luminositySynchrotron2(E,st.ntMuon,iR,magf)/E;
-			//piSyLocal = luminositySynchrotron2(E,st.ntChargedPion,iR,magf)/E;
+			eICLocal = luminosityIC(E,st.ntPair,iR.coord,st.photon.distribution,Ephmin,Ephmax)/E;
+			eICLocal += luminosityIC(E,st.ntPair,iR.coord,st.ntPhoton.distribution,
+										st.ntPhoton.emin(),st.ntPhoton.emax())/E;
+			eSyLocal = luminositySynchrotronExactSec(E,st.ntPair,iR,magf)/E;
+			muSyLocal = luminositySynchrotronExact(E,st.ntMuon,iR,magf)/E;
+			piSyLocal = luminositySynchrotronExact(E,st.ntChargedPion,iR,magf)/E;
 			
 			if (E/EV_TO_ERG > 1.0e7) {
-				//piPGLocal = luminosityPhotoHadronic(E,st.ntChargedPion,st.photon.distribution,iR,Ephmin,Ephmax)/E;
-				//piPPLocal = luminosityNTHadronic(E,st.ntChargedPion,st.denf_i.get(iR),iR)/E;
+				piPGLocal = luminosityPhotoHadronic(E,st.ntChargedPion,st.photon.distribution,iR,Ephmin,Ephmax)/E;
+				piPPLocal = luminosityNTHadronic(E,st.ntChargedPion,st.denf_i.get(iR),iR)/E;
 			}
 
 			double factor = pi/sqrt(3.0)*(rB2*rB2-rB1*rB1) / vol;
@@ -130,19 +130,27 @@ void secondariesProcesses(State& st)
 	show_message(msgEnd,Module_secondariesTimescales);
 	*/
 	
+	// PION INJECTION AND TRANSPORT
 	injectionChargedPion(st.ntChargedPion,st);
-	distributionOneZone_analytical(st.ntChargedPion,st);
+	writeEandRParamSpace("pionInjection",st.ntChargedPion.injection,0,1);
+	distributionSecondaries(st.ntChargedPion,st);
 	writeEandRParamSpace("pionDistribution",st.ntChargedPion.distribution,0,1);
+	
+	// MUON INJECTION AND TRANSPORT
 	injectionMuon(st.ntMuon,st);
-	distributionOneZone_analytical(st.ntMuon,st);
+	writeEandRParamSpace("pionInjection",st.ntMuon.injection,0,1);
+	distributionSecondaries(st.ntMuon,st);
 	writeEandRParamSpace("muonDistribution",st.ntMuon.distribution,0,1);
+	
+	// NEUTRINO INJECTION
 	injectionNeutrino(st.neutrino,st);
+	
 	int cond = 0;
 	int it = 0;
 	do {
 		it++;
 		injectionPair(st.ntPair,st,it);
-		distributionOneZone_analytical(st.ntPair,st);
+		distributionSecondaries(st.ntPair,st);
 		writeEandRParamSpace("secondaryPairDistribution",st.ntPair.distribution,0,1);
 		secondariesRadiationProcesses(st,"secondariesLum.dat");
 		cout << "Iteration = " << it << "\t Cond = " << cond << endl;

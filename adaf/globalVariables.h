@@ -59,6 +59,7 @@ extern const int calculateComptonRedMatrix;
 extern const int comptonMethod;
 extern const int calculateNewTemp;
 extern const int height_method;
+extern const int accMethod;
 
 // PARAMETERS
 extern const double schwRadius;					// Gravitationl Radius [cm]

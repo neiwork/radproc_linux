@@ -10,25 +10,23 @@ from matplotlib import cm
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 viridis = cm.get_cmap('viridis', 12)
 
-logeVp,r,lognp = np.loadtxt('protonDistribution.dat',unpack=True)
-logeVe,r,logne = np.loadtxt('electronDistribution.dat',unpack=True)
-logeVp,r,logqp = np.loadtxt('protonInjection.dat',unpack=True)
-logeVe,r,logqe = np.loadtxt('electronInjection.dat',unpack=True)
-logeVpion,r,logqpion = np.loadtxt('pionInjection.dat',unpack=True)
-logeVpion,r,lognpion = np.loadtxt('pionDistribution.dat',unpack=True)
-logeVmuon,r,logqmuon = np.loadtxt('muonInjection.dat',unpack=True)
-logeVmuon,r,lognmuon = np.loadtxt('muonDistribution.dat',unpack=True)
-logeVpair,r,logqpair = np.loadtxt('secondaryPairInjection.dat',unpack=True)
+logeVp,iR,logr,lognp = np.loadtxt('protonDistribution.dat',unpack=True)
+logeVe,iR,logr,logne = np.loadtxt('electronDistribution.dat',unpack=True)
+logeVp,iR,logr,logqp = np.loadtxt('protonInjection.dat',unpack=True)
+logeVe,iR,logr,logqe = np.loadtxt('electronInjection.dat',unpack=True)
+logeVpion,iR,logr,logqpion = np.loadtxt('pionInjection.dat',unpack=True)
+logeVpion,iR,logr,lognpion = np.loadtxt('pionDistribution.dat',unpack=True)
+logeVmuon,iR,logr,logqmuon = np.loadtxt('muonInjection.dat',unpack=True)
+logeVmuon,iR,logr,lognmuon = np.loadtxt('muonDistribution.dat',unpack=True)
+logeVpair,iR,logr,logqpair = np.loadtxt('secondaryPairInjection.dat',unpack=True)
 NT_logeV,NT_logSyp,NT_logIC,NT_logpp,NT_logpg,NT_logAbs = np.loadtxt('lumNonThermal.dat',unpack=True,skiprows=1)
 NT_logeVs,NT_logSys,NT_logSymu,NT_logSypi,NT_logICs,NT_logpip,NT_logpig,NT_logAbs = np.loadtxt('secondariesLum.dat',unpack=True,skiprows=1)
-logeVpairBH,r,logqpairBH = np.loadtxt('secondaryPairInjection_BH.dat',unpack=True)
 
 logerge = np.log10(np.power(10,logeVe)*1.6e-12)
 logergp = np.log10(np.power(10,logeVp)*1.6e-12)
 logergpion = np.log10(np.power(10,logeVpion)*1.6e-12)
 logergmuon = np.log10(np.power(10,logeVmuon)*1.6e-12)
 logergpair = np.log10(np.power(10,logeVpair)*1.6e-12)
-logergpairBH = np.log10(np.power(10,logeVpairBH)*1.6e-12)
 
 log_gp = logeVp - 8.973
 log_ge = logeVe - 5.71
@@ -37,7 +35,7 @@ log_gpion = logeVpion - 8.145
 x_ge = [log_ge[0]+.5,log_ge[-1]]
 x_gp = [0,log_gp[-1]]
 y_p = [33,50]
-y_pq = [30,40]
+y_pq = [30,45]
 y_e = [30,45]
 y_eq = [35,44]
 
@@ -64,9 +62,9 @@ for r1 in np.arange(nR//f):
 
 for r1 in np.arange(nR):
      for e in np.arange(nE):
-        #npionTot[e] = npionTot[e] + np.power(10,lognpion[r1*nE+e])
+        npionTot[e] = npionTot[e] + np.power(10,lognpion[r1*nE+e])
         npTot[e] = npTot[e] + np.power(10,lognp[r1*nE+e])
-        #nmuonTot[e] = nmuonTot[e] + np.power(10,lognmuon[r1*nE+e])
+        nmuonTot[e] = nmuonTot[e] + np.power(10,lognmuon[r1*nE+e])
 
 ax1.plot(log_gp[:nE],2.0*logergp[:nE]+np.log10(npTot),ls='-',lw=4,color='red',label='Total')
 ax1.legend(loc='best',fontsize=15)
@@ -201,19 +199,14 @@ fig.savefig('nonThermalDistributions_R.pdf')
 
 fig, ax1 = plt.subplots()
 
-qpairTotBH = np.zeros(nE)
-for r1 in np.arange(nR):
-     for e in np.arange(nE):
-        qpairTotBH[e] = qpairTotBH[e] + np.power(10,logqpairBH[r1*nE+e])
-
 ax1.tick_params(axis='both',labelsize=15)
 ax1.set_xlim([8,17])
 ax1.set_ylim(y_pq)
 ax1.set_xlabel(r'$\mathrm{Log}(E/{\rm eV})$',fontsize=19)
 ax1.set_ylabel(r'$\mathrm{Log}(E^2 Q_\mathrm{p}(E) ~ [\mathrm{erg~cm^{-3}s^{-1}}])$',fontsize=19)
 
-ax1.plot(logeVp[:nE],2.0*logergp[:nE]+np.log10(qpTot),ls='-',lw=4,color='red',label='Primary protons')
-ax1.plot(logeVe[:nE],2.0*logerge[:nE]+np.log10(qeTot),ls='-',lw=4,color='cyan',label='Primary electrons')
+#ax1.plot(logeVp[:nE],2.0*logergp[:nE]+np.log10(qpTot),ls='-',lw=4,color='red',label='Primary protons')
+#ax1.plot(logeVe[:nE],2.0*logerge[:nE]+np.log10(qeTot),ls='-',lw=4,color='cyan',label='Primary electrons')
 ax1.plot(logeVpion[:nE],2.0*logergpion[:nE]+np.log10(qpionTot),ls='-.',lw=3,color='blue',label='Pions')
 ax1.plot(logeVmuon[:nE],2.0*logergmuon[:nE]+np.log10(qmuonTot),ls=':',lw=3,color='green',label='Muons')
 ax1.plot(logeVpair[:nE],2.0*logergpair[:nE]+np.log10(qpairTot),ls='-',lw=4,color='yellow',label='Pairs')

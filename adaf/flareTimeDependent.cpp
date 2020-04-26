@@ -64,7 +64,7 @@ void oneZoneDist(Particle& p, State& st) {
 		double magf = st.magf.get(iR);
 		
 		double r = iR.val(DIM_R);
-		double Emax = eEmax(p,r,magf,-radialVel(r),dens);
+		double Emax = eEmax(p,r,magf,-radialVel(r),dens,iR.coord[DIM_R]);
 		double gammaMin = findGammaMin(st.tempElectrons.get(iR),Emax);
 		double Emin = gammaMin*electronMass*cLight2;
 		
@@ -122,7 +122,7 @@ void multiZoneInjection(Particle& p, State& st) {
 			double uth = dens*norm_temp*(p.mass*cLight2)*aTheta;   // erg cm^-3
 			double Q0 = etaInj*uth;   // energy injected in the burst in nt particles [erg cm^-3]
 			double magf = st.magf.get(iR);
-			double Emax = eEmax(p,r,magf,-radialVel(r),dens);
+			double Emax = eEmax(p,r,magf,-radialVel(r),dens,iR.coord[DIM_R]);
 			double gammaMin = findGammaMin(st.tempElectrons.get(iR),Emax);
 			double Emin = gammaMin*electronMass*cLight2;
 			

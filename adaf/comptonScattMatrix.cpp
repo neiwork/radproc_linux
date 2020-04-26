@@ -213,8 +213,8 @@ void comptonScattMatrix(State& st)
 	#pragma omp parallel for
 	for (int iRcd=0;iRcd<nRcd;iRcd++) {
 		double r0cd = st.denf_e.ps[DIM_Rcd][iRcd];
-		double drprim = schwRadius*(pasoprim-1.0);             // Step for the photon path.
 		for(size_t jPh=1;jPh<=nPhot;jPh++) {
+			double drprim = r0cd*(pasoprim-1.0);             // Step for the photon path.
 			double random_number = gsl_rng_uniform(RandomNumberGenerator);
 			double phiprim = 2.0*pi*random_number;
 			random_number = gsl_rng_uniform(RandomNumberGenerator);
@@ -238,7 +238,7 @@ void comptonScattMatrix(State& st)
 				r1aux = (height_method == 0) ? r1 : sqrt(x1*x1+y1*y1);
 				double exptau = 1.0;
 				if (r1aux < rCellsBoundaries[nR]) {
-					double ne = electronDensityTheta(r1,theta1);
+					double ne = electronDensityTheta(r1aux,theta1);
 					exptau = exp(-ne*thomson*drprim);
 					double psc = 1.0-exptau;    // Probability of scattering.
 					for(size_t jR=0;jR<=nR;jR++) {
@@ -251,7 +251,7 @@ void comptonScattMatrix(State& st)
 						}
 					}
 				}
-				//drprim=r1*(pasoprim-1.0);
+				drprim=r1aux*(pasoprim-1.0);
 				rprim += drprim;
 				pescap *= exptau;                // Probability that a photon reaches 
 												 // the previous position.

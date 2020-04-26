@@ -3,12 +3,13 @@
     "mu_i":"1.23",
     "mu_e":"1.14",
     "inclination":"0",
-    "accretionRateCorona":"1.0",
-    "rTr":"1.5e4",
-    "rOutCD":"1.6e4",
+    "accRateCorona":"2.0e-2",
+    "powerTransition":"1",
+    "rTr":"0.3e1",
+    "rOutCD":"1.0e4",
     "zGap":"1.0",
     "tAccBlob":"0",
-    "factorDensity":"200",
+    "factorDensity":"1",
       
     "calculateComptonScatt":"0",
     "height_method":"1",
@@ -25,12 +26,12 @@
 			"0":1,
 			"1":1,
 			"2":0,
-			"3":0,
+			"3":1,
 			"4":1
         },
         
         "compton": {
-            "method":"1",
+            "method":"3",
             
             "calculateRedMatrix":"0",
             "redMatrixParams": {
@@ -55,28 +56,28 @@
     
     "calculateNonThermal":"1",
     "nonThermal": {
-        "uth_power":"1.0",
+        "acc_method":"1",
 	    "protons":"1",
-	    "electrons":"1",
+	    "electrons":"0",
             "injection": {
 			    "calculateMagneticReconnection":"0",
 	    		"calculateDSA":"0",
 		    	"calculateSDA":"0",
 			    "calculatePL":"1",
-                "energyFraction_e":"0.001",
-			    "energyFraction_i":"0.01",
+                "energyFraction_e":"0.01",
+			    "energyFraction_i":"0.000005",
 		    	"PL": {
-			    	"accEfficiency":"0.001"
+			    	"accEfficiency":"0.1"
 			    },
 			    "SDA": {
 				    "fractionTurbulent":"0.2",
 				    "powerSpectrumIndex":"1.666"
 			    },
-			    "primaryIndex":"2.0"
+			    "primaryIndex":"1.0"
             },
         "calculateLosses":"0",
 		"calculateDistributions":"1",
-        "calculateLuminosities":"0",
+        "calculateLuminosities":"1",
 		"calculateSecondaries":"0",
 		"calculateJetEmission":"0",
     	"neutrons":{
@@ -92,15 +93,15 @@
 			}
 		},
 		"jet":{
-			"accRateFraction":"0.08",
+			"accRateFraction":"0.001",
 			"openingAngle":"0.1",
-			"zMin":"1.0e4",
+			"zMin":"1.0",
 			"lorentzFactor":"2.3",
-			"inclination":"30",
+			"inclination":"10",
 			"etaInj":"0.1",
-			"magneticEnergyFraction":"1.0e-2",
-			"electronEnergyFraction":"1.0e-1",
-			"pIndex":"2.3"
+			"magneticEnergyFraction":"1.0e-3",
+			"electronEnergyFraction":"1.0e-3",
+			"pIndex":"2.6"
 		},
 		"calculateFlare":"0",
 		"flare": {
@@ -131,11 +132,11 @@
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":50
+						"samples":30
 					},
 					"radius_cd":{
-                        			"samples":2
-                    			}
+                        "samples":20
+                    }
 				}
 			},
 			"photon": {
@@ -151,7 +152,7 @@
 				"dim":{
 					"energy": {
 						"min":-2.0,
-						"max":17.0
+						"max":15.0
 					}
 				}
 			},
@@ -169,7 +170,7 @@
 				"dim":{
 					"energy": {
 						"min":9.0,
-						"max":19.0
+						"max":18.0
 					}
 				}
 			},

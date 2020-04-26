@@ -18,10 +18,11 @@
 
 void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 {
-	std::ofstream file;
+	std::ofstream file,file2;
 	file.open(filename.c_str(), std::ios::out);
+	if (p.id == "ntProton") file2.open("diffusion_adv.dat", std::ios::out);
 
-	file << "r [M]" 
+	file << "r [2M]" 
 		<< "\t" << "Log(gamma)"
 		<< "\t" << "Acc"
 		<< "\t" << "Adv"
@@ -31,7 +32,16 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 		<< "\t" << "IC/pp"
 		<< "\t" << "pg/Bremss"
 		<< std::endl;
-
+	
+	if (p.id == "ntProton") {
+		file2   << "r [2M]"
+				<< "\t" << "Log(gamma)"
+				<< "\t" << "Diff_length"
+				<< "\t" << "dR"
+				<< "\t" << "Dlenght/dR"
+				<< std::endl;
+	}
+	
 	int flag1,flag2,flag3,flag4,flag5;
 	flag1 = flag2 = flag3 = flag4 = flag5 = 0;
 	double logr1,logr2,logr3,logr4,logr5;
@@ -52,6 +62,8 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 		
 		if (flag1 == 1 || flag2 == 1 || flag3 == 1 || flag4 == 1 || flag5 == 1) {
 			double tAdv = accretionTime(r);
+			double vR = radialVel(r/sqrt(paso_r));
+			double dR = r * (sqrt(paso_r)-1.0/sqrt(paso_r));
 			double B = st.magf.get(iR);
 			double height = height_fun(r);
 			double rho = massDensityADAF(r);
@@ -59,15 +71,23 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 			p.ps.iterate([&](const SpaceIterator& iRE) {
 				double E = iRE.val(DIM_E);
 				double tAcc = 1.0/accelerationRate(E,B);
-				tAcc = accelerationTimeSDA(E,p,B,height,rho);
+				if (accMethod == 1) tAcc = accelerationTimeSDA(E,p,B,height,rho);
 				double tDiff = diffusionTimeTurbulence(E,height,p,B);
 
-				file << "\t" << (int)(r/schwRadius)
+				file << (int)(r/schwRadius)
 					 << "\t" << safeLog10(E/(p.mass*cLight2))
 					 << "\t" << safeLog10(tAcc)
 					 << "\t" << safeLog10(tAdv)
 					 << "\t" << safeLog10(tDiff)
 					 << "\t" << safeLog10(eMaxHillas/1.602e-12/(p.mass*cLight2));
+				if (p.id == "ntProton") {
+					double diff_length = diffLength(E/(p.mass*cLight2),p,r,height,B,vR);
+					file2   << (int)(r/schwRadius)
+							<< "\t" << safeLog10(E/(p.mass*cLight2))
+							<< "\t" << safeLog10(diff_length/schwRadius)
+							<< "\t" << safeLog10(dR/schwRadius)
+							<< "\t" << diff_length/dR << std::endl;
+				}
 				
 				if (p.id == "ntElectron") {
 					double tSyn = E/lossesSyn(E,B,p);
@@ -98,6 +118,7 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 		}
 	},{0,-1,0});
 	file.close();
+	if (p.id == "ntProton") file2.close();
 }
 
 using namespace std;

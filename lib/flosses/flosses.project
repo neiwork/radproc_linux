@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="flosses" Version="10.0.0" InternalType="Library">
+<CodeLite_Project Name="flosses" Version="11000" InternalType="Library">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -31,6 +31,12 @@
     <File Name="photoPairProduction.h" ExcludeProjConfig="Debug;Release"/>
     <File Name="dataLosses.h" ExcludeProjConfig="Debug;Release"/>
   </VirtualDirectory>
+  <Dependencies Name="Debug">
+    <Project Name="fmath"/>
+    <Project Name="fparameters"/>
+    <Project Name="fparticle"/>
+  </Dependencies>
+  <Dependencies Name="Release"/>
   <Settings Type="Static Library">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -130,10 +136,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug">
-    <Project Name="fmath"/>
-    <Project Name="fparameters"/>
-    <Project Name="fparticle"/>
-  </Dependencies>
-  <Dependencies Name="Release"/>
 </CodeLite_Project>

@@ -224,19 +224,17 @@ void nonThermalRadiation(State& st, const std::string& filename)
 			double height = height_fun(r);
 			double tau_ssa_p = 0.5*sqrt(pi)*kappa_ssa_p*height;
 			double taugg = 0.5*sqrt(pi)*kappagg*height;
-			taugg = kappagg*100*schwRadius;
 			st.tau_gg.set(psc,taugg);
 			
 			double eICLocal,pSyLocal,pPPLocal,pPGLocal;
 			eICLocal = pSyLocal = pPPLocal = pPGLocal = 0.0;
 			eICLocal = luminosityIC(E,st.ntElectron,iR.coord,st.photon.distribution,Ephmin,Ephmax)/E;
-			pSyLocal = luminositySynchrotron(E,st.ntProton,iR,st.magf)/E;
-			//pSyLocal = luminositySynchrotronExact(E,st.ntProton,iR,st.magf.get(iR))/E;
+			pSyLocal = luminositySynchrotronExact(E,st.ntProton,iR,st.magf.get(iR))/E;
 			
 			if (E/EV_TO_ERG > 1.0e7) {
 				pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,iR,Ephmin,Ephmax)/E;
 				pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(iR),iR)/E;
-				if (E/EV_TO_ERG < 1.0e10)
+				if (E/EV_TO_ERG < 1.0e10){}
 					pPPLocal += 4.0*pi*luminosityHadronic(E,st.denf_i.get(iR),st.tempIons.get(iR))/planck;
 			}
 
@@ -250,8 +248,9 @@ void nonThermalRadiation(State& st, const std::string& filename)
 			eIC[E_ix] += eICLocal*vol;
 			pPP[E_ix] += pPPLocal*vol;
 			pPG[E_ix] += pPGLocal*vol;
-			double totLocal = (taugg > 1.0e-10) ? factor*vol*eTot/kappagg*(1.0-exp(-2.0*sqrt(3.0)*taugg)) : 
-								eTot*vol;
+			double totLocal = (taugg > 1.0e-10) ? 
+									factor*vol*eTot/kappagg*(1.0-exp(-2.0*sqrt(3.0)*taugg)) : 
+										eTot*vol;
 			totAbs[E_ix] += totLocal;
 			
 			double tau_es = st.denf_e.get(iR)*thomson*height;

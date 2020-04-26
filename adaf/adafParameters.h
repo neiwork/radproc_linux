@@ -51,6 +51,8 @@ int comptonMethod;						// Method used to calculate the Comptonized spectrum.
 										// 3: Compute the P(v,v',Te) at the energies required.
 int height_method;						// 0: Use r*costhetaH(r)
 										// 1: Use sqrt(cs/omK)
+int accMethod;							// 0: General acceleration method. Power-law injection.
+										// 1: SDA solving Fokker-Planck equation. Monoenergetic injection.
 int calculateNewTemp;					// If 1 calculate again the electron temperatures.
 
 size_t nGammaCompton;					// Number of points in Y  for the precomputed matrices

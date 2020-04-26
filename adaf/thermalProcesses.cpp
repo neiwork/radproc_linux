@@ -279,6 +279,7 @@ void coldDiskLuminosity(State& st, Matrix lumOut, Matrix& lumOutRefl,
 			}
 			aux2 += ((lumInc - lumOutRefl[jjE][jRcd])*dfreq);
 		}
+		aux2 = 0.0;
 		double aux = aux1+aux2;
 		double temp = pow(aux/area/ stefanBoltzmann,0.25);
 		//cout << "Radius = " << rCd/schwRadius << " Temperature = " << scientific << temp << endl;
@@ -446,7 +447,7 @@ void thermalCompton2(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOut
 					}
 				}
 			}
-			jR++;
+ 			jR++;
 		},{0,-1,0});
 		
 		double pasoNuPrim = pow(energies[nE-1]/energies[0],1.0/(nE-1));
@@ -719,6 +720,39 @@ void photonDensity(State& st, Vector energies, Matrix lumOut)
 	file.close();
 }
 
+void photonDensityAux(State& st, Vector energies, Matrix lumOut)
+{
+	Vector z(50,GlobalConfig.get<double>("zGap")*schwRadius);
+	double zMax = z[0]*1000;
+	double pasoZ = pow(zMax/z[0],1.0/50);
+	for (size_t i=1;i<50;i++) z[i] = z[i-1]*pasoZ;
+	
+	ofstream file;
+	file.open("photonDensity_z.dat",ios::out);
+
+	for (size_t i=1;i<50;i++) {
+		double Uph = 0.0;
+		size_t jE=0;
+		double pasoE = pow(energies.back()/energies.front(),1.0/(energies.size()-1));
+		st.photon.ps.iterate([&](const SpaceIterator& itE) {
+			double nPh = 0.0;
+			double energy = itE.val(DIM_E);
+			double dE = energy * (pasoE - 1.0);
+			size_t jR=0;
+			st.photon.ps.iterate([&](const SpaceIterator& itER) {
+				double r = itER.val(DIM_R);
+				double dist2 = z[i]*z[i]+r*r;
+				nPh += ( lumOut[jE][jR] / (4*pi*dist2*cLight*energy*planck) );
+				jR++;
+			},{itE.coord[DIM_E],-1,0});
+			Uph += nPh * dE;
+			jE++;
+		},{-1,0,0});
+		file << z[i]/schwRadius << "\t" << Uph << endl;
+	}
+	file.close();
+}
+
 void targetField(State& st, Matrix lumOut, Matrix lumCD, Matrix lumRefl)
 {
 	size_t jE=0;
@@ -736,12 +770,17 @@ void targetField(State& st, Matrix lumOut, Matrix lumCD, Matrix lumRefl)
 			double tau_es_2 = tau_es_1 * (rB2-rB1)/height;
 			double tescape = height/cLight * tau_es_1;
 			double tcross = (rB2-rB1)/cLight * tau_es_2;
-			for (size_t jjR=0;jjR<nR;jjR++)
+			/*for (size_t jjR=0;jjR<nR;jjR++)
 				lumReachingShell += ( (jjR == jR) ? lumOut[jE][jR]*tescape : 
 									reachAA[jjR][jR]*lumOut[jE][jjR]*tcross );
 			for (size_t jjRcd=0;jjRcd<nRcd;jjRcd++)
 				lumReachingShell += reachDA[jjRcd][jR]*(lumCD[jE][jjRcd]+lumRefl[jE][jjRcd])*tcross;
-			st.photon.distribution.set(itER,lumReachingShell/(vol*planck*E)); //erg^⁻1 cm^-3
+			st.photon.distribution.set(itER,lumReachingShell/(vol*planck*E)); //erg^⁻1 cm^-3 */
+			for (size_t jjR=0;jjR<nR;jjR++)
+				lumReachingShell += reachAA[jjR][jR]*lumOut[jE][jjR];
+			for (size_t jjRcd=0;jjRcd<nRcd;jjRcd++)
+				lumReachingShell += reachDA[jjRcd][jR]*(lumCD[jE][jjRcd]+lumRefl[jE][jjRcd]);
+			st.photon.distribution.set(itER,lumReachingShell/(4.0*pi*r*height*planck*E*cLight)); //erg^⁻1 cm^-3
 			jR++;
 		},{itE.coord[DIM_E],-1,0});
 		jE++;
@@ -871,6 +910,7 @@ void thermalRadiation(State& st, const string& filename)
 				coldDiskLuminosity(st,lumOut,lumOutRefl,lumOutCD,energies);
 		} while (res > 1.0e-3);
 		photonDensity(st,energies,lumOut);
+		photonDensityAux(st,energies,lumOut);
 		absorptionLumThermal(st,lumOut,lumOutCD,lumOutRefl,lumOut_gg);
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,lumInICm,
 							lumOutIC,lumOut_gg,lumOutCD,lumOutRefl,filename);

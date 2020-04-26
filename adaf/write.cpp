@@ -69,7 +69,7 @@ void writeEandRParamSpace(const std::string& filename, const ParamSpaceValues& d
 		double r = i.val(DIM_R);
 		double voll = (vol) ? volume(r) : 1.0;
 		double logQ = safeLog10(data.get(i)*voll);
-		file << logE << '\t' << i.coord[DIM_R] << '\t' << logQ << std::endl;
+		file << logE << '\t' << i.coord[DIM_R] << '\t' << safeLog10(r/schwRadius) << '\t' << logQ << std::endl;
 			
 	}, { -1, -1, t });  
 
@@ -233,6 +233,8 @@ void writeFields(State& st) {
 	st.photon.ps.iterate([&](const SpaceIterator& iR) {
 		double r = iR.val(DIM_R);
 		fields << safeLog10(r/schwRadius) << "\t"
+			   << accRateADAF(r)/accRateOut << "\t"
+			   << accRateColdDisk(r)/accRateOut << "\t"
 			   << safeLog10(st.tempElectrons.get(iR)) << "\t"
 			   << safeLog10(st.tempIons.get(iR)) << "\t"
 			   << height_fun(r)/r << "\t"
