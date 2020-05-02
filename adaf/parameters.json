@@ -3,7 +3,7 @@
     "mu_i":"1.23",
     "mu_e":"1.14",
     "inclination":"0",
-    "accRateCorona":"2.0e-2",
+    "accRateCorona":"1.0e-2",
     "powerTransition":"1",
     "rTr":"0.3e1",
     "rOutCD":"1.0e4",
@@ -58,14 +58,14 @@
     "nonThermal": {
         "acc_method":"1",
 	    "protons":"1",
-	    "electrons":"0",
+	    "electrons":"1",
             "injection": {
 			    "calculateMagneticReconnection":"0",
 	    		"calculateDSA":"0",
 		    	"calculateSDA":"0",
 			    "calculatePL":"1",
-                "energyFraction_e":"0.01",
-			    "energyFraction_i":"0.000005",
+                "energyFraction_e":"0.101",
+			    "energyFraction_i":"0.0010",
 		    	"PL": {
 			    	"accEfficiency":"0.1"
 			    },

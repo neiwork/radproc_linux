@@ -55,7 +55,7 @@ int main()
 			writeRParamSpace("photonDensity_R",model.photon.distribution,0,0);
 		} else {
 			readEandRParamSpace("photonDensity",model.photon.distribution,0,0);
-			writeEandRParamSpace("photonDensity",model.photon.distribution,0,0);
+			writeEandRParamSpace("photonDensity2",model.photon.distribution,0,0);
 		}
 		
 		if (calculateJetEmission)

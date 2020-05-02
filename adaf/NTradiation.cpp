@@ -159,37 +159,40 @@ void nonThermalRadiation(State& st, const std::string& filename)
 	Vector pPG(nEnt,0.0);
 	Vector totAbs(nEnt,0.0);
 
-	#pragma omp parallel for
-	for (int E_ix=0;E_ix<nE;E_ix++) {
-		double E = st.photon.ps[DIM_E][E_ix];
-		st.photon.ps.iterate([&](const SpaceIterator &iR) {
-			double r = iR.val(DIM_R);
-			double rB1 = r/sqrt(paso_r);
-			double rB2 = rB1*paso_r;
-			double vol = volume(r);
-			double magf = st.magf.get(iR);
-			SpaceCoord psc = {E_ix,iR.coord[DIM_R],0};
-			
-			double alpha_th = jSync(E,st.tempElectrons.get(iR),magf,st.denf_e.get(iR)) / 
-								bb(E/planck,st.tempElectrons.get(iR));
-			double kappa_ssa_e = ssaAbsorptionCoeff(E,magf,st.ntElectron,psc)+alpha_th;
-			double height = height_fun(r);
-			double tau_ssa_e = 0.5*sqrt(pi)*kappa_ssa_e*height;
+	if (calculateNTelectrons) {
+		#pragma omp parallel for
+		for (int E_ix=0;E_ix<nE;E_ix++) {
+			double E = st.photon.ps[DIM_E][E_ix];
+			st.photon.ps.iterate([&](const SpaceIterator &iR) {
+				double r = iR.val(DIM_R);
+				double rB1 = r/sqrt(paso_r);
+				double rB2 = rB1*paso_r;
+				double vol = volume(r);
+				double magf = st.magf.get(iR);
+				SpaceCoord psc = {E_ix,iR.coord[DIM_R],0};
+				
+				double alpha_th = jSync(E,st.tempElectrons.get(iR),magf,st.denf_e.get(iR)) / 
+									bb(E/planck,st.tempElectrons.get(iR));
+				double kappa_ssa_e = ssaAbsorptionCoeff(E,magf,st.ntElectron,psc)+alpha_th;
+				double height = height_fun(r);
+				double tau_ssa_e = 0.5*sqrt(pi)*kappa_ssa_e*height;
 
-			eSyLocal[E_ix][iR.coord[DIM_R]] = luminositySynchrotronExact(E,st.ntElectron,iR,magf)/E;
-			
-			double factor = pi/sqrt(3.0)*(rB2*rB2-rB1*rB1) / vol;
-			eSyLocal[E_ix][iR.coord[DIM_R]] = (tau_ssa_e > 1.0e-10) ?
-							factor*(eSyLocal[E_ix][iR.coord[DIM_R]]/kappa_ssa_e)*(1.0-exp(-2.0*sqrt(3.0)*tau_ssa_e)) :
-							eSyLocal[E_ix][iR.coord[DIM_R]];
-			eSy[E_ix] += eSyLocal[E_ix][iR.coord[DIM_R]]*vol;
-			double tau_es = st.denf_e.get(iR)*thomson*height;
-			double tescape = height/cLight * (1.0+tau_es);
-			SpaceCoord iE = {E_ix,iR.coord[DIM_R],0};
-			st.photon.distribution.set(iE,st.photon.distribution.get(iE) + 
-										eSyLocal[E_ix][iR.coord[DIM_R]]/E * tescape);
-		},{E_ix,-1,0});
+				eSyLocal[E_ix][iR.coord[DIM_R]] = luminositySynchrotronExact(E,st.ntElectron,iR,magf)/E;
+				
+				double factor = pi/sqrt(3.0)*(rB2*rB2-rB1*rB1) / vol;
+				eSyLocal[E_ix][iR.coord[DIM_R]] = (tau_ssa_e > 1.0e-10) ?
+								factor*(eSyLocal[E_ix][iR.coord[DIM_R]]/kappa_ssa_e)*(1.0-exp(-2.0*sqrt(3.0)*tau_ssa_e)) :
+								eSyLocal[E_ix][iR.coord[DIM_R]];
+				eSy[E_ix] += eSyLocal[E_ix][iR.coord[DIM_R]]*vol;
+				double tau_es = st.denf_e.get(iR)*thomson*height;
+				double tescape = height/cLight * (1.0+tau_es);
+				SpaceCoord iE = {E_ix,iR.coord[DIM_R],0};
+				st.photon.distribution.set(iE,st.photon.distribution.get(iE) + 
+											eSyLocal[E_ix][iR.coord[DIM_R]]/E * tescape);
+			},{E_ix,-1,0});
+		}
 	}
+
 	/*
 	// Adding nonthermal photons to the thermal ones; specially Sync photons.
 	st.photon.ps.iterate([&](const SpaceIterator& i) {
@@ -226,22 +229,29 @@ void nonThermalRadiation(State& st, const std::string& filename)
 			double taugg = 0.5*sqrt(pi)*kappagg*height;
 			st.tau_gg.set(psc,taugg);
 			
+			double factor = pi/sqrt(3.0)*(rB2*rB2-rB1*rB1) / vol;
+			
 			double eICLocal,pSyLocal,pPPLocal,pPGLocal;
 			eICLocal = pSyLocal = pPPLocal = pPGLocal = 0.0;
-			eICLocal = luminosityIC(E,st.ntElectron,iR.coord,st.photon.distribution,Ephmin,Ephmax)/E;
-			pSyLocal = luminositySynchrotronExact(E,st.ntProton,iR,st.magf.get(iR))/E;
 			
-			if (E/EV_TO_ERG > 1.0e7) {
-				pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,iR,Ephmin,Ephmax)/E;
-				pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(iR),iR)/E;
-				if (E/EV_TO_ERG < 1.0e10){}
-					pPPLocal += 4.0*pi*luminosityHadronic(E,st.denf_i.get(iR),st.tempIons.get(iR))/planck;
-			}
-
-			double factor = pi/sqrt(3.0)*(rB2*rB2-rB1*rB1) / vol;
-			pSyLocal = (tau_ssa_p > 1.0e-10) ? 
+			if (calculateNTelectrons)
+				eICLocal = luminosityIC(E,st.ntElectron,iR.coord,st.photon.distribution,Ephmin,Ephmax)/E;
+				
+			if (calculateNTprotons) {
+				pSyLocal = luminositySynchrotronExact(E,st.ntProton,iR,st.magf.get(iR))/E;
+			
+				if (E/EV_TO_ERG > 1.0e7) {
+					pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,iR,Ephmin,Ephmax)/E;
+					pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(iR),iR)/E;
+					if (E/EV_TO_ERG < 1.0e10){}
+						pPPLocal += 4.0*pi*luminosityHadronic(E,st.denf_i.get(iR),st.tempIons.get(iR))/planck;
+				}
+				
+				pSyLocal = (tau_ssa_p > 1.0e-10) ? 
 							factor*(pSyLocal/kappa_ssa_p)*(1.0-exp(-2.0*sqrt(3.0)*tau_ssa_p)) :
 							pSyLocal;
+			}
+			
 			double eTot = eICLocal+pSyLocal+pPPLocal+pPGLocal;
 
 			pSy[E_ix] += pSyLocal*vol;

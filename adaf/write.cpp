@@ -67,7 +67,7 @@ void writeEandRParamSpace(const std::string& filename, const ParamSpaceValues& d
 		
 		double logE = log10(i.val(DIM_E) / EV_TO_ERG);
 		double r = i.val(DIM_R);
-		double voll = (vol) ? volume(r) : 1.0;
+		double voll = (vol == 1) ? volume(r) : 1.0;
 		double logQ = safeLog10(data.get(i)*voll);
 		file << logE << '\t' << i.coord[DIM_R] << '\t' << safeLog10(r/schwRadius) << '\t' << logQ << std::endl;
 			

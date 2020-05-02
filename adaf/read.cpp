@@ -25,7 +25,7 @@ void readEandRParamSpace(const std::string& filename, ParamSpaceValues& data, in
 	file.open(dataName(filename).c_str(), std::ios::in);
 	
 	data.ps.iterate([&](const SpaceIterator& i){
-		double voll = (vol) ? volume(i.val(DIM_R)) : 1.0;
+		double voll = (vol == 1) ? volume(i.val(DIM_R)) : 1.0;
 		double aux1,aux2,aux3,dist;
 		file >> aux1 >> aux2 >> aux3 >> dist;
 		data.set(i,pow(10,dist)/voll);

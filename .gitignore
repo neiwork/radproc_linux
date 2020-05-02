@@ -55,7 +55,10 @@ Makefile
 
 # Generated files
 *.txt
+*.dat
 *.ipynb
+*.diff
+*.pdf
 
 # Build results
 [Dd]ebug/

@@ -914,7 +914,6 @@ void thermalRadiation(State& st, const string& filename)
 		absorptionLumThermal(st,lumOut,lumOutCD,lumOutRefl,lumOut_gg);
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,lumInICm,
 							lumOutIC,lumOut_gg,lumOutCD,lumOutRefl,filename);
-		writeEandRParamSpace("photonDensity",st.photon.distribution,0,0);
 	}	
 	show_message(msgEnd,Module_thermalLuminosities);
 }
