@@ -58,14 +58,14 @@
     "nonThermal": {
         "acc_method":"1",
 	    "protons":"1",
-	    "electrons":"1",
+	    "electrons":"0",
             "injection": {
 			    "calculateMagneticReconnection":"0",
 	    		"calculateDSA":"0",
 		    	"calculateSDA":"0",
 			    "calculatePL":"1",
                 "energyFraction_e":"0.101",
-			    "energyFraction_i":"0.0010",
+			    "energyFraction_i":"0.0050",
 		    	"PL": {
 			    	"accEfficiency":"0.1"
 			    },
@@ -78,7 +78,7 @@
         "calculateLosses":"0",
 		"calculateDistributions":"1",
         "calculateLuminosities":"1",
-		"calculateSecondaries":"0",
+		"calculateSecondaries":"1",
 		"calculateJetEmission":"0",
     	"neutrons":{
 			"calculateInjection":"0",

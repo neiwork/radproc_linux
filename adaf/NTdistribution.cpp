@@ -894,6 +894,7 @@ void distributionSecondaries(Particle& particle, State& st)
 		double rho = massDensityADAF(r);
 		double rateAccretion = abs(radialVel(rB1))*4.0*pi*height_fun(rB1)*rB1/vol;
 		double rateWind = (accRateADAF(rB2)-accRateADAF(rB1)) / (rho*vol);
+		rateWind = 0.0;
 		
 		particle.ps.iterate([&](const SpaceIterator& jRE) {
 			
@@ -968,7 +969,7 @@ void distributionFokkerPlanckMultiZone(Particle& particle, State& st)
 		
 		// If NORMALIZATION A PRIORI:
 		double vA = st.magf.get(jR)/sqrt(4.0*pi*massDensityADAF(r));
-		double Q0 = Ainjection * dens * vA/height * particle.mass*cLight2;
+		double Q0 = Ainjection * dens * particle.mass *cLight2;
 		
 		double sigma = g_inj * (paso_g-1.0) / 10;
 		

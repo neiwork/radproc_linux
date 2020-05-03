@@ -24,8 +24,11 @@ double losses(double E, Particle& p, State& st, const SpaceCoord& i)
 	if (p.id == "ntProton" || p.id == "ntChargedPion")
 		losses = lossesSyn(E,B,p) + lossesHadronics(E,density,p)
 			+ lossesPhotoHadronic_simple(E,p,st.photon.distribution,i,st.photon.emin(),st.photon.emax());
-	else if(p.id == "ntElectron" || p.id == "ntPair" || p.id == "ntMuon")
-		losses = lossesSyn(E,B,p);//+lossesIC(E,p,st.photon.distribution,i,st.photon.emin(),st.photon.emax());
+	else if(p.id == "ntElectron" || p.id == "ntPair" || p.id == "ntMuon") {
+		double lossSy = lossesSyn(E,B,p);
+		double lossIC = lossesIC(E,p,st.photon.distribution,i,st.photon.emin(),st.photon.emax());
+		losses = lossSy+lossIC;
+	}
 	return losses;
 }
 

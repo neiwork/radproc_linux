@@ -271,18 +271,6 @@ void nonThermalRadiation(State& st, const std::string& filename)
 		},{E_ix,-1,0});
 	}
 	
-	st.ntPhoton.ps.iterate([&](const SpaceIterator& iR) {
-		double r = iR.val(DIM_R);
-		int cond = 1;
-		st.ntPhoton.ps.iterate([&](const SpaceIterator& iRE) {
-			double E = iRE.val(DIM_E);
-			if (cond && st.tau_gg.get(iRE) > 1.0) {
-				cout << iR.val(DIM_R)/schwRadius << "\t" << height_fun(r)/r << "\t" << safeLog10(E/EV_TO_ERG) << endl;
-				cond = 0;
-			}
-		},{-1,iR.coord[DIM_R],0});
-	},{0,-1,0});
-	
 	for (size_t jE=0;jE<nEnt;jE++) {
 		double E = st.ntPhoton.ps[DIM_E][jE];
 		double fmtE = safeLog10(E/EV_TO_ERG);

@@ -173,7 +173,7 @@ void injection(Particle& p, State& st)
 		double vA = st.magf.get(iR)/sqrt(4.0*pi*massDensityADAF(r));
 		double h = height_fun(r);
 		Qfactor = (accMethod == 0) ? st.magf.get(iR) * uth * abs(radialVel(r))/cLight / (r/schwRadius) :
-										dens * vA/h * p.mass*cLight2;
+										dens * p.mass*cLight2;
 		sum += vol * Qfactor;
 	},{0,-1,0});
 	Ainjection = etaInj*accRateOut*cLight2 / sum;
