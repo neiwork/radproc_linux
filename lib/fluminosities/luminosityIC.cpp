@@ -82,3 +82,36 @@ double luminosityIC(double E, const Particle& creator, const SpaceCoord& distCoo
 
 	}
 
+double fIC_2(double Eg, double Ee, double Eph)
+{
+	double z = Eg / Ee;
+	double b = 4*Eph*Ee/P2(electronRestEnergy);
+	double aux = b*(1.0-z);
+	return 1.0/(b*Ee) * 
+		(1.0+z*z/(2.0*(1.0-z))+z/aux-2.0*z*z/P2(aux)-z*z*z/(2.0*b*P2(1.0-z))-2.0*z/aux * log(aux/z));
+}
+
+double luminosityIC_2(double E, const Particle& creator, const SpaceCoord& distCoord, const ParamSpaceValues& tpf,
+					double phEmin, double phEmax)
+{
+	double constant = 8*pi*cLight*P2(electronRadius);
+	double result = integSimpsonLog(creator.emin()*1.1, creator.emax()/1.1, [E,&creator,&distCoord,&tpf,phEmin,phEmax](double Ee)
+				{
+					double g = Ee / (creator.mass * cLight2);
+					double ne = creator.distribution.interpolate({{0,Ee}},&distCoord);
+					double z = E/Ee;
+					double Ephmin = max(phEmin*1.1,z/(1.0-z) * P2(electronRestEnergy)/(4*Ee));
+					double Ephmax = min(E,phEmax/1.1);
+					double integral = integSimpsonLog(Ephmin,Ephmax, [&distCoord,E,Ee,&tpf](double Eph)
+					{
+						double nph = tpf.interpolate({{0,Eph}},&distCoord);
+						double f = fIC_2(E,Ee,Eph);
+						double result1 = nph* (f > 0.0 ? f : 0.0);
+						return result1;
+					},50);
+					return integral*ne;
+				},50);
+				
+				
+	return E*E*constant*result;
+}

@@ -69,8 +69,8 @@ void secondariesRadiationProcesses(State& st, const std::string& filename)
 			double eICLocal,eSyLocal,piPPLocal,piPGLocal,piSyLocal,muSyLocal;
 			eICLocal = eSyLocal = piPPLocal = piPGLocal = piSyLocal = muSyLocal = 0.0;
 			eICLocal = luminosityIC_2(E,st.ntPair,iR.coord,st.photon.distribution,Ephmin,Ephmax)/E;
-			//eICLocal += luminosityIC(E,st.ntPair,iR.coord,st.ntPhoton.distribution,
-			//							st.ntPhoton.emin(),st.ntPhoton.emax())/E;
+			eICLocal += luminosityIC(E,st.ntPair,iR.coord,st.ntPhoton.distribution,
+										st.ntPhoton.emin(),st.ntPhoton.emax())/E;
 			eSyLocal = luminositySynchrotronExactSec(E,st.ntPair,iR,magf)/E;
 			muSyLocal = luminositySynchrotronExact(E,st.ntMuon,iR,magf)/E;
 			piSyLocal = luminositySynchrotronExact(E,st.ntChargedPion,iR,magf)/E;
@@ -154,5 +154,5 @@ void secondariesProcesses(State& st)
 		writeEandRParamSpace("secondaryPairDistribution",st.ntPair.distribution,0,1);
 		secondariesRadiationProcesses(st,"secondariesLum.dat");
 		cout << "Iteration = " << it << "\t Cond = " << cond << endl;
-	} while (it<=0);
+	} while (it<=1);
 }
