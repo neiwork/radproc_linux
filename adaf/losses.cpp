@@ -26,9 +26,10 @@ double losses(double E, Particle& p, State& st, const SpaceCoord& i)
 			+ lossesPhotoHadronic_simple(E,p,st.photon.distribution,i,st.photon.emin(),st.photon.emax());
 	else if(p.id == "ntElectron" || p.id == "ntPair" || p.id == "ntMuon") {
 		double lossSy = lossesSyn(E,B,p);
-		double lossIC1 = lossesIC(E,p,st.photon.distribution,i,st.photon.emin(),st.photon.emax());
-		double lossIC2 = lossesIC(E,p,st.ntPhoton.distribution,i,st.ntPhoton.emin(),st.ntPhoton.emax());
-		losses = lossSy+lossIC1+lossIC2;
+		//double lossIC1 = lossesIC(E,p,st.photon.distribution,i,st.photon.emin(),st.photon.emax());
+		//double lossIC2 = lossesIC(E,p,st.ntPhoton.distribution,i,st.ntPhoton.emin(),st.ntPhoton.emax());
+		//losses = lossSy+lossIC1+lossIC2;
+		losses = lossSy;
 	}
 	return losses;
 }

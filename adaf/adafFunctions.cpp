@@ -183,9 +183,11 @@ double accRateADAF(double r)
 	double result = accRateOut * (r < rOut ? pow(r/rOut,s) : 0.0);
 	int processesFlags[numProcesses];
 	readThermalProcesses(processesFlags);
+	
 	if (processesFlags[3]) {
 		result = accRateOut * gAcc(r) * hAcc(r) * coronaFraction;
 	}
+	
 	return result;
 }
 

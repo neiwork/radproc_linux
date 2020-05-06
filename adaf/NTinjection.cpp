@@ -156,7 +156,7 @@ void injection(Particle& p, State& st)
 
 	// CALCULATION OF THE NORMALIZATION FACTOR
 	double sum = 0.0;
-	double Qfactor = 1.0;
+	Vector Qfactor(nR,1.0);
 	p.ps.iterate([&](const SpaceIterator& iR) {
 		double r = iR.val(DIM_R);
 		double vol = volume(r);
@@ -172,9 +172,9 @@ void injection(Particle& p, State& st)
 		double uth = aTheta * dens * p.mass*cLight2 * norm_temp;
 		double vA = st.magf.get(iR)/sqrt(4.0*pi*massDensityADAF(r));
 		double h = height_fun(r);
-		Qfactor = (accMethod == 0) ? st.magf.get(iR) * uth * abs(radialVel(r))/cLight / (r/schwRadius) :
+		Qfactor[iR.coord[DIM_R]] = (accMethod == 0) ? uth * abs(radialVel(r))/cLight / (r/schwRadius) :
 										dens * p.mass*cLight2;
-		sum += vol * Qfactor;
+		sum += vol * Qfactor[iR.coord[DIM_R]];
 	},{0,-1,0});
 	Ainjection = etaInj*accRateOut*cLight2 / sum;
 	cout << Ainjection << endl;
@@ -204,7 +204,7 @@ void injection(Particle& p, State& st)
 					return e*cutOffPL(e,Emin,Emax);
 				},100);
         
-		double Q0p = Ainjection * Qfactor / int_E;
+		double Q0p = Ainjection * Qfactor[iR.coord[DIM_R]] / int_E;
 		
 		p.ps.iterate([&](const SpaceIterator& iRE) {
 			const double E = iRE.val(DIM_E);

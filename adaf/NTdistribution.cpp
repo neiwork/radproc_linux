@@ -867,13 +867,13 @@ void distributionMultiZone(Particle& particle, State& st)
 		// THERMAL AND NONTHERMAL TOTAL ENERGY
 		particle.ps.iterate([&](const SpaceIterator& iR) {
 			double r = iR.val(DIM_R);
-			double vol = volume(r);
-			double U_CR = vol*integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
+			double U_CR = integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
 							{
 								return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e;
 							},100);
-			double U_Th = 1.5*st.denf_i.get(iR)*boltzmann*st.tempIons.get(iR)*vol;
-			cout << iR.coord[DIM_R] << "\t U_Nth/U_Th = " << U_CR/U_Th << endl;
+			double U_Th = 1.5*st.denf_i.get(iR)*boltzmann*st.tempIons.get(iR);
+			double Press = massDensityADAF(r)*sqrdSoundVel(r);
+			cout << iR.coord[DIM_R] << "\t U_Nth/U_Th = " << U_CR/U_Th << "\t U_Nth/P_gas = " << U_Th/Press << endl;
 		},{0,-1,0});
 	}
 	

@@ -101,7 +101,7 @@ int main()
 						distributionMultiZone(model.ntProton, model);
 					else
 						distributionFokkerPlanckMultiZone(model.ntProton,model);
-					writeEandRParamSpace("protonDistribution", model.ntProton.distribution, 0,1);
+					writeEandRParamSpace("protonDistribution", model.ntProton.distribution,0,1);
 					writeRParamSpace("protonDistribution_R", model.ntProton.distribution, 0, 0);
 				} else {
 					readEandRParamSpace("protonInjection",model.ntProton.injection,0,1);

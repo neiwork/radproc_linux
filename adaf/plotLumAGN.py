@@ -16,7 +16,7 @@ NT_logSye_fun = interpol.interp1d(NT_logeVSy,NT_logSye,bounds_error=False,fill_v
 Th_logTot_fun = interpol.interp1d(np.log10(eV),np.log10(Tot),bounds_error=False,fill_value=-1000.0)
 
 x_eV = [-5,21]
-y_axis = [38,44]
+y_axis = [35,45]
 
 fig, ax1 = plt.subplots(figsize=(15,7))
 

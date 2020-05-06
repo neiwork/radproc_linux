@@ -3,9 +3,9 @@
     "mu_i":"1.23",
     "mu_e":"1.14",
     "inclination":"0",
-    "accRateCorona":"1.0e-2",
+    "accRateCorona":"1.0",
     "powerTransition":"1",
-    "rTr":"0.3e1",
+    "rTr":"0.3e4",
     "rOutCD":"1.0e4",
     "zGap":"1.0",
     "tAccBlob":"0",
@@ -26,7 +26,7 @@
 			"0":1,
 			"1":1,
 			"2":0,
-			"3":1,
+			"3":0,
 			"4":1
         },
         
@@ -56,29 +56,29 @@
     
     "calculateNonThermal":"1",
     "nonThermal": {
-        "acc_method":"1",
+        "acc_method":"0",
 	    "protons":"1",
-	    "electrons":"0",
+	    "electrons":"1",
             "injection": {
 			    "calculateMagneticReconnection":"0",
 	    		"calculateDSA":"0",
 		    	"calculateSDA":"0",
 			    "calculatePL":"1",
-                "energyFraction_e":"0.101",
-			    "energyFraction_i":"0.0050",
+                "energyFraction_e":"0.1",
+			    "energyFraction_i":"0.1",
 		    	"PL": {
-			    	"accEfficiency":"0.1"
+			    	"accEfficiency":"0.001"
 			    },
 			    "SDA": {
 				    "fractionTurbulent":"0.2",
 				    "powerSpectrumIndex":"1.666"
 			    },
-			    "primaryIndex":"1.0"
+			    "primaryIndex":"2.0"
             },
         "calculateLosses":"0",
 		"calculateDistributions":"1",
         "calculateLuminosities":"1",
-		"calculateSecondaries":"1",
+		"calculateSecondaries":"0",
 		"calculateJetEmission":"0",
     	"neutrons":{
 			"calculateInjection":"0",
@@ -135,7 +135,7 @@
 						"samples":30
 					},
 					"radius_cd":{
-                        "samples":20
+                        "samples":2
                     }
 				}
 			},
@@ -152,7 +152,7 @@
 				"dim":{
 					"energy": {
 						"min":-2.0,
-						"max":15.0
+						"max":18.0
 					}
 				}
 			},
@@ -170,7 +170,7 @@
 				"dim":{
 					"energy": {
 						"min":9.0,
-						"max":18.0
+						"max":19.0
 					}
 				}
 			},

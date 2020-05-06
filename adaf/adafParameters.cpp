@@ -61,8 +61,8 @@ void adafParameters()
 	height_method = GlobalConfig.get<int>("height_method");
     
     calculateThermal = GlobalConfig.get<int>("calculateThermal");
+	numProcesses = GlobalConfig.get<int>("thermal.numProcesses");
     if (calculateThermal) {
-        numProcesses = GlobalConfig.get<int>("thermal.numProcesses");
         calculateComptonRedMatrix = GlobalConfig.get<int>("thermal.compton.calculateRedMatrix");
         comptonMethod = GlobalConfig.get<int>("thermal.compton.method");
         if (1) {
