@@ -652,6 +652,19 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 	};
 	cout << "Total thermal luminosity (power) = " << lumThermalTot << endl;
 	
+	double lumThermal = 0.0;
+	for (size_t jR=0;jR<nR;jR++) {
+		double r = st.denf_i.ps[DIM_R][jR]/schwRadius;
+		for (size_t jE=0;jE<nE;jE++) {
+			double E = energies[jE];
+			double frequency = E/planck;
+			double dfreq = frequency*(pasoF-1.0);
+			lumThermal += lumOut[jE][jR]*dfreq*escapeAi[jR];
+		}
+		cout << "percentage of the lum produced inside r = " << r*paso_r
+			 << " equal to " << lumThermal/lumThermalTot * 100 << " %" << endl;
+	};
+	
 	double eVar = pow(energies[nE-1]/energies[0],1.0/nE);
 	size_t jR=0;
 	st.photon.ps.iterate([&](const SpaceIterator& itR) {

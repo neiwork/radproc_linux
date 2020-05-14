@@ -232,6 +232,7 @@ void writeFields(State& st) {
 	fields.open("fields.dat",std::ios::out);
 	st.photon.ps.iterate([&](const SpaceIterator& iR) {
 		double r = iR.val(DIM_R);
+		cout << r/schwRadius << "\t" << height_fun(r)/r << endl;
 		fields << safeLog10(r/schwRadius) << "\t"
 			   << accRateADAF(r)/accRateOut << "\t"
 			   << accRateColdDisk(r)/accRateOut << "\t"

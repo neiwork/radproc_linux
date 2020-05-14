@@ -157,6 +157,7 @@ void nonThermalRadiation(State& st, const std::string& filename)
 	Vector pSy(nEnt,0.0);
 	Vector pPP(nEnt,0.0);
 	Vector pPG(nEnt,0.0);
+	Vector totNotAbs(nEnt,0.0);
 	Vector totAbs(nEnt,0.0);
 
 	if (calculateNTelectrons) {
@@ -261,7 +262,8 @@ void nonThermalRadiation(State& st, const std::string& filename)
 			double totLocal = (taugg > 1.0e-10) ? 
 									factor*vol*eTot/kappagg*(1.0-exp(-2.0*sqrt(3.0)*taugg)) : 
 										eTot*vol;
-			totAbs[E_ix] += totLocal;
+			totNotAbs[E_ix] += totLocal;
+			totAbs[E_ix] += eTot*vol - totLocal;
 			
 			double tau_es = st.denf_e.get(iR)*thomson*height;
 			double tescape = height/cLight * (1.0+tau_es);
@@ -279,6 +281,7 @@ void nonThermalRadiation(State& st, const std::string& filename)
 			 << "\t" << safeLog10(eIC[jE]*E)
 			 << "\t" << safeLog10(pPP[jE]*E)
 			 << "\t" << safeLog10(pPG[jE]*E)
+			 << '\t' << safeLog10(totNotAbs[jE]*E)
 			 << '\t' << safeLog10(totAbs[jE]*E)
 			 << std::endl;
 	}

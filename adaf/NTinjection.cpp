@@ -273,26 +273,43 @@ void injectionMuon(Particle& p, State& st)
 void injectionPair(Particle& p, State& st, int it)
 {
 	show_message(msgStart, Module_pairInjection);
+	
+	std::ofstream secondariesMuonFile, secondariesBHFile, secondariesGammaGammaFile;
+	
+	if (it == 1) {
+		secondariesMuonFile.open("secondariesInjectionMuon.dat", std::ios::out);
+		secondariesBHFile.open("secondariesInjectionBH.dat", std::ios::out);
+		secondariesGammaGammaFile.open("secondariesInjectionGammaGamma.dat", std::ios::out);
+	}
+	
 	double sumTot = 0.0;
 	double sumTotPh = 0.0;
 	p.ps.iterate([&](const SpaceIterator& iR) {
+		double r = iR.val(DIM_R);
+		double vol = volume(r);
 		double height = height_fun(iR.val(DIM_R));
 		p.ps.iterate([&](const SpaceIterator& iRE) {
 			double Eee = iRE.val(DIM_E);
-			if (it <= 1) {
-				double injection = pairMuonDecayNew(Eee,st.ntMuon,iRE);
-							+ pairBH(Eee,st.ntProton,st.photon.distribution,iRE,
+			if (it == 1) {
+				double injectionMuon = pairMuonDecayNew(Eee,st.ntMuon,iRE);
+				double injectionBH = pairBH(Eee,st.ntProton,st.photon.distribution,iRE,
 								st.photon.emin(),st.photon.emax());
-				p.injection.set(iRE,injection);
+				p.injection.set(iRE, injectionMuon + injectionBH);
+				secondariesMuonFile << safeLog10(Eee/EV_TO_ERG) << "\t" << iR.coord[DIM_R] << "\t"
+								<< r/schwRadius << "\t" << injectionMuon*vol << endl;
+				secondariesBHFile << safeLog10(Eee/EV_TO_ERG) << "\t" << iR.coord[DIM_R] << "\t"
+								<< r/schwRadius << "\t" << injectionBH*vol << endl;
 			}
-			double injection2 = pairGammaGammaNew(Eee,st.ntPhoton.distribution,st.photon.distribution,
+			double injectionGammaGamma = pairGammaGammaNew(Eee,st.ntPhoton.distribution,st.photon.distribution,
 						iRE,st.photon.emin(),st.photon.emax(),st.ntPhoton.emin(),st.ntPhoton.emax());
-			double tcool = Eee/lossesSyn(Eee,st.magf.get(iR),p);
-			p.injection.set(iRE,p.injection.get(iRE)+injection2);
+			//double tcool = Eee/lossesSyn(Eee,st.magf.get(iR),p);
+			p.injection.set(iRE,p.injection.get(iRE)+injectionGammaGamma);
+			secondariesGammaGammaFile << safeLog10(Eee/EV_TO_ERG) << "\t" << vol << "\t"
+								<< r/schwRadius << "\t" << injectionGammaGamma << endl;
 		},{-1,iR.coord[DIM_R],0});
 		sumTot += integSimpsonLog(p.emin(),p.emax(),[&st,&p,iR](double e)
 					{
-						double tcool = e/lossesSyn(e,st.magf.get(iR),p);
+						//double tcool = e/lossesSyn(e,st.magf.get(iR),p);
 						double inj = p.injection.interpolate({{DIM_E,e}},&iR.coord);
 						return e*inj;
 					},100)*volume(iR.val(DIM_R));
@@ -308,6 +325,13 @@ void injectionPair(Particle& p, State& st, int it)
 	cout << "Total photon power absorbed to create pairs = " << sumTotPh << "\t" << endl;
 	cout << "Total power injected in " << p.id << " = " << sumTot << "\t" << endl;
 	writeEandRParamSpace("secondaryPairInjection",p.injection,0,1);
+	
+	if (it == 1) {
+		secondariesMuonFile.close();
+		secondariesBHFile.close();
+	}
+	secondariesGammaGammaFile.close();
+	
 	show_message(msgEnd, Module_pairInjection);
 }
 
