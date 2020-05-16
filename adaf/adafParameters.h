@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <fmath/physics.h>
+#include "State.h"
 
 // PARAMETERS (from parameter.json)
 
@@ -110,3 +111,4 @@ double etaInj;
 double pIndex;
 
 void adafParameters();
+void redshiftFactor(State& st);

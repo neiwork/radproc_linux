@@ -9,6 +9,7 @@
 #include "adafFunctions.h"
 #include "globalVariables.h"
 #include "flareProcesses.h"
+#include "redshiftFunction.h"
 
 #include "thermalDistribution.h"
 #include "NTtimescales.h"
@@ -48,6 +49,8 @@ int main()
 		} else {
 			comptonScattMatrixRead(model);
 		}
+		
+		redshiftFactor(model);
 		
 		if (calculateThermal) {
 			thermalRadiation(model,"lumThermal.dat");

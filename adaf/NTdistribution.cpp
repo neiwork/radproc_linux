@@ -943,7 +943,7 @@ void distributionFokkerPlanckMultiZone(Particle& particle, State& st)
 		double tAccretion = accretionTime(r);
 		double rateAccretion = 1.0/min(tCell,tAccretion);
 		rateAccretion = abs(radialVel(rB1))*4.0*pi*height_fun(rB1)*rB1/vol;
-		//double rateWind = (accRateADAF(rB2)-accRateADAF(rB1)) / (rho*vol);
+		//double rateWind = accRateADAF(r)*(hAcc(rB2)-hAcc(rB1)) / (rho*vol);
 		double rateWind = 0.0;
 		// We define a new mesh of points
 		size_t M = 199;
@@ -955,7 +955,7 @@ void distributionFokkerPlanckMultiZone(Particle& particle, State& st)
 		Vector delta_g_m_au(M+2,0.0);
 		Vector delta_g(M+1,0.0);
 		
-		double g_inj = 2.0*g_min;
+		double g_inj = 4.0*g_min;
 		double E_inj = g_inj*particle.mass*cLight2;
 		
 		double norm_temp, dens;
@@ -969,9 +969,9 @@ void distributionFokkerPlanckMultiZone(Particle& particle, State& st)
 		
 		// If NORMALIZATION A PRIORI:
 		double vA = st.magf.get(jR)/sqrt(4.0*pi*massDensityADAF(r));
-		double Q0 = Ainjection * dens * particle.mass *cLight2;
+		double Q0 = Ainjection * dens * cLight / schwRadius / g_inj;
 		
-		double sigma = g_inj * (paso_g-1.0) / 10;
+		double sigma = g_inj * (paso_g-1.0) / 5;
 		
 		for (size_t jg=1;jg<M+3;jg++)	g_au[jg] = g_au[jg-1]*paso_g;
 		for (size_t jg=0;jg<M+2;jg++)	delta_g_m_au[jg] = g_au[jg+1]-g_au[jg];
@@ -1181,7 +1181,7 @@ void distributionFokkerPlanckMultiZone(Particle& particle, State& st)
 	
 }
 
-
+/*
 void distributionFokkerPlanckMultiZoneTimeDependent(Particle& particle, State& st)
 {
 	particle.ps.iterate([&](const SpaceIterator& iR) {
@@ -1422,7 +1422,7 @@ void distributionFokkerPlanckMultiZoneTimeDependent(Particle& particle, State& s
 	*/
 	
 	// TESTS
-	
+	/*
 	// CONSERVATION OF FLUX OF PARTICLES CROSSING EACH SHELL
 	particle.ps.iterate([&](const SpaceIterator& iR) {
 		double rB1 = iR.val(DIM_R) / sqrt(paso_r);
@@ -1457,9 +1457,7 @@ void distributionFokkerPlanckMultiZoneTimeDependent(Particle& particle, State& s
 		double pFluid = massDensityADAF(r)*sqrdSoundVel(r);
 		cout << iR.coord[DIM_R] << "\t pCR/pgas = " << pCR/pFluid << endl;
 	},{0,-1,0});
-	
-}
-
+}*/
 
 
 
@@ -1476,10 +1474,10 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 	Vector delta_g_m_au(M+2,0.0);
 	Vector delta_g(M+1,0.0);
 	
-	double g_inj = 2.0*g_min;
+	double g_inj = 4.0*g_min;
 	double E_inj = g_inj*particle.mass*cLight2;
 	
-	double sigma = g_inj;
+	double sigma = g_inj/5;
 	
 	for (size_t jg=1;jg<M+3;jg++)	g_au[jg] = g_au[jg-1]*paso_g;
 	for (size_t jg=0;jg<M+2;jg++)	delta_g_m_au[jg] = g_au[jg+1]-g_au[jg];
@@ -1501,9 +1499,9 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 						double B = magneticField(rad);
 						double height = height_fun(rad);
 						double rho = massDensityADAF(rad);
-						double tCool = E/abs(losses(E,particle,st,jR));
+						double dgdt = - abs(losses(E,particle,st,jR)) / (particle.mass*cLight2);
 						double Dg = diffCoeff_g(g,particle,height,B,rho);
-						return -g/(abs(vR)*tCool) + 2.0*Dg/g/abs(vR) + 0.5*g/r;
+						return - dgdt / vR - 2.0*Dg/vR / g + 0.5*g/r;
 					};
 					
 	fun2 Cfun = [&particle] (double g, double r)
@@ -1517,7 +1515,7 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 						double rho = massDensityADAF(rad);
 						double vR = radialVel(rad);
 						double Dg = diffCoeff_g(g,particle,height,B,rho);
-						return -Dg/abs(vR);
+						return Dg / vR;
 					};
 
 	fun2 Rfun = [&particle] (double g, double r) 
@@ -1531,9 +1529,9 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 						double rateWind = -s/rad;
 						double B = magneticField(rad);
 						double height = height_fun(rad);
-						double rateDiff = 1.0/(diffusionTimeTurbulence(E,height,particle,B)*vR);
-						return 1.0e99;
-						//return pow(rateWind+rateDiff,-1);
+						double rateDiff = 1.0/(diffusionTimeTurbulence(E,height,particle,B));
+						//return 1.0e99;
+						return pow(rateDiff,-1) * vR;
 					};
 	
 	fun2 Qfun = [g_inj,sigma,&particle] (double g, double r)
@@ -1553,9 +1551,9 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 						double vR = radialVel(rad);
 						double vA = magneticField(rad)/sqrt(4.0*pi*massDensityADAF(rad));
 						double height = height_fun(rad);
-						double Q0 = Ainjection * dens * vA/height * particle.mass*cLight2;
+						double Q0 = Ainjection * dens * cLight/schwRadius / g_inj;
 						
-						return rad*height_fun(rad)*Q0*gsl_ran_gaussian_pdf(g-g_inj,sigma);
+						return rad*height*Q0*gsl_ran_gaussian_pdf(g-g_inj,sigma);
 					};
 		
 	size_t Nrad = 150;
@@ -1630,13 +1628,15 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 	}
 	
 	size_t jr(Nrad);
-	particle.ps.iterate([&](const SpaceIterator &jR) {
+	particle.ps.iterate([&](const SpaceIterator& jR) {
 		double logr = log10(jR.val(DIM_R));
 		while (log10(radius[jr]) < logr) jr--;
+		if (jr >= Nrad-1) jr = Nrad-2;
 		size_t m(0);
 		particle.ps.iterate([&](const SpaceIterator &jRE) {
 			double logg = log10(jRE.val(DIM_E)/(particle.mass*cLight2));
 			while (log10(g_au[m]) < logg) m++;
+			
 			double slope1 = (safeLog10(dist[jr][m])-safeLog10(dist[jr][m-1]))/log10(g_au[m]/g_au[m-1]);
 			double dist_1 = slope1 * (logg-log10(g_au[m-1])) + safeLog10(dist[jr][m-1]);
 			double slope2 = (safeLog10(dist[jr+1][m])-safeLog10(dist[jr+1][m-1]))/log10(g_au[m]/g_au[m-1]);

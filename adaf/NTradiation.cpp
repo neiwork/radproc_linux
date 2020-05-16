@@ -206,6 +206,7 @@ void nonThermalRadiation(State& st, const std::string& filename)
 	for (int E_ix=0;E_ix<nEnt;E_ix++) {
 		double E = ntPh.ps[DIM_E][E_ix];
 		st.ntPhoton.ps.iterate([&](const SpaceIterator& iR) {
+			E = E / redshift_to_inf[iR.coord[DIM_R]];
 			double r = iR.val(DIM_R);
 			double rB1 = r/sqrt(paso_r);
 			double rB2 = r*sqrt(paso_r);
@@ -255,15 +256,15 @@ void nonThermalRadiation(State& st, const std::string& filename)
 			
 			double eTot = eICLocal+pSyLocal+pPPLocal+pPGLocal;
 
-			pSy[E_ix] += pSyLocal*vol;
-			eIC[E_ix] += eICLocal*vol;
-			pPP[E_ix] += pPPLocal*vol;
-			pPG[E_ix] += pPGLocal*vol;
+			pSy[E_ix] += pSyLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
+			eIC[E_ix] += eICLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
+			pPP[E_ix] += pPPLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
+			pPG[E_ix] += pPGLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
 			double totLocal = (taugg > 1.0e-10) ? 
 									factor*vol*eTot/kappagg*(1.0-exp(-2.0*sqrt(3.0)*taugg)) : 
 										eTot*vol;
-			totNotAbs[E_ix] += totLocal;
-			totAbs[E_ix] += eTot*vol - totLocal;
+			totNotAbs[E_ix] += totLocal * pow(redshift_to_inf[iR.coord[DIM_R]],3);
+			totAbs[E_ix] += (eTot*vol - totLocal) * pow(redshift_to_inf[iR.coord[DIM_R]],3);
 			
 			double tau_es = st.denf_e.get(iR)*thomson*height;
 			double tescape = height/cLight * (1.0+tau_es);

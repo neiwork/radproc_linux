@@ -83,16 +83,16 @@ void secondariesRadiationProcesses(State& st, const std::string& filename)
 			double factor = pi/sqrt(3.0)*(rB2*rB2-rB1*rB1) / vol;
 			double eTot = eSyLocal+eICLocal+muSyLocal+piSyLocal+piPPLocal+piPGLocal;
 
-			eSy[E_ix] += eSyLocal*vol;
-			muSy[E_ix] += muSyLocal*vol;
-			piSy[E_ix] += piSyLocal*vol;
-			eIC[E_ix] += eICLocal*vol;
-			piPP[E_ix] += piPPLocal*vol;
-			piPG[E_ix] += piPGLocal*vol;
+			eSy[E_ix] += eSyLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
+			muSy[E_ix] += muSyLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
+			piSy[E_ix] += piSyLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
+			eIC[E_ix] += eICLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
+			piPP[E_ix] += piPPLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
+			piPG[E_ix] += piPGLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
 			double totLocal = (tau_gg > 1.0e-10) ? factor*vol*eTot/kappa_gg*(1.0-exp(-2.0*sqrt(3.0)*tau_gg)) : 
 								eTot*vol;
-			double totLocalNA = eTot;
-			totAbs[E_ix] += totLocal;
+			double totLocalNA = eTot * pow(redshift_to_inf[iR.coord[DIM_R]],3);
+			totAbs[E_ix] += totLocal  * pow(redshift_to_inf[iR.coord[DIM_R]],3);
 			
 			double tau_es = st.denf_e.get(iR)*thomson*height;
 			double tescape = height/cLight * (1.0+tau_es);

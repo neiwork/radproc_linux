@@ -364,7 +364,7 @@ void comptonNewNewPruebaVector(Vector tempVec, Vector nuPrimVec, Vector nuVec, V
 	fread(emiss,sizeof(float),numE*numR*numTheta,emissFile);
 	fclose(emissFile); */
 
-void cNew(State& st, Vector& p, Vector redshift)
+void cNew(State& st, Vector& p, Vector redshift_to_inf)
 {
 	FILE *probsFile, *ntFile, *omFile, *ompFile;
 	probsFile = fopen("probs.bin","rb");
@@ -399,7 +399,7 @@ void cNew(State& st, Vector& p, Vector redshift)
 		double lognt2 = ntVec[pos_r];
 		size_t jE = 0;
 		st.photon.ps.iterate([&](const SpaceIterator& iRE) {
-			double logom = log10(iRE.val(DIM_E)/redshift[jR]/electronRestEnergy);
+			double logom = log10(iRE.val(DIM_E)/redshift_to_inf[jR]/electronRestEnergy);
 			if (logom > omVec[0] && logom < omVec[nNuCompton-1]) {
 				double aux = omVec[0];
 				size_t pos_om = 0;
@@ -411,7 +411,7 @@ void cNew(State& st, Vector& p, Vector redshift)
 				double logom2 = omVec[pos_om];
 				size_t jjE = 0;
 				st.photon.ps.iterate([&](const SpaceIterator& iREE) {
-					double logomp = log10(iREE.val(DIM_E)/redshift[jR]/electronRestEnergy);
+					double logomp = log10(iREE.val(DIM_E)/redshift_to_inf[jR]/electronRestEnergy);
 					if (logomp > ompVec[0] && logomp < ompVec[nNuCompton-1]) {
 						double aux = ompVec[0];
 						size_t pos_omp = 0;

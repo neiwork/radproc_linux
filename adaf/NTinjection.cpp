@@ -172,12 +172,11 @@ void injection(Particle& p, State& st)
 		double uth = aTheta * dens * p.mass*cLight2 * norm_temp;
 		double vA = st.magf.get(iR)/sqrt(4.0*pi*massDensityADAF(r));
 		double h = height_fun(r);
-		Qfactor[iR.coord[DIM_R]] = (accMethod == 0) ? uth * abs(radialVel(r))/cLight / (r/schwRadius) :
-										dens * p.mass*cLight2;
+		Qfactor[iR.coord[DIM_R]] = (accMethod == 0) ? uth * abs(radialVel(r)) / r :
+										dens * p.mass*cLight2 * cLight/schwRadius;
 		sum += vol * Qfactor[iR.coord[DIM_R]];
 	},{0,-1,0});
-	Ainjection = etaInj*accRateOut*cLight2 / sum;
-	cout << Ainjection << endl;
+	Ainjection = etaInj*accRateOut*cLight2 / sum;		// [non-dimensional]
 	
 ////////////////////////////////////////////////////////
 

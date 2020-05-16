@@ -47,6 +47,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="redshiftFunction.h"/>
+    <File Name="redshiftFunction.cpp"/>
     <File Name="blob.h"/>
     <File Name="blob.cpp"/>
     <File Name="read.h"/>

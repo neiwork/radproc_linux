@@ -6,6 +6,8 @@
 #include <fmath/physics.h>
 #include <fparameters/parameters.h>
 #include <boost/property_tree/ptree.hpp>
+#include <fparameters/SpaceIterator.h>
+#include "State.h"
 
 using namespace std;
 

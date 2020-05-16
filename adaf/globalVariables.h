@@ -39,6 +39,12 @@ extern Matrix reachDA;
 extern Vector escapeAi;
 extern Vector escapeDi;
 
+extern Vector redshift_to_inf;
+extern Vector redshift_CD_to_inf;
+extern Matrix redshift;
+extern Matrix redshift_RIAF_to_CD;
+extern Matrix redshift_CD_to_RIAF;
+
 extern const int calculateComptonScatt;
 extern const int calculateThermal;
 extern const int calculatePhotonDensityGap;
