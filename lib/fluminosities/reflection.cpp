@@ -2,7 +2,7 @@
 #include <fmath/physics.h>
 
 double lumShellInc(double freq0, size_t jE, size_t jRcd, Matrix lumOut, Matrix absCD,
-					Vector energies, size_t nR)
+					Vector energies, size_t nR, Matrix redshift_RIAF_to_CD)
 {
 	double lum = 0.0;
 	for (size_t jjR=0;jjR<nR;jjR++) {
@@ -14,7 +14,7 @@ double lumShellInc(double freq0, size_t jE, size_t jRcd, Matrix lumOut, Matrix a
 				logLumFreq0 = log10(lumOut[jjE][jjR]/lumOut[jjE-1][jjR]) /
 					log10(energies[jjE]/energies[jjE-1]) * log10(freq0*planck/energies[jjE-1])
 					+ log10(lumOut[jjE-1][jjR]);
-				lum += pow(10.0,logLumFreq0) * absCD[jjR][jRcd];
+				lum += pow(10.0,logLumFreq0) * absCD[jjR][jRcd] * pow(redshift_RIAF_to_CD[jjR][jRcd],3);
 			}
 		}
 	}
