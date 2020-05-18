@@ -241,9 +241,9 @@ void coldDiskLuminosity(State& st, Matrix lumOut, Matrix& lumOutRefl,
 	for (int jRcd=0;jRcd<nRcd;jRcd++) {
 		double rCd = st.photon.ps[DIM_Rcd][jRcd];
 		
-		double lj = rCd/sqrt(paso_rCD);
-		double lj1 = rCd*sqrt(paso_rCD);
-		double area = 2.0*pi*(lj1*lj1-lj*lj);
+		double lj1 = rCd/sqrt(paso_rCD);
+		double lj2 = rCd*sqrt(paso_rCD);
+		double area = 2.0*pi*(lj2*lj2-lj1*lj1);
 		double aux1 = auxCD(rCd);
 		double aux2 = 0.0;
 		
@@ -255,18 +255,19 @@ void coldDiskLuminosity(State& st, Matrix lumOut, Matrix& lumOutRefl,
 			double dfreq = frequency*(sqrt(pasoE)-1.0/sqrt(pasoE));
 			double lumInc = 0.0;
 			for (size_t kR=0;kR<nR;kR++) {
-				lumInc += (lumOut[jjE][kR]*reachAD[kR][jRcd]) * pow(redshift_RIAF_to_CD[kR][jRcd],3);
+				lumInc += (lumOut[jjE][kR]*reachAD[kR][jRcd] * pow(redshift_RIAF_to_CD[kR][jRcd],2));
 			}
 			aux2 += ((lumInc - lumOutRefl[jjE][jRcd])*dfreq);
+			aux2 = 0.0;
 		}
-		aux2 = 0.0;
+		//aux2 = 0.0;
 		double aux = aux1+aux2;
 		double temp = pow(aux/area/ stefanBoltzmann,0.25);
 		//cout << "Radius = " << rCd/schwRadius << " Temperature = " << scientific << temp << endl;
 
 		for(size_t jE=0;jE<nE;jE++) {
 			double frecuency=energies[jE]/planck;
-			lumOutCD[jE][jRcd] = area * bb(frecuency,1.7*temp)/pow(1.7,4);
+			lumOutCD[jE][jRcd] = area * pi * bb(frecuency,1.7*temp)/pow(1.7,4);
 		};
 	}
 }
@@ -612,6 +613,8 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 			lumTot += lumOut[jE][jR] * pow(redshift_to_inf[jR],3) * escapeAi[jR];
 		}
 		for (size_t jRcd=0;jRcd<nRcd;jRcd++) {
+			if (jE==0)
+				cout << st.denf_e.ps[DIM_Rcd][jRcd]/schwRadius << "\t redshift = " << redshift_CD_to_inf[jRcd] << endl;
 			lumCD += lumOutCD[jE][jRcd] * pow(redshift_CD_to_inf[jRcd],3) * escapeDi[jRcd];
 			lumRefl += lumOutRefl[jE][jRcd] * pow(redshift_CD_to_inf[jRcd],3) * escapeDi[jRcd];
 		}
@@ -762,20 +765,21 @@ void targetField(State& st, Matrix lumOut, Matrix lumCD, Matrix lumRefl)
 			double height = height_fun(r);
 			double tau_es_1 = st.denf_e.get(itER)*thomson*height;
 			double tau_es_2 = tau_es_1 * (rB2-rB1)/height;
-			double tescape = height/cLight * tau_es_1;
-			double tcross = (rB2-rB1)/cLight * tau_es_2;
-			/*for (size_t jjR=0;jjR<nR;jjR++)
-				lumReachingShell += ( (jjR == jR) ? lumOut[jE][jR]*tescape : 
-									reachAA[jjR][jR]*lumOut[jE][jjR]*tcross );
-			for (size_t jjRcd=0;jjRcd<nRcd;jjRcd++)
-				lumReachingShell += reachDA[jjRcd][jR]*(lumCD[jE][jjRcd]+lumRefl[jE][jjRcd])*tcross;
-			st.photon.distribution.set(itER,lumReachingShell/(vol*planck*E)); //erg^⁻1 cm^-3 */
+			double tescape = height/cLight * (1.0 + tau_es_1);
+			double tcross = (rB2-rB1)/cLight * (1.0 + tau_es_2);
 			for (size_t jjR=0;jjR<nR;jjR++)
-				lumReachingShell += reachAA[jjR][jR]*pow(redshift[jjR][jR],2)*lumOut[jE][jjR];
+				lumReachingShell += ( (jjR == jR) ? lumOut[jE][jR]*tescape : 
+									reachAA[jjR][jR]*redshift[jjR][jR]*lumOut[jE][jjR]*tcross );
 			for (size_t jjRcd=0;jjRcd<nRcd;jjRcd++)
-				lumReachingShell += reachDA[jjRcd][jR]*pow(redshift_CD_to_RIAF[jjRcd][jR],2)*
-										(lumCD[jE][jjRcd]+lumRefl[jE][jjRcd]);
-			st.photon.distribution.set(itER,lumReachingShell/(4.0*pi*r*height*planck*E*cLight)); //erg^⁻1 cm^-3
+				lumReachingShell += reachDA[jjRcd][jR]*redshift_CD_to_RIAF[jjRcd][jR] * 
+									(lumCD[jE][jjRcd]+lumRefl[jE][jjRcd])*tcross;
+			st.photon.distribution.set(itER,lumReachingShell/(vol*planck*E)); //erg^⁻1 cm^-3 */
+			//for (size_t jjR=0;jjR<nR;jjR++)
+			//	lumReachingShell += reachAA[jjR][jR]*pow(redshift[jjR][jR],2)*lumOut[jE][jjR];
+			//for (size_t jjRcd=0;jjRcd<nRcd;jjRcd++)
+			//	lumReachingShell += reachDA[jjRcd][jR]*pow(redshift_CD_to_RIAF[jjRcd][jR],2)*
+			//							(lumCD[jE][jjRcd]+lumRefl[jE][jjRcd]);
+			//st.photon.distribution.set(itER, lumReachingShell/(4.0*pi*r*height*planck*E*cLight)); //erg^⁻1 cm^-3
 			jR++;
 		},{itE.coord[DIM_E],-1,0});
 		jE++;

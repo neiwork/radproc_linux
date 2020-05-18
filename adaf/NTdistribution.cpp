@@ -1501,7 +1501,7 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 						double rho = massDensityADAF(rad);
 						double dgdt = - abs(losses(E,particle,st,jR)) / (particle.mass*cLight2);
 						double Dg = diffCoeff_g(g,particle,height,B,rho);
-						return - dgdt / vR - 2.0*Dg/vR / g + 0.5*g/r;
+						return - dgdt/vR - 2.0*Dg/vR / g + 0.5*g/r;
 					};
 					
 	fun2 Cfun = [&particle] (double g, double r)
@@ -1556,7 +1556,7 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 						return rad*height*Q0*gsl_ran_gaussian_pdf(g-g_inj,sigma);
 					};
 		
-	size_t Nrad = 150;
+	size_t Nrad = 600;
 	Vector radius(Nrad+1,0.0);
 	radius[0] = particle.ps[DIM_R][nR-1];
 	double pasor = pow(radius[0]/particle.ps[DIM_R][0],1.0/(Nrad-1));
@@ -1620,8 +1620,6 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 			b[m] = 1.0 + deltar[jr]/delta_g[m] * ( Cm_minusHalf * Wplus_m_minusHalf / delta_g_m_au[m] +
 						Cm_plusHalf * Wminus_m_plusHalf / delta_g_m_au[m+1] ) + deltar[jr]/Rm;
 			d[m] = Qm*deltar[jr] + d[m];
-			
-			
 		}
 		TriDiagSys(a,b,c,d,M);
 		for (size_t m=0;m<M+1;m++) dist[jr][m] = d[m]/(radius[jr]*height_fun(radius[jr])*radialVel(radius[jr]));
@@ -1632,18 +1630,21 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 		double logr = log10(jR.val(DIM_R));
 		while (log10(radius[jr]) < logr) jr--;
 		if (jr >= Nrad-1) jr = Nrad-2;
-		size_t m(0);
+		size_t m(1);
 		particle.ps.iterate([&](const SpaceIterator &jRE) {
 			double logg = log10(jRE.val(DIM_E)/(particle.mass*cLight2));
-			while (log10(g_au[m]) < logg) m++;
+			while (log10(g_au[m+1]) < logg) m++;
 			
-			double slope1 = (safeLog10(dist[jr][m])-safeLog10(dist[jr][m-1]))/log10(g_au[m]/g_au[m-1]);
-			double dist_1 = slope1 * (logg-log10(g_au[m-1])) + safeLog10(dist[jr][m-1]);
-			double slope2 = (safeLog10(dist[jr+1][m])-safeLog10(dist[jr+1][m-1]))/log10(g_au[m]/g_au[m-1]);
-			double dist_2 = slope2 * (logg-log10(g_au[m-1])) + safeLog10(dist[jr+1][m-1]);
+			double slope1 = (safeLog10(dist[jr][m])-safeLog10(dist[jr][m-1]))/log10(g_au[m+1]/g_au[m]);
+			double dist_1 = slope1 * (logg-log10(g_au[m])) + safeLog10(dist[jr][m-1]);
+			double slope2 = (safeLog10(dist[jr+1][m])-safeLog10(dist[jr+1][m-1]))/log10(g_au[m+1]/g_au[m]);
+			double dist_2 = slope2 * (logg-log10(g_au[m])) + safeLog10(dist[jr+1][m-1]);
 			double slope = (safeLog10(dist_2)-safeLog10(dist_1))/log10(radius[jr+1]/radius[jr]);
 			double distr = slope * (logr-log10(radius[jr+1])) + dist_2;
-			distr = pow(10,distr);
+
+			if (m < M+1) distr = pow(10,distr);
+			else distr = 0.0;
+			
 			particle.distribution.set(jRE,distr/(particle.mass*cLight2));
 		},{-1,jR.coord[DIM_R],0});
 	},{0,-1,0});

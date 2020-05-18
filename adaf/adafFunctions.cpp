@@ -219,10 +219,10 @@ double accRateColdDisk(double r)
 
 double auxCD(double r)
 {
-	double lj = r/sqrt(paso_r);
-	double lj1 = r*sqrt(paso_r);
+	double lj1 = r / sqrt(paso_r);
+	double lj2 = r * sqrt(paso_r);
 	return 3.0*gravitationalConstant*blackHoleMass*accRateColdDisk(r)/2.0 *
-			(1.0/lj * (1.0-2.0/3.0*sqrt(rTr/lj))-1.0/lj1*(1.0-2.0/3.0*sqrt(rTr/lj1)));
+			(1.0/lj1 * (1.0-2.0/3.0*sqrt(rTr/lj1))-1.0/lj2*(1.0-2.0/3.0*sqrt(rTr/lj2)));
 }
 
 double electronDensity(double r)
