@@ -101,7 +101,7 @@ int main()
 					writeEandRParamSpace("protonInjection", model.ntProton.injection, 0,1);
 					writeRParamSpace("protonInjection_R", model.ntProton.injection, 0, 0);
 					if (accMethod == 0)
-						distributionMultiZone(model.ntProton, model);
+						distributionMultiZoneRadial(model.ntProton, model);
 					else
 						distributionFokkerPlanckRadial(model.ntProton,model);
 					writeEandRParamSpace("protonDistribution", model.ntProton.distribution,0,1);
@@ -110,33 +110,42 @@ int main()
 					readEandRParamSpace("protonInjection",model.ntProton.injection,0,1);
 					readEandRParamSpace("protonDistribution",model.ntProton.distribution,0,1);
 				}
-				
-				if (calculateNeutronInj) {
-					injectionNeutrons(model);
-					radiativeLossesNeutron(model.ntNeutron,model,"neutronLosses.dat");
-					if (calculateNeutronDis)
-						distributionNeutrons(model);
-					if (calculateJetDecay)
-						jetNeutronDecay(model);
+			} else {
+				if (calculateNTelectrons) {
+					readEandRParamSpace("electronInjection",model.ntElectron.injection,0,1);
+					readEandRParamSpace("electronDistribution",model.ntElectron.distribution,0,1);
 				}
-				
-				if (calculateNonThermalLum) {
-					nonThermalRadiation(model,"lumNonThermal.dat");
-					writeEandRParamSpace("photonDensity",model.photon.distribution,0,0);
-					writeRParamSpace("photonDensity_R",model.photon.distribution,0,0);
-					writeEandRParamSpace("NTphotonDensity",model.ntPhoton.distribution,0,0);
-					writeRParamSpace("NTphotonDensity_R",model.ntPhoton.distribution,0,0);
-					writeEandRParamSpace("opticalDepth_gg",model.tau_gg,0,0);
-				} else {
-					readEandRParamSpace("photonDensity",model.photon.distribution,0,0);
-					readEandRParamSpace("NTphotonDensity",model.ntPhoton.distribution,0,0);
-					readEandRParamSpace("NTphotonDensity",model.ntPhoton.injection,0,0);
-					readEandRParamSpace("opticalDepth_gg",model.tau_gg,0,0);
+				if (calculateNTprotons) {
+					readEandRParamSpace("protonInjection",model.ntProton.injection,0,1);
+					readEandRParamSpace("protonDistribution",model.ntProton.distribution,0,1);
 				}
-				
-				if (calculateSecondaries)
-					secondariesProcesses(model);
 			}
+				
+			if (calculateNeutronInj) {
+				injectionNeutrons(model);
+				radiativeLossesNeutron(model.ntNeutron,model,"neutronLosses.dat");
+				if (calculateNeutronDis)
+					distributionNeutrons(model);
+				if (calculateJetDecay)
+					jetNeutronDecay(model);
+			}
+			
+			if (calculateNonThermalLum) {
+				nonThermalRadiation(model,"lumNonThermal.dat");
+				writeEandRParamSpace("photonDensity",model.photon.distribution,0,0);
+				writeRParamSpace("photonDensity_R",model.photon.distribution,0,0);
+				writeEandRParamSpace("NTphotonDensity",model.ntPhoton.distribution,0,0);
+				writeRParamSpace("NTphotonDensity_R",model.ntPhoton.distribution,0,0);
+				writeEandRParamSpace("opticalDepth_gg",model.tau_gg,0,0);
+			} else {
+				readEandRParamSpace("photonDensity",model.photon.distribution,0,0);
+				readEandRParamSpace("NTphotonDensity",model.ntPhoton.distribution,0,0);
+				readEandRParamSpace("NTphotonDensity",model.ntPhoton.injection,0,0);
+				readEandRParamSpace("opticalDepth_gg",model.tau_gg,0,0);
+			}
+			
+			if (calculateSecondaries)
+				secondariesProcesses(model);
 		}
 	}
 	catch (std::runtime_error& e)

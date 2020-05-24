@@ -140,9 +140,9 @@ void localProcesses2(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumO
 							0.5*sqrt(pi)*xSy*height_fun(r);
 			double fluxBr = (2.0*sqrt(3.0)*tau < 1.0e-3) ? 0.5*sqrt(pi)*xBr*height_fun(r) : 0.0;
 							
-			lumOutSy[jE][jR] = 2*pi*fluxSy*(rB2*rB2-rB1*rB1);
-			lumOutBr[jE][jR] = 2*pi*fluxBr*(rB2*rB2-rB1*rB1);
-			lumOut[jE][jR] = lumOutSy[jE][jR]+lumOutBr[jE][jR]+lumOutpp[jE][jR];
+			lumOutSy[jE][jR] = 2.0 * pi*(rB2*rB2-rB1*rB1) * fluxSy;
+			lumOutBr[jE][jR] = 2.0 * pi*(rB2*rB2-rB1*rB1) * fluxBr;
+			lumOut[jE][jR] = lumOutSy[jE][jR] + lumOutBr[jE][jR];
 			jR++;
 		},{jE,-1,0});
 	}
@@ -258,7 +258,7 @@ void coldDiskLuminosity(State& st, Matrix lumOut, Matrix& lumOutRefl,
 				lumInc += (lumOut[jjE][kR]*reachAD[kR][jRcd] * pow(redshift_RIAF_to_CD[kR][jRcd],2));
 			}
 			aux2 += ((lumInc - lumOutRefl[jjE][jRcd])*dfreq);
-			aux2 = 0.0;
+			//aux2 = 0.0;
 		}
 		//aux2 = 0.0;
 		double aux = aux1+aux2;
@@ -368,12 +368,15 @@ void thermalCompton2(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOut
 	
 	if (comptonMethod == 1) cNew(st,p,redshift_to_inf);
 
+	if (processesFlags[3])
+		coldDiskLuminosity(st,lumOut,lumOutRefl,lumOutCD,energies);
+		
 	double res;		// Residual.
 	size_t it=1;	// Iterations.
 	do {
 		cout << "Iteration number = " << it << endl;
 		res=0.0;
-
+		
 		// To compute the residuals.
 		Vector lumOld(nE,0.0);
 		for (size_t jE=0;jE<nE;jE++) {
@@ -388,9 +391,6 @@ void thermalCompton2(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOut
 		}
 		
 		matrixInit(lumOutIC,nE,nR,0.0);
-		
-		if (processesFlags[3])
-			coldDiskLuminosity(st,lumOut,lumOutRefl,lumOutCD,energies);
 
 		// For each shell.
 		size_t jR=0;
@@ -428,7 +428,7 @@ void thermalCompton2(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOut
 					}
 				}
 			}
- 			jR++;
+			jR++;
 		},{0,-1,0});
 		
 		double pasoNuPrim = pow(energies[nE-1]/energies[0],1.0/(nE-1));
@@ -454,18 +454,18 @@ void thermalCompton2(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOut
 		}
 		cout << endl;
 		cout << "Total photons non-scattered per unit time = " 
-					 << nPhNS << " s^-1" << endl;
+						<< nPhNS << " s^-1" << endl;
 		cout << "Total photons scattered per unit time, before scattering = " 
-					 << nPhBS << " s^-1" << endl;
+						 << nPhBS << " s^-1" << endl;
 		cout << "Total photons scattered per unit time, after scattering = " 
-					 << nPhAS << " s^-1" << endl;
+						 << nPhAS << " s^-1" << endl;
 		cout << endl;
 		
 		res /= nE;
 		cout << "Residuo = " << res << endl;
 		++it;
 	} while (res > 1.0e-3 && it < 100);
-	//} while (it < 3);
+
 	show_message(msgEnd,Module_thermalCompton);
 }
 
@@ -597,6 +597,7 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 	
 	double lumSy,lumBr,lumICin,lumIC,lumpp,lumTot,lumCD,lumRefl;
 	double lumThermalTot = 0.0;
+	double lumThermalTotRIAF = 0.0;
 	double pasoF = pow(energies[nE-1]/energies[0],1.0/(nE-1));
 	for (size_t jE=0;jE<nE;jE++) {
 		double E = energies[jE];
@@ -620,6 +621,7 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 		}
 		double dfreq = frequency*(pasoF-1.0);
 		lumThermalTot += (lumTot + lumCD + lumRefl)*dfreq;
+		lumThermalTotRIAF += lumTot*dfreq;
         file1
 			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << frequency
 			<< setw(10) << setiosflags(ios::fixed) << scientific << setprecision(2) << energyEV
@@ -644,8 +646,8 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 			double dfreq = frequency*(pasoF-1.0);
 			lumThermal += lumOut[jE][jR]*dfreq*escapeAi[jR] * pow(redshift_to_inf[jR],3);
 		}
-		cout << "percentage of the lum produced inside r = " << r*paso_r
-			 << " equal to " << lumThermal/lumThermalTot * 100 << " %" << endl;
+		cout << "percentage of the lum produced inside r = " << r*sqrt(paso_r)
+			 << " equal to " << lumThermal/lumThermalTotRIAF * 100 << " %" << endl;
 	};
 	
 	double eVar = pow(energies[nE-1]/energies[0],1.0/nE);
@@ -769,9 +771,9 @@ void targetField(State& st, Matrix lumOut, Matrix lumCD, Matrix lumRefl)
 			double tcross = (rB2-rB1)/cLight * (1.0 + tau_es_2);
 			for (size_t jjR=0;jjR<nR;jjR++)
 				lumReachingShell += ( (jjR == jR) ? lumOut[jE][jR]*tescape : 
-									reachAA[jjR][jR]*redshift[jjR][jR]*lumOut[jE][jjR]*tcross );
+									reachAA[jjR][jR]*pow(redshift[jjR][jR],2)*lumOut[jE][jjR]*tcross );
 			for (size_t jjRcd=0;jjRcd<nRcd;jjRcd++)
-				lumReachingShell += reachDA[jjRcd][jR]*redshift_CD_to_RIAF[jjRcd][jR] * 
+				lumReachingShell += reachDA[jjRcd][jR]*pow(redshift_CD_to_RIAF[jjRcd][jR],2) * 
 									(lumCD[jE][jjRcd]+lumRefl[jE][jjRcd])*tcross;
 			st.photon.distribution.set(itER,lumReachingShell/(vol*planck*E)); //erg^⁻1 cm^-3 */
 			//for (size_t jjR=0;jjR<nR;jjR++)

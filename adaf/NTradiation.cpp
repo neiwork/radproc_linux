@@ -33,9 +33,11 @@ void targetFieldNT(State& st, Matrix lumNT)
 			double vol = volume(r);
 			double lumReachingShell = 0.0;
 			double tcross = r*(sqrt(paso_r)-1.0/sqrt(paso_r))/cLight;
+			double tescape = height_fun(r)/cLight;
 			for (size_t jjR=0;jjR<nR;jjR++)
-				lumReachingShell += reachAA[jjR][jR]*lumNT[jE][jjR];
-			st.photon.injection.set(itER,lumReachingShell*tcross/(vol*E*E)); // erg^⁻1 cm^-3
+				lumReachingShell += ( (jjR == jR) ? lumNT[jE][jR]*tescape : 
+									reachAA[jjR][jR]*pow(redshift[jjR][jR],2)*lumNT[jE][jjR]*tcross );
+			st.photon.injection.set(itER,lumReachingShell/(vol*E*E)); // erg^⁻1 cm^-3
 			jR++;
 		},{itE.coord[DIM_E],-1,0});
 		jE++;
@@ -166,6 +168,7 @@ void nonThermalRadiation(State& st, const std::string& filename)
 			double E = st.photon.ps[DIM_E][E_ix];
 			st.photon.ps.iterate([&](const SpaceIterator &iR) {
 				double r = iR.val(DIM_R);
+				E = E / redshift_to_inf[iR.coord[DIM_R]];
 				double rB1 = r/sqrt(paso_r);
 				double rB2 = rB1*paso_r;
 				double vol = volume(r);
@@ -174,22 +177,24 @@ void nonThermalRadiation(State& st, const std::string& filename)
 				
 				double alpha_th = jSync(E,st.tempElectrons.get(iR),magf,st.denf_e.get(iR)) / 
 									bb(E/planck,st.tempElectrons.get(iR));
-				double kappa_ssa_e = ssaAbsorptionCoeff(E,magf,st.ntElectron,psc)+alpha_th;
+				double alpha_ssa = ssaAbsorptionCoeff(E,magf,st.ntElectron,psc);
+				double alpha_tot = alpha_th + alpha_ssa;
 				double height = height_fun(r);
-				double tau_ssa_e = 0.5*sqrt(pi)*kappa_ssa_e*height;
+				double tau = 0.5*sqrt(pi)*alpha_tot*height;
 
 				eSyLocal[E_ix][iR.coord[DIM_R]] = luminositySynchrotronExact(E,st.ntElectron,iR,magf)/E;
 				
-				double factor = pi/sqrt(3.0)*(rB2*rB2-rB1*rB1) / vol;
-				eSyLocal[E_ix][iR.coord[DIM_R]] = (tau_ssa_e > 1.0e-10) ?
-								factor*(eSyLocal[E_ix][iR.coord[DIM_R]]/kappa_ssa_e)*(1.0-exp(-2.0*sqrt(3.0)*tau_ssa_e)) :
-								eSyLocal[E_ix][iR.coord[DIM_R]];
-				eSy[E_ix] += eSyLocal[E_ix][iR.coord[DIM_R]]*vol;
+				double factor = 0.5/sqrt(3.0);
+				eSyLocal[E_ix][iR.coord[DIM_R]] = (tau > 1.0e-10) ?
+								0.5/sqrt(3.0) * (eSyLocal[E_ix][iR.coord[DIM_R]]/alpha_tot) * 
+								(1.0-exp(-2.0*sqrt(3.0)*tau)) :
+								eSyLocal[E_ix][iR.coord[DIM_R]] * 0.5 * sqrt(pi) * height;  // flux
+				eSy[E_ix] += eSyLocal[E_ix][iR.coord[DIM_R]] * 2.0 * pi*(rB2*rB2-rB1*rB1);  // luminosity
 				double tau_es = st.denf_e.get(iR)*thomson*height;
 				double tescape = height/cLight * (1.0+tau_es);
 				SpaceCoord iE = {E_ix,iR.coord[DIM_R],0};
-				st.photon.distribution.set(iE,st.photon.distribution.get(iE) + 
-											eSyLocal[E_ix][iR.coord[DIM_R]]/E * tescape);
+				st.photon.distribution.set(iE, st.photon.distribution.get(iE) + 
+											eSyLocal[E_ix][iR.coord[DIM_R]] / E / height * tescape);
 			},{E_ix,-1,0});
 		}
 	}

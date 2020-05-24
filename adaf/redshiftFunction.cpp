@@ -29,8 +29,11 @@ void redshiftFactor(State& st)
 		double beta = vr/cLight;
 		if (abs(beta) >= 1.0) beta = -0.9;
 		double redshift_factor = sqrt( (1.0-schwRadius/r) / (1.0-beta*beta) );
+		//redshift_factor = sqrt(1.0-schwRadius/r) * sqrt((1.0-abs(beta))/(1.0+abs(beta)));
+		redshift_factor = sqrt(1.0-schwRadius/r) * sqrt(1.0-beta*beta);
 		redshift_factor = (redshift_factor > 0.0) ? redshift_factor : 1.0;
 		redshift_to_inf[jR] = redshift_factor;
+		cout << "r [2M] = " << r/schwRadius << "\t (1+z)^-1 = " << redshift_to_inf[jR] << endl;
 		size_t jjR=0;
 		st.photon.ps.iterate([&](const SpaceIterator& itRR) {
 			double rr = itRR.val(DIM_R);

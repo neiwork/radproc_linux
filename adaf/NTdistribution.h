@@ -16,4 +16,6 @@ void distributionMultiZonePrueba(Particle& p, State& st);
 void distributionFokkerPlanckOneZone(Particle& p, State& st);
 void distributionFokkerPlanckMultiZone(Particle& p, State& st);
 void distributionFokkerPlanckRadial(Particle& p, State& st);
+void distributionMultiZoneRadial(Particle& p, State& st);
+
 //void distributionFokkerPlanckMultiZoneTimeDependent(Particle& p, State& st);
