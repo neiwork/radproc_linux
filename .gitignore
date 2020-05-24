@@ -27,6 +27,7 @@ Makefile
 *.lo
 *.o
 *.obj
+*.pyc
 
 # Precompiled Headers
 *.gch
@@ -60,6 +61,8 @@ Makefile
 *.diff
 *.pdf
 *.jpg
+*.eps
+*.png
 
 # Build results
 [Dd]ebug/
