@@ -59,6 +59,7 @@ Makefile
 *.ipynb
 *.diff
 *.pdf
+*.jpg
 
 # Build results
 [Dd]ebug/
