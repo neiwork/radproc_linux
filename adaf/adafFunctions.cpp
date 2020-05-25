@@ -196,7 +196,7 @@ double massDensityADAF(double r)
 	if (height_method == 0)
 		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r)));
 	else 
-		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r))); // / sqrt(0.5*pi);
+		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r))) / sqrt(0.5*pi);
 }
 
 double magneticField(double r)

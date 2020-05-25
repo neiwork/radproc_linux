@@ -32,6 +32,7 @@ void redshiftFactor(State& st)
 		//redshift_factor = sqrt(1.0-schwRadius/r) * sqrt((1.0-abs(beta))/(1.0+abs(beta)));
 		redshift_factor = sqrt(1.0-schwRadius/r) * sqrt(1.0-beta*beta);
 		redshift_factor = (redshift_factor > 0.0) ? redshift_factor : 1.0;
+		redshift_factor = 1.0;
 		redshift_to_inf[jR] = redshift_factor;
 		cout << "r [2M] = " << r/schwRadius << "\t (1+z)^-1 = " << redshift_to_inf[jR] << endl;
 		size_t jjR=0;
@@ -43,6 +44,7 @@ void redshiftFactor(State& st)
 			if (abs(relative_beta) >= 1.0) relative_beta = 0.9;
 			double doppler_factor = sqrt( (1.0-relative_beta) / (1.0+relative_beta) );
 			double grav_factor_shells = sqrt( (1.0-schwRadius/r) / (1.0-schwRadius/rr) );
+			grav_factor_shells = doppler_factor = 1.0;
 			redshift[jR][jjR] = grav_factor_shells * doppler_factor;
 			jjR++;
 		},{0,-1,0});

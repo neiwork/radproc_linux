@@ -8,6 +8,8 @@
 //#include <fmath/physics.h>
 //#include <boost/property_tree/ptree.hpp>
 #include <iostream>
+#include <finjection/pgammaPionInj.h>
+#include <flosses/lossesPhotoHadronic.h>
 #include <finjection/neutronPp.h>
 #include <finjection/neutronPgamma.h>
 #include <fparameters/SpaceIterator.h>
@@ -24,7 +26,7 @@ void injectionNeutrons(State& st)
     Particle &n = st.ntNeutron;
     
 	std::ofstream file;
-	file.open("neutronInj.txt",std::ios::out);
+	file.open("neutronInjection.dat",std::ios::out);
 	file 	<< "log(E/eV)"
 			<< '\t' << "r/rS"
 			<< '\t' << "pp"
@@ -32,28 +34,34 @@ void injectionNeutrons(State& st)
 			<< std::endl;
 
 	double sumQ = 0.0;
-	n.ps.iterate([&](const SpaceIterator& i) {
-		double dens = st.denf_i.get(i);
-		const double rB1 = i.val(DIM_R)/sqrt(paso_r);
-		const double rB2 = rB1*paso_r;
-		const double thetaH = st.thetaH.get(i);
-		const double vol = (4.0/3.0)*pi*cos(thetaH)*(rB2*rB2*rB2-rB1*rB1*rB1);
-		
-		double tcross = i.val(DIM_R) / cLight; //corregir porque deberia ser (Rmax(theta)-r)/cLight;
-		n.ps.iterate([&](const SpaceIterator& jE) {
-			const double E = jE.val(DIM_E);
-			double n_pg = neutronPgamma(E,tcross,n,p,st.photon.distribution,jE,
-							st.photon.emin(),st.photon.emax());
-			double n_pp = neutronPp(E,p,dens,i);
+	n.ps.iterate([&](const SpaceIterator& iR) {
+		double r = iR.val(DIM_R);
+		double dens = st.denf_i.get(iR);
+		const double vol = volume(r);
+		double height = height_fun(r);
+		double tcross = height / cLight; //corregir porque deberia ser (Rmax(theta)-r)/cLight;
+		n.ps.iterate([&](const SpaceIterator& iRE) {
+			const double En = iRE.val(DIM_E);
+			//double n_pg = neutronPgamma(En,tcross,n,p,st.photon.distribution,iR,
+			//				st.photon.emin(),st.photon.emax());
+			double Ep = 4.0/3.0 * En;
+			double t_pg = t_pion_PHsimple(Ep,st.ntProton,st.photon.distribution,iR, 
+					st.photon.emin(),st.photon.emax());
+			t_pg = Ep/lossesPhotoMeson(Ep,st.ntProton,st.photon.distribution,iR,st.photon.emin(),
+									st.photon.emax());
+			double n_pg = 4.0/3.0 * st.ntProton.distribution.interpolate({{DIM_E,Ep}},&iR.coord) / t_pg;
+			double n_pp = neutronPp(En,p,dens,iR);
 			double total = n_pp + n_pg;
-			file << safeLog10(E/1.6e-12) << "\t"
-				 << i.val(DIM_R)/schwRadius << "\t"
+			file << safeLog10(En/EV_TO_ERG) << "\t"
+				 << iR.val(DIM_R)/schwRadius << "\t"
 				 << safeLog10(n_pp*vol)  << "\t"
 				 << safeLog10(n_pg*vol) << endl;
-			n.injection.set(jE,total); //en unidades de erg^-1 s^-1 cm^{-3}
-		},{-1,i.coord[DIM_R],0});
-		sumQ += RungeKuttaSimple(n.emin(),n.emax(),[&](double e)
-					{return n.injection.interpolate({{DIM_E,e}},&i.coord)*e;})*vol;
+			n.injection.set(iRE,total); //en unidades de erg^-1 s^-1 cm^{-3}
+		},{-1,iR.coord[DIM_R],0});
+		sumQ += integSimpsonLog(n.emin(), n.emax(), [&] (double En)
+				{
+					return En * n.injection.interpolate({{DIM_E,En}},&iR.coord);
+				},30) * vol;
 	},{0,-1,0});
 	cout << "Total power injected in " << n.id << " = " << sumQ << endl;
 

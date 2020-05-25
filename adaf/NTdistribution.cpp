@@ -766,7 +766,7 @@ void distributionMultiZone(Particle& particle, State& st)
 		for (size_t jg=0;jg<M+2;jg++)	delta_g_m_au[jg] = g_au[jg+1]-g_au[jg];
 		for (size_t jg=0;jg<M+1;jg++)	delta_g[jg] = 0.5*(g_au[jg+2]-g_au[jg]);
 		
-		fun1 Bfun = [&particle,&st,&jR,B,rho,height] (double g) 
+		fun1 Bfun = [&particle,&st,&jR,vR,r] (double g) 
 						{
 							double E = g*particle.mass*cLight2;
 							double tCool = E/losses(E,particle,st,jR);
@@ -782,8 +782,8 @@ void distributionMultiZone(Particle& particle, State& st)
 								rateDecay = 1.0 / (g*chargedPionMeanLife);
 							else if (particle.id == "ntMuon")
 								rateDecay = 1.0 / (g*muonMeanLife);
-	
-							return pow(rateAccretion+rateWind+rateDiff,-1);
+							//return 1.0e99;
+							return pow(rateAccretion,-1);//+rateWind+rateDiff,-1);
 						};
 		
 		fun1 Qfun = [&particle,&jR,rB2,vol] (double g)
@@ -1737,7 +1737,7 @@ void distributionMultiZoneRadial(Particle& particle, State& st)
 {
 	
 	// We define a new mesh of points
-	size_t M = 299;
+	size_t M = 399;
 	double g_min = particle.emin()/(particle.mass*cLight2);
 	double g_max = particle.emax()/(particle.mass*cLight2);
 	
@@ -1781,7 +1781,7 @@ void distributionMultiZoneRadial(Particle& particle, State& st)
 						
 						double E = g*particle.mass*cLight2;
 						double vR = radialVel(rad);
-						double rateWind = s/rad;
+						double rateWind = 2.0*s*abs(vR)/rad;
 						double B = magneticField(rad);
 						double height = height_fun(rad);
 						double rateDiff = 1.0/(diffusionTimeTurbulence(E,height,particle,B));
@@ -1802,19 +1802,11 @@ void distributionMultiZoneRadial(Particle& particle, State& st)
 						},{0,-1,0});
 						SpaceCoord jR = {0,jjR,0};
 						
-						double norm_temp, dens;
-						if (particle.id == "ntProton") {
-							norm_temp = boltzmann*ionTemp(rad)/(particle.mass*cLight2);
-							dens = electronDensity(rad)*eMeanMolecularWeight/iMeanMolecularWeight;
-						} else if (particle.id == "ntElectron") {
-							norm_temp = boltzmann*electronTemp(rad)/(particle.mass*cLight2);
-							dens = electronDensity(rad);
-						}
 						double height = height_fun(rad);
-						return (rad > 70*schwRadius) ? particle.injection.interpolate({{DIM_E,E},{DIM_R,rad}},&jR)*(particle.mass*cLight2)*rad*height : 0.0;
+						return particle.injection.interpolate({{DIM_E,E},{DIM_R,rad}},&jR)*(particle.mass*cLight2)*rad*height;
 					};
 		
-	size_t Nrad = 50;
+	size_t Nrad = 100;
 	Vector radius(Nrad+1,0.0);
 	radius[0] = particle.ps[DIM_R][nR-1];
 	double pasor = pow(radius[0]/particle.ps[DIM_R][0],1.0/(Nrad-1));

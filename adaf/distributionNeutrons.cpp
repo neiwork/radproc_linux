@@ -17,66 +17,68 @@ using namespace std;
 void distributionNeutrons(State& st)
 {
 	ofstream fileNeutrons,fileProtons,fileElectrons;
-	fileNeutrons.open("neutronProp.txt",ios::out);
-	fileProtons.open("protonInjByNeutrons.txt",ios::out);
-	fileElectrons.open("electronInjByNeutrons.txt",ios::out);
+	fileNeutrons.open("neutronProp.dat",ios::out);
+	fileProtons.open("protonInjByNeutrons.dat",ios::out);
+	fileElectrons.open("electronInjByNeutrons.dat",ios::out);
 	Vector Q0n(nE,0.0);
 	size_t jE = 0;
 	st.ntNeutron.ps.iterate([&](const SpaceIterator &iE) {
 		st.ntNeutron.ps.iterate([&](const SpaceIterator &iER) {
-			double rB2 = iER.val(DIM_R)*sqrt(paso_r);
-			double rB1 = rB2/paso_r;
-			double vol = (4.0/3.0)*pi*cos(st.thetaH.get(iER))*(rB2*rB2*rB2-rB1*rB1*rB1);
-			Q0n[jE] += st.ntNeutron.injection.get(iER) * vol;
+			double r = iER.val(DIM_R);
+			Q0n[jE] += st.ntNeutron.injection.get(iER) * volume(r);
 		},{iE.coord[DIM_E],-1,0});
 		jE++;
 	},{-1,0,0});
 
 	size_t nRn = nE;
-	double r = cLight*neutronMeanLife*1.0e-4;
-	double pasoRn = pow(st.ntNeutron.emax()*1.0e4/(neutronMass*cLight2),1.0/nRn);
+	double RnMin = cLight*neutronMeanLife*1.0e-4;
+	double gammaMax = st.ntNeutron.emax() / (st.ntNeutron.mass * cLight2);
+	double pasoRn = pow(gammaMax,1.0/nRn);
 	
 	double Qp_tot = 0.0;
 	double Qe_tot = 0.0;
+	double Rn = RnMin;
 	for (size_t jR=0;jR<nRn;jR++) {
-		r *= pasoRn;
-		double NnFactor = 1.0 / (4.0 * pi * cLight) / (r*r);
-		double vol = 4.0*pi*r*r*r*(pasoRn-1.0);
+		Rn *= pasoRn;
+		double dRn = Rn * (pasoRn - 1.0);
+		double NnFactor = 1.0 / (4*pi*cLight) / (Rn*Rn);
+		double vol = 4*pi*Rn*Rn*dRn;
 		size_t jE = 0;
 		st.ntNeutron.ps.iterate([&](const SpaceIterator &iE) {
-			double E = iE.val(DIM_E);
-			double gamma = E / (neutronMass*cLight2);
-			double tDecay = neutronMeanLife*gamma;
+			double En = iE.val(DIM_E);
+			double g = En / (neutronMass*cLight2);
+			double tDecay = neutronMeanLife*g;
 			double rDec = cLight*tDecay;
-			double Nn = NnFactor * Q0n[jE]*exp(-r/rDec);
+			double Nn = NnFactor * Q0n[jE]*exp(-Rn/rDec);
 			st.ntNeutron.distribution.set(iE,Nn);
 			jE++;
-			fileNeutrons << safeLog10(r) << "\t" << safeLog10(E/1.6e-12) << "\t"
+			fileNeutrons << safeLog10(Rn / schwRadius) << "\t" << safeLog10(En/EV_TO_ERG) << "\t"
 						 << safeLog10(Nn) << "\t"
-						 << safeLog10(Nn*E*E*4.0*pi*r*r) << endl;
+						 << safeLog10(Nn*En*En * 4*pi*Rn*Rn) << endl;
 		},{-1,0,0});
 		
 		double Qp_local = 0.0;
 		double pasoEp = pow(st.ntProton.emax()/st.ntProton.emin(),1.0/nE);
 		st.ntProton.ps.iterate([&](const SpaceIterator &iE) {
-			double E = iE.val(DIM_E);
-			double tDecay = neutronMeanLife*(E/(neutronMass*cLight2));
-			double Qp = st.ntNeutron.distribution.get(iE)/tDecay;
-			Qp_local += Qp*E*E*(pasoEp-1.0);
-			fileProtons << safeLog10(r) << "\t" << safeLog10(E/1.6e-12) << "\t"
+			double Ep = iE.val(DIM_E);
+			double En = Ep * 1.001;
+			double tDecay = neutronMeanLife*(En/(neutronMass*cLight2));
+			double Qp = 1.001 * st.ntNeutron.distribution.interpolate({{DIM_E,En}},&iE.coord) / tDecay;
+			Qp_local += Qp*Ep*Ep*(pasoEp-1.0);
+			fileProtons << safeLog10(Rn / schwRadius) << "\t" << safeLog10(Ep/1.6e-12) << "\t"
 						<< safeLog10(Qp) << "\t"
-						<< safeLog10(Qp*E*E*4.0*pi*r*r*r) << endl;
+						<< safeLog10(Qp*Ep*Ep*4.0*pi*Rn*Rn) << endl;
 		},{-1,0,0});
 		
 		double Qe_local = 0.0;
 		double pasoEe = pow(st.ntElectron.ps[DIM_E][nE-1]/st.ntElectron.ps[DIM_E][0],1.0/nE);
 		st.ntElectron.ps.iterate([&](const SpaceIterator &iE) {
-			double E = iE.val(DIM_E);
-			double Qe = injElectronNeutronDecay(E,st.ntNeutron,iE);
-			Qe_local += Qe*E*E*(pasoEe-1.0);
-			fileElectrons << safeLog10(r) << "\t" << safeLog10(E/1.6e-12) << "\t"
+			double Ee = iE.val(DIM_E);
+			double Qe = injElectronNeutronDecay(Ee,st.ntNeutron,iE);
+			Qe_local += Qe*Ee*Ee*(pasoEe-1.0);
+			fileElectrons << safeLog10(Rn) << "\t" << safeLog10(Ee/1.6e-12) << "\t"
 						  << safeLog10(Qe) << "\t"
-						  << safeLog10(Qe*E*E*4.0*pi*r*r*r) << endl;
+						  << safeLog10(Qe*Ee*Ee*4.0*pi*Rn*Rn) << endl;
 		},{-1,0,0});
 		
 		Qp_tot += Qp_local*vol;

@@ -2,7 +2,6 @@
 #include "probexact.h"
 #include "probaprox.h"
 
-#include "../ionTori/maxwellJuttner.h"
 #include <math.h>
 #include <fmath/mathFunctions.h>
 #include <fmath/RungeKutta.h>
