@@ -19,7 +19,7 @@
     },
     "calculateNewTemp":"0",
 
-    "calculateThermal":"0",
+    "calculateThermal":"1",
     "thermal": {
         "numProcesses":"5",
         "processNumber": {
@@ -82,7 +82,7 @@
 		"calculateJetEmission":"0",
     	"neutrons":{
 			"calculateInjection":"1",
-        	"calculatePropagation":"0",
+        	"calculatePropagation":"1",
 			"calculateJetDecay":"0",
 			"jetDecay":{
 				"openingAngle":"6",
@@ -214,7 +214,7 @@
 				"dim":{
 					"energy": {
 						"min":5.71,
-						"max":16.7
+						"max":17.7
 					}
 				}
             		}

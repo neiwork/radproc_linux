@@ -17,9 +17,9 @@
 double ggCrossSection(double x, double E_ph, double E)
 {
 	double Erest = electronMass*cLight2;
-	double aux = 2.0*Erest*Erest / ((1.0-x)*E_ph*E);
-	double beta = sqrt( abs(1.0 -  aux)); 
-	return (beta < 1.0) ? (3.0*thomson/16.0)*(1.0-beta*beta)*( 2.0*beta*(beta*beta-2.0) + 
+	double aux = (x < 0.999999) ? 2.0*Erest*Erest / ((1.0-x)*E_ph*E) : 2.0;
+	double beta = (aux < 1.0 ? sqrt( abs(1.0 -  aux) ) : 2.0); 
+	return (beta < 1.0) ? (3.0*thomson/16.0)*(1.0-beta*beta)*( - 2.0*beta*(2.0-beta*beta) + 
 					(3.0-pow(beta,4.0))*log((1.0+beta)/(1.0-beta))) : 0.0;
 }
 

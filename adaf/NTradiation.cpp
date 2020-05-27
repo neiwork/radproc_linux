@@ -250,7 +250,7 @@ void nonThermalRadiation(State& st, const std::string& filename)
 				if (E/EV_TO_ERG > 1.0e7) {
 					pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,iR,Ephmin,Ephmax)/E;
 					pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(iR),iR)/E;
-					if (E/EV_TO_ERG < 1.0e10){}
+					if (E/EV_TO_ERG < 1.0e10)
 						pPPLocal += 4.0*pi*luminosityHadronic(E,st.denf_i.get(iR),st.tempIons.get(iR))/planck;
 				}
 				
@@ -274,8 +274,8 @@ void nonThermalRadiation(State& st, const std::string& filename)
 			double tau_es = st.denf_e.get(iR)*thomson*height;
 			double tescape = height/cLight * (1.0+tau_es);
 			double rate_gg = kappagg * cLight;
-			st.ntPhoton.distribution.set(psc,eTot/E * pow(rate_gg+pow(tescape,-1),-1));
-			st.ntPhoton.injection.set(psc,eTot/E * pow(rate_gg+pow(tescape,-1),-1));
+			st.ntPhoton.distribution.set(psc, eTot/E * pow(rate_gg+pow(tescape,-1),-1));
+			st.ntPhoton.injection.set(psc, eTot/E * pow(rate_gg+pow(tescape,-1),-1));
 		},{E_ix,-1,0});
 	}
 	

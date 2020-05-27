@@ -44,12 +44,13 @@ void injectionNeutrons(State& st)
 			const double En = iRE.val(DIM_E);
 			//double n_pg = neutronPgamma(En,tcross,n,p,st.photon.distribution,iR,
 			//				st.photon.emin(),st.photon.emax());
-			double Ep = 4.0/3.0 * En;
+			/*double Ep = 4.0/3.0 * En;
 			double t_pg = t_pion_PHsimple(Ep,st.ntProton,st.photon.distribution,iR, 
 					st.photon.emin(),st.photon.emax());
 			t_pg = Ep/lossesPhotoMeson(Ep,st.ntProton,st.photon.distribution,iR,st.photon.emin(),
 									st.photon.emax());
-			double n_pg = 4.0/3.0 * st.ntProton.distribution.interpolate({{DIM_E,Ep}},&iR.coord) / t_pg;
+			double n_pg = 4.0/3.0 * st.ntProton.distribution.interpolate({{DIM_E,Ep}},&iR.coord) / t_pg;*/
+			double n_pg = neutronPgamma(En,n,p,st.photon.distribution,iR,st.photon.emin(),st.photon.emax());
 			double n_pp = neutronPp(En,p,dens,iR);
 			double total = n_pp + n_pg;
 			file << safeLog10(En/EV_TO_ERG) << "\t"

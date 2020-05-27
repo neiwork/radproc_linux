@@ -689,32 +689,37 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 
 void photonDensity(State& st, Vector energies, Matrix lumOut)
 {
-	double z = GlobalConfig.get<double>("zGap")*schwRadius;
-	
 	ofstream file;
 	file.open("photonDensity_gap.dat",ios::out);
-
-	double Uph = 0.0;
-	size_t jE=0;
-	double pasoE = pow(energies.back()/energies.front(),1.0/(energies.size()-1));
-	st.photon.ps.iterate([&](const SpaceIterator& itE) {
-		double nPh = 0.0;
-		double energy = itE.val(DIM_E);
-		double dE = energy * (pasoE - 1.0);
-		size_t jR=0;
-		st.photon.ps.iterate([&](const SpaceIterator& itER) {
-			double r = itER.val(DIM_R);
-			double dist2 = z*z+r*r;
-			nPh += ( lumOut[jE][jR] / (4*pi*dist2*cLight*energy*planck) );
-			jR++;
-		},{itE.coord[DIM_E],-1,0});
-		Uph += nPh * energy * dE;
-		file << energy << "\t" << nPh << endl;
-		jE++;
-	},{-1,0,0});
-	cout << "Uph = " << Uph << "erg cm**-3" << endl;
-	double Ub = P2(magneticField(st.denf_e.ps[DIM_R][0]))/(8*pi);
-	cout << "Uph/Ub = " << Uph/Ub << endl;
+	
+	size_t nZ = nR;
+	double zMin = schwRadius;
+	double pasoZ = pow(1e6,1.0/nZ);
+	double z = zMin;
+	st.photon.ps.iterate([&](const SpaceIterator& iZ) {
+		z *= pasoZ;
+		double Uph = 0.0;
+		size_t jE=0;
+		double pasoE = pow(energies.back()/energies.front(),1.0/(energies.size()-1));
+		st.photon.ps.iterate([&](const SpaceIterator& iZE) {
+			double nPh = 0.0;
+			double energy = iZE.val(DIM_E);
+			double dE = energy * (pasoE - 1.0);
+			size_t jR=0;
+			st.photon.ps.iterate([&](const SpaceIterator& iZER) {
+				double r = iZER.val(DIM_R);
+				double dist2 = z*z+r*r;
+				nPh += ( lumOut[jE][jR] / (4*pi*dist2*cLight*energy*planck) );
+				jR++;
+			},{iZE.coord[DIM_E],-1,0});
+			Uph += nPh * energy * dE;
+			file << z/schwRadius << "\t" << energy << "\t" << nPh << endl;
+			st.photon.injection.set(iZE,nPh);
+			jE++;
+		},{-1,iZ.coord[DIM_R],0});
+		double Ub = P2(magneticField(st.denf_e.ps[DIM_R][0])/pow(z/schwRadius,1))/(8*pi);
+		cout << "z = " << z/schwRadius << " Rs,\t Uph = " << Uph << " erg cm^-3,\t Uph/Ub = " << Uph/Ub << endl;
+	},{0,-1,0});
 	file.close();
 }
 
@@ -910,7 +915,7 @@ void thermalRadiation(State& st, const string& filename)
 				coldDiskLuminosity(st,lumOut,lumOutRefl,lumOutCD,energies);
 		} while (res > 1.0e-3);
 		photonDensity(st,energies,lumOut);
-		photonDensityAux(st,energies,lumOut);
+		//photonDensityAux(st,energies,lumOut);
 		absorptionLumThermal(st,lumOut,lumOutCD,lumOutRefl,lumOut_gg);
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,lumInICm,
 							lumOutIC,lumOut_gg,lumOutCD,lumOutRefl,filename);

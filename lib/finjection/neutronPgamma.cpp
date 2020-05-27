@@ -12,7 +12,7 @@
 
 
 
-double psiEsc(double E, double tcross, Particle& neutron, const ParamSpaceValues& tpf, const SpaceCoord& distCoord,
+double psiEsc(double E, Particle& neutron, const ParamSpaceValues& tpf, const SpaceCoord& distCoord,
 				double tpEmin, double tpEmax)  //E=Ep
 {
 
@@ -23,6 +23,8 @@ double psiEsc(double E, double tcross, Particle& neutron, const ParamSpaceValues
 	double L = 0.0;
 
 	int nT = 10;
+	
+	double tcross = 0.0;
 	double dt = tcross/nT;
 	double t = 0.0;
 
@@ -40,35 +42,27 @@ double psiEsc(double E, double tcross, Particle& neutron, const ParamSpaceValues
 }
 
 
-double neutronPgamma(double E, double tcross, Particle& neutron, Particle& proton, const ParamSpaceValues& tpf,
+double neutronPgamma(double En, Particle& neutron, Particle& proton, const ParamSpaceValues& tpf,
 						const SpaceCoord& distCoord, double tpEmin, double tpEmax)  
 {
 	//double protonDist = proton.dist(E);// interpol(E, proton.energyPoints, Nproton, Nproton.size() - 1);
-	double t_1   = t_pion_PH(E,proton,tpf,distCoord,tpEmin,tpEmax);     //esto no es lossesPH porque son perdidas solo del canal de produccion de piones
-	double omega = omegaPH(E,proton,tpf,distCoord,tpEmin,tpEmax);
-	
-	double emissivity;
-	if (t_1 > 0.0 && omega > 0.0)	{
-		double averageInel = t_1/omega;
+	//double t_1 = t_pion_PH(E,proton,tpf,distCoord,tpEmin,tpEmax);     //esto no es lossesPH porque son perdidas solo del canal de produccion de piones
+	//double omega_pg = omegaPH(E,proton,tpf,distCoord,tpEmin,tpEmax);
+	//double averageInel = t_1/omega;
+	double averageInel = 0.3;
+	double Ep = En/(1.0-averageInel);
 
-		double seda_pn = 0.5;
-
-		double Ep = E/(1.0-averageInel);
-
-		double protonDist;
-		if (Ep < proton.emin() || Ep > proton.emax()){protonDist = 0.0;}
-		else{ protonDist = proton.distribution.interpolate({ { 0, Ep } }, &distCoord);}
+	double xi_pn = 0.5;
+	double protonDist = (Ep > proton.emin() && Ep < proton.emax()) ?
+						proton.distribution.interpolate({{0,Ep}},&distCoord) : 0.0;
 
 //		double k2 = 0.6;
 //		double p1 = (k2-averageInel)/(k2-k1);	
 //		double nChargedPion = 2.0-1.5*p1;
 
-		double pEsc = psiEsc(Ep, tcross, neutron, tpf, distCoord, tpEmin, tpEmax);
-		double tauEsc = 1.0/(pEsc*seda_pn*omega);
-
-		emissivity = protonDist/(1.0-averageInel)/tauEsc;
-	}
-	else	{ emissivity = 0; }
-	
+		//double pEsc = psiEsc(Ep, tcross, neutron, tpf, distCoord, tpEmin, tpEmax);
+		//double tauEsc = 1.0/(pEsc*seda_pn*omega);
+	double omega_pg = omegaPH(Ep,proton,tpf,distCoord,tpEmin,tpEmax);
+	double emissivity = xi_pn * protonDist / (1.0-averageInel) * omega_pg; // /tauEsc;
 	return emissivity;
 }

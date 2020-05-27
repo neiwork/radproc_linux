@@ -99,7 +99,7 @@ void secondariesRadiationProcesses(State& st, const std::string& filename)
 			SpaceCoord iE = {E_ix,iR.coord[DIM_R],0};
 			double rate_gg = kappa_gg * cLight;
 			double NTphot = st.ntPhoton.injection.get(iE);
-			st.ntPhoton.distribution.set(iE,NTphot + eTot/E*pow(rate_gg+pow(tescape,-1),-1));
+			st.ntPhoton.distribution.set(iE,NTphot + eTot/E * pow(rate_gg+pow(tescape,-1),-1));
 		},{E_ix,-1,0});
 	}
 	

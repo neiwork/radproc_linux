@@ -199,12 +199,11 @@ void secondariesTimescales(Particle& p, State& st, const std::string& filename)
 
 void radiativeLossesNeutron(Particle& n, State& st, const std::string& filename)
 {
-	static const double accEfficiency = GlobalConfig.get<double>("nonThermal.injection.accEfficiency");
 	std::ofstream file;
 	file.open(filename.c_str(), std::ios::out);
 
-	file << "Log(E/GeV)" 
-		<< "\t" << "r [M]"
+	file << "r [Rs]" 
+		<< "\t" << "E [GeV]"
 		<< "\t" << "Escape"
 		<< "\t" << "Decay"
 		<< "\t" << "pp"
@@ -213,25 +212,44 @@ void radiativeLossesNeutron(Particle& n, State& st, const std::string& filename)
 	
 	double phEmin = st.photon.emin();
 	double phEmax = st.photon.emax();
-	n.ps.iterate([&](const SpaceIterator& i) {
-		
-		double E = i.val(DIM_E);
-		double gamma = E/(neutronMass*cLight2);
-		double r = i.val(DIM_R);
-		double fmtE = log10(E/1.6e-3);
-		
-		double nEscape = cLight/r;
-		double nDecay = 1.0/(gamma*neutronMeanLife);
-		double nPP = lossesHadronics(E,st.denf_i.get(i),n)/E;
-		double nPG = lossesPhotoHadronic(E,n,st.photon.distribution,i,phEmin,phEmax)/E;
-
-		file << fmtE << "\t" << r/schwRadius
-					 << "\t" << safeLog10(nEscape)
-					 << "\t" << safeLog10(nDecay)
-					 << "\t" << safeLog10(nPP)
-				 	 << "\t" << safeLog10(nPG) << endl;
-	},{-1,-1,0});
-	file.close();
 	
+	int flag1,flag2,flag3,flag4,flag5;
+	flag1 = flag2 = flag3 = flag4 = flag5 = 0;
+	double logr1,logr2,logr3,logr4,logr5;
+	logr1 = log10(1.5);
+	double aux = log10(st.denf_e.ps[DIM_R].last()/schwRadius)/4.0;
+	logr2 = logr1+aux;
+	logr3 = logr2+aux;
+	logr4 = logr3+aux;
+	logr5 = logr4+aux;
+	n.ps.iterate([&](const SpaceIterator& iR) {
+		double r = iR.val(DIM_R);
+		double logr = log10(r/schwRadius);
+		if (logr > logr1) flag1++;
+		if (logr > logr2) flag2++;
+		if (logr > logr3) flag3++;
+		if (logr > logr4) flag4++;
+		if (logr > 0.9*logr5) flag5++;
+		
+		if (flag1 == 1 || flag2 == 1 || flag3 == 1 || flag4 == 1 || flag5 == 1) {
+			n.ps.iterate([&](const SpaceIterator& iRE) {
+				double En = iRE.val(DIM_E);
+				double gamma_n = En / (n.mass*cLight2);
+				double tEscape = height_fun(r) / cLight;
+				double tDecay = gamma_n*neutronMeanLife;
+				double loss_np = lossesHadronics(En,st.denf_i.get(iR),n);
+				double loss_ng = lossesPhotoMeson(En,n,st.photon.distribution,iR,phEmin,phEmax);
+				double tNP = (loss_np > 0.0) ? En / loss_np : 1e30;
+				double tNG = (loss_ng > 0.0) ? En / loss_ng : 1e30;
+
+				file << r/schwRadius << "\t" << En / (EV_TO_ERG*1e9)
+						 << "\t" << tEscape
+						 << "\t" << tDecay
+						 << "\t" << tNP
+						 << "\t" << tNG << endl;
+			},{-1,iR.coord[DIM_R],0});
+		}
+	},{0,-1,0});
+	file.close();
 }
 
