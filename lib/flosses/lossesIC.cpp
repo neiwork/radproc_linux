@@ -5,6 +5,7 @@
 #include <fmath/RungeKutta.h>
 #include <fparameters/parameters.h>
 #include <fmath/physics.h>
+#include <gsl/gsl_sf_dilog.h>
 
 double cIC(double u)   //limite inferior
 {
@@ -38,7 +39,7 @@ double fIC(double u,double t, double E, double mass, const ParamSpaceValues& tpf
 }
 
 //double lossesIC(double E, Particle& particle, fun1 tpf, double phEmin, double phEmax)
-double lossesIC(double E, Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& psc, double phEmin, double phEmax)
+double lossesIC_old(double E, Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& psc, double phEmin, double phEmax)
 {
 	double constant  = 3*crossSectionThomson(p.mass)*P2(p.mass)*pow(cLight,5)/4;
 	constant = 3.0*thomson*p.mass*p.mass*pow(cLight,5)/4.0;
@@ -71,22 +72,35 @@ double dN_dtde1(double e1, double Ee, Particle& p, const ParamSpaceValues& tpf,c
 				return tpf.interpolate({{0,e}},&psc) * factorQ(e1,e,Ee);
 			},40);
 }
-double lossesICnew(double E, Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& psc,
-					double phEmin, double phEmax)
-{
-	double constant = 2.0*pi*P2(electronRadius*electronRestEnergy)*cLight/(E*E);
-	return constant*integSimpson(log(phEmin),log(min(0.99*E,phEmax)),[E,phEmin,phEmax,&p,&tpf,&psc](double loge1)
-				{
-					double e1 = exp(loge1);
-					return e1*e1*dN_dtde1(e1,E,p,tpf,psc,phEmin,phEmax);
-				},50);
-}
 
 double lossesIC_Th(double E, Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& psc,
 					double phEmin, double phEmax)
 {
 	double g = E / (p.mass*cLight2);
-	double Uph = integSimpson(phEmin,phEmax,[tpf,&psc](double Eph)
+	double Uph = integSimpsonLog(phEmin,phEmax,[tpf,&psc](double Eph)
 					{return tpf.interpolate({{0,Eph}},&psc)*Eph;},100);
 	return 4.0/3.0 * thomson * cLight * Uph * P2(electronMass/p.mass) * g*g;
+}
+
+double fKN(double b)
+{
+	double g = (0.5*b + 6.0 + 6.0/b) * log(1.0+b);
+	g = g - (11.0/12.0 * b*b*b + 6.0*b*b + 9.0*b + 4.0) / P2(1.0+b);
+	g = g - 2.0 + 2.0 * gsl_sf_dilog(-b);
+	return (b > 1e-3 ? 9.0*g/(b*b*b) : 1.0);
+}
+
+double lossesIC(double E, Particle& p, const ParamSpaceValues& tpf, const SpaceCoord& psc,
+					double phEmin, double phEmax)
+{
+	double g = E / (p.mass*cLight2);
+	double Uph = integSimpsonLog(phEmin,phEmax,[tpf,&psc](double Eph)
+					{return tpf.interpolate({{0,Eph}},&psc)*Eph;},100);
+	double lossesTh = 4.0/3.0 * thomson * cLight * Uph * P2(electronMass/p.mass) * g*g;
+	return (lossesTh/Uph) * integSimpsonLog(phEmin,phEmax, [&tpf,&psc,g,&p] (double Eph)
+				{
+					double nPh = tpf.interpolate({{0,Eph}},&psc);
+					double b = 4.0 * g * (Eph/(p.mass*cLight2));
+					return fKN(b)*nPh*Eph;
+				},100);
 }

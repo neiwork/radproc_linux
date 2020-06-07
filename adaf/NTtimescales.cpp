@@ -64,6 +64,7 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 			double tAdv = accretionTime(r);
 			double vR = radialVel(r/sqrt(paso_r));
 			double dR = r * (sqrt(paso_r)-1.0/sqrt(paso_r));
+			double tCell = dR / abs(vR);
 			double B = st.magf.get(iR);
 			double height = height_fun(r);
 			double rho = massDensityADAF(r);
@@ -77,7 +78,7 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 				file << (int)(r/schwRadius)
 					 << "\t" << safeLog10(E/(p.mass*cLight2))
 					 << "\t" << safeLog10(tAcc)
-					 << "\t" << safeLog10(tAdv)
+					 << "\t" << safeLog10(tCell)
 					 << "\t" << safeLog10(tDiff)
 					 << "\t" << safeLog10(eMaxHillas/1.602e-12/(p.mass*cLight2));
 				if (p.id == "ntProton") {

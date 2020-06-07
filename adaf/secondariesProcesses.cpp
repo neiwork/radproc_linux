@@ -14,6 +14,7 @@
 #include <fluminosities/luminosityNTHadronic.h>
 #include <fluminosities/opticalDepthSSA.h>
 #include <fluminosities/luminosityIC.h>
+#include <fluminosities/luminosityPairAnnihilation.h>
 #include "NTinjection.h"
 #include "NTdistribution.h"
 #include <fparameters/Dimension.h>
@@ -47,6 +48,7 @@ void secondariesRadiationProcesses(State& st, const std::string& filename)
 	Vector eIC(nEnt,0.0);
 	Vector muSy(nEnt,0.0);
 	Vector piSy(nEnt,0.0);
+	Vector eeAnn(nEnt,0.0);
 	Vector piPP(nEnt,0.0);
 	Vector piPG(nEnt,0.0);
 	Vector totAbs(nEnt,0.0);
@@ -56,6 +58,7 @@ void secondariesRadiationProcesses(State& st, const std::string& filename)
 		double E = ntPh.ps[DIM_E][E_ix];
 		st.ntPhoton.ps.iterate([&](const SpaceIterator& iR) {
 			double r = iR.val(DIM_R);
+			E = E / redshift_to_inf[iR.coord[DIM_R]];
 			double rB1 = r/sqrt(paso_r);
 			double rB2 = r*sqrt(paso_r);
 			double vol = volume(r);
@@ -66,11 +69,12 @@ void secondariesRadiationProcesses(State& st, const std::string& filename)
 			double tau_gg = st.tau_gg.get(psc);
 			double kappa_gg = 2.0/sqrt(pi)*tau_gg/height;
 			
-			double eICLocal,eSyLocal,piPPLocal,piPGLocal,piSyLocal,muSyLocal;
+			double eICLocal,eSyLocal,piPPLocal,piPGLocal,piSyLocal,muSyLocal,ePairAnnLocal;
 			eICLocal = eSyLocal = piPPLocal = piPGLocal = piSyLocal = muSyLocal = 0.0;
 			eICLocal = luminosityIC_2(E,st.ntPair,iR.coord,st.photon.distribution,Ephmin,Ephmax)/E;
-			eICLocal += luminosityIC(E,st.ntPair,iR.coord,st.ntPhoton.distribution,
+			eICLocal += luminosityIC_2(E,st.ntPair,iR.coord,st.ntPhoton.distribution,
 										st.ntPhoton.emin(),st.ntPhoton.emax())/E;
+			ePairAnnLocal += luminosityPairAnnihilation(E,st.ntPair,iR)/E;
 			eSyLocal = luminositySynchrotronExactSec(E,st.ntPair,iR,magf)/E;
 			muSyLocal = luminositySynchrotronExact(E,st.ntMuon,iR,magf)/E;
 			piSyLocal = luminositySynchrotronExact(E,st.ntChargedPion,iR,magf)/E;
@@ -81,7 +85,7 @@ void secondariesRadiationProcesses(State& st, const std::string& filename)
 			}
 
 			double factor = pi/sqrt(3.0)*(rB2*rB2-rB1*rB1) / vol;
-			double eTot = eSyLocal+eICLocal+muSyLocal+piSyLocal+piPPLocal+piPGLocal;
+			double eTot = eSyLocal+eICLocal+muSyLocal+piSyLocal+piPPLocal+piPGLocal+ePairAnnLocal;
 
 			eSy[E_ix] += eSyLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
 			muSy[E_ix] += muSyLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
@@ -89,6 +93,7 @@ void secondariesRadiationProcesses(State& st, const std::string& filename)
 			eIC[E_ix] += eICLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
 			piPP[E_ix] += piPPLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
 			piPG[E_ix] += piPGLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
+			eeAnn[E_ix] += ePairAnnLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
 			double totLocal = (tau_gg > 1.0e-10) ? factor*vol*eTot/kappa_gg*(1.0-exp(-2.0*sqrt(3.0)*tau_gg)) : 
 								eTot*vol;
 			double totLocalNA = eTot * pow(redshift_to_inf[iR.coord[DIM_R]],3);
@@ -113,6 +118,7 @@ void secondariesRadiationProcesses(State& st, const std::string& filename)
 			 << "\t" << safeLog10(eIC[jE]*E)
 			 << "\t" << safeLog10(piPP[jE]*E)
 			 << "\t" << safeLog10(piPG[jE]*E)
+			 << '\t' << safeLog10(eeAnn[jE]*E)
 			 << '\t' << safeLog10(totAbs[jE]*E)
 			 << std::endl;
 	}

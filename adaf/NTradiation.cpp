@@ -189,7 +189,8 @@ void nonThermalRadiation(State& st, const std::string& filename)
 								0.5/sqrt(3.0) * (eSyLocal[E_ix][iR.coord[DIM_R]]/alpha_tot) * 
 								(1.0-exp(-2.0*sqrt(3.0)*tau)) :
 								eSyLocal[E_ix][iR.coord[DIM_R]] * 0.5 * sqrt(pi) * height;  // flux
-				eSy[E_ix] += eSyLocal[E_ix][iR.coord[DIM_R]] * 2.0 * pi*(rB2*rB2-rB1*rB1);  // luminosity
+				eSy[E_ix] += ( eSyLocal[E_ix][iR.coord[DIM_R]] * 2.0 * pi*(rB2*rB2-rB1*rB1)
+								* pow(redshift_to_inf[iR.coord[DIM_R]],3) );  // luminosity
 				double tau_es = st.denf_e.get(iR)*thomson*height;
 				double tescape = height/cLight * (1.0+tau_es);
 				SpaceCoord iE = {E_ix,iR.coord[DIM_R],0};
@@ -242,8 +243,7 @@ void nonThermalRadiation(State& st, const std::string& filename)
 			eICLocal = pSyLocal = pPPLocal = pPGLocal = 0.0;
 			
 			if (calculateNTelectrons)
-				eICLocal = luminosityIC(E,st.ntElectron,iR.coord,st.photon.distribution,Ephmin,Ephmax)/E;
-				
+				eICLocal = luminosityIC_2(E,st.ntElectron,iR.coord,st.photon.distribution,Ephmin,Ephmax)/E;
 			if (calculateNTprotons) {
 				pSyLocal = luminositySynchrotronExact(E,st.ntProton,iR,st.magf.get(iR))/E;
 			

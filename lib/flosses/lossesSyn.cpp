@@ -1,14 +1,24 @@
 #include "lossesSyn.h"
 
-
+#include <gsl/gsl_sf_dilog.h>
 #include <fmath/RungeKutta.h>
 #include <fmath/physics.h>
 
+double fKN_sy(double b)
+{
+	double g = (0.5*b + 6.0 + 6.0/b) * log(1.0+b);
+	g = g - (11.0/12.0 * b*b*b + 6.0*b*b + 9.0*b + 4.0) / P2(1.0+b);
+	g = g - 2.0 + 2.0 * gsl_sf_dilog(-b);
+	return (b > 1e-3 ? 9.0*g/(b*b*b) : 1.0);
+}
 
 double lossesSyn(double E, double magf, Particle& p)
 {
 	double gamma = E / (p.mass*cLight2);
 	double wmag = magf*magf / (8.0 * pi);
+	double Bcrit = 4.4e13;
+	double b = 4.0 * gamma * magf/Bcrit;
+	wmag = wmag * fKN_sy(b);
 	return (4.0/3.0)*thomson*cLight*wmag*P2(electronMass/p.mass) * gamma*gamma;
 }	
 

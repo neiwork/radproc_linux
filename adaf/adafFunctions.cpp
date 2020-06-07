@@ -7,6 +7,7 @@
 #include <fmath/physics.h>
 #include <fparameters/parameters.h>
 #include <gsl/gsl_sf_bessel.h>
+#include <gsl/gsl_sf_erf.h>
 #include <cstddef>
 #include <fparameters/SpaceIterator.h>
 #include <fparameters/Dimension.h>
@@ -31,7 +32,8 @@ double electronTemp(double r)
 	double temp = eMeanMolecularWeight*exp(logT);
 	//double r_rg = r/(schwRadius/2.0);
 	//return (r_rg <= 30) ? temp * 1.4/pow(r_rg,0.097) : temp;
-	return temp;
+	double factorTemp = GlobalConfig.get<double>("factorTemperature");
+	return temp * factorTemp;
 }
 
 double electronTempOriginal(double r)
@@ -89,7 +91,8 @@ double radialVel(double r)
 	double logrv = m*(logr_actual-logr[pos_r-1])+logv[pos_r-1];
 	double vel = -exp(logrv);
 	double r_rg = r / (schwRadius/2.0);
-	return (r_rg <= 30 ? vel / (0.93*exp(2.13/r_rg)) : vel);
+	double result = (r_rg <= 30 ? vel / (0.93*exp(2.13/r_rg)) : vel);
+	return result;
 }
 
 double accretionTime(double r)
@@ -186,6 +189,11 @@ double accRateADAF(double r)
 	
 	if (processesFlags[3]) {
 		result = accRateOut * gAcc(r) * hAcc(r) * coronaFraction;
+		if (rTr < 5*schwRadius) {
+			double deltaR = rOut/10;
+			result = accRateOut * coronaFraction / 10 * pow(10, gsl_sf_erf((rOut-r)/deltaR)) *
+						pow(r/rOut,s);
+		}
 	}
 	
 	return result;
@@ -196,7 +204,7 @@ double massDensityADAF(double r)
 	if (height_method == 0)
 		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r)));
 	else 
-		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r))) / sqrt(0.5*pi);
+		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r))); // / sqrt(0.5*pi);
 }
 
 double magneticField(double r)
@@ -212,7 +220,10 @@ double accRateColdDisk(double r)
 	double rOutADAF = exp(logr.back())*schwRadius;
 	double result = 0.0;
 	if (r > rTr) {
-		result = accRateOut * fAcc(r);
+		if (rTr < 5*schwRadius) {
+			result = accRateOut * (1.0-accRateADAF(r)/accRateOut);
+		} else
+			result = accRateOut * fAcc(r);
 	}
 	return result;
 }

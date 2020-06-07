@@ -4,9 +4,10 @@
     "mu_e":"1.14",
     "inclination":"0",
     "accRateCorona":"1.0",
-    "powerTransition":"2",
-    "rTr":"1e3",
-    "rOutCD":"1.0e4",
+    "factorTemperature":"1",
+    "powerTransition":"1",
+    "rTr":"2e4",
+    "rOutCD":"2e5",
     "zGap":"1.0",
     "tAccBlob":"0",
     "factorDensity":"1",
@@ -14,12 +15,12 @@
     "calculateComptonScatt":"0",
     "height_method":"1",
     "scatt": {
-        "nRandomPhot":"300",
+        "nRandomPhot":"500",
         "nTheta":"5"
     },
     "calculateNewTemp":"0",
 
-    "calculateThermal":"1",
+    "calculateThermal":"0",
     "thermal": {
         "numProcesses":"5",
         "processNumber": {
@@ -59,30 +60,31 @@
         "acc_method":"0",
 	    "protons":"1",
 	    "electrons":"1",
-            "injection": {
-			    "calculateMagneticReconnection":"0",
-	    		"calculateDSA":"0",
-		    	"calculateSDA":"0",
-			    "calculatePL":"1",
-                "energyFraction_e":"8.5e-5",
-			    "energyFraction_i":"6.5e-2",
-		    	"PL": {
-			    	"accEfficiency":"0.001"
-			    },
-			    "SDA": {
-				    "fractionTurbulent":"0.1",
-				    "powerSpectrumIndex":"1.666"
-			    },
-			    "primaryIndex":"2"
-            },
+        "comptonLosses":"0",
+        "injection": {
+		    "calculateMagneticReconnection":"0",
+	        "calculateDSA":"0",
+			"calculateSDA":"0",
+		    "calculatePL":"1",
+            "energyFraction_e":"0.0005",
+		    "energyFraction_i":"0.02",
+			"PL": {
+		    	"accEfficiency":"0.001"
+		    },
+		    "SDA": {
+			    "fractionTurbulent":"0.1",
+			    "powerSpectrumIndex":"1.666"
+		    },
+		    "primaryIndex":"1.5"
+        },
         "calculateLosses":"0",
-		"calculateDistributions":"0",
-        "calculateLuminosities":"0",
-		"calculateSecondaries":"0",
+		"calculateDistributions":"1",
+        "calculateLuminosities":"1",
+		"calculateSecondaries":"1",
 		"calculateJetEmission":"0",
     	"neutrons":{
-			"calculateInjection":"1",
-        	"calculatePropagation":"1",
+			"calculateInjection":"0",
+        	"calculatePropagation":"0",
 			"calculateJetDecay":"0",
 			"jetDecay":{
 				"openingAngle":"6",
@@ -132,17 +134,17 @@
 					"radius":{
 						"min":1.0,
 						"max":1.0,
-						"samples":30
+						"samples":50
 					},
 					"radius_cd":{
-                        "samples":3
+                        "samples":2
                     }
 				}
 			},
 			"photon": {
 				"dim":{
 					"energy": {
-						"min":-6.0,
+						"min":-7.0,
 						"max":8.0,
 						"samples":"100"
 					}
@@ -152,7 +154,7 @@
 				"dim":{
 					"energy": {
 						"min":-2.0,
-						"max":18.0
+						"max":17.0
 					}
 				}
 			},
@@ -161,7 +163,7 @@
 				"dim":{
 					"energy": {
 						"min":6.00,
-						"max":14.0
+						"max":18.0
 					}
 				}
 			},

@@ -102,7 +102,7 @@ int main()
 					writeEandRParamSpace("protonInjection", model.ntProton.injection, 0,1);
 					writeRParamSpace("protonInjection_R", model.ntProton.injection, 0, 0);
 					if (accMethod == 0)
-						distributionMultiZone(model.ntProton, model);
+						distributionMultiZoneRadial(model.ntProton, model);
 					else
 						distributionFokkerPlanckRadial(model.ntProton,model);
 					writeEandRParamSpace("protonDistribution", model.ntProton.distribution,0,1);

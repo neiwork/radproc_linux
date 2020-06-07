@@ -750,7 +750,7 @@ void distributionMultiZone(Particle& particle, State& st)
 		double B = st.magf.get(jR);
 		double rho = massDensityADAF(r);
 		double rateAccretion = abs(radialVel(rB1))*4.0*pi*height_fun(rB1)*rB1/vol;
-		double rateWind = (accRateADAF(rB2)-accRateADAF(rB1)) / (rho*vol);
+		double rateWind = 2.0*s*abs(vR)/r;
 		
 		// We define a new mesh of points
 		size_t M = 199;
@@ -783,7 +783,7 @@ void distributionMultiZone(Particle& particle, State& st)
 							else if (particle.id == "ntMuon")
 								rateDecay = 1.0 / (g*muonMeanLife);
 							//return 1.0e99;
-							return pow(rateAccretion,-1);//+rateWind+rateDiff,-1);
+							return pow(rateAccretion+rateWind+rateDiff,-1);
 						};
 		
 		fun1 Qfun = [&particle,&jR,rB2,vol] (double g)
@@ -854,26 +854,32 @@ void distributionMultiZone(Particle& particle, State& st)
 		},{0,-1,0});
 		
 		// COSMIC RAY PRESSURE << THERMAL PRESSURE
-		particle.ps.iterate([&](const SpaceIterator& iR) {
-			double r = iR.val(DIM_R);
-			double pCR = integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
-							{
-								return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e/3.0;
-							},100);
-			double pFluid = massDensityADAF(r)*sqrdSoundVel(r);
-			cout << iR.coord[DIM_R] << "\t pCR/pgas = " << pCR/pFluid << endl;
-		},{0,-1,0});
+		if (particle.id == "ntProton") {
+			particle.ps.iterate([&](const SpaceIterator& iR) {
+				double r = iR.val(DIM_R);
+				double pCR = integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
+								{
+									return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e/3.0;
+								},100);
+				double pFluid = massDensityADAF(r)*sqrdSoundVel(r);
+				cout << iR.coord[DIM_R] << "\t pCR/pgas = " << pCR/pFluid << endl;
+			},{0,-1,0});
+		}
 		
 		// THERMAL AND NONTHERMAL TOTAL ENERGY
 		particle.ps.iterate([&](const SpaceIterator& iR) {
 			double r = iR.val(DIM_R);
-			double U_CR = integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
+			double U_Nth = integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
 							{
 								return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e;
 							},100);
-			double U_Th = 1.5*st.denf_i.get(iR)*boltzmann*st.tempIons.get(iR);
+			double temp = (particle.id == "ntElectron") ? st.tempElectrons.get(iR) : st.tempIons.get(iR);
+			double dens = (particle.id == "ntElectron") ? st.denf_e.get(iR) : st.denf_i.get(iR);
+			double norm_temp = boltzmann*temp / (particle.mass*cLight2);
+			double aTheta = 3.0 - 6.0/(4.0+5.0*norm_temp); // Gammie & Popham (1998)
+			double U_Th = aTheta * dens * particle.mass*cLight2 * norm_temp;
 			double Press = massDensityADAF(r)*sqrdSoundVel(r);
-			cout << iR.coord[DIM_R] << "\t U_Nth/U_Th = " << U_CR/U_Th << "\t U_Nth/P_gas = " << U_Th/Press << endl;
+			cout << iR.coord[DIM_R] << "\t U_Nth/U_Th = " << U_Nth/U_Th << endl;
 		},{0,-1,0});
 	}
 	
@@ -903,11 +909,13 @@ void distributionSecondaries(Particle& particle, State& st)
 			double rateDiff = 1.0/diffusionTimeTurbulence(E,height,particle,magf);
 			double rateCool = losses(E,particle,st,jR) / E;
 			double rateDecay = 0.0;
+			double rateAnn = 0.0;
 			
 			if (particle.id == "ntChargedPion") rateDecay = 1.0 / (chargedPionMeanLife*g);
 			if (particle.id == "ntMuon") rateDecay = 1.0 / (muonMeanLife*g);
+			if (particle.id == "ntPair") rateAnn = annihilationRate(E,st.ntPair,iR);
 			
-			double rateTotal = rateCool + rateDecay + rateWind + rateAccretion + rateDiff;
+			double rateTotal = rateCool + rateDecay + rateWind + rateAccretion + rateDiff + rateAnn;
 
 			double Qinj = 0.0;
 			double Qplus = 0.0;
@@ -1160,6 +1168,249 @@ void distributionFokkerPlanckMultiZone(Particle& particle, State& st)
 	},{0,-1,0});
 	
 }
+
+
+
+void distributionFokkerPlanckSpatialDiffusion(Particle& particle, State& st)
+{
+	double paso_E = pow(particle.emax()/particle.emin(),1.0/(nE-1));
+	particle.ps.iterate([&](const SpaceIterator& iE) {
+		
+		SpaceCoord jE = {nE-1-iE.coord[DIM_E],0,0};
+		double E = particle.ps[DIM_E][jE[DIM_E]];
+		double EB2 = E*sqrt(paso_E);
+		double EB1 = EB2/paso_E;
+		double bE = losses(E,particle,st,jE);
+		
+		// We define a new mesh of points
+		size_t M = 199;
+		double r_min = st.denf_e.ps[DIM_R][0] / schwRadius;
+		double r_max = st.denf_e.ps[DIM_R][nR-1] / schwRadius;
+		
+		double paso_r = pow(r_max/r_min,1.0/M);
+		Vector r_au(M+3,r_min/paso_r);
+		Vector delta_r_m_au(M+2,0.0);
+		Vector delta_r(M+1,0.0);
+		
+		for (size_t jr=1;jr<M+3;jr++)	r_au[jr] = r_au[jr-1]*paso_r;
+		for (size_t jr=0;jr<M+2;jr++)	delta_r_m_au[jr] = r_au[jr+1]-r_au[jr];
+		for (size_t jr=0;jr<M+1;jr++)	delta_r[jr] = 0.5*(r_au[jr+2]-r_au[jr]);
+		
+		fun1 Bfun = [&particle,&st,&jE,E] (double r) 
+						{
+							double g = E / (particle.mass*cLight2);
+							r = r * schwRadius;
+							double height = height_fun(r);
+							double B = magneticField(r);
+							double vR = radialVel(r);
+							double k_rr = diffCoeff_r(g,particle,height,B);
+							return - (1.0 - 3.0 * k_rr / (2.0*vR*r));
+						};
+
+		fun1 Cfun = [&particle,&jE,E] (double r)
+						{
+							double g = E / (particle.mass*cLight2);
+							r = r * schwRadius;
+							double height = height_fun(r);
+							double B = magneticField(r);
+							double vR = radialVel(r);
+							double k_rr = diffCoeff_r(g,particle,height,B);
+							return - k_rr / vR;
+						};
+
+		fun1 Tfun = [&st,&particle,&jE,E,paso_E] (double r) 
+						{
+							double g = E / (particle.mass*cLight2);
+							size_t jjR=0;
+							particle.ps.iterate([&](const SpaceIterator& iR) {
+								double rAux = iR.val(DIM_R) / schwRadius;
+								if (rAux < r) jjR++;
+							},{0,-1,0});
+							SpaceCoord jEaux = {jE[DIM_E],jjR,0};
+							r = r * schwRadius;
+							double height = height_fun(r);
+							double B = magneticField(r);
+							double vR = radialVel(r);
+							double rateDiff = r*r/diffCoeff_r(g,particle,height,B);
+							double rateWind = 2.0*s*abs(vR)/r;
+							double rateCool = abs(losses(E,particle,st,jEaux))/(E*(sqrt(paso_E)-1.0/sqrt(paso_E)));
+							return pow(rateWind+rateDiff+rateCool,-1)*vR;
+						};
+		
+		fun1 Qfun = [&st,&particle,&jE,E,paso_E] (double r)
+					{
+						size_t jjR=0;
+						particle.ps.iterate([&](const SpaceIterator& iR) {
+							double rAux = iR.val(DIM_R) / schwRadius;
+							if (rAux < r) jjR++;
+						},{0,-1,0});
+						SpaceCoord jEaux = {jE[DIM_E],jjR,0};
+						r = r * schwRadius;
+						double height = height_fun(r);
+						double Qplus = 0.0;
+						if (jE[DIM_E] < nE-1) {
+							SpaceCoord jEplus = {jE[DIM_E]+1,jjR,0};
+							double Nplus = particle.distribution.interpolate({{DIM_R,r}},&jEplus)*r*height;
+							Qplus = Nplus * abs(losses(E,particle,st,jEplus)) / (E*(sqrt(paso_E)-1.0/sqrt(paso_E)));
+						}
+						double vR = radialVel(r);
+						return (r > particle.ps[DIM_R].first()/schwRadius && 
+								r < particle.ps[DIM_R].last()/schwRadius ) ?
+								particle.injection.interpolate({{DIM_R,r}},&jEaux)*r*height + Qplus : 0.0;
+					};
+		
+		Vector d(M+1,0.0);
+		Vector a(M+1,0.0), b(M+1,0.0), c(M+1,0.0);
+		for (size_t m=0;m<M+1;m++) {
+			double Bm_minusHalf = 0.5 * (Bfun(r_au[m]) + Bfun(r_au[m+1]));
+			double Bm_plusHalf = 0.5 * (Bfun(r_au[m+1]) + Bfun(r_au[m+2]));
+			double Cm_minusHalf = 0.5 * (Cfun(r_au[m]) + Cfun(r_au[m+1]));
+			double Cm_plusHalf = 0.5 * (Cfun(r_au[m+1]) + Cfun(r_au[m+2]));
+			double Qm = Qfun(r_au[m+1]);
+			double Tm = Tfun(r_au[m+1]);
+			double wm_minusHalf = Bm_minusHalf/Cm_minusHalf * delta_r_m_au[m];
+			double wm_plusHalf = Bm_plusHalf/Cm_plusHalf * delta_r_m_au[m+1];
+			double Wm_minusHalf(0.0), Wm_plusHalf(0.0);
+			double Wplus_m_minusHalf(0.0), Wminus_m_minusHalf(0.0);
+			double Wplus_m_plusHalf(0.0), Wminus_m_plusHalf(0.0);
+			
+			if ( abs(wm_minusHalf) < 1.0e-3 ) {
+				Wm_minusHalf = pow(1.0+gsl_pow_2(wm_minusHalf)/24+gsl_pow_4(wm_minusHalf)/1920,-1);
+				Wplus_m_minusHalf = Wm_minusHalf * exp(0.5*wm_minusHalf);
+				Wminus_m_minusHalf = Wm_minusHalf * exp(-0.5*wm_minusHalf);
+			} else {
+				Wm_minusHalf = abs(wm_minusHalf)*exp(-0.5*abs(wm_minusHalf)) /
+								(1.0-exp(-abs(wm_minusHalf)));
+				if (wm_minusHalf > 0.0) {
+					Wplus_m_minusHalf = abs(wm_minusHalf) / (1.0-exp(-abs(wm_minusHalf)));
+					Wminus_m_minusHalf = Wm_minusHalf * exp(-0.5*wm_minusHalf);
+				} else {
+					Wplus_m_minusHalf = Wm_minusHalf * exp(0.5*wm_minusHalf);
+					Wminus_m_minusHalf = abs(wm_minusHalf) / (1.0-exp(-abs(wm_minusHalf)));
+				}
+			}
+			if ( abs(wm_plusHalf) < 1.0e-3 ) {
+				Wm_plusHalf = pow(1.0+gsl_pow_2(wm_plusHalf)/24+gsl_pow_4(wm_plusHalf)/1920,-1);
+				Wplus_m_plusHalf = Wm_plusHalf * exp(0.5*wm_plusHalf);
+				Wminus_m_plusHalf = Wm_plusHalf * exp(-0.5*wm_plusHalf);
+			} else {
+				Wm_plusHalf = abs(wm_plusHalf)*exp(-0.5*abs(wm_plusHalf)) /
+								(1.0-exp(-abs(wm_plusHalf)));
+				if (wm_plusHalf > 0.0) {
+					Wplus_m_plusHalf = abs(wm_plusHalf) / (1.0-exp(-abs(wm_plusHalf)));
+					Wminus_m_plusHalf = Wm_plusHalf * exp(-0.5*wm_plusHalf);
+				} else {
+					Wplus_m_plusHalf = Wm_plusHalf * exp(0.5*wm_plusHalf);
+					Wminus_m_plusHalf = abs(wm_plusHalf) / (1.0-exp(-abs(wm_plusHalf)));
+				}
+			}
+			
+			if (m >= 1)
+				a[m] = - Cm_minusHalf * Wminus_m_minusHalf / ( delta_r[m] * delta_r_m_au[m] );
+			if (m <= M-1)
+				c[m] = - Cm_plusHalf * Wplus_m_plusHalf / ( delta_r[m] * delta_r_m_au[m+1] );
+			b[m] = 1.0/delta_r[m] * ( Cm_minusHalf * Wplus_m_minusHalf / delta_r_m_au[m] +
+						Cm_plusHalf * Wminus_m_plusHalf / delta_r_m_au[m+1] ) + 1.0/Tm;
+			d[m] = Qm;
+		}
+		TriDiagSys(a,b,c,d,M);
+		size_t m = 1;
+		particle.ps.iterate([&](const SpaceIterator &jER) {
+			double r = jER.val(DIM_R);
+			double h = height_fun(r);
+			double vR = radialVel(r);
+			double logr = log10(r / schwRadius);
+			while (log10(r_au[m]) < logr)
+				m++;
+			double slope = (safeLog10(d[m])-safeLog10(d[m-1]))/log10(r_au[m]/r_au[m-1]);
+			double dist = slope * (logr-log10(r_au[m-1])) + safeLog10(d[m-1]);
+			dist = pow(10,dist);
+			particle.distribution.set(jER,dist/(r*h*vR));
+		},{jE[DIM_E],-1,0});
+	},{-1,0,0});
+	
+	// NORMALIZATION A POSTERIORI
+	/*
+	double sum = 0.0;
+	particle.ps.iterate([&](const SpaceIterator& iR) {
+		double r = iR.val(DIM_R);
+		double rB2 = r*sqrt(paso_r);
+		double rB1 = rB2/paso_r;
+		double vol = volume(r);
+		double massDens = massDensityADAF(r);
+		double massLostWinds = accRateADAF(rB2)-accRateADAF(rB1);
+		double magf = st.magf.get(iR);
+		double height = height_fun(r);
+		double u_nth = integSimpsonLog(particle.emin(),particle.emax(),
+					[&particle,&iR] (double e)
+					{
+						return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e;
+					},100);
+		double q_losses = integSimpsonLog(particle.emin(),particle.emax(),
+					[&particle,&iR,&height,&magf,&st] (double e)
+					{
+						double rateDiff = 1.0 / diffusionTimeTurbulence(e,height,particle,magf);
+						rateDiff = 0.0;
+						double rateCooling = losses(e,particle,st,iR)/e;
+						double rateLosses = rateDiff + rateCooling;
+						return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e*rateLosses;
+					},100);
+		sum += vol*q_losses + u_nth * massLostWinds/massDens;
+	},{0,-1,0});
+	SpaceCoord iRcoord = {0,1,0};
+	double u_nth_0 = integSimpsonLog(particle.emin(),particle.emax(),
+					[&particle,&iRcoord] (double e)
+					{
+						return particle.distribution.interpolate({{DIM_E,e}},&iRcoord)*e;
+					},100);
+	sum += accRateADAF(particle.ps[DIM_R][1])/massDensityADAF(particle.ps[DIM_R][1])*u_nth_0;
+	
+	double normFactor = etaInj * accRateOut * cLight2 / sum;
+	
+	particle.ps.iterate([&](const SpaceIterator& i) {
+		particle.distribution.set(i,particle.distribution.get(i)*normFactor);
+	},{-1,-1,0});
+	*/
+	
+	// TESTS
+	
+	// CONSERVATION OF FLUX OF PARTICLES CROSSING EACH SHELL
+	particle.ps.iterate([&](const SpaceIterator& iR) {
+		double rB1 = iR.val(DIM_R) / sqrt(paso_r);
+		double area = 4.0*pi*rB1*height_fun(rB1);
+		double vR = abs(radialVel(rB1));
+		double flux = area*vR*integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
+						{
+							return particle.distribution.interpolate({{DIM_E,e}},&iR.coord);
+						},100);
+		cout << iR.coord[DIM_R] << "\t flux = " << flux << endl;
+	},{0,-1,0});
+	
+	// FLUX OF ENERGY
+	particle.ps.iterate([&](const SpaceIterator& iR) {
+		double rB1 = iR.val(DIM_R) / sqrt(paso_r);
+		double area = 4.0*pi*rB1*height_fun(rB1);
+		double vR = abs(radialVel(rB1));
+		double flux = area*vR*integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
+						{
+							return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e;
+						},100);
+		cout << iR.coord[DIM_R] << "\t flux of energy = " << flux << endl;
+	},{0,-1,0});
+	
+	// COSMIC RAY PRESSURE << THERMAL PRESSURE
+	particle.ps.iterate([&](const SpaceIterator& iR) {
+		double r = iR.val(DIM_R);
+		double pCR = integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
+						{
+							return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e/3.0;
+						},100);
+		double pFluid = massDensityADAF(r)*sqrdSoundVel(r);
+		cout << iR.coord[DIM_R] << "\t pCR/pgas = " << pCR/pFluid << endl;
+	},{0,-1,0});
+	
+}
+
 
 /*
 void distributionFokkerPlanckMultiZoneTimeDependent(Particle& particle, State& st)
@@ -1737,7 +1988,8 @@ void distributionMultiZoneRadial(Particle& particle, State& st)
 {
 	
 	// We define a new mesh of points
-	size_t M = 399;
+	size_t M = 199;
+	double factor = 1e10;
 	double g_min = particle.emin()/(particle.mass*cLight2);
 	double g_max = particle.emax()/(particle.mass*cLight2);
 	
@@ -1785,10 +2037,11 @@ void distributionMultiZoneRadial(Particle& particle, State& st)
 						double B = magneticField(rad);
 						double height = height_fun(rad);
 						double rateDiff = 1.0/(diffusionTimeTurbulence(E,height,particle,B));
+						rateDiff = 0.0;
 						return pow(rateDiff + rateWind,-1) * vR;
 					};
 	
-	fun2 Qfun = [&particle] (double g, double r)
+	fun2 Qfun = [&particle,&factor] (double g, double r)
 					{
 						double E = g * particle.mass * cLight2;
 						double rad = r;
@@ -1801,9 +2054,8 @@ void distributionMultiZoneRadial(Particle& particle, State& st)
 							if (rAux < rad) jjR++;
 						},{0,-1,0});
 						SpaceCoord jR = {0,jjR,0};
-						
 						double height = height_fun(rad);
-						return particle.injection.interpolate({{DIM_E,E},{DIM_R,rad}},&jR)*(particle.mass*cLight2)*rad*height;
+						return (1.0/factor)*particle.injection.interpolate({{DIM_E,E},{DIM_R,rad}},&jR)*(particle.mass*cLight2)*rad*height;
 					};
 		
 	size_t Nrad = 100;
@@ -1855,7 +2107,7 @@ void distributionMultiZoneRadial(Particle& particle, State& st)
 			if (m < M+1) distr = pow(10,distr);
 			else distr = 0.0;
 			
-			particle.distribution.set(jRE,distr/(particle.mass*cLight2));
+			particle.distribution.set(jRE,factor*distr/(particle.mass*cLight2));
 		},{-1,jR.coord[DIM_R],0});
 	},{0,-1,0});
 	

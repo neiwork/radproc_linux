@@ -8,7 +8,7 @@ double luminositySynchrotron(double E, const Particle& c, const SpaceCoord& dist
 double luminositySynchrotron2(double E, const Particle& c, const SpaceCoord& distCoord, double magf);
 double luminositySynchrotronExact(double E, const Particle& c, const SpaceCoord& distCoord, double magf);
 double luminositySynchrotronExactSec(double E, const Particle& c, const SpaceCoord& distCoord, double magf);
-
+double luminositySynchrotronBackReaction(double E, const Particle& c, const SpaceCoord& distCoord, double magf);
 /* this is the Synchrotron luminosity with Synchrotron self absorption*/ 
 //double luminositySynchrotron_conSSA(double E, const Particle& creator);
 

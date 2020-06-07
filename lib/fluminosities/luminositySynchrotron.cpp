@@ -130,9 +130,9 @@ double luminositySynchrotronExact(double Eph, const Particle& c, const SpaceCoor
 							double x = Eph/Ec;
 							return phiSy(x,si);
 						//});
-						},10);
+						},20);
 				return c.distribution.interpolate({{0,Ee}},&psc)*integAng;
-			},50);
+			},80);
 	double constant = sqrt(3.0)*gsl_pow_3(electronCharge)*magf/(planck*c.mass*cLight2);
 	return (integralS > 0.0) ? constant*integralS*Eph : 0.0;
 }
@@ -144,7 +144,6 @@ double luminositySynchrotronExactSec(double Eph, const Particle& c, const SpaceC
 				double g = Ee/(c.mass*cLight2);
 				double tau = Eph/Ee;
 				double integAng = integSimpson(0.0,0.9999,[Eph,g,magf,&c,tau](double mu)
-				//double integAng = qromo(0.0,0.9999,[&](double mu)
 						{
 							double si = sqrt(1.0-mu*mu);
 							double Ec = 3.0*electronCharge*planck*magf*si*g*g/(4*pi*c.mass*cLight);
@@ -152,15 +151,47 @@ double luminositySynchrotronExactSec(double Eph, const Particle& c, const SpaceC
 							if (tau < 1.0)
 								return phiSy(x,si)*(1.0-tau);
 							else return 0.0;
-						//});
-						},10);
+						},20);
 				return c.distribution.interpolate({{0,Ee}},&psc)*integAng;
-			},50);
+			},80);
 	double constant = sqrt(3.0)*gsl_pow_3(electronCharge)*magf/(planck*c.mass*cLight2);
 	return (integralS > 0.0) ? constant*integralS*Eph : 0.0;
 }
 
+double Sfunc(double z)
+{
+	double a = integSimpsonLog(z,50,[&](double q)
+				{
+					return (pow(q,1.5) - pow(z,1.5)) * gsl_sf_bessel_Knu(5.0/3.0,q);
+				},40);
+	return (a > 0.0 ? 2.0/(3.0*sqrt(z)) * a / (6*pi) : 0.0);
+}
 
+double luminositySynchrotronBackReaction(double Eph, const Particle& c, const SpaceCoord& psc, double magf)
+{
+	double eps = sqrt(3.0*electronCharge/(thomson*magf));
+	double integralS = integSimpsonLog(c.emin(),c.emax(),[Eph,magf,&c,&psc,eps](double Ee)
+			{
+				double tau = Eph/Ee;
+				double g = Ee/(c.mass*cLight2);
+				if (g > eps) {
+					double Ec = 1.5*g*g*electronCharge*magf/(c.mass*cLight) * planck;
+					double x = (Eph/Ec) / (1.0-tau);
+					return (tau < 1.0) ? c.distribution.interpolate({{0,Ee}},&psc)*Sfunc(x)*(1.0-tau) : 0.0;
+				} else {
+					double integAng = integSimpson(0.0,0.9999,[&](double mu)
+						{
+							double si = sqrt(1.0-mu*mu);
+							double Ec = 3.0*electronCharge*planck*magf*si*g*g/(4*pi*c.mass*cLight);
+							double x = Eph/Ec;
+							return phiSy(x,si);
+						},20);
+					return c.distribution.interpolate({{0,Ee}},&psc)*integAng;
+				}
+			},80);
+	double constant = sqrt(3.0)*gsl_pow_3(electronCharge)*magf/(planck*c.mass*cLight2);
+	return (integralS > 0.0) ? constant*integralS*Eph : 0.0;
+}
 /*
 double luminositySynchrotron_conSSA(double E, const Particle& creator)
 {

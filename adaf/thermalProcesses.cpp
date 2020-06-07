@@ -258,9 +258,7 @@ void coldDiskLuminosity(State& st, Matrix lumOut, Matrix& lumOutRefl,
 				lumInc += (lumOut[jjE][kR]*reachAD[kR][jRcd] * pow(redshift_RIAF_to_CD[kR][jRcd],2));
 			}
 			aux2 += ((lumInc - lumOutRefl[jjE][jRcd])*dfreq);
-			//aux2 = 0.0;
 		}
-		//aux2 = 0.0;
 		double aux = aux1+aux2;
 		double temp = pow(aux/area/ stefanBoltzmann,0.25);
 		//cout << "Radius = " << rCd/schwRadius << " Temperature = " << scientific << temp << endl;
@@ -469,7 +467,7 @@ void thermalCompton2(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOut
 	show_message(msgEnd,Module_thermalCompton);
 }
 
-
+/*
 void thermalCompton(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOutIC, Vector energies, 
 						int processesFlags[])
 {
@@ -584,6 +582,7 @@ void thermalCompton(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOutI
 	} while (cond);
 	show_message(msgEnd,Module_thermalCompton);
 }
+*/
 
 void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOutBr,
 						Matrix lumOutpp, Matrix lumInICm, Matrix lumOutIC, Matrix lumOut, 
@@ -614,8 +613,6 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 			lumTot += lumOut[jE][jR] * pow(redshift_to_inf[jR],3) * escapeAi[jR];
 		}
 		for (size_t jRcd=0;jRcd<nRcd;jRcd++) {
-			if (jE==0)
-				cout << st.denf_e.ps[DIM_Rcd][jRcd]/schwRadius << "\t redshift = " << redshift_CD_to_inf[jRcd] << endl;
 			lumCD += lumOutCD[jE][jRcd] * pow(redshift_CD_to_inf[jRcd],3) * escapeDi[jRcd];
 			lumRefl += lumOutRefl[jE][jRcd] * pow(redshift_CD_to_inf[jRcd],3) * escapeDi[jRcd];
 		}
@@ -914,7 +911,7 @@ void thermalRadiation(State& st, const string& filename)
 			if (processesFlags[3])
 				coldDiskLuminosity(st,lumOut,lumOutRefl,lumOutCD,energies);
 		} while (res > 1.0e-3);
-		photonDensity(st,energies,lumOut);
+		//photonDensity(st,energies,lumOut);
 		//photonDensityAux(st,energies,lumOut);
 		absorptionLumThermal(st,lumOut,lumOutCD,lumOutRefl,lumOut_gg);
 		writeLuminosities(st,energies,lumOutSy,lumOutBr,lumOutpp,lumInICm,

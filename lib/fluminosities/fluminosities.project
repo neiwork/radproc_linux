@@ -8,6 +8,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="luminosityPairAnnihilation.h"/>
+    <File Name="luminosityPairAnnihilation.cpp"/>
     <File Name="luminositySynchrotron.cpp"/>
     <File Name="luminosityPhotoHadronic.h"/>
     <File Name="luminosityPhotoHadronic.cpp"/>

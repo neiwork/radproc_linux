@@ -188,7 +188,7 @@ void injection(Particle& p, State& st)
 		double rB2 = rB1*paso_r;
 		const double vol = volume(r);
 		
-		double gammaMin = 6.0;
+		double gammaMin = 2.0;
 		double Emax = eEmax_numerical(p,r,st.magf.get(iR),-radialVel(r),st.denf_i.get(iR),jR,st,iR.coord);
 		double Emin = gammaMin*p.mass*cLight2;
 		if (p.id == "ntElectron") {
@@ -197,7 +197,6 @@ void injection(Particle& p, State& st)
 			Emin = gammaMin*electronRestEnergy;
 			file << r/schwRadius << "\t" << gammaMin << endl;
 		}
-		
 		double int_E = integSimpsonLog(p.emin(),p.emax(),[Emin,Emax](double e)
 				{
 					return e*cutOffPL(e,Emin,Emax);

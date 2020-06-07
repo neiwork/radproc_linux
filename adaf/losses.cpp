@@ -1,6 +1,8 @@
 #include "losses.h"
 #include "globalVariables.h"
 #include <fmath/physics.h>
+#include <fmath/RungeKutta.h>
+#include <gsl/gsl_math.h>
 
 //#include "targetFields.h"
 
@@ -9,7 +11,7 @@
 #include <flosses/lossesIC.h>
 #include <flosses/lossesHadronics.h>
 #include <flosses/lossesPhotoHadronic.h>
-
+#include <fparameters/parameters.h>
 //#include <fparticle/Particle.h>
 
 
@@ -26,10 +28,14 @@ double losses(double E, Particle& p, State& st, const SpaceCoord& i)
 			+ lossesPhotoHadronic_simple(E,p,st.photon.distribution,i,st.photon.emin(),st.photon.emax());
 	else if(p.id == "ntElectron" || p.id == "ntPair" || p.id == "ntMuon") {
 		double lossSy = lossesSyn(E,B,p);
-		//double lossIC1 = lossesIC(E,p,st.photon.distribution,i,st.photon.emin(),st.photon.emax());
-		//double lossIC2 = lossesIC(E,p,st.ntPhoton.distribution,i,st.ntPhoton.emin(),st.ntPhoton.emax());
-		//losses = lossSy+lossIC1+lossIC2;
-		losses = lossSy;
+		double lossIC1, lossIC2;
+		lossIC1 = lossIC2 = 0.0;
+		int comptonLossesImportant = GlobalConfig.get<int>("nonThermal.comptonLosses");
+		if (comptonLossesImportant) {
+			lossIC1 = lossesIC(E,p,st.photon.distribution,i,st.photon.emin(),st.photon.emax());
+			lossIC2 = lossesIC(E,p,st.ntPhoton.distribution,i,st.ntPhoton.emin(),st.ntPhoton.emax());
+		}
+		losses = lossSy+lossIC1+lossIC2;
 	}
 	return losses;
 }
@@ -65,4 +71,18 @@ double t_cool(double E, double r, Particle& p) {
 			losses = lossesSyn(E, B, p);//  + lossesIC(E, p, st.photon.distribution, i, st.photon.emin(), st.photon.emax());
 	}
 	return E/losses;
+}
+
+double annihilationRate(double Ep, Particle& p, const SpaceCoord& psc)
+{
+	double gamma_p = Ep / electronRestEnergy;
+	double integral = integSimpsonLog(p.emin(),p.emax(),[gamma_p,&p,&psc](double Em)
+	{
+		double gamma_m = Em / electronRestEnergy;
+		double Nm = (Em > p.emin() && Em < p.emax()) ?
+				p.distribution.interpolate({{DIM_E,Em}},&psc) : 0.0;
+		double result = Nm / gamma_m * (log(4.0*gamma_m*gamma_p)-2.0);
+		return (result > 0.0 ? result : 0.0);
+	},80);
+	return pi*gsl_pow_2(electronRadius)*cLight / gamma_p * integral;
 }

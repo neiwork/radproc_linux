@@ -74,7 +74,7 @@ double diffLength(double g, Particle& p, double r, double height, double B, doub
 }
 
 
-double diffusionTimeTurbulence(double E, double height, Particle& p, double B)   //en [s]^-1
+double diffusionTimeTurbulence(double E, double height, Particle& p, double B)   //en [s]
 {
 	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
 	double q = GlobalConfig.get<double>("nonThermal.injection.SDA.powerSpectrumIndex");

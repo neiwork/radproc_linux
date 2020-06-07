@@ -218,9 +218,9 @@ void comptonScattMatrix(State& st)
 			double random_number = gsl_rng_uniform(RandomNumberGenerator);
 			double phiprim = 2.0*pi*random_number;
 			random_number = gsl_rng_uniform(RandomNumberGenerator);
-			double thetaprim = acos(1.0-2.0*random_number);   // Photon directions
-															  // distributed
-			double rprim=drprim; 	                          // isotropically.
+			double thetaprim = 0.5*acos(1.0-2.0*random_number);   // Photon directions
+																  // distributed
+			double rprim=drprim; 	                           	  // proportional to cos(theta)sin(theta).
 			double pescap = 1.0;
 			double r1 = r0cd;
 			double r1aux = r1;
