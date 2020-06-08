@@ -1003,7 +1003,8 @@ void distributionFokkerPlanckMultiZone(Particle& particle, State& st)
 						{
 							double E = g*particle.mass*cLight2;
 							double rateDiff = 1.0/diffusionTimeTurbulence(E,height,particle,B);
-							return pow(rateAccretion+rateWind+rateDiff,-1);
+							//return pow(rateAccretion+rateWind+rateDiff,-1);
+							return pow(rateAccretion,-1);
 						};
 		
 		fun1 Qfun = [Q0,g_inj,sigma,&particle,&jR,tCell,rB2,area,vR,vol] (double g)
@@ -1198,18 +1199,16 @@ void distributionFokkerPlanckSpatialDiffusion(Particle& particle, State& st)
 		
 		fun1 Bfun = [&particle,&st,&jE,g] (double rTrue) 
 						{
-							//double rTrue = rNorm * schwRadius;
 							double height = height_fun(rTrue);
 							double B = magneticField(rTrue);
 							double vR = radialVel(rTrue);
 							double k_rr = diffCoeff_r(g,particle,height,B);
-							
+							//return -vR;
 							return - vR * ( 2.0*k_rr/(rTrue*vR) + 1.0 );
 						};
 
 		fun1 Cfun = [&particle,&jE,g] (double rTrue)
 						{
-							//double rTrue = rNorm * schwRadius;
 							double height = height_fun(rTrue);
 							double B = magneticField(rTrue);
 							double vR = radialVel(rTrue);
@@ -1219,7 +1218,6 @@ void distributionFokkerPlanckSpatialDiffusion(Particle& particle, State& st)
 
 		fun1 Tfun = [&st,&particle,&jE,g,E,paso_E,restEnergy] (double rTrue) 
 						{
-							//double rTrue = rNorm * schwRadius;
 							size_t jjR=0;
 							particle.ps.iterate([&](const SpaceIterator& iR) {
 								if (iR.val(DIM_R) < rTrue) jjR++;
@@ -1232,12 +1230,14 @@ void distributionFokkerPlanckSpatialDiffusion(Particle& particle, State& st)
 							double rateWind = 2.0*s*abs(vR)/rTrue;
 							double loss = abs(losses(E,particle,st,jEaux));
 							double rateCool = loss / (E*(sqrt(paso_E)-1.0/sqrt(paso_E)));
-							return pow(rateWind+rateDiff+rateCool,-1);
+							double rateAccretion = (rTrue > st.denf_e.ps[DIM_R][0] && rTrue < 2*schwRadius) ? 
+														pow(accretionTime(rTrue),-1) : 0.0;
+							return 1e99;
+							return pow(rateWind+rateDiff+rateCool+rateAccretion,-1);
 						};
 		
 		fun1 Qfun = [&st,&particle,&jE,E,paso_E,restEnergy,factor] (double rTrue)
 					{
-						//double rTrue = rNorm * schwRadius;
 						size_t jjR=0;
 						particle.ps.iterate([&](const SpaceIterator& iR) {
 							if (iR.val(DIM_R) < rTrue) jjR++;
@@ -1694,7 +1694,7 @@ void distributionFokkerPlanckMultiZoneTimeDependent(Particle& particle, State& s
 
 void distributionFokkerPlanckRadial(Particle& particle, State& st)
 {
-	
+	double factor = 1;
 	// We define a new mesh of points
 	size_t M = 199;
 	double g_min = particle.emin()/(particle.mass*cLight2);
@@ -1726,7 +1726,6 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 						double height = height_fun(rad);
 						double rho = massDensityADAF(rad);
 						
-						
 						size_t jjR=0;
 						while (particle.ps[DIM_R][jjR] < rad) jjR++;
 						
@@ -1749,6 +1748,8 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 						SpaceCoord jR = {0,jjR,0};
 						double dgdt = - abs(losses(E,particle,st,jR)) / (particle.mass*cLight2);
 						*/
+						//double kRR = diffCoeff_r(g,particle,height,B);
+						// vR = vR + 2.0*kRR / rad;
 						
 						double Dg = diffCoeff_g(g,particle,height,B,rho);
 						return - dgdt/vR - 2.0*Dg/vR / g + 0.5*g/r;
@@ -1765,6 +1766,8 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 						double height = height_fun(rad);
 						double rho = massDensityADAF(rad);
 						double vR = radialVel(rad);
+						//double kRR = diffCoeff_r(g,particle,height,B);
+						// vR = vR + 2.0*kRR / rad;
 						double Dg = diffCoeff_g(g,particle,height,B,rho);
 						return Dg / vR;
 					};
@@ -1782,10 +1785,14 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 						double height = height_fun(rad);
 						double rateDiff = 1.0/(diffusionTimeTurbulence(E,height,particle,B));
 						//return 1.0e99;
-						return pow(rateWind + rateDiff,-1) * vR;
+						
+						//double kRR = diffCoeff_r(g,particle,height,B);
+						// vR = vR + 2.0*kRR / rad;
+						return 1e99*vR;
+						//return pow(rateWind + rateDiff,-1) * vR;
 					};
 	
-	fun2 Qfun = [g_inj,sigma,&particle] (double g, double r)
+	fun2 Qfun = [g_inj,sigma,&particle,factor] (double g, double r)
 					{
 						double rad = r;
 						if (r > particle.ps[DIM_R][nR-1]) rad = particle.ps[DIM_R][nR-1]/1.11;
@@ -1800,9 +1807,11 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 							dens = electronDensity(rad);
 						}
 						double vR = radialVel(rad);
+						//double kRR = diffCoeff_r(g,particle,height,B);
+						// vR = vR + 2.0*kRR / rad;
 						double vA = magneticField(rad)/sqrt(4.0*pi*massDensityADAF(rad));
 						double height = height_fun(rad);
-						double Q0 = 1.0e-8*Ainjection * dens * cLight/schwRadius / g_inj;
+						double Q0 = factor*Ainjection * dens * cLight/schwRadius / g_inj;
 						//return (rad*sqrt(paso_r) > 70*schwRadius) ? rad*height*Q0*gsl_ran_gaussian_pdf(g-g_inj,sigma) : 0.0;
 						return rad*height*Q0*gsl_ran_gaussian_pdf(g-g_inj,sigma);
 					};
@@ -1873,7 +1882,12 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 			d[m] = Qm*deltar[jr] + d[m];
 		}
 		TriDiagSys(a,b,c,d,M);
-		for (size_t m=0;m<M+1;m++) dist[jr][m] = d[m]/(radius[jr]*height_fun(radius[jr])*radialVel(radius[jr]));
+		for (size_t m=0;m<M+1;m++) { 
+			double vR = radialVel(radius[jr]);
+			//double kRR = diffCoeff_r(g,particle,height,B);
+			// vR = vR + 2.0*kRR / rad;
+			dist[jr][m] = d[m]/(radius[jr]*height_fun(radius[jr])*vR*factor);
+		}
 	}
 	
 	size_t jr(Nrad);
@@ -1884,17 +1898,19 @@ void distributionFokkerPlanckRadial(Particle& particle, State& st)
 		size_t m(1);
 		particle.ps.iterate([&](const SpaceIterator &jRE) {
 			double logg = log10(jRE.val(DIM_E)/(particle.mass*cLight2));
-			while (log10(g_au[m+1]) < logg) m++;
+			while (log10(g_au[m]) < logg) m++;
 			
-			double slope1 = (safeLog10(dist[jr][m])-safeLog10(dist[jr][m-1]))/log10(g_au[m+1]/g_au[m]);
-			double dist_1 = slope1 * (logg-log10(g_au[m])) + safeLog10(dist[jr][m-1]);
-			double slope2 = (safeLog10(dist[jr+1][m])-safeLog10(dist[jr+1][m-1]))/log10(g_au[m+1]/g_au[m]);
-			double dist_2 = slope2 * (logg-log10(g_au[m])) + safeLog10(dist[jr+1][m-1]);
-			double slope = (safeLog10(dist_2)-safeLog10(dist_1))/log10(radius[jr+1]/radius[jr]);
+			double slope1 = safeLog10(dist[jr][m] / dist[jr][m-1]) / safeLog10(g_au[m]/g_au[m-1]);
+			double dist_1 = slope1 * (logg-log10(g_au[m-1])) + safeLog10(dist[jr][m-1]);
+			double slope2 = safeLog10(dist[jr+1][m]/dist[jr+1][m-1]) / safeLog10(g_au[m]/g_au[m-1]);
+			double dist_2 = slope2 * (logg-log10(g_au[m-1])) + safeLog10(dist[jr+1][m-1]);
+			double slope = safeLog10(dist_1/dist_2) / safeLog10(radius[jr]/radius[jr+1]);
 			double distr = slope * (logr-log10(radius[jr+1])) + dist_2;
 
-			if (m < M+1) distr = pow(10,distr);
-			else distr = 0.0;
+			if (m < M+1) 
+				distr = pow(10,distr);
+			else
+				distr = 0.0;
 			
 			particle.distribution.set(jRE,distr/(particle.mass*cLight2));
 		},{-1,jR.coord[DIM_R],0});

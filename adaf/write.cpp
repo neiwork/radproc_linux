@@ -232,14 +232,14 @@ void writeFields(State& st) {
 	fields.open("fields.dat",std::ios::out);
 	st.photon.ps.iterate([&](const SpaceIterator& iR) {
 		double r = iR.val(DIM_R);
-		fields << safeLog10(r/schwRadius) << "\t"
+		fields << r/schwRadius << "\t"
 			   << accRateADAF(r)/accRateOut << "\t"
 			   << accRateColdDisk(r)/accRateOut << "\t"
-			   << safeLog10(st.tempElectrons.get(iR)) << "\t"
-			   << safeLog10(st.tempIons.get(iR)) << "\t"
+			   << st.tempElectrons.get(iR) << "\t"
+			   << st.tempIons.get(iR) << "\t"
 			   << height_fun(r)/r << "\t"
-			   << safeLog10(2.0*massDensityADAF(r)*height_fun(r)) << "\t"
-			   << safeLog10(st.magf.get(iR)) << endl;
+			   << electronDensity(r) << "\t"
+			   << st.magf.get(iR) << endl;
 	},{0,-1,0});
 	fields.close();
 }

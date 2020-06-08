@@ -135,7 +135,7 @@ void localProcesses2(State& st, Matrix& lumOutSy, Matrix& lumOutBr, Matrix& lumO
 			double b_nu = bb(unrEnergy/planck,temp_e);
 			double kappa = (xSy+xBr)/(4.0*pi*b_nu);
 			double tau = 0.5*sqrt(pi)*kappa*height_fun(r);
-			double fluxSy = (2.0*sqrt(3.0)*tau > 1.0e-5) ? 
+			double fluxSy = (2.0*sqrt(3.0)*tau > 1.0e-9) ? 
 							2.0*pi/sqrt(3.0)*b_nu*(1.0-exp(-2.0*sqrt(3.0)*tau)) :
 							0.5*sqrt(pi)*xSy*height_fun(r);
 			double fluxBr = (2.0*sqrt(3.0)*tau < 1.0e-3) ? 0.5*sqrt(pi)*xBr*height_fun(r) : 0.0;

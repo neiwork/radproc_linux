@@ -12,15 +12,15 @@
     "tAccBlob":"0",
     "factorDensity":"1",
       
-    "calculateComptonScatt":"1",
+    "calculateComptonScatt":"0",
     "height_method":"1",
     "scatt": {
-        "nRandomPhot":"300",
+        "nRandomPhot":"200",
         "nTheta":"5"
     },
     "calculateNewTemp":"0",
 
-    "calculateThermal":"1",
+    "calculateThermal":"0",
     "thermal": {
         "numProcesses":"5",
         "processNumber": {
@@ -55,7 +55,7 @@
         "calculateRelCorrections":"0"
     },
     
-    "calculateNonThermal":"0",
+    "calculateNonThermal":"1",
     "nonThermal": {
         "acc_method":"0",
 	    "protons":"1",
@@ -144,7 +144,7 @@
 			"photon": {
 				"dim":{
 					"energy": {
-						"min":-7.0,
+						"min":-6.0,
 						"max":8.0,
 						"samples":"100"
 					}

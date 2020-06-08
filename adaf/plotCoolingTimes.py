@@ -38,7 +38,7 @@ with PdfPages('electronCoolingTimes.pdf') as pdf:
         ax1.set_xlim(x_ge)
         ax1.set_ylim(y_e)
 
-        ax1.set_title(r'$R=$'+str(np.int8(r[r1*nE]))+r'$R_{\rm schw}$',fontsize=15)
+        ax1.set_title(r'$R=$'+str(np.int64(r[r1*nE]))+r'$R_{\rm schw}$',fontsize=15)
         ax1.set_xlabel(r'$\mathrm{Log}(\gamma_e)$',fontsize=13)
         ax1.set_ylabel(r'$\mathrm{Log}(t ~ [\mathrm{s}])$',fontsize=13)
     
@@ -64,7 +64,7 @@ with PdfPages('protonCoolingTimes.pdf') as pdf:
         ax1.set_xlim(x_gp)
         ax1.set_ylim(y_p)
 
-        ax1.set_title(r'$R=$'+str(np.int8(r[r1*nE]))+r'$R_{\rm schw}$',fontsize=15)
+        ax1.set_title(r'$R=$'+str(np.int64(r[r1*nE]))+r'$R_{\rm schw}$',fontsize=15)
         ax1.set_xlabel(r'$\mathrm{Log}(\gamma_p)$',fontsize=13)
         ax1.set_ylabel(r'$\mathrm{Log}(t ~ [\mathrm{s}])$',fontsize=13)
     

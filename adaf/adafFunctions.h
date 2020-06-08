@@ -20,6 +20,7 @@ double magneticField(double);
 double accRateADAF(double);
 double accRateColdDisk(double);
 double accretionTime(double);
+double accretionTimer1r2(double,double);
 double qie(double,double,double);
 double qie_beta(double,double,double);
 double dlogrho_dlogr(double);

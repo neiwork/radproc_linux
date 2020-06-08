@@ -64,7 +64,8 @@ double eEmax_numerical(Particle& p, double r, double B, double v, double dens, i
 	double accE = GlobalConfig.get<double>("nonThermal.injection.PL.accEfficiency");
 	double dr = r*(paso_r-1.0);
 	double h = height_fun(r);
-	double sumAdvTime = 0.0;
+	double rho = massDensityADAF(r);
+	/*double sumAdvTime = 0.0;
 	for (int jj=nR-1;jj>=jR;jj--) {
 		double rAux = p.ps[DIM_R][jj];
 		double Baux = magneticField(rAux);
@@ -72,18 +73,35 @@ double eEmax_numerical(Particle& p, double r, double B, double v, double dens, i
 		double tCellAux = drAux / abs(radialVel(rAux));
 		sumAdvTime += Baux * tCellAux;
 	}
-    double Emax_adv = accE*cLight*electronCharge*sumAdvTime;
+	double Emax_adv = accE*cLight*electronCharge*sumAdvTime;
+	*/
+	double q = GlobalConfig.get<double>("nonThermal.injection.SDA.powerSpectrumIndex");
+	double sumAdvTime = 0.0;
+	for (int jj=nR-1;jj>=jR;jj--) {
+		double rAux = p.ps[DIM_R][jj];
+		double Baux = magneticField(rAux);
+		double height_aux = height_fun(rAux);
+		double rhoAux = massDensityADAF(rAux);
+		double vAlfv = Baux / sqrt(4.0*pi*rhoAux);
+		double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
+		double rL = p.mass*cLight2/(electronCharge*Baux);
+		double fAux = 1.0/zeda * pow(vAlfv/cLight,-2)*(height_aux/cLight)*pow(rL/height_aux,2.0-q);
+		double drAux = rAux*(1.0-1.0/paso_r);
+		double tCellAux = drAux / abs(radialVel(rAux));
+		sumAdvTime += pow(fAux,-1) * tCellAux;
+	}
+	double Emax_adv = p.mass*cLight2*pow(sumAdvTime+pow(2*p.emin()/(p.mass*cLight2),2.0-q),1.0/(2.0-q));
 	double Emax_Hillas = electronCharge*B*h;
 							
-	fun1 rate_cool_acc = [&p,&st,&i,accE,B] (double E)
+	fun1 rate_cool_acc = [&p,&st,&i,accE,B,h,rho,r] (double E)
 						{
 							double rate_cool = losses(E,p,st,i)/E;
-							double rate_acc = accE*cLight*electronCharge*B/E;
+							//double rate_acc = accE*cLight*electronCharge*B/E;
+							double rate_acc = accelerationRateSDA(E,p,B,h,rho);
 							return rate_cool - rate_acc;
 						};
 	double Emax_cool = 10*p.emin()*cLight2;
 	Bisect(rate_cool_acc,2.0*p.emin(),p.emax()/2.0,Emax_cool);
-	
 	return min(Emax_cool, min(Emax_Hillas,Emax_adv));
 }
 
@@ -91,6 +109,11 @@ double eEmax_numerical(Particle& p, double r, double B, double v, double dens, i
 double cutOffPL(double E, double Emin, double Emax)
 {
 	return pow(E,-pIndex)*exp(-E/Emax)*exp(-Emin/E);
+}
+
+double SDA_PL(double E, double Emin, double Emax)
+{
+	return pow(E,0.5)*exp(-pow(27*E/Emax,1.0/3.0))*exp(-Emin/E);
 }
 
 double auxFun(double g, double gammaMax)
@@ -199,7 +222,8 @@ void injection(Particle& p, State& st)
 		}
 		double int_E = integSimpsonLog(p.emin(),p.emax(),[Emin,Emax](double e)
 				{
-					return e*cutOffPL(e,Emin,Emax);
+					return e*SDA_PL(e,Emin,Emax);
+					//return e*cutOffPL(e,Emin,Emax);
 				},100);
         
 		double Q0p = Ainjection * Qfactor[iR.coord[DIM_R]] / int_E;
@@ -207,6 +231,7 @@ void injection(Particle& p, State& st)
 		p.ps.iterate([&](const SpaceIterator& iRE) {
 			const double E = iRE.val(DIM_E);
 			double total = cutOffPL(E,Emin,Emax)*Q0p;
+			total = SDA_PL(E,Emin,Emax)*Q0p;
 			p.injection.set(iRE,total); //en unidades de erg^-1 s^-1 cm^-3
 		},{-1,iR.coord[DIM_R],0});
 		jR++;

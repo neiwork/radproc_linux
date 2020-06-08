@@ -27,7 +27,7 @@ void redshiftFactor(State& st)
 		double r = itR.val(DIM_R);
 		double vr = radialVel(r);
 		double beta = vr/cLight;
-		if (abs(beta) >= 1.0) beta = -0.99;
+		if (abs(beta) >= 1.0) beta = -0.9;
 		double redshift_factor = sqrt( (1.0-schwRadius/r) * (1.0-beta*beta) );
 		redshift_factor = (redshift_factor > 0.0) ? redshift_factor : 1.0;
 		redshift_to_inf[jR] = redshift_factor;

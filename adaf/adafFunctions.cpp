@@ -105,6 +105,16 @@ double accretionTime(double r)
 			},30);
 }
 
+double accretionTimer1r2(double rIni, double rEnd)
+{
+	return (rIni > rEnd) ? integSimpsonLog(rIni,rEnd,[&](double rr)
+			{
+				rr *= schwRadius;
+				double vr = -radialVel(rr);
+				return rr/vr;
+			},50) : 1e100;
+}
+
 double keplAngVel(double r)
 {
 	return sqrt(gravitationalConstant*blackHoleMass/r) / (r-schwRadius);

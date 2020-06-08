@@ -63,7 +63,8 @@ void comptonScattMatrix(State& st)
     InitialiseRandom(RANDOM_GENERATOR);
 	//ADAF SCATTERING MATRIX
 	
-	double pasoprim = pow(rCellsBoundaries[1]/rCellsBoundaries[0],1.0/5.0);
+	double pasoprim = min(pow(rCellsBoundaries[1]/rCellsBoundaries[0],1.0/10.0),
+						1.0+height_fun(st.denf_i.ps[DIM_R][0])/st.denf_i.ps[DIM_R][0]);
 	
 	#pragma omp parallel for
 	for (int iR=0;iR<nR;iR++) {
