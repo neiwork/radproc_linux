@@ -17,5 +17,5 @@ double diffCoeff_p(double E, Particle& p, double height, double B, double rho);
 double diffCoeff_g(double g, Particle& p, double height, double B, double rho);
 double accelerationRate(double E, double magneticField); //en [s]^-1
 double accelerationTimeSDA(double,Particle&,double,double,double);
-
+double accelerationRateSDA(double E, Particle& p, double B, double height, double rho);
 double escapeRate(double size, double vel);  //en [s]^-1

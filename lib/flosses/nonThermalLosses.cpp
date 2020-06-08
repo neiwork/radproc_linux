@@ -93,6 +93,12 @@ double accelerationTimeSDA(double E, Particle& p, double B, double height, doubl
 	return (1.0/zeda) / P2(alfvenVel/cLight) * tEscape * pow(larmorRadius/height,2.0-q);
 }
 
+double accelerationRateSDA(double E, Particle& p, double B, double height, double rho)
+{
+	double gamma = E / (p.mass*cLight2);
+	return diffCoeff_g(gamma,p,height,B,rho) / (gamma*gamma);
+}
+
 /*
 double relaxTime(double E, double r, Particle& p, int indicator) {
 	
