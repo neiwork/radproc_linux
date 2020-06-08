@@ -63,8 +63,7 @@ double jSync(double energy, double temp, double magfield, double dens_e)
 	double bessel = gsl_sf_bessel_Kn(2,1.0/norm_temp);
 	
     double result = (bessel > 0.0) ? 4.437e-30 * dens_e * frequency / bessel * mAux(xM, temp) : 0.0;
-    
-	return result/(4*pi);
+	return result;
 } // esto debería tener unidades de erg cm^-3 ster^-1 s^-1 Hz^-1
 
 

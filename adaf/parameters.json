@@ -12,15 +12,15 @@
     "tAccBlob":"0",
     "factorDensity":"1",
       
-    "calculateComptonScatt":"0",
+    "calculateComptonScatt":"1",
     "height_method":"1",
     "scatt": {
-        "nRandomPhot":"500",
+        "nRandomPhot":"300",
         "nTheta":"5"
     },
     "calculateNewTemp":"0",
 
-    "calculateThermal":"0",
+    "calculateThermal":"1",
     "thermal": {
         "numProcesses":"5",
         "processNumber": {
@@ -55,11 +55,11 @@
         "calculateRelCorrections":"0"
     },
     
-    "calculateNonThermal":"1",
+    "calculateNonThermal":"0",
     "nonThermal": {
         "acc_method":"0",
 	    "protons":"1",
-	    "electrons":"1",
+	    "electrons":"0",
         "comptonLosses":"0",
         "injection": {
 		    "calculateMagneticReconnection":"0",
@@ -75,12 +75,12 @@
 			    "fractionTurbulent":"0.1",
 			    "powerSpectrumIndex":"1.666"
 		    },
-		    "primaryIndex":"1.5"
+		    "primaryIndex":"2.0"
         },
         "calculateLosses":"0",
 		"calculateDistributions":"1",
-        "calculateLuminosities":"1",
-		"calculateSecondaries":"1",
+        "calculateLuminosities":"0",
+		"calculateSecondaries":"0",
 		"calculateJetEmission":"0",
     	"neutrons":{
 			"calculateInjection":"0",

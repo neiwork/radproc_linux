@@ -43,5 +43,6 @@ double jBremss(double energy, double temp, double dens_i, double dens_e) {
     double aux = eeCoolingRate(norm_temp, dens_e) + eiCoolingRate(norm_temp, dens_e, dens_i);
     double temp_aux = boltzmann * temp / energy;
     
-    return aux * 0.25 / pi / temp_aux / energy * planck * exp(- (1.0/temp_aux)) * gauntFactor(temp_aux);
+    double result = aux / (boltzmann*temp) * planck * exp(- (1.0/temp_aux)) * gauntFactor(temp_aux);
+	return result / (4.0*pi);
 }

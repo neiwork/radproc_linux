@@ -1174,18 +1174,18 @@ void distributionFokkerPlanckMultiZone(Particle& particle, State& st)
 void distributionFokkerPlanckSpatialDiffusion(Particle& particle, State& st)
 {
 	double paso_E = pow(particle.emax()/particle.emin(),1.0/(nE-1));
+	double restEnergy = particle.mass * cLight2;
+	double factor = 1e10;
 	particle.ps.iterate([&](const SpaceIterator& iE) {
 		
 		SpaceCoord jE = {nE-1-iE.coord[DIM_E],0,0};
 		double E = particle.ps[DIM_E][jE[DIM_E]];
-		double EB2 = E*sqrt(paso_E);
-		double EB1 = EB2/paso_E;
-		double bE = losses(E,particle,st,jE);
+		double g = E / restEnergy;
 		
 		// We define a new mesh of points
-		size_t M = 199;
-		double r_min = st.denf_e.ps[DIM_R][0] / schwRadius;
-		double r_max = st.denf_e.ps[DIM_R][nR-1] / schwRadius;
+		size_t M = 150;
+		double r_min = st.denf_e.ps[DIM_R][0];// / schwRadius;
+		double r_max = st.denf_e.ps[DIM_R][nR-1];// / schwRadius;
 		
 		double paso_r = pow(r_max/r_min,1.0/M);
 		Vector r_au(M+3,r_min/paso_r);
@@ -1196,67 +1196,68 @@ void distributionFokkerPlanckSpatialDiffusion(Particle& particle, State& st)
 		for (size_t jr=0;jr<M+2;jr++)	delta_r_m_au[jr] = r_au[jr+1]-r_au[jr];
 		for (size_t jr=0;jr<M+1;jr++)	delta_r[jr] = 0.5*(r_au[jr+2]-r_au[jr]);
 		
-		fun1 Bfun = [&particle,&st,&jE,E] (double r) 
+		fun1 Bfun = [&particle,&st,&jE,g] (double rTrue) 
 						{
-							double g = E / (particle.mass*cLight2);
-							r = r * schwRadius;
-							double height = height_fun(r);
-							double B = magneticField(r);
-							double vR = radialVel(r);
+							//double rTrue = rNorm * schwRadius;
+							double height = height_fun(rTrue);
+							double B = magneticField(rTrue);
+							double vR = radialVel(rTrue);
 							double k_rr = diffCoeff_r(g,particle,height,B);
-							return - (1.0 - 3.0 * k_rr / (2.0*vR*r));
+							
+							return - vR * ( 2.0*k_rr/(rTrue*vR) + 1.0 );
 						};
 
-		fun1 Cfun = [&particle,&jE,E] (double r)
+		fun1 Cfun = [&particle,&jE,g] (double rTrue)
 						{
-							double g = E / (particle.mass*cLight2);
-							r = r * schwRadius;
-							double height = height_fun(r);
-							double B = magneticField(r);
-							double vR = radialVel(r);
+							//double rTrue = rNorm * schwRadius;
+							double height = height_fun(rTrue);
+							double B = magneticField(rTrue);
+							double vR = radialVel(rTrue);
 							double k_rr = diffCoeff_r(g,particle,height,B);
-							return - k_rr / vR;
+							return k_rr;
 						};
 
-		fun1 Tfun = [&st,&particle,&jE,E,paso_E] (double r) 
+		fun1 Tfun = [&st,&particle,&jE,g,E,paso_E,restEnergy] (double rTrue) 
 						{
-							double g = E / (particle.mass*cLight2);
+							//double rTrue = rNorm * schwRadius;
 							size_t jjR=0;
 							particle.ps.iterate([&](const SpaceIterator& iR) {
-								double rAux = iR.val(DIM_R) / schwRadius;
-								if (rAux < r) jjR++;
+								if (iR.val(DIM_R) < rTrue) jjR++;
 							},{0,-1,0});
 							SpaceCoord jEaux = {jE[DIM_E],jjR,0};
-							r = r * schwRadius;
-							double height = height_fun(r);
-							double B = magneticField(r);
-							double vR = radialVel(r);
-							double rateDiff = r*r/diffCoeff_r(g,particle,height,B);
-							double rateWind = 2.0*s*abs(vR)/r;
-							double rateCool = abs(losses(E,particle,st,jEaux))/(E*(sqrt(paso_E)-1.0/sqrt(paso_E)));
-							return pow(rateWind+rateDiff+rateCool,-1)*vR;
+							double height = height_fun(rTrue);
+							double B = magneticField(rTrue);
+							double vR = radialVel(rTrue);
+							double rateDiff = diffCoeff_r(g,particle,height,B) / (height*height);
+							double rateWind = 2.0*s*abs(vR)/rTrue;
+							double loss = abs(losses(E,particle,st,jEaux));
+							double rateCool = loss / (E*(sqrt(paso_E)-1.0/sqrt(paso_E)));
+							return pow(rateWind+rateDiff+rateCool,-1);
 						};
 		
-		fun1 Qfun = [&st,&particle,&jE,E,paso_E] (double r)
+		fun1 Qfun = [&st,&particle,&jE,E,paso_E,restEnergy,factor] (double rTrue)
 					{
+						//double rTrue = rNorm * schwRadius;
 						size_t jjR=0;
 						particle.ps.iterate([&](const SpaceIterator& iR) {
-							double rAux = iR.val(DIM_R) / schwRadius;
-							if (rAux < r) jjR++;
+							if (iR.val(DIM_R) < rTrue) jjR++;
 						},{0,-1,0});
 						SpaceCoord jEaux = {jE[DIM_E],jjR,0};
-						r = r * schwRadius;
-						double height = height_fun(r);
+						double height = height_fun(rTrue);
 						double Qplus = 0.0;
 						if (jE[DIM_E] < nE-1) {
 							SpaceCoord jEplus = {jE[DIM_E]+1,jjR,0};
-							double Nplus = particle.distribution.interpolate({{DIM_R,r}},&jEplus)*r*height;
-							Qplus = Nplus * abs(losses(E,particle,st,jEplus)) / (E*(sqrt(paso_E)-1.0/sqrt(paso_E)));
+							double Nplus = (rTrue > particle.ps[DIM_R].first() &&
+											rTrue < particle.ps[DIM_R].last()) ?
+								particle.distribution.interpolate({{DIM_R,rTrue}},&jEplus)*rTrue*height : 0.0;
+							double loss = losses(E,particle,st,jEplus);
+							Qplus = Nplus * abs(loss) / (E*(sqrt(paso_E)-1.0/sqrt(paso_E)));
 						}
-						double vR = radialVel(r);
-						return (r > particle.ps[DIM_R].first()/schwRadius && 
-								r < particle.ps[DIM_R].last()/schwRadius ) ?
-								particle.injection.interpolate({{DIM_R,r}},&jEaux)*r*height + Qplus : 0.0;
+						double vR = radialVel(rTrue);
+						double Qlocal = (rTrue > particle.ps[DIM_R].first() && 
+								rTrue < particle.ps[DIM_R].last()) ?
+								particle.injection.interpolate({{DIM_R,rTrue}},&jEaux)*rTrue*height: 0.0;
+						return factor * (Qlocal + Qplus);
 					};
 		
 		Vector d(M+1,0.0);
@@ -1316,16 +1317,15 @@ void distributionFokkerPlanckSpatialDiffusion(Particle& particle, State& st)
 		TriDiagSys(a,b,c,d,M);
 		size_t m = 1;
 		particle.ps.iterate([&](const SpaceIterator &jER) {
-			double r = jER.val(DIM_R);
-			double h = height_fun(r);
-			double vR = radialVel(r);
-			double logr = log10(r / schwRadius);
-			while (log10(r_au[m]) < logr)
+			double rTrue = jER.val(DIM_R);
+			double height = height_fun(rTrue);
+			double vR = radialVel(rTrue);
+			double logrTrue = log10(rTrue);// / schwRadius);
+			while (log10(r_au[m]) < logrTrue)
 				m++;
-			double slope = (safeLog10(d[m])-safeLog10(d[m-1]))/log10(r_au[m]/r_au[m-1]);
-			double dist = slope * (logr-log10(r_au[m-1])) + safeLog10(d[m-1]);
-			dist = pow(10,dist);
-			particle.distribution.set(jER,dist/(r*h*vR));
+			double slope = safeLog10(d[m]/d[m-1])/safeLog10(r_au[m]/r_au[m-1]);
+			double dist = d[m-1] * pow(rTrue / r_au[m-1], slope);
+			particle.distribution.set(jER,dist/(rTrue*height*factor));//*schwRadius*timeMeasure*restEnergy));
 		},{jE[DIM_E],-1,0});
 	},{-1,0,0});
 	
