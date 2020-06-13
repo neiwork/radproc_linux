@@ -230,6 +230,16 @@ void writeMatrix(const std::string& filename, Particle& p, Matrix& a)
 void writeFields(State& st) {
 	std::ofstream fields;
 	fields.open("fields.dat",std::ios::out);
+	fields  << "r [Rs]" 	<< "\t"
+			<< "MdotRIAF" 	<< "\t"
+			<< "MdotCD" 	<< "\t"
+			<< "Te"			<< "\t"
+			<< "Ti"			<< "\t"
+			<< "H/R"		<< "\t"
+			<< "ne"			<< "\t"
+			<< "v/c"		<< "\t"
+			<< "B"			<< endl;
+
 	st.photon.ps.iterate([&](const SpaceIterator& iR) {
 		double r = iR.val(DIM_R);
 		fields << r/schwRadius << "\t"
@@ -239,6 +249,7 @@ void writeFields(State& st) {
 			   << st.tempIons.get(iR) << "\t"
 			   << height_fun(r)/r << "\t"
 			   << electronDensity(r) << "\t"
+			   << abs(radialVel(r))/cLight <<"\t"
 			   << st.magf.get(iR) << endl;
 	},{0,-1,0});
 	fields.close();

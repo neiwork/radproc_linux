@@ -57,7 +57,7 @@
     
     "calculateNonThermal":"1",
     "nonThermal": {
-        "acc_method":"0",
+        "acc_method":"1",
 	    "protons":"1",
 	    "electrons":"0",
         "comptonLosses":"0",
@@ -67,12 +67,12 @@
 			"calculateSDA":"0",
 		    "calculatePL":"1",
             "energyFraction_e":"0.0005",
-		    "energyFraction_i":"0.02",
+		    "energyFraction_i":"3.0e-8",
 			"PL": {
 		    	"accEfficiency":"0.001"
 		    },
 		    "SDA": {
-			    "fractionTurbulent":"0.1",
+			    "fractionTurbulent":"0.2",
 			    "powerSpectrumIndex":"1.666"
 		    },
 		    "primaryIndex":"2.0"

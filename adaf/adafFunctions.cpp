@@ -117,7 +117,8 @@ double accretionTimer1r2(double rIni, double rEnd)
 
 double keplAngVel(double r)
 {
-	return sqrt(gravitationalConstant*blackHoleMass/r) / (r-schwRadius);
+	return (r > schwRadius) ? sqrt(gravitationalConstant*blackHoleMass/r) / (r-schwRadius) :
+				sqrt(gravitationalConstant*blackHoleMass/schwRadius) / 0.1*schwRadius;
 }
 
 double sqrdSoundVel(double r)
@@ -211,10 +212,13 @@ double accRateADAF(double r)
 
 double massDensityADAF(double r)
 {
+	double result = 0.0;
 	if (height_method == 0)
-		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r)));
+		result = accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r)));
 	else 
-		return accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r))); // / sqrt(0.5*pi);
+		result = accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r)));
+	double result_out = accRateADAF(exp(logr.back())*schwRadius/1.1) / (4.0*pi*r*height_fun(r)*(-radialVel(r)));
+	return (result > 0.0 && r < exp(logr.back())*schwRadius) ? result : result_out;
 }
 
 double magneticField(double r)

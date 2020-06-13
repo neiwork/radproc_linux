@@ -98,14 +98,20 @@ int main()
 				}
 				
 				if (calculateNTprotons) {
-					injection(model.ntProton,model);
+					if (accMethod == 0)
+						injection(model.ntProton,model);
+					else
+						injection(model.ntProton,model);
+						//injectionFokkerPlanckOneZone(model.ntProton,model);
 					writeEandRParamSpace("protonInjection", model.ntProton.injection, 0,1);
 					writeRParamSpace("protonInjection_R", model.ntProton.injection, 0, 0);
 					if (accMethod == 0)
 						distributionFokkerPlanckSpatialDiffusion(model.ntProton, model);
 						//distributionMultiZoneRadial(model.ntProton, model);
 					else
-						distributionFokkerPlanckRadial(model.ntProton,model);
+						distributionFokkerPlanckComplete(model.ntProton, model);
+						//distributionFokkerPlanckSpatialDiffusionTimeDependent(model.ntProton, model);
+						//distributionFokkerPlanckRadial(model.ntProton,model);
 					writeEandRParamSpace("protonDistribution", model.ntProton.distribution,0,1);
 					writeRParamSpace("protonDistribution_R", model.ntProton.distribution, 0, 0);
 				} else {

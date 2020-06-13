@@ -1,12 +1,12 @@
 #pragma once
 
 //#include <fparticle\Particle.h>
-
 #include "State.h"
 
 /* Returns Q(E,z) in units of 1/erg/s  (it is multiplied by the volume of each celd)*/
 
 double findGammaMin(double,double);
+void injectionFokkerPlanckOneZone(Particle& particle, State& st);
 void injection(Particle& p, State& st);
 void injectionBurst(Particle& p, State& st);
 
