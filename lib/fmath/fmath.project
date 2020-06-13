@@ -8,6 +8,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="tridiagonal.cpp"/>
     <File Name="tridiagonal.h"/>
     <File Name="configure.h"/>
     <File Name="constants.h"/>
