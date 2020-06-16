@@ -459,6 +459,7 @@ void injectionFokkerPlanckOneZone(Particle& p, State& st)
 			temp = st.tempIons.get(iR);
 		}
 		Qfactor[iR.coord[DIM_R]] = dens * boltzmann * temp * abs(radialVel(r))/r;
+		Qfactor[iR.coord[DIM_R]] = dens;
 		sum += vol * Qfactor[iR.coord[DIM_R]];
 	},{0,-1,0});
 	Ainjection = etaInj*accRateOut*cLight2 / sum;		// [non-dimensional]

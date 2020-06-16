@@ -7,6 +7,13 @@ void matrixInit(Matrix& m, size_t height, size_t width, double initValue )
 		m = aux;
 }
 
+void matrixInitQuad(MatrixQuad& m, size_t height, size_t width, __float128 initValue )
+{
+		VectorQuad row(width,initValue);
+		MatrixQuad aux(height,row);
+		m = aux;
+}
+
 void matrixInitCopy(Matrix& m, size_t height, size_t width, Matrix copy)
 {
 		Vector row(width,0.0);
@@ -19,6 +26,20 @@ void matrixInitCopy(Matrix& m, size_t height, size_t width, Matrix copy)
 			}
 		}
 }
+
+void matrixInitCopyQuad(MatrixQuad& m, size_t height, size_t width, MatrixQuad copy)
+{
+		VectorQuad row(width,0.0);
+		MatrixQuad aux(height,row);
+		m = aux;
+		
+		for (std::size_t i=0;i<height;i++) {
+			for (std::size_t j=0;j<width;j++) {
+				m[i][j] = copy[i][j];
+			}
+		}
+}
+
 
 void matrixInitTwoVec(Matrix& m, size_t height, Vector x, Vector y)
 {

@@ -7,9 +7,11 @@
 using namespace std;
 
 void matrixInit(Matrix& m, size_t width, size_t height, double initValue);
+void matrixInitQuad(MatrixQuad& m, size_t width, size_t height, __float128 initValue);
 void matrixInit4(Matrix& m1, Matrix& m2, Matrix& m3, Matrix& m4,
 				size_t width, size_t height, double initValue);
 void matrixInitCopy(Matrix& m, size_t width, size_t height, Matrix copy);
+void matrixInitCopyQuad(MatrixQuad& m, size_t width, size_t height, MatrixQuad copy);
 void matrixInitSum3(Matrix& m, size_t width, size_t height, Matrix sum1, Matrix sum2, Matrix sum3);
 void matrixRead(const string name, Matrix& m, size_t rows, size_t columns);
 void vectorRead(const string name, Vector& v, size_t size);

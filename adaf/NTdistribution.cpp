@@ -10,7 +10,9 @@
 #include <flosses/lossesSyn.h>
 #include <nrMath/brent.h>
 
+#include <fmath/mgmres.h>
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_roots.h>
@@ -2637,8 +2639,632 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 	
 	// We define a vector for the time evolution
 	
-	size_t Ntime = 1000;
-	size_t NdeltaTime = 50;
+	size_t Ntime = 1e4;
+	size_t NdeltaTime = 1e4;
+	double charEnergy = 1e5*particle.emin();
+	double charGamma = charEnergy / (particle.mass*cLight2);
+	double charHeight = 100*schwRadius;
+	double charRho = massDensityADAF(10*schwRadius);
+	double charMagf = magneticField(5*schwRadius);
+	double timescaleAdvection = schwRadius / cLight;
+	double timescaleDiffusion = diffCoeff_r(charGamma,particle,charHeight,charMagf);
+	double timescaleRadial = min(timescaleAdvection, timescaleDiffusion);
+	SpaceCoord iR = {0,3,0};
+	double timescaleCooling = charEnergy / losses(charEnergy,particle,st,iR);
+	double naturalTimescale = P2(2.0) / diffCoeff_g(2.0,particle,10*schwRadius,charMagf,charRho);
+	for (size_t j=2;j<J-1;j++) {
+		double rTrue = r_local[j]*schwRadius;
+		double deltar = delta_r[j]*schwRadius;
+		double magf = magneticField(rTrue);
+		double rho = massDensityADAF(rTrue);
+		double height = height_fun(rTrue);
+		double vR = radialVel(rTrue);
+		double advTime = deltar / abs(vR);
+		for (size_t m=2;m<M-1;m++) {
+			double localAccTime = P2(delta_g[m]) / diffCoeff_g(g_local[m],particle,height,magf,rho);
+			double localDiffTime = P2(deltar) / diffCoeff_r(g_local[j],particle,height,magf);
+			naturalTimescale = min(naturalTimescale,min(localDiffTime,min(advTime,localAccTime)));
+		}
+	}
+	double maxTime = naturalTimescale*1e5;
+	Vector time(Ntime+1,1.0);
+	double dt = naturalTimescale*1e4;
+	//double paso_time = pow(maxTime/naturalTimescale,1.0/(Ntime-1));
+	//for (size_t t=1;t<Ntime+1;t++) time[t] = time[t-1]*paso_time;
+	for (size_t t=1;t<Ntime+1;t++) time[t] = time[t-1] + dt;
+	Vector deltat(Ntime,1.0);
+	for (size_t t=0;t<Ntime;t++) deltat[t] = (time[t+1]-time[t])/NdeltaTime;
+	
+	fun2 Afun = [&particle,naturalTimescale] (double r, double g) 
+				{
+					double rTrue = r * schwRadius;
+					double height = height_fun(rTrue);
+					double B = magneticField(rTrue);
+					double vR = radialVel(rTrue);
+					double k_rr = diffCoeff_r(g,particle,height,B);
+					return - (vR/schwRadius) * naturalTimescale * ( 2.0*k_rr/(rTrue*vR) + 1.0 );
+				};
+
+	fun2 Bfun = [&particle,naturalTimescale] (double r, double g)
+				{
+					double rTrue = r * schwRadius;
+					double height = height_fun(rTrue);
+					double B = magneticField(rTrue);
+					double k_rr = diffCoeff_r(g,particle,height,B);
+					return k_rr / (schwRadius*schwRadius) * naturalTimescale;
+				};
+
+	fun2 Cfun = [&particle,&st,paso_r_local,naturalTimescale] (double r, double g) 
+				{
+					double rTrue = r * schwRadius;
+					double E = g*particle.mass*cLight2;
+					
+					size_t jjR=0;
+					if (rTrue > particle.ps[DIM_R][0]) {
+						if (rTrue < particle.ps[DIM_R][nR-1]) {
+							while (particle.ps[DIM_R][jjR] < rTrue) jjR++;
+						} else
+							jjR = nR-1;
+					}
+					
+					double dgdt = 0.0;
+					if (jjR > 0 && jjR < nR-1) {
+						SpaceCoord jR1 = {0,jjR-1,0};
+						SpaceCoord jR2 = {0,jjR,0};
+						double r1 = st.denf_e.ps[DIM_R][jjR-1];
+						double r2 = st.denf_e.ps[DIM_R][jjR];
+						double dEdt_1 = losses(E,particle,st,jR1);
+						double dEdt_2 = losses(E,particle,st,jR2);
+						double slope = safeLog10(dEdt_2/dEdt_1)/safeLog10(r2/r1);
+						dgdt = - dEdt_1 * pow(rTrue/r1, slope) / (particle.mass*cLight2);
+						
+					} else if (jjR == 0) {
+						SpaceCoord jR = {0,0,0};
+						dgdt = - losses(E,particle,st,jR) / (particle.mass*cLight2);
+					} else if (jjR == nR-1) {
+						SpaceCoord jR = {0,nR-1,0};
+						dgdt = - losses(E,particle,st,jR) / (particle.mass*cLight2);
+					}
+					double height = height_fun(rTrue);
+					double B = magneticField(rTrue);
+					double rho = massDensityADAF(rTrue);
+					double Dg = diffCoeff_g(g,particle,height,B,rho);
+					double vR = radialVel(rTrue);
+					double dvRdr = (radialVel(rTrue*paso_r_local) - radialVel(rTrue/paso_r_local)) / 
+									(rTrue*(paso_r_local-1.0/paso_r_local));
+					
+					dvRdr = (dvRdr > 0.0) ? dvRdr : 0.0;
+					return (-2.0*Dg/g - dgdt + 1.0/3.0 * (2.0*vR/rTrue + dvRdr) * g ) * naturalTimescale;
+				};
+	
+	fun2 Dfun = [&particle,naturalTimescale] (double r, double g)
+				{
+					double rTrue = r * schwRadius;
+					double height = height_fun(rTrue);
+					double B = magneticField(rTrue);
+					double rho = massDensityADAF(rTrue);
+					double Dg = diffCoeff_g(g,particle,height,B,rho);
+					return naturalTimescale * Dg;
+				};
+	
+	fun2 Tfun = [&particle,naturalTimescale] (double r, double g) 
+				{
+					double rTrue = r * schwRadius;
+					double height = height_fun(rTrue);
+					double B = magneticField(rTrue);
+					double vR = radialVel(rTrue);
+					double rateDiff = diffCoeff_r(g,particle,height,B) / (height*height);
+					double rateWinds = 2.0*s*abs(vR)/rTrue;
+					//double rateAccretion = 1.0/accretionTime(rTrue);
+					return pow(rateDiff+rateWinds,-1) / naturalTimescale;
+				};
+		
+	fun2 Qfun = [&st,&particle,paso_g_local,factor,naturalTimescale,r_local,J] (double r, double g)
+				{
+					double rTrue = r * schwRadius;
+					double E = g * particle.mass*cLight2;
+					double g_inj = 3.0;
+					double sigma = g_inj * (paso_g_local-1.0)/2.0;
+					double Qlocal = (rTrue > particle.ps[DIM_R][0] && 
+							rTrue < particle.ps[DIM_R][nR-1]) ?
+							rTrue*rTrue * Ainjection * ionDensity(rTrue) * accelerationRateSDA(particle.mass*cLight2,particle,magneticField(rTrue),height_fun(rTrue),massDensityADAF(rTrue)): 0.0;
+					double result = Qlocal * gsl_ran_gaussian_pdf(g-g_inj,sigma);
+					double smoother = 0.25 * (1.0 + gsl_sf_erf((r_local[J]-r)/(r_local[J]/10.0))) 
+											* (1.0 + gsl_sf_erf(r-r_local[0]));
+					return result * naturalTimescale * factor * smoother;
+				};
+	
+	Matrix Bj_minusHalf_m;				matrixInit(Bj_minusHalf_m,M+1,J+1,0.0);
+	Matrix Bj_plusHalf_m;				matrixInit(Bj_plusHalf_m,M+1,J+1,0.0);
+	Matrix Djm_minusHalf;				matrixInit(Djm_minusHalf,J+1,M+1,0.0);
+	Matrix Djm_plusHalf;				matrixInit(Djm_plusHalf,J+1,M+1,0.0);
+	Matrix Wminus_j_minusHalf;			matrixInit(Wminus_j_minusHalf,M+1,J+1,0.0);
+	Matrix Wminus_j_plusHalf;			matrixInit(Wminus_j_plusHalf,M+1,J+1,0.0);
+	Matrix Wplus_j_minusHalf;			matrixInit(Wplus_j_minusHalf,M+1,J+1,0.0);
+	Matrix Wplus_j_plusHalf;			matrixInit(Wplus_j_plusHalf,M+1,J+1,0.0);
+	Matrix Vminus_m_minusHalf;			matrixInit(Vminus_m_minusHalf,J+1,M+1,0.0);
+	Matrix Vminus_m_plusHalf;			matrixInit(Vminus_m_plusHalf,J+1,M+1,0.0);
+	Matrix Vplus_m_minusHalf;			matrixInit(Vplus_m_minusHalf,J+1,M+1,0.0);
+	Matrix Vplus_m_plusHalf;			matrixInit(Vplus_m_plusHalf,J+1,M+1,0.0);
+	Matrix Tjm;							matrixInit(Tjm,J+1,M+1,0.0);
+	Matrix Qjm;							matrixInit(Qjm,J+1,M+1,0.0);
+	
+	cout << "TRANSPORT EQUATION: Starting matrix element calculation" << endl << endl;
+	
+	#pragma omp parallel for
+	for (size_t j=0;j<J+1;j++) {
+		for (size_t m=0;m<M+1;m++) {
+			size_t l = j*(M+1)+m;
+			double Ajm = Afun(r_local[j],g_local[m]);
+			double Aj_minusHalf_m = 0.5 * (Afun(r_local_extended[j],g_local[m]) + Ajm);
+			double Aj_plusHalf_m = 0.5 * (Afun(r_local_extended[j+2],g_local[m]) + Ajm);
+					
+			double Bjm = Bfun(r_local[j],g_local[m]);
+			Bj_minusHalf_m[m][j] = 0.5 * (Bfun(r_local_extended[j],g_local[m]) + Bjm);
+			Bj_plusHalf_m[m][j] = 0.5 * (Bfun(r_local_extended[j+2],g_local[m]) + Bjm);
+			
+			double Cjm = Cfun(r_local[j],g_local[m]);
+			double Cjm_minusHalf = 0.5 * (Cfun(r_local[j],g_local_extended[m]) + Cjm);
+			double Cjm_plusHalf = 0.5 * (Cfun(r_local[j],g_local_extended[m+2]) + Cjm);
+			
+			double Djm = Dfun(r_local[j],g_local[m]);
+			Djm_minusHalf[j][m] = 0.5 * (Dfun(r_local[j],g_local_extended[m]) + Djm);
+			Djm_plusHalf[j][m] = 0.5 * (Dfun(r_local[j],g_local_extended[m+2]) + Djm);
+			
+			Qjm[j][m] = Qfun(r_local[j],g_local[m]);
+			Tjm[j][m] = Tfun(r_local[j],g_local[m]);
+					
+			double wj_minusHalf = Aj_minusHalf_m/Bj_minusHalf_m[m][j] * delta_r_j_minushalf[j];
+			double wj_plusHalf = Aj_plusHalf_m/Bj_plusHalf_m[m][j] * delta_r_j_plushalf[j];
+			double Wj_minusHalf(0.0), Wj_plusHalf(0.0);
+			
+			if ( abs(wj_minusHalf) < 1.0e-3 ) {
+				Wj_minusHalf = pow(1.0+gsl_pow_2(wj_minusHalf)/24+gsl_pow_4(wj_minusHalf)/1920,-1);
+				Wplus_j_minusHalf[m][j] = Wj_minusHalf * exp(0.5*wj_minusHalf);
+				Wminus_j_minusHalf[m][j] = Wj_minusHalf * exp(-0.5*wj_minusHalf);
+			} else {
+				Wj_minusHalf = abs(wj_minusHalf)*exp(-0.5*abs(wj_minusHalf)) /
+								(1.0-exp(-abs(wj_minusHalf)));
+				if (wj_minusHalf > 0.0) {
+					Wplus_j_minusHalf[m][j] = abs(wj_minusHalf) / (1.0-exp(-abs(wj_minusHalf)));
+					Wminus_j_minusHalf[m][j] = Wj_minusHalf * exp(-0.5*wj_minusHalf);
+				} else {
+					Wplus_j_minusHalf[m][j] = Wj_minusHalf * exp(0.5*wj_minusHalf);
+					Wminus_j_minusHalf[m][j] = abs(wj_minusHalf) / (1.0-exp(-abs(wj_minusHalf)));
+				}
+			}
+			if ( abs(wj_plusHalf) < 1.0e-3 ) {
+				Wj_plusHalf = pow(1.0+gsl_pow_2(wj_plusHalf)/24+gsl_pow_4(wj_plusHalf)/1920,-1);
+				Wplus_j_plusHalf[m][j] = Wj_plusHalf * exp(0.5*wj_plusHalf);
+				Wminus_j_plusHalf[m][j] = Wj_plusHalf * exp(-0.5*wj_plusHalf);
+			} else {
+				Wj_plusHalf = abs(wj_plusHalf)*exp(-0.5*abs(wj_plusHalf)) /
+								(1.0-exp(-abs(wj_plusHalf)));
+				if (wj_plusHalf > 0.0) {
+					Wplus_j_plusHalf[m][j] = abs(wj_plusHalf) / (1.0-exp(-abs(wj_plusHalf)));
+					Wminus_j_plusHalf[m][j] = Wj_plusHalf * exp(-0.5*wj_plusHalf);
+				} else {
+					Wplus_j_plusHalf[m][j] = Wj_plusHalf * exp(0.5*wj_plusHalf);
+					Wminus_j_plusHalf[m][j] = abs(wj_plusHalf) / (1.0-exp(-abs(wj_plusHalf)));
+				}
+			}
+			
+			double vm_minusHalf = Cjm_minusHalf/Djm_minusHalf[j][m] * delta_g_m_minushalf[m];
+			double vm_plusHalf = Cjm_plusHalf/Djm_plusHalf[j][m] * delta_g_m_plushalf[m];
+			double Vm_minusHalf(0.0), Vm_plusHalf(0.0);
+			
+			if ( abs(vm_minusHalf) < 1.0e-3 ) {
+				Vm_minusHalf = pow(1.0+gsl_pow_2(vm_minusHalf)/24.0+gsl_pow_4(vm_minusHalf)/1920.0,-1);
+				Vplus_m_minusHalf[j][m] = Vm_minusHalf * exp(0.5*vm_minusHalf);
+				Vminus_m_minusHalf[j][m] = Vm_minusHalf * exp(-0.5*vm_minusHalf);
+			} else {
+				Vm_minusHalf = abs(vm_minusHalf)*exp(-0.5*abs(vm_minusHalf)) /
+								(1.0-exp(-abs(vm_minusHalf)));
+				if (vm_minusHalf > 0.0) {
+					Vplus_m_minusHalf[j][m] = abs(vm_minusHalf) / (1.0-exp(-abs(vm_minusHalf)));
+					Vminus_m_minusHalf[j][m] = Vm_minusHalf * exp(-0.5*vm_minusHalf);
+				} else {
+					Vplus_m_minusHalf[j][m] = Vm_minusHalf * exp(0.5*vm_minusHalf);
+					Vminus_m_minusHalf[j][m] = abs(vm_minusHalf) / (1.0-exp(-abs(vm_minusHalf)));
+				}
+			}
+			if ( abs(vm_plusHalf) < 1.0e-3 ) {
+				Vm_plusHalf = pow(1.0+gsl_pow_2(vm_plusHalf)/24+gsl_pow_4(vm_plusHalf)/1920,-1);
+				Vplus_m_plusHalf[j][m] = Vm_plusHalf * exp(0.5*vm_plusHalf);
+				Vminus_m_plusHalf[j][m] = Vm_plusHalf * exp(-0.5*vm_plusHalf);
+			} else {
+				Vm_plusHalf = abs(vm_plusHalf)*exp(-0.5*abs(vm_plusHalf)) /
+								(1.0-exp(-abs(vm_plusHalf)));
+				if (vm_plusHalf > 0.0) {
+					Vplus_m_plusHalf[j][m] = abs(vm_plusHalf) / (1.0-exp(-abs(vm_plusHalf)));
+					Vminus_m_plusHalf[j][m] = Vm_plusHalf * exp(-0.5*vm_plusHalf);
+				} else {
+					Vplus_m_plusHalf[j][m] = Vm_plusHalf * exp(0.5*vm_plusHalf);
+					Vminus_m_plusHalf[j][m] = abs(vm_plusHalf) / (1.0-exp(-abs(vm_plusHalf)));
+				}
+			}
+		}
+	}
+	
+	ofstream fileMatrixDistEne, fileMatrixDistPos, fileMatrixDistQT;
+	fileMatrixDistEne.open("matrixCoeffTransportEq_Ene.txt");
+	fileMatrixDistPos.open("matrixCoeffTransportEq_Pos.txt");
+	fileMatrixDistQT.open("matrixCoeffTransportEq_QT.txt");
+	fileMatrixDistEne 	<< "j \t m \t Dj- \t Dj+ \t V-- \t V-+ \t V+- \t V++" << endl;
+	fileMatrixDistPos 	<< "m \t j \t Bj- \t Bj+ \t W-- \t W-+ \t W+- \t W++" << endl;
+	fileMatrixDistQT 	<< "j \t m \t T \t Q \t" << endl;
+	
+	for (size_t j=0;j<J+1;j++) {
+		for (size_t m=0;m<M+1;m++) {
+			fileMatrixDistEne 	<< j << "\t" << m << "\t"
+								<< Djm_minusHalf[j][m] << "\t" << Djm_plusHalf[j][m] << "\t"
+								<< Vminus_m_minusHalf[j][m] << "\t" << Vminus_m_plusHalf[j][m] << "\t"
+								<< Vplus_m_minusHalf[j][m] << "\t" << Vplus_m_plusHalf[j][m] << endl;
+			fileMatrixDistQT	<< j << "\t" << m << "\t"
+								<< Tjm[j][m] << "\t" << Qjm[j][m] << endl;
+		}
+	}
+	for (size_t m=0;m<M+1;m++) {
+		for (size_t j=0;j<J+1;j++) {
+			fileMatrixDistPos	<< m << "\t" << j << "\t"
+								<< Bj_minusHalf_m[m][j] << "\t" << Bj_plusHalf_m[m][j] << "\t"
+								<< Wminus_j_minusHalf[m][j] << "\t" << Wminus_j_plusHalf[m][j] << "\t"
+								<< Wplus_j_minusHalf[m][j] << "\t" << Wplus_j_plusHalf[m][j] << endl;
+		}
+	}
+ 
+	fileMatrixDistEne.close();
+	fileMatrixDistPos.close();
+	fileMatrixDistQT.close();
+	
+	cout << "TRANSPORT EQUATION: Finished matrix calculation" << endl << endl;
+	
+	Vector rr((J+1)*(M+1),0.0);
+	Matrix rrOld;
+	matrixInit(rrOld,J+1,M+1,0.0);
+	Matrix dist;
+	
+	cout << "TRANSPORT EQUATION: Starting time evolution" << endl << endl;
+	
+	for (size_t t=0;t<Ntime;t++) {
+		cout << "t = " << t << endl;
+		for (size_t jt=0;jt<NdeltaTime;jt++) {
+			
+			Vector a((J+1)*(M+1),0.0);
+			Vector b((J+1)*(M+1),0.0);
+			Vector c((J+1)*(M+1),0.0);
+			Vector d((J+1)*(M+1),0.0);
+			Vector e((J+1)*(M+1),0.0);
+			Vector f((J+1)*(M+1),0.0);
+			
+			// BLOCK 1: Advances in half a time with the energy operators implicit and the spatial
+			// operator explicit.
+			
+			#pragma omp parallel for
+			for (size_t j=0;j<J+1;j++) {
+				
+				for (size_t m=0;m<M+1;m++) {
+					size_t l = j*(M+1)+m;
+				
+					if (j > 0 && j < J) {
+					
+						if (m > 0)
+							a[l] = - (0.5*deltat[t])/delta_g[m] * Djm_minusHalf[j][m] * Vminus_m_minusHalf[j][m] / delta_g_m_minushalf[m];
+						if (m < M)
+							c[l] = - (0.5*deltat[t])/delta_g[m] * Djm_plusHalf[j][m] * Vplus_m_plusHalf[j][m] / delta_g_m_plushalf[m];
+						b[l] = 1.0 + (0.5*deltat[t])/delta_g[m] * ( Djm_minusHalf[j][m] * Vplus_m_minusHalf[j][m] / delta_g_m_minushalf[m] +
+									Djm_plusHalf[j][m] * Vminus_m_plusHalf[j][m] / delta_g_m_plushalf[m] ) + 0.5*deltat[t]/Tjm[j][m];
+						
+						d[l] = (0.5*deltat[t])/delta_r[j] * Bj_minusHalf_m[m][j] * Wminus_j_minusHalf[m][j] / delta_r_j_minushalf[j];
+						e[l] = 1.0 - 0.5*(deltat[t])/delta_r[j] * ( Bj_minusHalf_m[m][j] * Wplus_j_minusHalf[m][j] / delta_r_j_minushalf[j] +
+									Bj_plusHalf_m[m][j] * Wminus_j_plusHalf[m][j] / delta_r_j_plushalf[j] );
+						f[l] = (j < J) ? 
+							(0.5*deltat[t])/delta_r[j] * Bj_plusHalf_m[m][j] * Wplus_j_plusHalf[m][j] / delta_r_j_plushalf[j] : 0.0;
+						
+						//rr[l] = (j2 > 0 ? rrOld[j2-1][m] : 0.0) * d[l] + rrOld[j2][m] * e[l] + (j < J ? rrOld[j2+1][m] * f[l] : 0.0) + Qjm[j2][m]*deltat;
+					} else {
+						b[l] = 1.0;
+					}
+					rr[l] = (j > 0 ? rrOld[j-1][m] : 0.0) * d[l] + rrOld[j][m] * e[l] 
+							+ (j < J ? rrOld[j+1][m] * f[l] : 0.0) + (j > 0 && j < J ? Qjm[j][m] :0.0)*0.5*deltat[t];
+					//rr[l] = rrOld[j][m] + (j > 0 && j < J ? Qjm[j][m] * deltat[t] : 0.0);
+				}
+			}
+			TriDiagSys(a,b,c,rr,(J+1)*(M+1));
+			
+			#pragma omp parallel for
+			for (size_t j=0;j<J+1;j++) {
+				for (size_t m=0;m<M+1;m++) {
+					size_t l = j*(M+1)+m;
+					rrOld[j][m] = rr[l];
+				}
+			}
+			
+			// BLOCK 2: Advances in a time with the spatial operators implicit.
+			/*
+			#pragma omp parallel for
+			for (size_t m=0;m<M+1;m++){
+				for (size_t j=0;j<J+1;j++) {
+					size_t lp = m*(J+1)+j;
+					size_t l = j*(M+1)+m;
+					a[lp] = - d[l];
+					b[lp] = 2.0 - e[l];// + (deltat[t])/Tjm[j2][m];
+					c[lp] = (j < J) ? - f[l] : 0.0;
+					
+					rr[lp] = rrOld[j][m];// + Qjm[j2][m] * 0.5*deltat[t];
+				}
+			}
+			TriDiagSys(a,b,c,rr,(J+1)*(M+1));
+			
+			#pragma omp parallel for
+			for (size_t j=0;j<J+1;j++) {
+				for (size_t m=0;m<M+1;m++) {
+					size_t lp = m*(J+1)+j;
+					rrOld[j][m] = rr[lp];
+				}
+			}
+			
+			// BLOCK 3: Advances in half a time with the energy operators implicit.
+			fill(a.begin(),a.end(),0.0);
+			fill(b.begin(),b.end(),0.0);
+			fill(c.begin(),c.end(),0.0);
+			
+			#pragma omp parallel for
+			for (size_t j=0;j<J+1;j++) {
+				for (size_t m=0;m<M+1;m++) {
+					size_t l = j*(M+1)+m;
+					
+					if (j > 0 && j < J) {
+						
+						if (m > 0)
+							a[l] = - (0.5*deltat[t])/delta_g[m] * Djm_minusHalf[j][m] * Vminus_m_minusHalf[j][m] / delta_g_m_minushalf[m];
+						if (m < M)
+							c[l] = - (0.5*deltat[t])/delta_g[m] * Djm_plusHalf[j][m] * Vplus_m_plusHalf[j][m] / delta_g_m_plushalf[m];
+						b[l] = 1.0 + (0.5*deltat[t])/delta_g[m] * ( Djm_minusHalf[j][m] * Vplus_m_minusHalf[j][m] / delta_g_m_minushalf[m] +
+									Djm_plusHalf[j][m] * Vminus_m_plusHalf[j][m] / delta_g_m_plushalf[m] ) + 0.5*deltat[t]/Tjm[j][m];
+						
+						//rr[l] = (j2 > 0 ? rrOld[j2-1][m] : 0.0) * d[l] + rrOld[j2][m] * e[l] + (j < J ? rrOld[j2+1][m] * f[l] : 0.0) + Qjm[j2][m]*deltat;
+					} else {
+						b[l] = 1.0;
+					}
+					rr[l] = rrOld[j][m];
+				}
+			}
+			TriDiagSys(a,b,c,rr,(J+1)*(M+1));
+			
+			#pragma omp parallel for
+			for (size_t j=0;j<J+1;j++) {
+				for (size_t m=0;m<M+1;m++) {
+					size_t l = j*(M+1)+m;
+					rrOld[j][m] = rr[l];
+				}
+			}
+			*/
+		}
+		if (t % 100 == 0 || t == Ntime-2) {
+			matrixInit(dist,J+1,M+1,0.0);
+			ofstream fileDist;
+			fileDist.open("dist"+to_string(t)+".txt");
+			for (size_t j=0;j<J+1;j++) {
+				for (size_t m=0;m<M+1;m++) {
+					size_t l = j*(M+1)+m;
+					dist[j][m] = rrOld[j][m] / P2(r_local[j]*schwRadius) / factor;
+					fileDist << r_local[j] << "\t" << g_local[m] << "\t" << dist[j][m] << endl;
+				}
+			}
+			fileDist.close();
+		}
+	}
+	
+	for (size_t j=0;j<J+1;j++) {
+		for (size_t m=0;m<M+1;m++) {
+			size_t l = j*(M+1)+m;
+			rr[l] = rrOld[j][m];
+		}
+	}
+	
+	// BLOCK 3: Advances both
+	/*
+	for (size_t jt=0;jt<1;jt++) {
+		
+		Vector a(J*(M+1),0.0);
+		Vector b(J*(M+1),0.0);
+		Vector c(J*(M+1),0.0);
+		Vector d(J*(M+1),0.0);
+		Vector e(J*(M+1),0.0);
+		Vector f(J*(M+1),0.0);
+		
+		size_t t = Ntime/10;
+		for (size_t j=1;j<J+1;j++) {
+			size_t j2 = j-1;
+			for (size_t m=0;m<M+1;m++) {
+				size_t l = j2*(M+1)+m;
+				
+				if (m > 0)
+					a[l] = - (0.5*deltat[t])/delta_g[m] * Djm_minusHalf[j2][m] * Vminus_m_minusHalf[j2][m] / delta_g_m_minushalf[m];
+				if (m < M)
+					c[l] = - (0.5*deltat[t])/delta_g[m] * Djm_plusHalf[j2][m] * Vplus_m_plusHalf[j2][m] / delta_g_m_plushalf[m];
+				b[l] = 1.0 + (0.5*deltat[t])/delta_g[m] * ( Djm_minusHalf[j2][m] * Vplus_m_minusHalf[j2][m] / delta_g_m_minushalf[m] +
+							Djm_plusHalf[j2][m] * Vminus_m_plusHalf[j2][m] / delta_g_m_plushalf[m] ) + 0.5*deltat[t]/Tjm[j2][m];
+				
+				d[l] = (0.5*deltat[t])/delta_r[j] * Bj_minusHalf_m[m][j2] * Wminus_j_minusHalf[m][j2] / delta_r_j_minushalf[j];
+				e[l] = 1.0 - (0.5*deltat[t])/delta_r[j] * ( Bj_minusHalf_m[m][j2] * Wplus_j_minusHalf[m][j2] / delta_r_j_minushalf[j] +
+							Bj_plusHalf_m[m][j2] * Wminus_j_plusHalf[m][j2] / delta_r_j_plushalf[j] );
+				f[l] = (j < J) ? 
+					(0.5*deltat[t])/delta_r[j] * Bj_plusHalf_m[m][j2] * Wplus_j_plusHalf[m][j2] / delta_r_j_plushalf[j] : 0.0;
+				
+				rr[l] = rr[l] + Qjm[j2][m] * 0.5*deltat[t];
+				rr[l] = (j2 > 0 ? rr[(j2-1)*(M+1)+m] : 0.0) * d[l] + rr[l] * e[l] + (j < J ? rr[(j2+1)*(M+1)+m] * f[l] : 0.0) + Qjm[j2][m]*0.5*deltat[t];
+			}
+		}
+		TriDiagSys(a,b,c,rr,J*(M+1));
+	}
+	*/
+	matrixInit(dist,J+1,M+1,0.0);
+	ofstream fileDist;
+	fileDist.open("dist_last.txt");
+	for (size_t j=0;j<J+1;j++) {
+		for (size_t m=0;m<M+1;m++) {
+			size_t l = j*(M+1)+m;
+			dist[j][m] = rr[l] / P2(r_local[j]*schwRadius) / factor;
+			fileDist << r_local[j] << "\t" << g_local[m] << "\t" << dist[j][m] << endl;
+		}
+	}
+	fileDist.close();
+
+	cout << endl << "TRANSPORT EQUATION: Finished time evolution" << endl << endl;
+	
+	particle.ps.iterate([&] (const SpaceIterator& iR) {
+		double r = iR.val(DIM_R);
+		size_t j = 1;
+		while (r_local[j]*schwRadius < r) j++;
+		particle.ps.iterate([&] (const SpaceIterator& iRE) {
+			double g = iRE.val(DIM_E) / (particle.mass*cLight2);
+			size_t m = 0;
+			while (g_local[m] < g) m++;
+			
+			double N11 = dist[j-1][m-1];
+			double N12 = dist[j-1][m];
+			double N1 = 0.0;
+			if (N11 > 0.0 && N12 > 0.0) {
+				double s1 = safeLog10(N12/N11)/safeLog10(g_local[m]/g_local[m-1]);
+				N1 = N11 * pow(g / g_local[m-1], s1);
+			} else {
+				if (N11 > 0.0)
+					N1 = - N11 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]) + N11;
+				else if (N12 > 0.0)
+					N1 = N12 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]);
+				else
+					N1 = 0.0;
+			}
+			double N21 = dist[j][m-1];
+			double N22 = dist[j][m];
+			double N2 = 0.0;
+			if (N21 > 0.0 && N22 > 0.0) {
+				double s2 = safeLog10(N22/N21)/safeLog10(g_local[m]/g_local[m-1]);
+				N2 = N21 * pow(g / g_local[m-1], s2);
+			} else {
+				if (N21 > 0.0)
+					N2 = - N21 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]) + N21;
+				else if (N22 > 0.0)
+					N2 = N22 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]);
+				else
+					N2 = 0.0;
+			}
+			
+			double N = 0.0;
+			if (N1 > 0.0 && N2 > 0.0) {
+				double s = safeLog10(N2/N1)/safeLog10(r_local[j]/r_local[j-1]);
+				N = N1 * pow(r / (r_local[j-1]*schwRadius), s);
+			} else {
+				if (N1 > 0.0)
+					N = - N1 * (r/schwRadius - r_local[j-1])/(r_local[j]-r_local[j-1]) + N1;
+				else if (N2 > 0.0)
+					N = N2 * (r/schwRadius - r_local[j-1])/(r_local[j]-r_local[j-1]);
+				else
+					N = 0.0;
+			}
+			particle.distribution.set(iRE, N / (particle.mass*cLight2));
+		},{-1,iR.coord[DIM_R],0});
+	},{0,-1,0});
+	
+	// TESTS
+	
+	// CONSERVATION OF FLUX OF PARTICLES CROSSING EACH SHELL
+	particle.ps.iterate([&](const SpaceIterator& iR) {
+		double rB1 = iR.val(DIM_R) / sqrt(paso_r);
+		double area = 4.0*pi*rB1*height_fun(rB1);
+		double vR = abs(radialVel(rB1));
+		double flux = area*vR*integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
+						{
+							return particle.distribution.interpolate({{DIM_E,e}},&iR.coord);
+						},100);
+		cout << iR.coord[DIM_R] << "\t flux = " << flux << endl;
+	},{0,-1,0});
+	
+	// FLUX OF ENERGY
+	particle.ps.iterate([&](const SpaceIterator& iR) {
+		double rB1 = iR.val(DIM_R) / sqrt(paso_r);
+		double area = 4.0*pi*rB1*height_fun(rB1);
+		double vR = abs(radialVel(rB1));
+		double flux = area*vR*integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
+						{
+							return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e;
+						},100);
+		cout << iR.coord[DIM_R] << "\t flux of energy = " << flux << endl;
+	},{0,-1,0});
+	
+	// COSMIC RAY PRESSURE << THERMAL PRESSURE
+	particle.ps.iterate([&](const SpaceIterator& iR) {
+		double r = iR.val(DIM_R);
+		double pCR = integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
+						{
+							return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e/3.0;
+						},100);
+		double pFluid = massDensityADAF(r)*sqrdSoundVel(r);
+		cout << iR.coord[DIM_R] << "\t pCR/pgas = " << pCR/pFluid << endl;
+	},{0,-1,0});
+	
+}
+
+
+
+
+
+
+void distributionFokkerPlanckComplete2(Particle& particle, State& st)
+// This routine solves the transport equation by considering separated one zones at each
+// energy. The escape time includes the time that takes to the particles to "cross" the energy-cell
+// by losing energy, and the injection includes the flux of particles coming from the immediately 
+// higher-energy cell. It is solved backward (from the highest energy to the lowest one) and so 
+// it can only handle systematic energy losses (cooling) and not acceleration.
+// At each cell, the steady transport equation is an ordinary diff. equation
+// in the radial variable, it considers spatial advection and diffusion and it is solved by 
+// finite differences (CC70, PP96).
+{
+	double factor = 1.0e-20;
+	
+	size_t J = 40;
+	double r_min = sqrt(st.denf_e.ps[DIM_R][0] / schwRadius);
+	double r_max = (st.denf_e.ps[DIM_R][nR-1]/schwRadius)*paso_r;
+	double paso_r_local = pow(r_max/r_min,1.0/J);
+	
+	// We define a mesh of points for the radial coordinate
+	
+	Vector r_local(J+1,r_min);
+	Vector r_local_extended(J+3,r_min/paso_r_local);
+	Vector delta_r_j_plushalf(J+1,0.0);
+	Vector delta_r_j_minushalf(J+1,0.0);
+	Vector delta_r(J+1,0.0);
+		
+	for (size_t j=1;j<J+1;j++)	r_local[j] = r_local[j-1]*paso_r_local;
+	for (size_t j=1;j<J+3;j++)	r_local_extended[j] = r_local_extended[j-1]*paso_r_local;
+	for (size_t j=0;j<J+1;j++)	delta_r_j_plushalf[j] = r_local[j]*(paso_r_local-1.0);
+	for (size_t j=0;j<J+1;j++)	delta_r_j_minushalf[j] = r_local[j]*(1.0-1.0/paso_r_local);
+	for (size_t j=0;j<J+1;j++)	delta_r[j] = 0.5*r_local[j]*(paso_r_local-1.0/paso_r_local);
+	
+	// We define a mesh of points for the Lorentz factor coordinate
+	size_t M = 110;
+	double g_min = 0.9 * (particle.emin() / (particle.mass*cLight2));
+	double g_max = 1.1 * (particle.emax() / (particle.mass*cLight2));
+	
+	double paso_g_local = pow(g_max/g_min,1.0/M);
+	Vector g_local(M+1,g_min);
+	Vector g_local_extended(M+3,g_min/paso_g_local);
+	Vector delta_g_m_plushalf(M+1,0.0);
+	Vector delta_g_m_minushalf(M+1,0.0);
+	Vector delta_g(M+1,0.0);
+		
+	for (size_t m=1;m<M+1;m++)	g_local[m] = g_local[m-1]*paso_g_local;
+	for (size_t m=1;m<M+3;m++)	g_local_extended[m] = g_local_extended[m-1]*paso_g_local;
+	for (size_t m=0;m<M+1;m++)	delta_g_m_plushalf[m] = g_local[m]*(paso_g_local-1.0);
+	for (size_t m=0;m<M+1;m++)	delta_g_m_minushalf[m] = g_local[m]*(1.0-1.0/paso_g_local);
+	for (size_t m=0;m<M+1;m++)	delta_g[m] = 0.5*g_local[m]*(paso_g_local-1.0/paso_g_local);
+	
+	// We define a vector for the time evolution
+	
+	size_t Ntime = 30;
+	size_t NdeltaTime = 20;
 	double charEnergy = 1e5*particle.emin();
 	double charGamma = charEnergy / (particle.mass*cLight2);
 	double charHeight = 100*schwRadius;
@@ -2653,13 +3279,10 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 	double timescaleEnergy = min(timescaleCooling,timescaleAcceleration);
 	double naturalTimescale = min(timescaleRadial, timescaleEnergy);
 	double maxTime = particle.ps[DIM_R][nR-1]/abs(radialVel(particle.ps[DIM_R][nR-1]));
+	maxTime = naturalTimescale*100;
 	Vector time(Ntime+1,1.0);
 	double paso_time = pow(maxTime/naturalTimescale,1.0/(Ntime-1));
 	for (size_t t=1;t<Ntime+1;t++) time[t] = time[t-1]*paso_time;
-	
-	
-	cout << time[Ntime] << endl;
-	
 	
 	Vector deltat(Ntime,1.0);
 	for (size_t t=0;t<Ntime;t++) deltat[t] = (time[t+1]-time[t])/NdeltaTime;
@@ -2681,7 +3304,7 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 					double height = height_fun(rTrue);
 					double B = magneticField(rTrue);
 					double k_rr = diffCoeff_r(g,particle,height,B);
-					return k_rr / (schwRadius*schwRadius) * naturalTimescale/1e20;
+					return k_rr / (schwRadius*schwRadius) * naturalTimescale;
 				};
 
 	fun2 Cfun = [&particle,&st,paso_r_local,naturalTimescale] (double r, double g) 
@@ -2753,124 +3376,121 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 				{
 					double rTrue = r * schwRadius;
 					double E = g * particle.mass*cLight2;
-					double g_inj = 2.0;
+					double g_inj = 10.0;
 					double sigma = g_inj * (paso_g_local-1.0)/2.0;
 					double Qlocal = (rTrue > particle.ps[DIM_R][0] && 
 							rTrue < particle.ps[DIM_R][nR-1]) ?
 							rTrue*rTrue* ionDensity(rTrue) * cLight/schwRadius: 0.0;
 					double result = Qlocal * gsl_ran_gaussian_pdf(g-g_inj,sigma);
 					return result * naturalTimescale * factor;
-					//SpaceCoord iAux = {0,0,0};
-					//return factor * (schwRadius/cLight) * pow(g,-2) * Qlocal * exp(-g/1e7);
 				};
 	
-	Matrix Bj_minusHalf_m;				matrixInit(Bj_minusHalf_m,M+1,J,0.0);
-	Matrix Bj_plusHalf_m;				matrixInit(Bj_plusHalf_m,M+1,J,0.0);
-	Matrix Djm_minusHalf;				matrixInit(Djm_minusHalf,J,M+1,0.0);
-	Matrix Djm_plusHalf;				matrixInit(Djm_plusHalf,J,M+1,0.0);
-	Matrix Wminus_j_minusHalf;			matrixInit(Wminus_j_minusHalf,M+1,J,0.0);
-	Matrix Wminus_j_plusHalf;			matrixInit(Wminus_j_plusHalf,M+1,J,0.0);
-	Matrix Wplus_j_minusHalf;			matrixInit(Wplus_j_minusHalf,M+1,J,0.0);
-	Matrix Wplus_j_plusHalf;			matrixInit(Wplus_j_plusHalf,M+1,J,0.0);
-	Matrix Vminus_m_minusHalf;			matrixInit(Vminus_m_minusHalf,J,M+1,0.0);
-	Matrix Vminus_m_plusHalf;			matrixInit(Vminus_m_plusHalf,J,M+1,0.0);
-	Matrix Vplus_m_minusHalf;			matrixInit(Vplus_m_minusHalf,J,M+1,0.0);
-	Matrix Vplus_m_plusHalf;			matrixInit(Vplus_m_plusHalf,J,M+1,0.0);
-	Matrix Tjm;							matrixInit(Tjm,J,M+1,0.0);
-	Matrix Qjm;							matrixInit(Qjm,J,M+1,0.0);
+	Matrix Bj_minusHalf_m;				matrixInit(Bj_minusHalf_m,J+1,M+1,0.0);
+	Matrix Bj_plusHalf_m;				matrixInit(Bj_plusHalf_m,J+1,M+1,0.0);
+	Matrix Djm_minusHalf;				matrixInit(Djm_minusHalf,J+1,M+1,0.0);
+	Matrix Djm_plusHalf;				matrixInit(Djm_plusHalf,J+1,M+1,0.0);
+	Matrix Wminus_j_minusHalf;			matrixInit(Wminus_j_minusHalf,J+1,M+1,0.0);
+	Matrix Wminus_j_plusHalf;			matrixInit(Wminus_j_plusHalf,J+1,M+1,0.0);
+	Matrix Wplus_j_minusHalf;			matrixInit(Wplus_j_minusHalf,J+1,M+1,0.0);
+	Matrix Wplus_j_plusHalf;			matrixInit(Wplus_j_plusHalf,J+1,M+1,0.0);
+	Matrix Vminus_m_minusHalf;			matrixInit(Vminus_m_minusHalf,J+1,M+1,0.0);
+	Matrix Vminus_m_plusHalf;			matrixInit(Vminus_m_plusHalf,J+1,M+1,0.0);
+	Matrix Vplus_m_minusHalf;			matrixInit(Vplus_m_minusHalf,J+1,M+1,0.0);
+	Matrix Vplus_m_plusHalf;			matrixInit(Vplus_m_plusHalf,J+1,M+1,0.0);
+	Matrix Tjm;							matrixInit(Tjm,J+1,M+1,0.0);
+	Matrix Qjm;							matrixInit(Qjm,J+1,M+1,0.0);
 	
 	cout << "TRANSPORT EQUATION: Starting matrix element calculation" << endl << endl;
 	
-	for (size_t j=1;j<J+1;j++) {
-		size_t j2 = j-1;
+	for (size_t j=0;j<J+1;j++) {
 		for (size_t m=0;m<M+1;m++) {
-			size_t l = j2*(M+1)+m;
+			size_t l = j*(M+1)+m;
 			double Ajm = Afun(r_local[j],g_local[m]);
 			double Aj_minusHalf_m = 0.5 * (Afun(r_local_extended[j],g_local[m]) + Ajm);
 			double Aj_plusHalf_m = 0.5 * (Afun(r_local_extended[j+2],g_local[m]) + Ajm);
 					
 			double Bjm = Bfun(r_local[j],g_local[m]);
-			Bj_minusHalf_m[m][j2] = 0.5 * (Bfun(r_local_extended[j],g_local[m]) + Bjm);
-			Bj_plusHalf_m[m][j2] = 0.5 * (Bfun(r_local_extended[j+2],g_local[m]) + Bjm);
+			Bj_minusHalf_m[j][m] = 0.5 * (Bfun(r_local_extended[j],g_local[m]) + Bjm);
+			Bj_plusHalf_m[j][m] = 0.5 * (Bfun(r_local_extended[j+2],g_local[m]) + Bjm);
 			
 			double Cjm = Cfun(r_local[j],g_local[m]);
 			double Cjm_minusHalf = 0.5 * (Cfun(r_local[j],g_local_extended[m]) + Cjm);
 			double Cjm_plusHalf = 0.5 * (Cfun(r_local[j],g_local_extended[m+2]) + Cjm);
 			
 			double Djm = Dfun(r_local[j],g_local[m]);
-			Djm_minusHalf[j2][m] = 0.5 * (Dfun(r_local[j],g_local_extended[m]) + Djm);
-			Djm_plusHalf[j2][m] = 0.5 * (Dfun(r_local[j],g_local_extended[m+2]) + Djm);
+			Djm_minusHalf[j][m] = 0.5 * (Dfun(r_local[j],g_local_extended[m]) + Djm);
+			Djm_plusHalf[j][m] = 0.5 * (Dfun(r_local[j],g_local_extended[m+2]) + Djm);
 			
-			Qjm[j2][m] = Qfun(r_local[j],g_local[m]);
-			Tjm[j2][m] = Tfun(r_local[j],g_local[m]);
+			Qjm[j][m] = Qfun(r_local[j],g_local[m]);
+			Tjm[j][m] = Tfun(r_local[j],g_local[m]);
 					
-			double wj_minusHalf = Aj_minusHalf_m/Bj_minusHalf_m[m][j2] * delta_r_j_minushalf[j];
-			double wj_plusHalf = Aj_plusHalf_m/Bj_plusHalf_m[m][j2] * delta_r_j_plushalf[j];
+			double wj_minusHalf = Aj_minusHalf_m/Bj_minusHalf_m[j][m] * delta_r_j_minushalf[j];
+			double wj_plusHalf = Aj_plusHalf_m/Bj_plusHalf_m[j][m] * delta_r_j_plushalf[j];
 			double Wj_minusHalf(0.0), Wj_plusHalf(0.0);
 			
 			if ( abs(wj_minusHalf) < 1.0e-3 ) {
 				Wj_minusHalf = pow(1.0+gsl_pow_2(wj_minusHalf)/24+gsl_pow_4(wj_minusHalf)/1920,-1);
-				Wplus_j_minusHalf[m][j2] = Wj_minusHalf * exp(0.5*wj_minusHalf);
-				Wminus_j_minusHalf[m][j2] = Wj_minusHalf * exp(-0.5*wj_minusHalf);
+				Wplus_j_minusHalf[j][m] = Wj_minusHalf * exp(0.5*wj_minusHalf);
+				Wminus_j_minusHalf[j][m] = Wj_minusHalf * exp(-0.5*wj_minusHalf);
 			} else {
 				Wj_minusHalf = abs(wj_minusHalf)*exp(-0.5*abs(wj_minusHalf)) /
 								(1.0-exp(-abs(wj_minusHalf)));
 				if (wj_minusHalf > 0.0) {
-					Wplus_j_minusHalf[m][j2] = abs(wj_minusHalf) / (1.0-exp(-abs(wj_minusHalf)));
-					Wminus_j_minusHalf[m][j2] = Wj_minusHalf * exp(-0.5*wj_minusHalf);
+					Wplus_j_minusHalf[j][m] = abs(wj_minusHalf) / (1.0-exp(-abs(wj_minusHalf)));
+					Wminus_j_minusHalf[j][m] = Wj_minusHalf * exp(-0.5*wj_minusHalf);
 				} else {
-					Wplus_j_minusHalf[m][j2] = Wj_minusHalf * exp(0.5*wj_minusHalf);
-					Wminus_j_minusHalf[m][j2] = abs(wj_minusHalf) / (1.0-exp(-abs(wj_minusHalf)));
+					Wplus_j_minusHalf[j][m] = Wj_minusHalf * exp(0.5*wj_minusHalf);
+					Wminus_j_minusHalf[j][m] = abs(wj_minusHalf) / (1.0-exp(-abs(wj_minusHalf)));
 				}
 			}
 			if ( abs(wj_plusHalf) < 1.0e-3 ) {
 				Wj_plusHalf = pow(1.0+gsl_pow_2(wj_plusHalf)/24+gsl_pow_4(wj_plusHalf)/1920,-1);
-				Wplus_j_plusHalf[m][j2] = Wj_plusHalf * exp(0.5*wj_plusHalf);
-				Wminus_j_plusHalf[m][j2] = Wj_plusHalf * exp(-0.5*wj_plusHalf);
+				Wplus_j_plusHalf[j][m] = Wj_plusHalf * exp(0.5*wj_plusHalf);
+				Wminus_j_plusHalf[j][m] = Wj_plusHalf * exp(-0.5*wj_plusHalf);
 			} else {
 				Wj_plusHalf = abs(wj_plusHalf)*exp(-0.5*abs(wj_plusHalf)) /
 								(1.0-exp(-abs(wj_plusHalf)));
 				if (wj_plusHalf > 0.0) {
-					Wplus_j_plusHalf[m][j2] = abs(wj_plusHalf) / (1.0-exp(-abs(wj_plusHalf)));
-					Wminus_j_plusHalf[m][j2] = Wj_plusHalf * exp(-0.5*wj_plusHalf);
+					Wplus_j_plusHalf[j][m] = abs(wj_plusHalf) / (1.0-exp(-abs(wj_plusHalf)));
+					Wminus_j_plusHalf[j][m] = Wj_plusHalf * exp(-0.5*wj_plusHalf);
 				} else {
-					Wplus_j_plusHalf[m][j2] = Wj_plusHalf * exp(0.5*wj_plusHalf);
-					Wminus_j_plusHalf[m][j2] = abs(wj_plusHalf) / (1.0-exp(-abs(wj_plusHalf)));
+					Wplus_j_plusHalf[j][m] = Wj_plusHalf * exp(0.5*wj_plusHalf);
+					Wminus_j_plusHalf[j][m] = abs(wj_plusHalf) / (1.0-exp(-abs(wj_plusHalf)));
 				}
 			}
 			
-			double vm_minusHalf = Cjm_minusHalf/Djm_minusHalf[j2][m] * delta_g_m_minushalf[m];
-			double vm_plusHalf = Cjm_plusHalf/Djm_plusHalf[j2][m] * delta_g_m_plushalf[m];
+			double vm_minusHalf = Cjm_minusHalf/Djm_minusHalf[j][m] * delta_g_m_minushalf[m];
+			double vm_plusHalf = Cjm_plusHalf/Djm_plusHalf[j][m] * delta_g_m_plushalf[m];
 			double Vm_minusHalf(0.0), Vm_plusHalf(0.0);
 			
 			if ( abs(vm_minusHalf) < 1.0e-3 ) {
 				Vm_minusHalf = pow(1.0+gsl_pow_2(vm_minusHalf)/24.0+gsl_pow_4(vm_minusHalf)/1920.0,-1);
-				Vplus_m_minusHalf[j2][m] = Vm_minusHalf * exp(0.5*vm_minusHalf);
-				Vminus_m_minusHalf[j2][m] = Vm_minusHalf * exp(-0.5*vm_minusHalf);
+				Vplus_m_minusHalf[j][m] = Vm_minusHalf * exp(0.5*vm_minusHalf);
+				Vminus_m_minusHalf[j][m] = Vm_minusHalf * exp(-0.5*vm_minusHalf);
 			} else {
 				Vm_minusHalf = abs(vm_minusHalf)*exp(-0.5*abs(vm_minusHalf)) /
 								(1.0-exp(-abs(vm_minusHalf)));
 				if (vm_minusHalf > 0.0) {
-					Vplus_m_minusHalf[j2][m] = abs(vm_minusHalf) / (1.0-exp(-abs(vm_minusHalf)));
-					Vminus_m_minusHalf[j2][m] = Vm_minusHalf * exp(-0.5*vm_minusHalf);
+					Vplus_m_minusHalf[j][m] = abs(vm_minusHalf) / (1.0-exp(-abs(vm_minusHalf)));
+					Vminus_m_minusHalf[j][m] = Vm_minusHalf * exp(-0.5*vm_minusHalf);
 				} else {
-					Vplus_m_minusHalf[j2][m] = Vm_minusHalf * exp(0.5*vm_minusHalf);
-					Vminus_m_minusHalf[j2][m] = abs(vm_minusHalf) / (1.0-exp(-abs(vm_minusHalf)));
+					Vplus_m_minusHalf[j][m] = Vm_minusHalf * exp(0.5*vm_minusHalf);
+					Vminus_m_minusHalf[j][m] = abs(vm_minusHalf) / (1.0-exp(-abs(vm_minusHalf)));
 				}
 			}
 			if ( abs(vm_plusHalf) < 1.0e-3 ) {
 				Vm_plusHalf = pow(1.0+gsl_pow_2(vm_plusHalf)/24+gsl_pow_4(vm_plusHalf)/1920,-1);
-				Vplus_m_plusHalf[j2][m] = Vm_plusHalf * exp(0.5*vm_plusHalf);
-				Vminus_m_plusHalf[j2][m] = Vm_plusHalf * exp(-0.5*vm_plusHalf);
+				Vplus_m_plusHalf[j][m] = Vm_plusHalf * exp(0.5*vm_plusHalf);
+				Vminus_m_plusHalf[j][m] = Vm_plusHalf * exp(-0.5*vm_plusHalf);
 			} else {
 				Vm_plusHalf = abs(vm_plusHalf)*exp(-0.5*abs(vm_plusHalf)) /
 								(1.0-exp(-abs(vm_plusHalf)));
 				if (vm_plusHalf > 0.0) {
-					Vplus_m_plusHalf[j2][m] = abs(vm_plusHalf) / (1.0-exp(-abs(vm_plusHalf)));
-					Vminus_m_plusHalf[j2][m] = Vm_plusHalf * exp(-0.5*vm_plusHalf);
+					Vplus_m_plusHalf[j][m] = abs(vm_plusHalf) / (1.0-exp(-abs(vm_plusHalf)));
+					Vminus_m_plusHalf[j][m] = Vm_plusHalf * exp(-0.5*vm_plusHalf);
 				} else {
-					Vplus_m_plusHalf[j2][m] = Vm_plusHalf * exp(0.5*vm_plusHalf);
-					Vminus_m_plusHalf[j2][m] = abs(vm_plusHalf) / (1.0-exp(-abs(vm_plusHalf)));
+					Vplus_m_plusHalf[j][m] = Vm_plusHalf * exp(0.5*vm_plusHalf);
+					Vminus_m_plusHalf[j][m] = abs(vm_plusHalf) / (1.0-exp(-abs(vm_plusHalf)));
 				}
 			}
 		}
@@ -2884,24 +3504,22 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 	fileMatrixDistPos 	<< "m \t j \t Bj- \t Bj+ \t W-- \t W-+ \t W+- \t W++" << endl;
 	fileMatrixDistQT 	<< "j \t m \t T \t Q \t" << endl;
 	
-	for (size_t j=1;j<J+1;j++) {
-		size_t j2 = j-1;
+	for (size_t j=0;j<J+1;j++) {
 		for (size_t m=0;m<M+1;m++) {
 			fileMatrixDistEne 	<< j << "\t" << m << "\t"
-								<< Djm_minusHalf[j2][m] << "\t" << Djm_plusHalf[j2][m] << "\t"
-								<< Vminus_m_minusHalf[j2][m] << "\t" << Vminus_m_plusHalf[j2][m] << "\t"
-								<< Vplus_m_minusHalf[j2][m] << "\t" << Vplus_m_plusHalf[j2][m] << endl;
+								<< Djm_minusHalf[j][m] << "\t" << Djm_plusHalf[j][m] << "\t"
+								<< Vminus_m_minusHalf[j][m] << "\t" << Vminus_m_plusHalf[j][m] << "\t"
+								<< Vplus_m_minusHalf[j][m] << "\t" << Vplus_m_plusHalf[j][m] << endl;
 			fileMatrixDistQT	<< j << "\t" << m << "\t"
-								<< Tjm[j2][m] << "\t" << Qjm[j2][m] << endl;
+								<< Tjm[j][m] << "\t" << Qjm[j][m] << endl;
 		}
 	}
 	for (size_t m=0;m<M+1;m++) {
-		for (size_t j=1;j<J+1;j++) {
-			size_t j2 = j-1;
+		for (size_t j=0;j<J+1;j++) {
 			fileMatrixDistPos	<< m << "\t" << j << "\t"
-								<< Bj_minusHalf_m[m][j2] << "\t" << Bj_plusHalf_m[m][j2] << "\t"
-								<< Wminus_j_minusHalf[m][j2] << "\t" << Wminus_j_plusHalf[m][j2] << "\t"
-								<< Wplus_j_minusHalf[m][j2] << "\t" << Wplus_j_plusHalf[m][j2] << endl;
+								<< Bj_minusHalf_m[j][m] << "\t" << Bj_plusHalf_m[j][m] << "\t"
+								<< Wminus_j_minusHalf[j][m] << "\t" << Wminus_j_plusHalf[j][m] << "\t"
+								<< Wplus_j_minusHalf[j][m] << "\t" << Wplus_j_plusHalf[j][m] << endl;
 		}
 	}
  
@@ -2918,119 +3536,58 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 	
 	cout << "TRANSPORT EQUATION: Starting time evolution" << endl << endl;
 	
+	Vector d((J+1)*(M+1),0.0);
 	for (size_t t=0;t<Ntime;t++) {
 		cout << "t = " << t << endl;
 		for (size_t jt=0;jt<NdeltaTime;jt++) {
 			
-			Vector a(J*(M+1),0.0);
-			Vector b(J*(M+1),0.0);
-			Vector c(J*(M+1),0.0);
-			Vector d(J*(M+1),0.0);
-			Vector e(J*(M+1),0.0);
-			Vector f(J*(M+1),0.0);
+			Vector a((J+1)*(M+1),0.0);
+			Vector ba((J+1)*(M+1),0.0);
+			Vector bb((J+1)*(M+1),0.0);
+			Vector bc((J+1)*(M+1),0.0);
+			Vector c((J+1)*(M+1),0.0);
 			
-			// BLOCK 1: Advances in half a time with the energy operators implicit and the spatial
-			// operator explicit.
-			
-			for (size_t j=1;j<J+1;j++) {
-				size_t j2 = j-1;
+			for (size_t j=0;j<J+1;j++) {
 				for (size_t m=0;m<M+1;m++) {
-					size_t l = j2*(M+1)+m;
-					
-					if (m > 0)
-						a[l] = - (0.5*deltat[t])/delta_g[m] * Djm_minusHalf[j2][m] * Vminus_m_minusHalf[j2][m] / delta_g_m_minushalf[m];
-					if (m < M)
-						c[l] = - (0.5*deltat[t])/delta_g[m] * Djm_plusHalf[j2][m] * Vplus_m_plusHalf[j2][m] / delta_g_m_plushalf[m];
-					b[l] = 1.0 + (0.5*deltat[t])/delta_g[m] * ( Djm_minusHalf[j2][m] * Vplus_m_minusHalf[j2][m] / delta_g_m_minushalf[m] +
-								Djm_plusHalf[j2][m] * Vminus_m_plusHalf[j2][m] / delta_g_m_plushalf[m] ) + 0.5*deltat[t]/Tjm[j2][m];
-					
-					d[l] = (0.5*deltat[t])/delta_r[j] * Bj_minusHalf_m[m][j2] * Wminus_j_minusHalf[m][j2] / delta_r_j_minushalf[j];
-					e[l] = 1.0 - (0.5*deltat[t])/delta_r[j] * ( Bj_minusHalf_m[m][j2] * Wplus_j_minusHalf[m][j2] / delta_r_j_minushalf[j] +
-								Bj_plusHalf_m[m][j2] * Wminus_j_plusHalf[m][j2] / delta_r_j_plushalf[j] );
-					f[l] = (j < J) ? 
-						(0.5*deltat[t])/delta_r[j] * Bj_plusHalf_m[m][j2] * Wplus_j_plusHalf[m][j2] / delta_r_j_plushalf[j] : 0.0;
-					
-					rr[l] = rrOld[j2][m] + Qjm[j2][m] * 0.5*deltat[t];
-					//rr[l] = (j2 > 0 ? rrOld[j2-1][m] : 0.0) * d[l] + rrOld[j2][m] * e[l] + (j < J ? rrOld[j2+1][m] * f[l] : 0.0) + Qjm[j2][m]*deltat;
+					size_t l = j*(M+1)+m;
+					if (j == 0) {
+						bb[l] = 1.0;
+					} else {
+						if (j > 0)
+							a[l] = - deltat[t]/delta_r[j] * Bj_minusHalf_m[j][m] * Wminus_j_minusHalf[j][m] / delta_r_j_minushalf[j];
+						a[l] /= 2.0;
+						
+						if (j < J)
+							c[l] = - deltat[t]/delta_r[j] * Bj_plusHalf_m[j][m] * Wplus_j_plusHalf[j][m] / delta_r_j_plushalf[j];
+						c[l] /= 2.0;
+						
+						if (m > 0)
+							ba[l] = - deltat[t]/delta_g[m] * Djm_minusHalf[j][m] * Vminus_m_minusHalf[j][m] / delta_g_m_minushalf[m];
+				
+						bb[l] = 1.0 + 0.5 * deltat[t]/delta_r[j] * ( Bj_plusHalf_m[j][m] * Wminus_j_plusHalf[j][m] / delta_r_j_plushalf[j]
+								+ Bj_minusHalf_m[j][m] * Wplus_j_minusHalf[j][m] / delta_r_j_minushalf[j] )
+						+ 1.0/delta_g[m] * ( Djm_plusHalf[j][m] * Vminus_m_plusHalf[j][m] / delta_g_m_plushalf[m] 
+								+ Djm_minusHalf[j][m] * Vplus_m_minusHalf[j][m] / delta_g_m_minushalf[m] ) 
+						+ deltat[t]/Tjm[j][m];
+						if (m < M)
+							bc[l] = - deltat[t]/delta_g[m] * Djm_plusHalf[j][m] * Vplus_m_plusHalf[j][m] / delta_g_m_plushalf[m];
+						
+						d[l] = Qjm[j][m]*deltat[t] + d[l] + d[l] - a[l] * (j>0 ? d[(j-1)*(M+1)+m] : 0.0) - 
+									bb[l] * d[l] - c[l] * (j<J ? d[(j+1)*(M+1)+m] : 0.0);
+					}
 				}
 			}
-			TriDiagSys(a,b,c,rr,J*(M+1));
-			
-			for (size_t j=1;j<J+1;j++) {
-				size_t j2 = j-1;
-				for (size_t m=0;m<M+1;m++) {
-					size_t l = j2*(M+1)+m;
-					rrOld[j2][m] = rr[l];
-				}
-			}
-			// BLOCK 2: Advances in half a time with the spatial operators implicit and the energy
-			// operators explicit.
-			
-			for (size_t m=0;m<M+1;m++){
-				for (size_t j=1;j<J+1;j++) {
-					size_t j2 = j-1;
-					size_t lp = m*J+j2;
-					size_t l = j2*(M+1)+m;
-					a[lp] = - d[l];
-					b[lp] = 2.0 - e[l] + (0.5*deltat[t])/Tjm[j2][m];
-					c[lp] = (j < J) ? - f[l] : 0.0;
-					
-					double dd = (m > 0) ? (0.5*deltat[t])/delta_g[m] * Djm_minusHalf[j2][m] * Vminus_m_minusHalf[j2][m] / delta_g_m_minushalf[m] : 0.0;
-					double ee = 1.0 - (0.5*deltat[t])/delta_g[m] * ( Djm_minusHalf[j2][m] * Vplus_m_minusHalf[j2][m] / delta_g_m_minushalf[m] +
-								Djm_plusHalf[j2][m] * Vminus_m_plusHalf[j2][m] / delta_g_m_plushalf[m] );
-					double ff = (m < M) ? (0.5*deltat[t])/delta_g[m] * Djm_plusHalf[j2][m] * Vplus_m_plusHalf[j2][m] / delta_g_m_plushalf[m] : 0.0;
-					
-					rr[lp] = rrOld[j2][m] + Qjm[j2][m]*0.5*deltat[t];
-					//rr[lp] = (m > 0 ? rrOld[j2][m-1] : 0.0) * dd + rrOld[j2][m] * ee + (m < M ? rrOld[j2][m+1] : 0.0) * ff;
-				}
-			}
-			TriDiagSys(a,b,c,rr,J*(M+1));
-			
-			for (size_t j=1;j<J+1;j++) {
-				size_t j2 = j-1;
-				for (size_t m=0;m<M+1;m++) {
-					size_t lp = m*J+j2;
-					rrOld[j2][m] = rr[lp];
-				}
-			}
-			/*
-			for (size_t j=1;j<J+1;j++) {
-				size_t j2 = j-1;
-				for (size_t m=0;m<M+1;m++) {
-					size_t l = j2*(M+1)+m;
-					
-					a[l] = - d[l];
-					b[l] = 2.0 - e[l] + 0.5*deltat/Tjm[l];
-					c[l] = (j < J) ? - f[l] : 0.0;
-					
-					double d = (m > 0) ? (0.5*deltat)/delta_g[m] * Djm_minusHalf[l] * Vminus_m_minusHalf[l] / delta_g_m_minushalf[m] : 0.0;
-					double e = 1.0 - (0.5*deltat)/delta_g[m] * ( Djm_minusHalf[l] * Vplus_m_minusHalf[l] / delta_g_m_minushalf[m] +
-								Djm_plusHalf[l] * Vminus_m_plusHalf[l] / delta_g_m_plushalf[m] );
-					double f = (m < M) ? (0.5*deltat)/delta_g[m] * Djm_plusHalf[l] * Vplus_m_plusHalf[l] / delta_g_m_plushalf[m] : 0.0;
-					
-					rr[l] = (m > 0 ? rrOld[j2*(M+1)+m-1] : 0.0) * d + rrOld[l] * e + (m < M ? rrOld[j2*(M+1)+m+1] : 0.0) * f + Qjm[l]*0.5*deltat;
-				}
-			}
-			TriDiagSys(a,b,c,rr,J*(M+1)-1);
-			for (size_t j=1;j<J+1;j++) {
-				size_t j2 = j-1;
-				for (size_t m=0;m<M+1;m++) {
-					size_t l = j2*(M+1)+m;
-					size_t lp = m*J+j2;
-					rrOld[l] = rr[lp];
-				}
-			}*/
+			TriBlockDiagSys2(a,ba,bb,bc,c,d,J+1,M+1);
 		}
 		
 		if (t % 10 == 0) {
 			matrixInit(dist,J+1,M+1,0.0);
 			ofstream fileDist;
 			fileDist.open("dist"+to_string(t)+".txt");
-			for (size_t j=1;j<J+1;j++) {
-				size_t j2 = j-1;
+			for (size_t j=0;j<J+1;j++) {
 				for (size_t m=0;m<M+1;m++) {
-					size_t l = j2*(M+1)+m;
-					dist[j][m] = rrOld[j2][m] / P2(r_local[j]*schwRadius) / factor;
+					size_t l = j*(M+1)+m;
+					dist[j][m] = d[l] / P2(r_local[j]*schwRadius) / factor;
 					fileDist << r_local[j] << "\t" << g_local[m] << "\t" << dist[j][m] << endl;
 				}
 			}
@@ -3135,257 +3692,6 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 
 
 
-	/*
-	for (size_t t=0;t<Ntime;t++) {
-		for (size_t jt=0;jt<NdeltaTime;jt++) {
-			
-			// BLOCK 1: Advances in half a time with the energy operators implicit and the spatial
-			// operator explicit.
-			
-			Vector a(J*(M+1),0.0);
-			Vector b(J*(M+1),0.0);
-			Vector c(J*(M+1),0.0);
-			for (size_t j=1;j<J+1;j++) {
-				size_t j2 = j-1;
-				for (size_t m=0;m<M+1;m++) {
-					size_t l = j2*(M+1)+m;
-					double Ajm = Afun(r_local[j],g_local[m]);
-					double Aj_minusHalf_m = 0.5 * (Afun(r_local_extended[j],g_local[m]) + Ajm);
-					double Aj_plusHalf_m = 0.5 * (Afun(r_local_extended[j+2],g_local[m]) + Ajm);
-					
-					double Bjm = Bfun(r_local[j],g_local[m]);
-					double Bj_minusHalf_m = 0.5 * (Bfun(r_local_extended[j],g_local[m]) + Bjm);
-					double Bj_plusHalf_m = 0.5 * (Bfun(r_local_extended[j+2],g_local[m]) + Bjm);
-					
-					double Cjm = Cfun(r_local[j],g_local[m]);
-					double Cjm_minusHalf = 0.5 * (Cfun(r_local[j],g_local_extended[m]) + Cjm);
-					double Cjm_plusHalf = 0.5 * (Cfun(r_local[j],g_local_extended[m+2]) + Cjm);
-					
-					double Djm = Dfun(r_local[j],g_local[m]);
-					double Djm_minusHalf = 0.5 * (Dfun(r_local[j],g_local_extended[m]) + Djm);
-					double Djm_plusHalf = 0.5 * (Dfun(r_local[j],g_local_extended[m+2]) + Djm);
-					
-					double Qjm = Qfun(r_local[j],g_local[m]);
-					double Tjm = Tfun(r_local[j],g_local[m]);
-					
-					double wj_minusHalf = Aj_minusHalf_m/Bj_minusHalf_m * delta_r_j_minushalf[j];
-					double wj_plusHalf = Aj_plusHalf_m/Bj_plusHalf_m * delta_r_j_plushalf[j];
-					double Wj_minusHalf(0.0), Wj_plusHalf(0.0);
-					double Wplus_j_minusHalf(0.0), Wminus_j_minusHalf(0.0);
-					double Wplus_j_plusHalf(0.0), Wminus_j_plusHalf(0.0);
-					
-					if ( abs(wj_minusHalf) < 1.0e-3 ) {
-						Wj_minusHalf = pow(1.0+gsl_pow_2(wj_minusHalf)/24+gsl_pow_4(wj_minusHalf)/1920,-1);
-						Wplus_j_minusHalf = Wj_minusHalf * exp(0.5*wj_minusHalf);
-						Wminus_j_minusHalf = Wj_minusHalf * exp(-0.5*wj_minusHalf);
-					} else {
-						Wj_minusHalf = abs(wj_minusHalf)*exp(-0.5*abs(wj_minusHalf)) /
-										(1.0-exp(-abs(wj_minusHalf)));
-						if (wj_minusHalf > 0.0) {
-							Wplus_j_minusHalf = abs(wj_minusHalf) / (1.0-exp(-abs(wj_minusHalf)));
-							Wminus_j_minusHalf = Wj_minusHalf * exp(-0.5*wj_minusHalf);
-						} else {
-							Wplus_j_minusHalf = Wj_minusHalf * exp(0.5*wj_minusHalf);
-							Wminus_j_minusHalf = abs(wj_minusHalf) / (1.0-exp(-abs(wj_minusHalf)));
-						}
-					}
-					if ( abs(wj_plusHalf) < 1.0e-3 ) {
-						Wj_plusHalf = pow(1.0+gsl_pow_2(wj_plusHalf)/24+gsl_pow_4(wj_plusHalf)/1920,-1);
-						Wplus_j_plusHalf = Wj_plusHalf * exp(0.5*wj_plusHalf);
-						Wminus_j_plusHalf = Wj_plusHalf * exp(-0.5*wj_plusHalf);
-					} else {
-						Wj_plusHalf = abs(wj_plusHalf)*exp(-0.5*abs(wj_plusHalf)) /
-										(1.0-exp(-abs(wj_plusHalf)));
-						if (wj_plusHalf > 0.0) {
-							Wplus_j_plusHalf = abs(wj_plusHalf) / (1.0-exp(-abs(wj_plusHalf)));
-							Wminus_j_plusHalf = Wj_plusHalf * exp(-0.5*wj_plusHalf);
-						} else {
-							Wplus_j_plusHalf = Wj_plusHalf * exp(0.5*wj_plusHalf);
-							Wminus_j_plusHalf = abs(wj_plusHalf) / (1.0-exp(-abs(wj_plusHalf)));
-						}
-					}
-					
-					double vm_minusHalf = Cjm_minusHalf/Djm_minusHalf * delta_g_m_minushalf[m];
-					double vm_plusHalf = Cjm_plusHalf/Djm_plusHalf * delta_g_m_plushalf[m];
-					double Vm_minusHalf(0.0), Vm_plusHalf(0.0);
-					double Vplus_m_minusHalf(0.0), Vminus_m_minusHalf(0.0);
-					double Vplus_m_plusHalf(0.0), Vminus_m_plusHalf(0.0);
-					
-					if ( abs(vm_minusHalf) < 1.0e-3 ) {
-						Vm_minusHalf = pow(1.0+gsl_pow_2(vm_minusHalf)/24+gsl_pow_4(vm_minusHalf)/1920,-1);
-						Vplus_m_minusHalf = Vm_minusHalf * exp(0.5*vm_minusHalf);
-						Vminus_m_minusHalf = Vm_minusHalf * exp(-0.5*vm_minusHalf);
-					} else {
-						Vm_minusHalf = abs(vm_minusHalf)*exp(-0.5*abs(vm_minusHalf)) /
-										(1.0-exp(-abs(vm_minusHalf)));
-						if (vm_minusHalf > 0.0) {
-							Vplus_m_minusHalf = abs(vm_minusHalf) / (1.0-exp(-abs(vm_minusHalf)));
-							Vminus_m_minusHalf = Vm_minusHalf * exp(-0.5*vm_minusHalf);
-						} else {
-							Vplus_m_minusHalf = Vm_minusHalf * exp(0.5*vm_minusHalf);
-							Vminus_m_minusHalf = abs(vm_minusHalf) / (1.0-exp(-abs(vm_minusHalf)));
-						}
-					}
-					if ( abs(vm_plusHalf) < 1.0e-3 ) {
-						Vm_plusHalf = pow(1.0+gsl_pow_2(vm_plusHalf)/24+gsl_pow_4(vm_plusHalf)/1920,-1);
-						Vplus_m_plusHalf = Vm_plusHalf * exp(0.5*vm_plusHalf);
-						Vminus_m_plusHalf = Vm_plusHalf * exp(-0.5*vm_plusHalf);
-					} else {
-						Vm_plusHalf = abs(vm_plusHalf)*exp(-0.5*abs(vm_plusHalf)) /
-										(1.0-exp(-abs(vm_plusHalf)));
-						if (vm_plusHalf > 0.0) {
-							Vplus_m_plusHalf = abs(vm_plusHalf) / (1.0-exp(-abs(vm_plusHalf)));
-							Vminus_m_plusHalf = Vm_plusHalf * exp(-0.5*vm_plusHalf);
-						} else {
-							Vplus_m_plusHalf = Vm_plusHalf * exp(0.5*vm_plusHalf);
-							Vminus_m_plusHalf = abs(vm_plusHalf) / (1.0-exp(-abs(vm_plusHalf)));
-						}
-					}
-					
-					if (m > 0)
-						a[l] = - (0.5*deltat)/delta_g[m] * Djm_minusHalf * Vminus_m_minusHalf / delta_g_m_minushalf[m];
-					if (m < M)
-						c[l] = - (0.5*deltat)/delta_g[m] * Djm_plusHalf * Vplus_m_plusHalf / delta_g_m_minushalf[m];
-					b[l] = 1.0 + (0.5*deltat)/delta_g[m] * ( Djm_minusHalf * Vplus_m_minusHalf / delta_g_m_minushalf[m] +
-								Djm_plusHalf * Vminus_m_plusHalf / delta_g_m_plushalf[m] ) + 0.5*deltat/Tjm;
-					
-					double d = (0.5*deltat)/delta_r[j] * Bj_minusHalf_m * Wminus_j_minusHalf / delta_r_j_minushalf[j];
-					double e = - 1.0 - (0.5*deltat)/delta_r[j] * ( Bj_minusHalf_m * Wplus_j_minusHalf / delta_r_j_minushalf[j] +
-								Bj_plusHalf_m * Wminus_j_plusHalf / delta_r_j_plushalf[j] );
-					double f = (j < J) ? 
-						(0.5*deltat)/delta_r[j] * Bj_plusHalf_m * Wplus_j_plusHalf / delta_r_j_minushalf[j] : 0.0;
-					
-					r[l] = (j2 > 0 ? r[(j2-1)*(M+1)+m] : 0.0) * d + r[l] * e + (j < J ? r[(j2+1)*(M+1)+m] * f : 0.0) + Qjm*0.5*deltat;
-				}
-			}
-			TriDiagSys(a,b,c,r,(J-1)*M);
-			
-			// BLOCK 2: Advances in half a time with the spatial operators implicit and the energy
-			// operators explicit.
-		
-			Vector a(J*(M+1),0.0);
-			Vector b(J*(M+1),0.0);
-			Vector c(J*(M+1),0.0);
-			for (size_t j=1;j<J+1;j++) {
-				size_t j2 = j-1;
-				for (size_t m=0;m<M+1;m++) {
-					size_t l = j2*(M+1)+m;
-					double Ajm = Afun(r_local[j],g_local[m]);
-					double Aj_minusHalf_m = 0.5 * (Afun(r_local_extended[j],g_local[m]) + Ajm);
-					double Aj_plusHalf_m = 0.5 * (Afun(r_local_extended[j+2],g_local[m]) + Ajm);
-					
-					double Bjm = Bfun(r_local[j],g_local[m]);
-					double Bj_minusHalf_m = 0.5 * (Bfun(r_local_extended[j],g_local[m]) + Bjm);
-					double Bj_plusHalf_m = 0.5 * (Bfun(r_local_extended[j+2],g_local[m]) + Bjm);
-					
-					double Cjm = Cfun(r_local[j],g_local[m]);
-					double Cjm_minusHalf = 0.5 * (Cfun(r_local[j],g_local_extended[m]) + Cjm);
-					double Cjm_plusHalf = 0.5 * (Cfun(r_local[j],g_local_extended[m+2]) + Cjm);
-					
-					double Djm = Dfun(r_local[j],g_local[m]);
-					double Djm_minusHalf = 0.5 * (Dfun(r_local[j],g_local_extended[m]) + Djm);
-					double Djm_plusHalf = 0.5 * (Dfun(r_local[j],g_local_extended[m+2]) + Djm);
-					
-					double Qjm = Qfun(r_local[j],g_local[m]);
-					double Tjm = Tfun(r_local[j],g_local[m]);
-					
-					double wj_minusHalf = Aj_minusHalf_m/Bj_minusHalf_m * delta_r_j_minushalf[j];
-					double wj_plusHalf = Aj_plusHalf_m/Bj_plusHalf_m * delta_r_j_plushalf[j];
-					double Wj_minusHalf(0.0), Wj_plusHalf(0.0);
-					double Wplus_j_minusHalf(0.0), Wminus_j_minusHalf(0.0);
-					double Wplus_j_plusHalf(0.0), Wminus_j_plusHalf(0.0);
-					
-					if ( abs(wj_minusHalf) < 1.0e-3 ) {
-						Wj_minusHalf = pow(1.0+gsl_pow_2(wj_minusHalf)/24+gsl_pow_4(wj_minusHalf)/1920,-1);
-						Wplus_j_minusHalf = Wj_minusHalf * exp(0.5*wj_minusHalf);
-						Wminus_j_minusHalf = Wj_minusHalf * exp(-0.5*wj_minusHalf);
-					} else {
-						Wj_minusHalf = abs(wj_minusHalf)*exp(-0.5*abs(wj_minusHalf)) /
-										(1.0-exp(-abs(wj_minusHalf)));
-						if (wj_minusHalf > 0.0) {
-							Wplus_j_minusHalf = abs(wj_minusHalf) / (1.0-exp(-abs(wj_minusHalf)));
-							Wminus_j_minusHalf = Wj_minusHalf * exp(-0.5*wj_minusHalf);
-						} else {
-							Wplus_j_minusHalf = Wj_minusHalf * exp(0.5*wj_minusHalf);
-							Wminus_j_minusHalf = abs(wj_minusHalf) / (1.0-exp(-abs(wj_minusHalf)));
-						}
-					}
-					if ( abs(wj_plusHalf) < 1.0e-3 ) {
-						Wj_plusHalf = pow(1.0+gsl_pow_2(wj_plusHalf)/24+gsl_pow_4(wj_plusHalf)/1920,-1);
-						Wplus_j_plusHalf = Wj_plusHalf * exp(0.5*wj_plusHalf);
-						Wminus_j_plusHalf = Wj_plusHalf * exp(-0.5*wj_plusHalf);
-					} else {
-						Wj_plusHalf = abs(wj_plusHalf)*exp(-0.5*abs(wj_plusHalf)) /
-										(1.0-exp(-abs(wj_plusHalf)));
-						if (wj_plusHalf > 0.0) {
-							Wplus_j_plusHalf = abs(wj_plusHalf) / (1.0-exp(-abs(wj_plusHalf)));
-							Wminus_j_plusHalf = Wj_plusHalf * exp(-0.5*wj_plusHalf);
-						} else {
-							Wplus_j_plusHalf = Wj_plusHalf * exp(0.5*wj_plusHalf);
-							Wminus_j_plusHalf = abs(wj_plusHalf) / (1.0-exp(-abs(wj_plusHalf)));
-						}
-					}
-					
-					double vm_minusHalf = Cjm_minusHalf/Djm_minusHalf * delta_g_m_minushalf[m];
-					double vm_plusHalf = Cjm_plusHalf/Djm_plusHalf * delta_g_m_plushalf[m];
-					double Vm_minusHalf(0.0), Vm_plusHalf(0.0);
-					double Vplus_m_minusHalf(0.0), Vminus_m_minusHalf(0.0);
-					double Vplus_m_plusHalf(0.0), Vminus_m_plusHalf(0.0);
-					
-					if ( abs(vm_minusHalf) < 1.0e-3 ) {
-						Vm_minusHalf = pow(1.0+gsl_pow_2(vm_minusHalf)/24+gsl_pow_4(vm_minusHalf)/1920,-1);
-						Vplus_m_minusHalf = Vm_minusHalf * exp(0.5*vm_minusHalf);
-						Vminus_m_minusHalf = Vm_minusHalf * exp(-0.5*vm_minusHalf);
-					} else {
-						Vm_minusHalf = abs(vm_minusHalf)*exp(-0.5*abs(vm_minusHalf)) /
-										(1.0-exp(-abs(vm_minusHalf)));
-						if (vm_minusHalf > 0.0) {
-							Vplus_m_minusHalf = abs(vm_minusHalf) / (1.0-exp(-abs(vm_minusHalf)));
-							Vminus_m_minusHalf = Vm_minusHalf * exp(-0.5*vm_minusHalf);
-						} else {
-							Vplus_m_minusHalf = Vm_minusHalf * exp(0.5*vm_minusHalf);
-							Vminus_m_minusHalf = abs(vm_minusHalf) / (1.0-exp(-abs(vm_minusHalf)));
-						}
-					}
-					if ( abs(vm_plusHalf) < 1.0e-3 ) {
-						Vm_plusHalf = pow(1.0+gsl_pow_2(vm_plusHalf)/24+gsl_pow_4(vm_plusHalf)/1920,-1);
-						Vplus_m_plusHalf = Vm_plusHalf * exp(0.5*vm_plusHalf);
-						Vminus_m_plusHalf = Vm_plusHalf * exp(-0.5*vm_plusHalf);
-					} else {
-						Vm_plusHalf = abs(vm_plusHalf)*exp(-0.5*abs(vm_plusHalf)) /
-										(1.0-exp(-abs(vm_plusHalf)));
-						if (vm_plusHalf > 0.0) {
-							Vplus_m_plusHalf = abs(vm_plusHalf) / (1.0-exp(-abs(vm_plusHalf)));
-							Vminus_m_plusHalf = Vm_plusHalf * exp(-0.5*vm_plusHalf);
-						} else {
-							Vplus_m_plusHalf = Vm_plusHalf * exp(0.5*vm_plusHalf);
-							Vminus_m_plusHalf = abs(vm_plusHalf) / (1.0-exp(-abs(vm_plusHalf)));
-						}
-					}
-					
-					a[l] = - (0.5*deltat)/delta_r[j] * Bj_minusHalf_m * Wminus_j_minusHalf / delta_r_j_minushalf[j];
-					b[l] = 1.0 + (0.5*deltat)/delta_r[j] * ( Bj_minusHalf_m * Wplus_j_minusHalf / delta_r_j_minushalf[j] +
-								Bj_plusHalf_m * Wminus_j_plusHalf / delta_r_j_plushalf[j] ) + 0.5*deltat/Tjm;
-					c[l] = (j < J) ? - (0.5*deltat)/delta_r[j] * Bj_plusHalf_m * Wplus_j_plusHalf / delta_r_j_minushalf[j] : 0.0;
-					
-					double d = (m > 0) ? (0.5*deltat)/delta_g[m] * Djm_minusHalf * Vminus_m_minusHalf / delta_g_m_minushalf[m] : 0.0;
-					double e = - 1.0 - (0.5*deltat)/delta_g[m] * ( Djm_minusHalf * Vplus_m_minusHalf / delta_g_m_minushalf[m] +
-								Djm_plusHalf * Vminus_m_plusHalf / delta_g_m_plushalf[m] );
-					double f = (m < M) ? (0.5*deltat)/delta_g[m] * Djm_plusHalf * Vplus_m_plusHalf / delta_g_m_minushalf[m] : 0.0;
-					
-					r[l] = (m > 0 ? r[j2*(M+1)+m-1] : 0.0) * d + r[l] * e + (m < M ? r[j2*(M+1)+m+1] : 0.0) * f + Qjm*0.5*deltat;
-				}
-			}
-			TriDiagSys(a,b,c,d,M);
-		}
-	} */
-	
-	
-	
-	
-	
-	
-	
 
 void distributionFokkerPlanckCompleteSteadyState(Particle& particle, State& st)
 // This routine solves the transport equation by considering separated one zones at each
@@ -3397,9 +3703,9 @@ void distributionFokkerPlanckCompleteSteadyState(Particle& particle, State& st)
 // in the radial variable, it considers spatial advection and diffusion and it is solved by 
 // finite differences (CC70, PP96).
 {
-	double factor = 1.0e-20;
+	double factor = 1.0e-35;
 	
-	size_t J = 30;
+	size_t J = 20;
 	double r_min = sqrt(st.denf_e.ps[DIM_R][0] / schwRadius);
 	double r_max = (st.denf_e.ps[DIM_R][nR-1]/schwRadius)*paso_r;
 	double paso_r_local = pow(r_max/r_min,1.0/J);
@@ -3419,7 +3725,7 @@ void distributionFokkerPlanckCompleteSteadyState(Particle& particle, State& st)
 	for (size_t j=0;j<J+1;j++)	delta_r[j] = 0.5*r_local[j]*(paso_r_local-1.0/paso_r_local);
 	
 	// We define a mesh of points for the Lorentz factor coordinate
-	size_t M = 60;
+	size_t M = 40;
 	double g_min = 0.9 * (particle.emin() / (particle.mass*cLight2));
 	double g_max = 1.1 * (particle.emax() / (particle.mass*cLight2));
 	
@@ -3524,7 +3830,7 @@ void distributionFokkerPlanckCompleteSteadyState(Particle& particle, State& st)
 				{
 					double rTrue = r * schwRadius;
 					double E = g * particle.mass*cLight2;
-					double g_inj = 2.0;
+					double g_inj = 3.0;
 					double sigma = g_inj * (paso_g_local-1.0)/2.0;
 					double Qlocal = (rTrue > particle.ps[DIM_R][0] && 
 							rTrue < particle.ps[DIM_R][nR-1]) ?
@@ -3683,51 +3989,52 @@ void distributionFokkerPlanckCompleteSteadyState(Particle& particle, State& st)
 	
 	cout << "TRANSPORT EQUATION: Starting solving" << endl << endl;
 	
-	
-	Matrix a;		matrixInit(a,J+1,M+1,0.0);
-	Matrix ba;		matrixInit(ba,J+1,M+1,0.0);
-	Matrix bb;		matrixInit(bb,J+1,M+1,0.0);
-	Matrix bc;		matrixInit(bc,J+1,M+1,0.0);
-	Matrix c;		matrixInit(c,J+1,M+1,0.0);
+	Vector a((J+1)*(M+1),0.0);
+	Vector ba((J+1)*(M+1),0.0);
+	Vector bb((J+1)*(M+1),0.0);
+	Vector bc((J+1)*(M+1),0.0);
+	Vector c((J+1)*(M+1),0.0);
 	Vector d((J+1)*(M+1),0.0);
-	
-	Vector a1((J+1)*(M+1),0.0);
-	Vector ba1((J+1)*(M+1),0.0);
-	Vector bb1((J+1)*(M+1),0.0);
-	Vector bc1((J+1)*(M+1),0.0);
-	Vector c1((J+1)*(M+1),0.0);
 	
 	for (size_t j=0;j<J+1;j++) {
 		for (size_t m=0;m<M+1;m++) {
-			if (j > 0) {
+			size_t l = j*(M+1)+m;
+			if (j == 0) {
+				bb[l] = 1.0;
+			} else {
 				if (j > 0)
-					a[j][m] = - 1.0/delta_r[j] * Bj_minusHalf_m[j][m] * Wminus_j_minusHalf[j][m] / delta_r_j_minushalf[j];
+					a[l] = - 1.0/delta_r[j] * Bj_minusHalf_m[j][m] * Wminus_j_minusHalf[j][m] / delta_r_j_minushalf[j];
 				if (j < J)
-					c[j][m] = - 1.0/delta_r[j] * Bj_plusHalf_m[j][m] * Wplus_j_plusHalf[j][m] / delta_r_j_plushalf[j];
+					c[l] = - 1.0/delta_r[j] * Bj_plusHalf_m[j][m] * Wplus_j_plusHalf[j][m] / delta_r_j_plushalf[j];
 				
-				if (j+m > 0)
-					ba[j][m] = - 1.0/delta_g[m] * Djm_minusHalf[j][m] * Vminus_m_minusHalf[j][m] / delta_g_m_minushalf[m];
+				if (m > 0)
+					ba[l] = - 1.0/delta_g[m] * Djm_minusHalf[j][m] * Vminus_m_minusHalf[j][m] / delta_g_m_minushalf[m];
 				
-				bb[j][m] = 1.0/delta_r[j] * ( Bj_plusHalf_m[j][m] * Wminus_j_plusHalf[j][m] / delta_r_j_plushalf[j]
+				bb[l] = 1.0/delta_r[j] * ( Bj_plusHalf_m[j][m] * Wminus_j_plusHalf[j][m] / delta_r_j_plushalf[j]
 								+ Bj_minusHalf_m[j][m] * Wplus_j_minusHalf[j][m] / delta_r_j_minushalf[j] )
 						+ 1.0/delta_g[m] * ( Djm_plusHalf[j][m] * Vminus_m_plusHalf[j][m] / delta_g_m_plushalf[m] 
 								+ Djm_minusHalf[j][m] * Vplus_m_minusHalf[j][m] / delta_g_m_minushalf[m] ) 
 						+ 1.0/Tjm[j][m];
-				if (j+m < J+M)
-					bc[j][m] = - 1.0/delta_g[m] * Djm_plusHalf[j][m] * Vplus_m_plusHalf[j][m] / delta_g_m_plushalf[m];
-				d[j*(M+1)+m] = Qjm[j][m];
-			} else {
-				bb[j][m] = 1.0;
+				if (m < M)
+					bc[l] = - 1.0/delta_g[m] * Djm_plusHalf[j][m] * Vplus_m_plusHalf[j][m] / delta_g_m_plushalf[m];
+				d[l] = Qjm[j][m];
 			}
-			a1[j*(M+1)+m] = a[j][m];
-			ba1[j*(M+1)+m] = ba[j][m];
-			bb1[j*(M+1)+m] = bb[j][m];
-			bc1[j*(M+1)+m] = bc[j][m];
-			c1[j*(M+1)+m] = c[j][m];
 		}
 	}
 	
-	TriBlockDiagSys(a1,ba1,bb1,bc1,c1,d,J+1,M+1);
+	ofstream fileElements;
+	fileElements.open("elements.txt");
+	fileElements << "j \t m \t a \t ba \t bb \t bc \t c \t d" << endl;
+	for (size_t j=0;j<J+1;j++) {
+		for (size_t m=0;m<M+1;m++) {
+			size_t l = j*(M+1)+m;
+			fileElements << j << "\t" << m << "\t" << a[l] << "\t" <<
+			ba[l] << "\t" << bb[l] << "\t" << bc[l] << "\t" << c[l] << "\t" << d[l] << endl;
+		}
+	}
+	fileElements.close();
+	
+	/*TriBlockDiagSys(a,ba,bb,bc,c,d,J+1,M+1);
 	matrixInit(dist,J+1,M+1,0.0);
 	ofstream fileDist;
 	fileDist.open("dist.txt");
@@ -3737,54 +4044,83 @@ void distributionFokkerPlanckCompleteSteadyState(Particle& particle, State& st)
 			fileDist << r_local[j] << "\t" << g_local[m] << "\t" << dist[j][m] << endl;
 		}
 	}
-	fileDist.close();
+	fileDist.close();*/
+	int nz_num = (M+1)*(J+1) + 2*J*M + J*(M+1) + (J-1)*(M+1);
+	int ia[nz_num], ja[nz_num];
+	double aa[nz_num], xx[(M+1)*(J+1)];
 	
-	/*
 	cout << "TRANSPORT EQUATION: Assigning elements to the matrix" << endl;
-	Matrix AA;
-	matrixInit(AA,(J+1)*(M+1),(J+1)*(M+1),0.0);
-	for (size_t j1=0;j1<J+1;j1++) {
-		for (size_t j2=0;j2<J+1;j2++) {
-			for (size_t m1=0;m1<M+1;m1++) {
-				for (size_t m2=0;m2<M+1;m2++) {
-					size_t i1 = j1*(M+1)+m1;
-					size_t i2 = j2*(M+1)+m2;
-					if (j1 == j2) {					// B matrix
-						if (m2 == m1-1) AA[i1][i2] = ba[j1][m1];
-						else if (m1 == m2) AA[i1][i2] = bb[j1][m1];
-						else if (m2 == m1+1) AA[i1][i2] = bc[j1][m1];
-						else AA[i1][i2] = 0.0;
-					} else if (j2 == j1-1) {		// A matrix
-						if (m2 == m1) AA[i1][i2] = a[j1][m1];
-						else AA[i1][i2] = 0.0;
-					} else if (j2 == j1+1) {		// C matrix
-						if (m2 == m1) AA[i1][i2] = c[j1][m1];
-						else AA[i1][i2] = 0.0;
-					} else
-						AA[i1][i2] = 0.0;
-				}
-			}
-		}
+	
+	
+	
+	cout << endl;
+	cout << "bb" << endl << endl;
+	for (size_t l=0;l<(M+1)*(J+1);l++) {
+		ia[l] = l;
+		ja[l] = l;
+		aa[l] = bb[l];
+		cout << l << "\t" << ia[l] << "\t" << ja[l] << "\t" << aa[l] << "\t" << bb[l] << endl;
+	}
+	cout << endl;
+	cout << "bc" << endl << endl;
+	for (size_t l=(M+1)*(J+1);l<(M+1)*(J+1)+J*M;l++) {
+		size_t lp = l - (M+1)*(J+1);
+		ia[l] = M+1 + lp + lp/M;
+		ja[l] = ia[l] + 1;
+		aa[l] = bc[M+1 + lp + lp/M];
+		cout << l << "\t" << ia[l] << "\t" << ja[l] << "\t" << aa[l] << "\t" << bc[M+1 + lp + lp/M] << endl;
+	}
+	cout << endl;
+	cout << "ba" << endl << endl;
+	for (size_t l=(M+1)*(J+1)+J*M;l<(M+1)*(J+1)+2*J*M;l++) {
+		size_t lp = l - ( (M+1)*(J+1) + J*M );
+		ia[l] = M+1 + 1 + lp + lp/M;
+		ja[l] = ia[l] - 1;
+		aa[l] = ba[M+1 + 1 + lp + lp/M];
+		cout << l << "\t" << ia[l] << "\t" << ja[l] << "\t" << aa[l] << "\t" << ba[M+1+1+lp+lp/M] << endl;
+	}
+	cout << "a" << endl << endl;
+	for (size_t l=(M+1)*(J+1)+2*J*M;l<(M+1)*(J+1)+2*J*M+J*(M+1);l++) {
+		size_t lp = l - ( (M+1)*(J+1) + 2*J*M );
+		ia[l] = M+1 + lp;
+		ja[l] = lp;
+		aa[l] = a[M+1 + lp];
+		cout << l << "\t" << ia[l] << "\t" << ja[l] << "\t" << aa[l] << "\t" << a[M+1+lp] << endl;
+	}
+	cout << "c" << endl << endl;
+	for (size_t l=(M+1)*(J+1)+2*J*M+J*(M+1);l<(M+1)*(J+1)+2*J*M+J*(M+1)+(J-1)*(M+1);l++) {
+		size_t lp = l - ( (M+1)*(J+1) + 2*J*M + J*(M+1) );
+		ia[l] = M+1 + lp;
+		ja[l] = lp + 2*(M+1);
+		aa[l] = c[M+1 + lp];
+		cout << l << "\t" << ia[l] << "\t" << ja[l] << "\t" << aa[l] << "\t" << c[M+1+lp] << endl;
 	}
 	
 	cout << "TRANSPORT EQUATION: Start Gauss-Seidel" << endl;
-	matrixWrite("matrixElements.txt",AA,(J+1)*(M+1),(J+1)*(M+1));
+	//matrixWrite("matrixElements.txt",AA,(J+1)*(M+1),(J+1)*(M+1));
 	
+	Matrix AA;
+	matrixInit(AA,(J+1)*(M+1),(J+1)*(M+1),0.0);
+	
+	for (size_t l=0;l<nz_num;l++) AA[ia[l]][ja[l]] = aa[l];
+	
+	mgmres_st((M+1)*(J+1),nz_num,ia,ja,aa,xx,xx,10,(M+1)*(J+1)-1,1e-1,1e-3);
 	double err = 0.0;
-	GaussSeidel(AA,d,d,(J+1)*(M+1),1,err);
-	cout << "ERROR = " << err << endl;
 	
+	//Jacobi(a,ba,bb,bc,c,d,J+1,M+1);
+	//GaussSeidel(AA,d,d,(J+1)*(M+1),1,err);
+
 	matrixInit(dist,J+1,M+1,0.0);
 	ofstream fileDist;
 	fileDist.open("dist.txt");
 	for (size_t j=0;j<J+1;j++) {
 		for (size_t m=0;m<M+1;m++) {
-			dist[j][m] = d[j*(M+1)+m] / P2(r_local[j]*schwRadius) / factor;
+			dist[j][m] = x[j*(M+1)+m] / P2(r_local[j]*schwRadius) / factor;
 			fileDist << r_local[j] << "\t" << g_local[m] << "\t" << dist[j][m] << endl;
 		}
 	}
 	fileDist.close();
-	*/
+	
 	cout << endl << "TRANSPORT EQUATION: Finished" << endl << endl;
 	
 	particle.ps.iterate([&] (const SpaceIterator& iR) {

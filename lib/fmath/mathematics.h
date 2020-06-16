@@ -13,7 +13,11 @@
 	inline double P3(double x) { return x*x*x; }
 
 	typedef std::vector< std::vector< double > > Matrix;
+	typedef std::vector< std::vector< long double > > MatrixLongDouble;
+	typedef std::vector< std::vector< __float128 > > MatrixQuad;
 	typedef std::vector<double> Vector;
+	typedef std::vector< long double> VectorLongDouble;
+	typedef std::vector< __float128 > VectorQuad;
 	typedef std::vector<float> fVector;
 
 	typedef std::function<double(double)> fun1;

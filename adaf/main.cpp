@@ -109,8 +109,8 @@ int main()
 						distributionFokkerPlanckSpatialDiffusion(model.ntProton, model);
 						//distributionMultiZoneRadial(model.ntProton, model);
 					else
-						//distributionFokkerPlanckComplete(model.ntProton, model);
-						distributionFokkerPlanckCompleteSteadyState(model.ntProton, model);
+						distributionFokkerPlanckComplete(model.ntProton, model);
+						//distributionFokkerPlanckCompleteSteadyState(model.ntProton, model);
 						//distributionFokkerPlanckSpatialDiffusionTimeDependent(model.ntProton, model);
 						//distributionFokkerPlanckRadial(model.ntProton,model);
 					writeEandRParamSpace("protonDistribution", model.ntProton.distribution,0,1);
