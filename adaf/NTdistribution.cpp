@@ -1521,256 +1521,6 @@ void distributionFokkerPlanckSpatialDiffusion(Particle& particle, State& st)
 
 
 
-void distributionFokkerPlanckSpatialDiffusionTimeDependent(Particle& particle, State& st)
-// This routine solves the transport equation by considering separated one zones at each
-// energy. The escape time includes the time that takes to the particles to "cross" the energy-cell
-// by losing energy, and the injection includes the flux of particles coming from the immediately 
-// higher-energy cell. It is solved backward (from the highest energy to the lowest one) and so 
-// it can only handle systematic energy losses (cooling) and not acceleration.
-// At each cell, the steady transport equation is an ordinary diff. equation
-// in the radial variable, it considers spatial advection and diffusion and it is solved by 
-// finite differences (CC70, PP96).
-{
-	double paso_E = pow(particle.emax()/particle.emin(),1.0/(nE-1));
-	double restEnergy = particle.mass * cLight2;
-	double factor = 1e10;
-	particle.ps.iterate([&](const SpaceIterator& iE) {
-		
-		SpaceCoord jE = {nE-1-iE.coord[DIM_E],0,0};
-		double E = particle.ps[DIM_E][jE[DIM_E]];
-		double g = E / restEnergy;
-		
-		// We define a new mesh of points
-		size_t M = 200;
-		double r_min = sqrt(schwRadius * st.denf_e.ps[DIM_R][0]);
-		double r_max = st.denf_e.ps[DIM_R][nR-1]*paso_r;
-		
-		double paso_r_local = pow(r_max/r_min,1.0/M);
-		Vector r_local(M+1,r_min);
-		Vector r_local_extended(M+3,r_min/paso_r_local);
-		Vector delta_r_m_plushalf(M+1,0.0);
-		Vector delta_r_m_minushalf(M+1,0.0);
-		Vector delta_r(M+1,0.0);
-		
-		for (size_t jr=1;jr<M+1;jr++)	r_local[jr] = r_local[jr-1]*paso_r_local;
-		for (size_t jr=1;jr<M+3;jr++)	r_local_extended[jr] = r_local_extended[jr-1]*paso_r_local;
-		for (size_t jr=0;jr<M+1;jr++)	delta_r_m_plushalf[jr] = r_local[jr]*(paso_r_local-1.0);
-		for (size_t jr=0;jr<M+1;jr++)	delta_r_m_minushalf[jr] = r_local[jr]*(1.0-1.0/paso_r_local);
-		for (size_t jr=0;jr<M+1;jr++)	delta_r[jr] = 0.5*r_local[jr]*(paso_r_local-1.0/paso_r_local);
-		
-		fun1 Bfun = [&particle,&st,&jE,g] (double rTrue) 
-						{
-							double height = height_fun(rTrue);
-							double B = magneticField(rTrue);
-							double vR = radialVel(rTrue);
-							double k_rr = diffCoeff_r(g,particle,height,B);
-							//return - vR * ( 2.0*k_rr/(rTrue*vR) + 1.0 );
-							return - vR;
-						};
-
-		fun1 Cfun = [&particle,&jE,g] (double rTrue)
-						{
-							double height = height_fun(rTrue);
-							double B = magneticField(rTrue);
-							double vR = radialVel(rTrue);
-							double k_rr = diffCoeff_r(g,particle,height,B);
-							return k_rr/1e20;
-						};
-
-		fun1 Tfun = [&st,&particle,&jE,g,E,paso_E,restEnergy] (double rTrue) 
-						{
-							size_t jjR=0;
-							particle.ps.iterate([&](const SpaceIterator& iR) {
-								if (iR.val(DIM_R) < rTrue) jjR++;
-							},{0,-1,0});
-							SpaceCoord jEaux = {jE[DIM_E],jjR,0};
-							double height = height_fun(rTrue);
-							double B = magneticField(rTrue);
-							double vR = radialVel(rTrue);
-							double rateDiff = diffCoeff_r(g,particle,height,B) / (height*height);
-							double rateWind = 2.0*s*abs(vR)/rTrue;
-							double loss = abs(losses(E,particle,st,jEaux));
-							double rateCool = loss / (E*(sqrt(paso_E)-1.0/sqrt(paso_E)));
-							double rateAccretion = (rTrue > st.denf_e.ps[DIM_R][0] && rTrue < 2*schwRadius) ? 
-														pow(accretionTime(rTrue),-1) : 0.0;
-							//return pow(rateDiff+rateCool,-1);
-							return 1e99;
-						};
-		
-		fun1 Qfun = [&st,&particle,&jE,E,paso_E,restEnergy,factor] (double rTrue)
-					{
-						size_t jjR=0;
-						particle.ps.iterate([&](const SpaceIterator& iR) {
-							if (iR.val(DIM_R) < rTrue) jjR++;
-						},{0,-1,0});
-						SpaceCoord jEaux = {jE[DIM_E],jjR,0};
-						double height = height_fun(rTrue);
-						double Qplus = 0.0;
-						if (jE[DIM_E] < nE-1) {
-							SpaceCoord jEplus = {jE[DIM_E]+1,jjR,0};
-							double Nplus = (rTrue > particle.ps[DIM_R].first() &&
-											rTrue < particle.ps[DIM_R].last()) ?
-								particle.distribution.interpolate({{DIM_R,rTrue}},&jEplus)*rTrue*height : 0.0;
-							double loss = losses(st.denf_e.ps[DIM_E][jE[DIM_E]],particle,st,jEplus);
-							Qplus = Nplus * abs(loss) / (E*(sqrt(paso_E)-1.0/sqrt(paso_E)));
-						}
-						double vR = radialVel(rTrue);
-						double Qlocal = (rTrue > particle.ps[DIM_R].first() && 
-								rTrue < particle.ps[DIM_R].last()) ?
-								particle.injection.interpolate({{DIM_R,rTrue}},&jEaux)*rTrue*height: 0.0;
-						return factor * Qlocal * schwRadius*gsl_ran_gaussian_pdf(rTrue-5*schwRadius,0.5*schwRadius);
-					};
-		
-		size_t Ntime = 20;
-		double tMax = 1000*schwRadius / cLight;
-		double dt = tMax / Ntime;
-		Vector time(Ntime+1,0.0);
-		time[0] = 0.0;
-		for (size_t jt=1;jt<Ntime+1;jt++) time[jt] = time[jt-1] + dt;
-
-		int noflux = 1;
-		Vector d(M+1,0.0);
-
-		if (jE[DIM_E] == 30) {
-		
-		for (size_t jtt=0;jtt<Ntime;jtt++) {
-			
-			double deltat = (time[jtt+1]-time[jtt])/20;
-			
-			for (size_t jt=0;jt<Ntime;jt++) {
-
-				Vector a(M+1,0.0), b(M+1,0.0), c(M+1,0.0);
-				for (size_t m=0;m<M+1;m++) {
-					double Bm_minusHalf = 0.5 * (Bfun(r_local_extended[m]) + Bfun(r_local[m]));
-					double Bm_plusHalf = 0.5 * (Bfun(r_local[m]) + Bfun(r_local_extended[m+2]));
-					double Cm_minusHalf = 0.5 * (Cfun(r_local_extended[m]) + Cfun(r_local[m]));
-					double Cm_plusHalf = 0.5 * (Cfun(r_local[m]) + Cfun(r_local_extended[m+2]));
-					double Qm = Qfun(r_local[m]);
-					double Tm = Tfun(r_local[m]);
-					double wm_minusHalf = Bm_minusHalf/Cm_minusHalf * delta_r_m_minushalf[m];
-					double wm_plusHalf = Bm_plusHalf/Cm_plusHalf * delta_r_m_plushalf[m];
-					double Wm_minusHalf(0.0), Wm_plusHalf(0.0);
-					double Wplus_m_minusHalf(0.0), Wminus_m_minusHalf(0.0);
-					double Wplus_m_plusHalf(0.0), Wminus_m_plusHalf(0.0);
-					
-					if ( abs(wm_minusHalf) < 1.0e-3 ) {
-						Wm_minusHalf = pow(1.0+gsl_pow_2(wm_minusHalf)/24+gsl_pow_4(wm_minusHalf)/1920,-1);
-						Wplus_m_minusHalf = Wm_minusHalf * exp(0.5*wm_minusHalf);
-						Wminus_m_minusHalf = Wm_minusHalf * exp(-0.5*wm_minusHalf);
-					} else {
-						Wm_minusHalf = abs(wm_minusHalf)*exp(-0.5*abs(wm_minusHalf)) /
-										(1.0-exp(-abs(wm_minusHalf)));
-						if (wm_minusHalf > 0.0) {
-							Wplus_m_minusHalf = abs(wm_minusHalf) / (1.0-exp(-abs(wm_minusHalf)));
-							Wminus_m_minusHalf = Wm_minusHalf * exp(-0.5*wm_minusHalf);
-						} else {
-							Wplus_m_minusHalf = Wm_minusHalf * exp(0.5*wm_minusHalf);
-							Wminus_m_minusHalf = abs(wm_minusHalf) / (1.0-exp(-abs(wm_minusHalf)));
-						}
-					}
-					if ( abs(wm_plusHalf) < 1.0e-3 ) {
-						Wm_plusHalf = pow(1.0+gsl_pow_2(wm_plusHalf)/24+gsl_pow_4(wm_plusHalf)/1920,-1);
-						Wplus_m_plusHalf = Wm_plusHalf * exp(0.5*wm_plusHalf);
-						Wminus_m_plusHalf = Wm_plusHalf * exp(-0.5*wm_plusHalf);
-					} else {
-						Wm_plusHalf = abs(wm_plusHalf)*exp(-0.5*abs(wm_plusHalf)) /
-										(1.0-exp(-abs(wm_plusHalf)));
-						if (wm_plusHalf > 0.0) {
-							Wplus_m_plusHalf = abs(wm_plusHalf) / (1.0-exp(-abs(wm_plusHalf)));
-							Wminus_m_plusHalf = Wm_plusHalf * exp(-0.5*wm_plusHalf);
-						} else {
-							Wplus_m_plusHalf = Wm_plusHalf * exp(0.5*wm_plusHalf);
-							Wminus_m_plusHalf = abs(wm_plusHalf) / (1.0-exp(-abs(wm_plusHalf)));
-						}
-					}
-					if (noflux) {
-						if (m > 0)
-							a[m] = - deltat * Cm_minusHalf * Wminus_m_minusHalf / ( delta_r[m] * delta_r_m_minushalf[m] );
-						if (m < M)
-							c[m] = - deltat * Cm_plusHalf * Wplus_m_plusHalf / ( delta_r[m] * delta_r_m_minushalf[m] );
-						
-						b[m] = 1.0 + deltat/delta_r[m] * ( Cm_minusHalf * Wplus_m_minusHalf / delta_r_m_minushalf[m] +
-									Cm_plusHalf * Wminus_m_plusHalf / delta_r_m_plushalf[m] ) + deltat/Tm;
-					} else {
-						if (m > 0)
-							a[m] = (m == M) ? 0.0 : - deltat * Cm_minusHalf * Wminus_m_minusHalf / ( delta_r[m] * delta_r_m_minushalf[m] );
-						if (m < M)
-							c[m] = (m == 0) ? 0.0 : - deltat * Cm_plusHalf * Wplus_m_plusHalf / ( delta_r[m] * delta_r_m_minushalf[m] );
-						
-						b[m] = (m == 0 || m == M) ? 1.0 : 1.0 + deltat/delta_r[m] * ( Cm_minusHalf * Wplus_m_minusHalf / delta_r_m_minushalf[m] +
-									Cm_plusHalf * Wminus_m_plusHalf / delta_r_m_plushalf[m] ) + deltat/Tm;
-					}
-					d[m] = (jtt == 0 && jt == 0 ? Qm*deltat + d[m] : d[m]);
-				}
-				TriDiagSys(a,b,c,d,M);
-			}
-			
-			ofstream fileD;
-			fileD.open("pruebasDiffusion.txt");
-			for (size_t m=0;m<M+1;m++) {
-				fileD << r_local[m]/schwRadius << "\t" << d[m] << endl;
-			}
-			fileD.close();
-			
-		}
-		
-		}
-		
-		size_t m = 0;
-		particle.ps.iterate([&](const SpaceIterator &jER) {
-			double rTrue = jER.val(DIM_R);
-			double height = height_fun(rTrue);
-			double vR = radialVel(rTrue);
-			double logrTrue = log10(rTrue);
-			while (log10(r_local[m]) < logrTrue) m++;
-			double slope = safeLog10(d[m]/d[m-1])/safeLog10(r_local[m]/r_local[m-1]);
-			double dist = d[m-1] * pow(rTrue / r_local[m-1], slope);
-			particle.distribution.set(jER,dist/(rTrue*height*factor));
-		},{jE[DIM_E],-1,0});
-		
-	},{-1,0,0});
-	
-	// TESTS
-	
-	// CONSERVATION OF FLUX OF PARTICLES CROSSING EACH SHELL
-	particle.ps.iterate([&](const SpaceIterator& iR) {
-		double rB1 = iR.val(DIM_R) / sqrt(paso_r);
-		double area = 4.0*pi*rB1*height_fun(rB1);
-		double vR = abs(radialVel(rB1));
-		double flux = area*vR*integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
-						{
-							return particle.distribution.interpolate({{DIM_E,e}},&iR.coord);
-						},100);
-		cout << iR.coord[DIM_R] << "\t flux = " << flux << endl;
-	},{0,-1,0});
-	
-	// FLUX OF ENERGY
-	particle.ps.iterate([&](const SpaceIterator& iR) {
-		double rB1 = iR.val(DIM_R) / sqrt(paso_r);
-		double area = 4.0*pi*rB1*height_fun(rB1);
-		double vR = abs(radialVel(rB1));
-		double flux = area*vR*integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
-						{
-							return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e;
-						},100);
-		cout << iR.coord[DIM_R] << "\t flux of energy = " << flux << endl;
-	},{0,-1,0});
-	
-	// COSMIC RAY PRESSURE << THERMAL PRESSURE
-	particle.ps.iterate([&](const SpaceIterator& iR) {
-		double r = iR.val(DIM_R);
-		double pCR = integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
-						{
-							return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e/3.0;
-						},100);
-		double pFluid = massDensityADAF(r)*sqrdSoundVel(r);
-		cout << iR.coord[DIM_R] << "\t pCR/pgas = " << pCR/pFluid << endl;
-	},{0,-1,0});
-	
-}
-
-
-
 
 /*
 void distributionFokkerPlanckMultiZoneTimeDependent(Particle& particle, State& st)
@@ -2056,7 +1806,7 @@ void distributionFokkerPlanckMultiZoneTimeDependent(Particle& particle, State& s
 
 
 
-
+/*
 void distributionFokkerPlanckRadial(Particle& particle, State& st)
 // This routine solves the transport equation in two dimensions: radius and energy.
 // The time-dependence in the usual Fokker-Planck equation is replaced via changes of variables
@@ -2589,20 +2339,15 @@ void distributionGAMERA(Particle& p, State& st)
 
 
 void distributionFokkerPlanckComplete(Particle& particle, State& st)
-// This routine solves the transport equation by considering separated one zones at each
-// energy. The escape time includes the time that takes to the particles to "cross" the energy-cell
-// by losing energy, and the injection includes the flux of particles coming from the immediately 
-// higher-energy cell. It is solved backward (from the highest energy to the lowest one) and so 
-// it can only handle systematic energy losses (cooling) and not acceleration.
-// At each cell, the steady transport equation is an ordinary diff. equation
-// in the radial variable, it considers spatial advection and diffusion and it is solved by 
-// finite differences (CC70, PP96).
+// This routine solves the complete time-dependent transport equation considering turbulence
+// acceleration and spatial diffusion.
 {
 	double factor = 1.0e-20;
 	
-	size_t J = 80;
+	size_t J = 50;
 	double r_min = sqrt(st.denf_e.ps[DIM_R][0] / schwRadius);
 	double r_max = (st.denf_e.ps[DIM_R][nR-1]/schwRadius)*paso_r;
+	r_max = 1.0e2*paso_r;
 	double paso_r_local = pow(r_max/r_min,1.0/J);
 	
 	// We define a mesh of points for the radial coordinate
@@ -2620,7 +2365,7 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 	for (size_t j=0;j<J+1;j++)	delta_r[j] = 0.5*r_local[j]*(paso_r_local-1.0/paso_r_local);
 	
 	// We define a mesh of points for the Lorentz factor coordinate
-	size_t M = 110;
+	size_t M = 80;
 	double g_min = 0.9 * (particle.emin() / (particle.mass*cLight2));
 	double g_max = 1.1 * (particle.emax() / (particle.mass*cLight2));
 	
@@ -2639,19 +2384,7 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 	
 	// We define a vector for the time evolution
 	
-	size_t Ntime = 1e4;
-	size_t NdeltaTime = 1e4;
-	double charEnergy = 1e5*particle.emin();
-	double charGamma = charEnergy / (particle.mass*cLight2);
-	double charHeight = 100*schwRadius;
-	double charRho = massDensityADAF(10*schwRadius);
-	double charMagf = magneticField(5*schwRadius);
-	double timescaleAdvection = schwRadius / cLight;
-	double timescaleDiffusion = diffCoeff_r(charGamma,particle,charHeight,charMagf);
-	double timescaleRadial = min(timescaleAdvection, timescaleDiffusion);
-	SpaceCoord iR = {0,3,0};
-	double timescaleCooling = charEnergy / losses(charEnergy,particle,st,iR);
-	double naturalTimescale = P2(2.0) / diffCoeff_g(2.0,particle,10*schwRadius,charMagf,charRho);
+	double naturalTimescale = schwRadius/cLight;
 	for (size_t j=2;j<J-1;j++) {
 		double rTrue = r_local[j]*schwRadius;
 		double deltar = delta_r[j]*schwRadius;
@@ -2666,9 +2399,17 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 			naturalTimescale = min(naturalTimescale,min(localDiffTime,min(advTime,localAccTime)));
 		}
 	}
-	double maxTime = naturalTimescale*1e5;
+	
+	cout << "Acceleration timescale = " << naturalTimescale << endl;
+	cout << "Natural timescale = " << schwRadius/cLight << endl;
+	
+	naturalTimescale = schwRadius/cLight;
+	
+	size_t Ntime = 5e2;
+	size_t NdeltaTime = 1e2;
+	
 	Vector time(Ntime+1,1.0);
-	double dt = naturalTimescale*1e4;
+	double dt = naturalTimescale;
 	//double paso_time = pow(maxTime/naturalTimescale,1.0/(Ntime-1));
 	//for (size_t t=1;t<Ntime+1;t++) time[t] = time[t-1]*paso_time;
 	for (size_t t=1;t<Ntime+1;t++) time[t] = time[t-1] + dt;
@@ -2682,7 +2423,7 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 					double B = magneticField(rTrue);
 					double vR = radialVel(rTrue);
 					double k_rr = diffCoeff_r(g,particle,height,B);
-					return - (vR/schwRadius) * naturalTimescale * ( 2.0*k_rr/(rTrue*vR) + 1.0 );
+					return - (vR/schwRadius) * naturalTimescale;// * ( 2.0*k_rr/(rTrue*vR) + 1.0 );
 				};
 
 	fun2 Bfun = [&particle,naturalTimescale] (double r, double g)
@@ -2691,7 +2432,7 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 					double height = height_fun(rTrue);
 					double B = magneticField(rTrue);
 					double k_rr = diffCoeff_r(g,particle,height,B);
-					return k_rr / (schwRadius*schwRadius) * naturalTimescale;
+					return 1e-10*k_rr / (schwRadius*schwRadius) * naturalTimescale;
 				};
 
 	fun2 Cfun = [&particle,&st,paso_r_local,naturalTimescale] (double r, double g) 
@@ -2755,7 +2496,7 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 					double vR = radialVel(rTrue);
 					double rateDiff = diffCoeff_r(g,particle,height,B) / (height*height);
 					double rateWinds = 2.0*s*abs(vR)/rTrue;
-					//double rateAccretion = 1.0/accretionTime(rTrue);
+					return 1e99;
 					return pow(rateDiff+rateWinds,-1) / naturalTimescale;
 				};
 		
@@ -2763,15 +2504,15 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 				{
 					double rTrue = r * schwRadius;
 					double E = g * particle.mass*cLight2;
-					double g_inj = 3.0;
+					double g_inj = 2.0;
 					double sigma = g_inj * (paso_g_local-1.0)/2.0;
 					double Qlocal = (rTrue > particle.ps[DIM_R][0] && 
 							rTrue < particle.ps[DIM_R][nR-1]) ?
-							rTrue*rTrue * Ainjection * ionDensity(rTrue) * accelerationRateSDA(particle.mass*cLight2,particle,magneticField(rTrue),height_fun(rTrue),massDensityADAF(rTrue)): 0.0;
+							rTrue*rTrue * Ainjection * ionDensity(rTrue) : 0.0;
 					double result = Qlocal * gsl_ran_gaussian_pdf(g-g_inj,sigma);
-					double smoother = 0.25 * (1.0 + gsl_sf_erf((r_local[J]-r)/(r_local[J]/10.0))) 
+					double smoother = 0.25 * (1.0 + gsl_sf_erf((r_local[J-5]-r)/(r_local[J-5]/10.0))) 
 											* (1.0 + gsl_sf_erf(r-r_local[0]));
-					return result * naturalTimescale * factor * smoother;
+					return (r>80) ? result * naturalTimescale * factor * smoother : 0.0;
 				};
 	
 	Matrix Bj_minusHalf_m;				matrixInit(Bj_minusHalf_m,M+1,J+1,0.0);
@@ -2937,8 +2678,7 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 			Vector e((J+1)*(M+1),0.0);
 			Vector f((J+1)*(M+1),0.0);
 			
-			// BLOCK 1: Advances in half a time with the energy operators implicit and the spatial
-			// operator explicit.
+			// BLOCK 1: Advances in half a time step the energy evolution operator.
 			
 			#pragma omp parallel for
 			for (size_t j=0;j<J+1;j++) {
@@ -2960,14 +2700,10 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 									Bj_plusHalf_m[m][j] * Wminus_j_plusHalf[m][j] / delta_r_j_plushalf[j] );
 						f[l] = (j < J) ? 
 							(0.5*deltat[t])/delta_r[j] * Bj_plusHalf_m[m][j] * Wplus_j_plusHalf[m][j] / delta_r_j_plushalf[j] : 0.0;
-						
-						//rr[l] = (j2 > 0 ? rrOld[j2-1][m] : 0.0) * d[l] + rrOld[j2][m] * e[l] + (j < J ? rrOld[j2+1][m] * f[l] : 0.0) + Qjm[j2][m]*deltat;
 					} else {
 						b[l] = 1.0;
 					}
-					rr[l] = (j > 0 ? rrOld[j-1][m] : 0.0) * d[l] + rrOld[j][m] * e[l] 
-							+ (j < J ? rrOld[j+1][m] * f[l] : 0.0) + (j > 0 && j < J ? Qjm[j][m] :0.0)*0.5*deltat[t];
-					//rr[l] = rrOld[j][m] + (j > 0 && j < J ? Qjm[j][m] * deltat[t] : 0.0);
+					rr[l] = rrOld[j][m] + (j > 0 && j < J ? Qjm[j][m] * deltat[t] : 0.0);
 				}
 			}
 			TriDiagSys(a,b,c,rr,(J+1)*(M+1));
@@ -2980,18 +2716,18 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 				}
 			}
 			
-			// BLOCK 2: Advances in a time with the spatial operators implicit.
-			/*
+			// BLOCK 2: Advances in a time step the spatial evolution operator.
+			
 			#pragma omp parallel for
 			for (size_t m=0;m<M+1;m++){
 				for (size_t j=0;j<J+1;j++) {
 					size_t lp = m*(J+1)+j;
 					size_t l = j*(M+1)+m;
 					a[lp] = - d[l];
-					b[lp] = 2.0 - e[l];// + (deltat[t])/Tjm[j2][m];
+					b[lp] = 2.0 - e[l];
 					c[lp] = (j < J) ? - f[l] : 0.0;
 					
-					rr[lp] = rrOld[j][m];// + Qjm[j2][m] * 0.5*deltat[t];
+					rr[lp] = rrOld[j][m];
 				}
 			}
 			TriDiagSys(a,b,c,rr,(J+1)*(M+1));
@@ -3004,7 +2740,7 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 				}
 			}
 			
-			// BLOCK 3: Advances in half a time with the energy operators implicit.
+			// BLOCK 3: Advances in half a time the energy evolution operator.
 			fill(a.begin(),a.end(),0.0);
 			fill(b.begin(),b.end(),0.0);
 			fill(c.begin(),c.end(),0.0);
@@ -3022,8 +2758,6 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 							c[l] = - (0.5*deltat[t])/delta_g[m] * Djm_plusHalf[j][m] * Vplus_m_plusHalf[j][m] / delta_g_m_plushalf[m];
 						b[l] = 1.0 + (0.5*deltat[t])/delta_g[m] * ( Djm_minusHalf[j][m] * Vplus_m_minusHalf[j][m] / delta_g_m_minushalf[m] +
 									Djm_plusHalf[j][m] * Vminus_m_plusHalf[j][m] / delta_g_m_plushalf[m] ) + 0.5*deltat[t]/Tjm[j][m];
-						
-						//rr[l] = (j2 > 0 ? rrOld[j2-1][m] : 0.0) * d[l] + rrOld[j2][m] * e[l] + (j < J ? rrOld[j2+1][m] * f[l] : 0.0) + Qjm[j2][m]*deltat;
 					} else {
 						b[l] = 1.0;
 					}
@@ -3039,12 +2773,89 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 					rrOld[j][m] = rr[l];
 				}
 			}
-			*/
+			
 		}
 		if (t % 100 == 0 || t == Ntime-2) {
 			matrixInit(dist,J+1,M+1,0.0);
 			ofstream fileDist;
 			fileDist.open("dist"+to_string(t)+".txt");
+			for (size_t j=0;j<J+1;j++) {
+				for (size_t m=0;m<M+1;m++) {
+					size_t l = j*(M+1)+m;
+					dist[j][m] = rrOld[j][m] / P2(r_local[j]*schwRadius) / factor;
+					fileDist << r_local[j] << "\t" << -radialVel(r_local[j]*schwRadius)/cLight
+								   << "\t" << g_local[m] << "\t" << dist[j][m] << endl;
+				}
+			}
+			fileDist.close();
+		}
+	}
+	
+	// TO IMPROVE THE SOLUTION
+	/*
+	Ntime = 101;
+	double deltat_shorter = 1.6e-3 * naturalTimescale;
+	NdeltaTime = (time[1]-time[0]) / deltat_shorter;
+	Vector deltat_shorterVec(Ntime,deltat_shorter);
+	cout << NdeltaTime << endl;
+	
+	for (size_t t=0;t<Ntime;t++) {
+		cout << "t = " << t << endl;
+		for (size_t jt=0;jt<NdeltaTime;jt++) {
+			
+			Vector a((J+1)*(M+1),0.0);
+			Vector b((J+1)*(M+1),0.0);
+			Vector c((J+1)*(M+1),0.0);
+			Vector d((J+1)*(M+1),0.0);
+			Vector e((J+1)*(M+1),0.0);
+			Vector f((J+1)*(M+1),0.0);
+			
+			// BLOCK 1: Advances in half a time with the energy operators implicit and the spatial
+			// operator explicit.
+			
+			#pragma omp parallel for
+			for (size_t j=0;j<J+1;j++) {
+				
+				for (size_t m=0;m<M+1;m++) {
+					size_t l = j*(M+1)+m;
+				
+					if (j > 0 && j < J) {
+					
+						if (m > 0)
+							a[l] = - (0.5*deltat_shorterVec[t])/delta_g[m] * Djm_minusHalf[j][m] * Vminus_m_minusHalf[j][m] / delta_g_m_minushalf[m];
+						if (m < M)
+							c[l] = - (0.5*deltat_shorterVec[t])/delta_g[m] * Djm_plusHalf[j][m] * Vplus_m_plusHalf[j][m] / delta_g_m_plushalf[m];
+						b[l] = 1.0 + (0.5*deltat_shorterVec[t])/delta_g[m] * ( Djm_minusHalf[j][m] * Vplus_m_minusHalf[j][m] / delta_g_m_minushalf[m] +
+									Djm_plusHalf[j][m] * Vminus_m_plusHalf[j][m] / delta_g_m_plushalf[m] ) + 0.5*deltat_shorterVec[t]/Tjm[j][m];
+						
+						d[l] = (0.5*deltat_shorterVec[t])/delta_r[j] * Bj_minusHalf_m[m][j] * Wminus_j_minusHalf[m][j] / delta_r_j_minushalf[j];
+						e[l] = 1.0 - 0.5*(deltat_shorterVec[t])/delta_r[j] * ( Bj_minusHalf_m[m][j] * Wplus_j_minusHalf[m][j] / delta_r_j_minushalf[j] +
+									Bj_plusHalf_m[m][j] * Wminus_j_plusHalf[m][j] / delta_r_j_plushalf[j] );
+						f[l] = (j < J) ? 
+							(0.5*deltat_shorterVec[t])/delta_r[j] * Bj_plusHalf_m[m][j] * Wplus_j_plusHalf[m][j] / delta_r_j_plushalf[j] : 0.0;
+						
+						//rr[l] = (j2 > 0 ? rrOld[j2-1][m] : 0.0) * d[l] + rrOld[j2][m] * e[l] + (j < J ? rrOld[j2+1][m] * f[l] : 0.0) + Qjm[j2][m]*deltat;
+					} else {
+						b[l] = 1.0;
+					}
+					rr[l] = (j > 0 ? rrOld[j-1][m] : 0.0) * d[l] + rrOld[j][m] * e[l] 
+							+ (j < J ? rrOld[j+1][m] * f[l] : 0.0) + (j > 0 && j < J ? Qjm[j][m] :0.0)*0.5*deltat_shorterVec[t];
+				}
+			}
+			TriDiagSys(a,b,c,rr,(J+1)*(M+1));
+			
+			#pragma omp parallel for
+			for (size_t j=0;j<J+1;j++) {
+				for (size_t m=0;m<M+1;m++) {
+					size_t l = j*(M+1)+m;
+					rrOld[j][m] = rr[l];
+				}
+			}
+		}
+		if (t % 1 == 0) {
+			matrixInit(dist,J+1,M+1,0.0);
+			ofstream fileDist;
+			fileDist.open("dist_improved_"+to_string(t)+".txt");
 			for (size_t j=0;j<J+1;j++) {
 				for (size_t m=0;m<M+1;m++) {
 					size_t l = j*(M+1)+m;
@@ -3062,44 +2873,8 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 			rr[l] = rrOld[j][m];
 		}
 	}
-	
-	// BLOCK 3: Advances both
-	/*
-	for (size_t jt=0;jt<1;jt++) {
-		
-		Vector a(J*(M+1),0.0);
-		Vector b(J*(M+1),0.0);
-		Vector c(J*(M+1),0.0);
-		Vector d(J*(M+1),0.0);
-		Vector e(J*(M+1),0.0);
-		Vector f(J*(M+1),0.0);
-		
-		size_t t = Ntime/10;
-		for (size_t j=1;j<J+1;j++) {
-			size_t j2 = j-1;
-			for (size_t m=0;m<M+1;m++) {
-				size_t l = j2*(M+1)+m;
-				
-				if (m > 0)
-					a[l] = - (0.5*deltat[t])/delta_g[m] * Djm_minusHalf[j2][m] * Vminus_m_minusHalf[j2][m] / delta_g_m_minushalf[m];
-				if (m < M)
-					c[l] = - (0.5*deltat[t])/delta_g[m] * Djm_plusHalf[j2][m] * Vplus_m_plusHalf[j2][m] / delta_g_m_plushalf[m];
-				b[l] = 1.0 + (0.5*deltat[t])/delta_g[m] * ( Djm_minusHalf[j2][m] * Vplus_m_minusHalf[j2][m] / delta_g_m_minushalf[m] +
-							Djm_plusHalf[j2][m] * Vminus_m_plusHalf[j2][m] / delta_g_m_plushalf[m] ) + 0.5*deltat[t]/Tjm[j2][m];
-				
-				d[l] = (0.5*deltat[t])/delta_r[j] * Bj_minusHalf_m[m][j2] * Wminus_j_minusHalf[m][j2] / delta_r_j_minushalf[j];
-				e[l] = 1.0 - (0.5*deltat[t])/delta_r[j] * ( Bj_minusHalf_m[m][j2] * Wplus_j_minusHalf[m][j2] / delta_r_j_minushalf[j] +
-							Bj_plusHalf_m[m][j2] * Wminus_j_plusHalf[m][j2] / delta_r_j_plushalf[j] );
-				f[l] = (j < J) ? 
-					(0.5*deltat[t])/delta_r[j] * Bj_plusHalf_m[m][j2] * Wplus_j_plusHalf[m][j2] / delta_r_j_plushalf[j] : 0.0;
-				
-				rr[l] = rr[l] + Qjm[j2][m] * 0.5*deltat[t];
-				rr[l] = (j2 > 0 ? rr[(j2-1)*(M+1)+m] : 0.0) * d[l] + rr[l] * e[l] + (j < J ? rr[(j2+1)*(M+1)+m] * f[l] : 0.0) + Qjm[j2][m]*0.5*deltat[t];
-			}
-		}
-		TriDiagSys(a,b,c,rr,J*(M+1));
-	}
 	*/
+	
 	matrixInit(dist,J+1,M+1,0.0);
 	ofstream fileDist;
 	fileDist.open("dist_last.txt");
@@ -3107,7 +2882,8 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 		for (size_t m=0;m<M+1;m++) {
 			size_t l = j*(M+1)+m;
 			dist[j][m] = rr[l] / P2(r_local[j]*schwRadius) / factor;
-			fileDist << r_local[j] << "\t" << g_local[m] << "\t" << dist[j][m] << endl;
+			fileDist << r_local[j] << "\t" << -radialVel(r_local[j]*schwRadius)/cLight
+								   << "\t" << g_local[m] << "\t" << dist[j][m] << endl;
 		}
 	}
 	fileDist.close();
@@ -3116,56 +2892,58 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 	
 	particle.ps.iterate([&] (const SpaceIterator& iR) {
 		double r = iR.val(DIM_R);
-		size_t j = 1;
-		while (r_local[j]*schwRadius < r) j++;
-		particle.ps.iterate([&] (const SpaceIterator& iRE) {
-			double g = iRE.val(DIM_E) / (particle.mass*cLight2);
-			size_t m = 0;
-			while (g_local[m] < g) m++;
-			
-			double N11 = dist[j-1][m-1];
-			double N12 = dist[j-1][m];
-			double N1 = 0.0;
-			if (N11 > 0.0 && N12 > 0.0) {
-				double s1 = safeLog10(N12/N11)/safeLog10(g_local[m]/g_local[m-1]);
-				N1 = N11 * pow(g / g_local[m-1], s1);
-			} else {
-				if (N11 > 0.0)
-					N1 = - N11 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]) + N11;
-				else if (N12 > 0.0)
-					N1 = N12 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]);
-				else
-					N1 = 0.0;
-			}
-			double N21 = dist[j][m-1];
-			double N22 = dist[j][m];
-			double N2 = 0.0;
-			if (N21 > 0.0 && N22 > 0.0) {
-				double s2 = safeLog10(N22/N21)/safeLog10(g_local[m]/g_local[m-1]);
-				N2 = N21 * pow(g / g_local[m-1], s2);
-			} else {
-				if (N21 > 0.0)
-					N2 = - N21 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]) + N21;
-				else if (N22 > 0.0)
-					N2 = N22 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]);
-				else
-					N2 = 0.0;
-			}
-			
-			double N = 0.0;
-			if (N1 > 0.0 && N2 > 0.0) {
-				double s = safeLog10(N2/N1)/safeLog10(r_local[j]/r_local[j-1]);
-				N = N1 * pow(r / (r_local[j-1]*schwRadius), s);
-			} else {
-				if (N1 > 0.0)
-					N = - N1 * (r/schwRadius - r_local[j-1])/(r_local[j]-r_local[j-1]) + N1;
-				else if (N2 > 0.0)
-					N = N2 * (r/schwRadius - r_local[j-1])/(r_local[j]-r_local[j-1]);
-				else
-					N = 0.0;
-			}
-			particle.distribution.set(iRE, N / (particle.mass*cLight2));
-		},{-1,iR.coord[DIM_R],0});
+		if (r/schwRadius < r_local.back()) {
+			size_t j = 1;
+			while (r_local[j]*schwRadius < r) j++;
+			particle.ps.iterate([&] (const SpaceIterator& iRE) {
+				double g = iRE.val(DIM_E) / (particle.mass*cLight2);
+				size_t m = 0;
+				while (g_local[m] < g) m++;
+				
+				double N11 = dist[j-1][m-1];
+				double N12 = dist[j-1][m];
+				double N1 = 0.0;
+				if (N11 > 0.0 && N12 > 0.0) {
+					double s1 = safeLog10(N12/N11)/safeLog10(g_local[m]/g_local[m-1]);
+					N1 = N11 * pow(g / g_local[m-1], s1);
+				} else {
+					if (N11 > 0.0)
+						N1 = - N11 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]) + N11;
+					else if (N12 > 0.0)
+						N1 = N12 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]);
+					else
+						N1 = 0.0;
+				}
+				double N21 = dist[j][m-1];
+				double N22 = dist[j][m];
+				double N2 = 0.0;
+				if (N21 > 0.0 && N22 > 0.0) {
+					double s2 = safeLog10(N22/N21)/safeLog10(g_local[m]/g_local[m-1]);
+					N2 = N21 * pow(g / g_local[m-1], s2);
+				} else {
+					if (N21 > 0.0)
+						N2 = - N21 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]) + N21;
+					else if (N22 > 0.0)
+						N2 = N22 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]);
+					else
+						N2 = 0.0;
+				}
+				
+				double N = 0.0;
+				if (N1 > 0.0 && N2 > 0.0) {
+					double s = safeLog10(N2/N1)/safeLog10(r_local[j]/r_local[j-1]);
+					N = N1 * pow(r / (r_local[j-1]*schwRadius), s);
+				} else {
+					if (N1 > 0.0)
+						N = - N1 * (r/schwRadius - r_local[j-1])/(r_local[j]-r_local[j-1]) + N1;
+					else if (N2 > 0.0)
+						N = N2 * (r/schwRadius - r_local[j-1])/(r_local[j]-r_local[j-1]);
+					else
+						N = 0.0;
+				}
+				particle.distribution.set(iRE, N / (particle.mass*cLight2));
+			},{-1,iR.coord[DIM_R],0});
+		}
 	},{0,-1,0});
 	
 	// TESTS
@@ -3210,7 +2988,7 @@ void distributionFokkerPlanckComplete(Particle& particle, State& st)
 
 
 
-
+/*
 
 void distributionFokkerPlanckComplete2(Particle& particle, State& st)
 // This routine solves the transport equation by considering separated one zones at each
@@ -3687,11 +3465,11 @@ void distributionFokkerPlanckComplete2(Particle& particle, State& st)
 		cout << iR.coord[DIM_R] << "\t pCR/pgas = " << pCR/pFluid << endl;
 	},{0,-1,0});
 	
-}
+}*/
 
 
 
-
+/*
 
 void distributionFokkerPlanckCompleteSteadyState(Particle& particle, State& st)
 // This routine solves the transport equation by considering separated one zones at each
@@ -4034,7 +3812,7 @@ void distributionFokkerPlanckCompleteSteadyState(Particle& particle, State& st)
 	}
 	fileElements.close();
 	
-	/*TriBlockDiagSys(a,ba,bb,bc,c,d,J+1,M+1);
+	TriBlockDiagSys(a,ba,bb,bc,c,d,J+1,M+1);
 	matrixInit(dist,J+1,M+1,0.0);
 	ofstream fileDist;
 	fileDist.open("dist.txt");
@@ -4045,6 +3823,7 @@ void distributionFokkerPlanckCompleteSteadyState(Particle& particle, State& st)
 		}
 	}
 	fileDist.close();*/
+	/*
 	int nz_num = (M+1)*(J+1) + 2*J*M + J*(M+1) + (J-1)*(M+1);
 	int ia[nz_num], ja[nz_num];
 	double aa[nz_num], xx[(M+1)*(J+1)];
@@ -4215,3 +3994,510 @@ void distributionFokkerPlanckCompleteSteadyState(Particle& particle, State& st)
 	},{0,-1,0});
 	
 }
+*/
+
+
+
+
+
+void distributionSpatialDiffusion(Particle& particle, State& st)
+// This routine solves the complete time-dependent transport equation considering turbulence
+// acceleration and spatial diffusion.
+{
+	double factor = 1.0e-10;
+	
+	size_t J = 60;
+	double r_min = sqrt(st.denf_e.ps[DIM_R][0] / schwRadius);
+	double r_max = (st.denf_e.ps[DIM_R][nR-1] / schwRadius) * paso_r;
+	double paso_r_local = pow(r_max/r_min,1.0/J);
+	
+	// We define a mesh of points for the radial coordinate
+	
+	Vector r_local(J+1,r_min);
+	Vector r_local_extended(J+3,r_min/paso_r_local);
+	Vector delta_r_j_plushalf(J+1,0.0);
+	Vector delta_r_j_minushalf(J+1,0.0);
+	Vector delta_r(J+1,0.0);
+		
+	for (size_t j=1;j<J+1;j++)	r_local[j] = r_local[j-1]*paso_r_local;
+	for (size_t j=1;j<J+3;j++)	r_local_extended[j] = r_local_extended[j-1]*paso_r_local;
+	for (size_t j=0;j<J+1;j++)	delta_r_j_plushalf[j] = r_local[j]*(paso_r_local-1.0);
+	for (size_t j=0;j<J+1;j++)	delta_r_j_minushalf[j] = r_local[j]*(1.0-1.0/paso_r_local);
+	for (size_t j=0;j<J+1;j++)	delta_r[j] = 0.5*r_local[j]*(paso_r_local-1.0/paso_r_local);
+	
+	// We define a mesh of points for the Lorentz factor coordinate
+	size_t M = 80;
+	double g_min = 0.9 * (particle.emin() / (particle.mass*cLight2));
+	double g_max = 1.1 * (particle.emax() / (particle.mass*cLight2));
+	
+	double paso_g_local = pow(g_max/g_min,1.0/M);
+	Vector g_local(M+1,g_min);
+	Vector g_local_extended(M+3,g_min/paso_g_local);
+	Vector delta_g_m_plushalf(M+1,0.0);
+	Vector delta_g_m_minushalf(M+1,0.0);
+	Vector delta_g(M+1,0.0);
+		
+	for (size_t m=1;m<M+1;m++)	g_local[m] = g_local[m-1]*paso_g_local;
+	for (size_t m=1;m<M+3;m++)	g_local_extended[m] = g_local_extended[m-1]*paso_g_local;
+	for (size_t m=0;m<M+1;m++)	delta_g_m_plushalf[m] = g_local[m]*(paso_g_local-1.0);
+	for (size_t m=0;m<M+1;m++)	delta_g_m_minushalf[m] = g_local[m]*(1.0-1.0/paso_g_local);
+	for (size_t m=0;m<M+1;m++)	delta_g[m] = 0.5*g_local[m]*(paso_g_local-1.0/paso_g_local);
+	
+	// We define a vector for the time evolution
+	
+	double naturalTimescale = schwRadius/cLight;
+	for (size_t j=2;j<J-1;j++) {
+		double rTrue = r_local[j]*schwRadius;
+		double deltar = delta_r[j]*schwRadius;
+		double magf = magneticField(rTrue);
+		double rho = massDensityADAF(rTrue);
+		double height = height_fun(rTrue);
+		double vR = radialVel(rTrue);
+		double advTime = deltar / abs(vR);
+		for (size_t m=2;m<M-1;m++) {
+			double localAccTime = P2(delta_g[m]) / diffCoeff_g(g_local[m],particle,height,magf,rho);
+			double localDiffTime = P2(deltar) / diffCoeff_r(g_local[j],particle,height,magf);
+			naturalTimescale = min(naturalTimescale,min(localDiffTime,min(advTime,localAccTime)));
+		}
+	}
+	
+	cout << "Acceleration timescale = " << naturalTimescale << endl;
+	cout << "Natural timescale = " << schwRadius/cLight << endl;
+	
+	naturalTimescale = schwRadius/cLight;
+	
+	size_t Ntime = 5e2;
+	size_t NdeltaTime = 1e2;
+	
+	Vector time(Ntime+1,1.0);
+	double dt = naturalTimescale;
+	//double paso_time = pow(maxTime/naturalTimescale,1.0/(Ntime-1));
+	//for (size_t t=1;t<Ntime+1;t++) time[t] = time[t-1]*paso_time;
+	for (size_t t=1;t<Ntime+1;t++) time[t] = time[t-1] + dt;
+	Vector deltat(Ntime,1.0);
+	for (size_t t=0;t<Ntime;t++) deltat[t] = (time[t+1]-time[t])/NdeltaTime;
+	
+	fun2 Afun = [&particle,naturalTimescale] (double r, double g) 
+				{
+					double rTrue = r * schwRadius;
+					double height = height_fun(rTrue);
+					double B = magneticField(rTrue);
+					double vR = radialVel(rTrue);
+					double k_rr = diffCoeff_r(g,particle,height,B);
+					return - (vR/schwRadius) * naturalTimescale;// * ( 2.0*k_rr/(rTrue*vR) + 1.0 );
+				};
+
+	fun2 Bfun = [&particle,naturalTimescale] (double r, double g)
+				{
+					double rTrue = r * schwRadius;
+					double height = height_fun(rTrue);
+					double B = magneticField(rTrue);
+					double k_rr = diffCoeff_r(g,particle,height,B);
+					return k_rr / (schwRadius*schwRadius) * naturalTimescale;
+				};
+
+	fun2 Cfun = [&particle,&st,paso_r_local,naturalTimescale] (double r, double g) 
+				{
+					double rTrue = r * schwRadius;
+					double E = g*particle.mass*cLight2;
+					
+					size_t jjR=0;
+					if (rTrue > particle.ps[DIM_R][0]) {
+						if (rTrue < particle.ps[DIM_R][nR-1]) {
+							while (particle.ps[DIM_R][jjR] < rTrue) jjR++;
+						} else
+							jjR = nR-1;
+					}
+					
+					double dgdt = 0.0;
+					if (jjR > 0 && jjR < nR-1) {
+						SpaceCoord jR1 = {0,jjR-1,0};
+						SpaceCoord jR2 = {0,jjR,0};
+						double r1 = st.denf_e.ps[DIM_R][jjR-1];
+						double r2 = st.denf_e.ps[DIM_R][jjR];
+						double dEdt_1 = losses(E,particle,st,jR1);
+						double dEdt_2 = losses(E,particle,st,jR2);
+						double slope = safeLog10(dEdt_2/dEdt_1)/safeLog10(r2/r1);
+						dgdt = - dEdt_1 * pow(rTrue/r1, slope) / (particle.mass*cLight2);
+						
+					} else if (jjR == 0) {
+						SpaceCoord jR = {0,0,0};
+						dgdt = - losses(E,particle,st,jR) / (particle.mass*cLight2);
+					} else if (jjR == nR-1) {
+						SpaceCoord jR = {0,nR-1,0};
+						dgdt = - losses(E,particle,st,jR) / (particle.mass*cLight2);
+					}
+					double vR = radialVel(rTrue);
+					double dvRdr = (radialVel(rTrue*paso_r_local) - radialVel(rTrue/paso_r_local)) / 
+									(rTrue*(paso_r_local-1.0/paso_r_local));
+					
+					dvRdr = (dvRdr > 0.0) ? dvRdr : 0.0;
+					return - dgdt + 1.0/3.0 * (2.0*vR/rTrue + dvRdr) * g ) * naturalTimescale;
+				};
+	
+	fun2 Tfun = [&particle,naturalTimescale] (double r, double g) 
+				{
+					double rTrue = r * schwRadius;
+					double height = height_fun(rTrue);
+					double B = magneticField(rTrue);
+					double vR = radialVel(rTrue);
+					double rateDiff = diffCoeff_r(g,particle,height,B) / (height*height);
+					double rateWinds = 2.0*s*abs(vR)/rTrue;
+					return pow(rateDiff+rateWinds,-1) / naturalTimescale;
+				};
+		
+	fun2 Qfun = [&st,&particle,paso_g_local,factor,naturalTimescale,r_local,J] (double r, double g)
+				{
+					SpaceCoord i = {0,0,0};
+					double rTrue = r * schwRadius;
+					double E = g * particle.mass*cLight2;
+					return factor * particle.injection.interpolate({{DIM_E,E},{DIM_R,rTrue}},i) : 0.0;
+				};
+	
+	Matrix Bj_minusHalf_m;				matrixInit(Bj_minusHalf_m,M+1,J+1,0.0);
+	Matrix Bj_plusHalf_m;				matrixInit(Bj_plusHalf_m,M+1,J+1,0.0);
+	Matrix Djm_minusHalf;				matrixInit(Djm_minusHalf,J+1,M+1,0.0);
+	Matrix Djm_plusHalf;				matrixInit(Djm_plusHalf,J+1,M+1,0.0);
+	Matrix Wminus_j_minusHalf;			matrixInit(Wminus_j_minusHalf,M+1,J+1,0.0);
+	Matrix Wminus_j_plusHalf;			matrixInit(Wminus_j_plusHalf,M+1,J+1,0.0);
+	Matrix Wplus_j_minusHalf;			matrixInit(Wplus_j_minusHalf,M+1,J+1,0.0);
+	Matrix Wplus_j_plusHalf;			matrixInit(Wplus_j_plusHalf,M+1,J+1,0.0);
+	Matrix Vminus_m_minusHalf;			matrixInit(Vminus_m_minusHalf,J+1,M+1,0.0);
+	Matrix Vminus_m_plusHalf;			matrixInit(Vminus_m_plusHalf,J+1,M+1,0.0);
+	Matrix Vplus_m_minusHalf;			matrixInit(Vplus_m_minusHalf,J+1,M+1,0.0);
+	Matrix Vplus_m_plusHalf;			matrixInit(Vplus_m_plusHalf,J+1,M+1,0.0);
+	Matrix Tjm;							matrixInit(Tjm,J+1,M+1,0.0);
+	Matrix Qjm;							matrixInit(Qjm,J+1,M+1,0.0);
+	
+	cout << "TRANSPORT EQUATION: Starting matrix element calculation" << endl << endl;
+	
+	#pragma omp parallel for
+	for (size_t j=0;j<J+1;j++) {
+		for (size_t m=0;m<M+1;m++) {
+			size_t l = j*(M+1)+m;
+			double Ajm = Afun(r_local[j],g_local[m]);
+			double Aj_minusHalf_m = 0.5 * (Afun(r_local_extended[j],g_local[m]) + Ajm);
+			double Aj_plusHalf_m = 0.5 * (Afun(r_local_extended[j+2],g_local[m]) + Ajm);
+					
+			double Bjm = Bfun(r_local[j],g_local[m]);
+			Bj_minusHalf_m[m][j] = 0.5 * (Bfun(r_local_extended[j],g_local[m]) + Bjm);
+			Bj_plusHalf_m[m][j] = 0.5 * (Bfun(r_local_extended[j+2],g_local[m]) + Bjm);
+			
+			double Cjm = Cfun(r_local[j],g_local[m]);
+			double Cjm_minusHalf = 0.5 * (Cfun(r_local[j],g_local_extended[m]) + Cjm);
+			double Cjm_plusHalf = 0.5 * (Cfun(r_local[j],g_local_extended[m+2]) + Cjm);
+			
+			Qjm[j][m] = Qfun(r_local[j],g_local[m]);
+			Tjm[j][m] = Tfun(r_local[j],g_local[m]);
+					
+			double wj_minusHalf = Aj_minusHalf_m/Bj_minusHalf_m[m][j] * delta_r_j_minushalf[j];
+			double wj_plusHalf = Aj_plusHalf_m/Bj_plusHalf_m[m][j] * delta_r_j_plushalf[j];
+			double Wj_minusHalf(0.0), Wj_plusHalf(0.0);
+			
+			if ( abs(wj_minusHalf) < 1.0e-3 ) {
+				Wj_minusHalf = pow(1.0+gsl_pow_2(wj_minusHalf)/24+gsl_pow_4(wj_minusHalf)/1920,-1);
+				Wplus_j_minusHalf[m][j] = Wj_minusHalf * exp(0.5*wj_minusHalf);
+				Wminus_j_minusHalf[m][j] = Wj_minusHalf * exp(-0.5*wj_minusHalf);
+			} else {
+				Wj_minusHalf = abs(wj_minusHalf)*exp(-0.5*abs(wj_minusHalf)) /
+								(1.0-exp(-abs(wj_minusHalf)));
+				if (wj_minusHalf > 0.0) {
+					Wplus_j_minusHalf[m][j] = abs(wj_minusHalf) / (1.0-exp(-abs(wj_minusHalf)));
+					Wminus_j_minusHalf[m][j] = Wj_minusHalf * exp(-0.5*wj_minusHalf);
+				} else {
+					Wplus_j_minusHalf[m][j] = Wj_minusHalf * exp(0.5*wj_minusHalf);
+					Wminus_j_minusHalf[m][j] = abs(wj_minusHalf) / (1.0-exp(-abs(wj_minusHalf)));
+				}
+			}
+			if ( abs(wj_plusHalf) < 1.0e-3 ) {
+				Wj_plusHalf = pow(1.0+gsl_pow_2(wj_plusHalf)/24+gsl_pow_4(wj_plusHalf)/1920,-1);
+				Wplus_j_plusHalf[m][j] = Wj_plusHalf * exp(0.5*wj_plusHalf);
+				Wminus_j_plusHalf[m][j] = Wj_plusHalf * exp(-0.5*wj_plusHalf);
+			} else {
+				Wj_plusHalf = abs(wj_plusHalf)*exp(-0.5*abs(wj_plusHalf)) /
+								(1.0-exp(-abs(wj_plusHalf)));
+				if (wj_plusHalf > 0.0) {
+					Wplus_j_plusHalf[m][j] = abs(wj_plusHalf) / (1.0-exp(-abs(wj_plusHalf)));
+					Wminus_j_plusHalf[m][j] = Wj_plusHalf * exp(-0.5*wj_plusHalf);
+				} else {
+					Wplus_j_plusHalf[m][j] = Wj_plusHalf * exp(0.5*wj_plusHalf);
+					Wminus_j_plusHalf[m][j] = abs(wj_plusHalf) / (1.0-exp(-abs(wj_plusHalf)));
+				}
+			}
+			
+			double vm_minusHalf = Cjm_minusHalf/Djm_minusHalf[j][m] * delta_g_m_minushalf[m];
+			double vm_plusHalf = Cjm_plusHalf/Djm_plusHalf[j][m] * delta_g_m_plushalf[m];
+			double Vm_minusHalf(0.0), Vm_plusHalf(0.0);
+			
+			if ( abs(vm_minusHalf) < 1.0e-3 ) {
+				Vm_minusHalf = pow(1.0+gsl_pow_2(vm_minusHalf)/24.0+gsl_pow_4(vm_minusHalf)/1920.0,-1);
+				Vplus_m_minusHalf[j][m] = Vm_minusHalf * exp(0.5*vm_minusHalf);
+				Vminus_m_minusHalf[j][m] = Vm_minusHalf * exp(-0.5*vm_minusHalf);
+			} else {
+				Vm_minusHalf = abs(vm_minusHalf)*exp(-0.5*abs(vm_minusHalf)) /
+								(1.0-exp(-abs(vm_minusHalf)));
+				if (vm_minusHalf > 0.0) {
+					Vplus_m_minusHalf[j][m] = abs(vm_minusHalf) / (1.0-exp(-abs(vm_minusHalf)));
+					Vminus_m_minusHalf[j][m] = Vm_minusHalf * exp(-0.5*vm_minusHalf);
+				} else {
+					Vplus_m_minusHalf[j][m] = Vm_minusHalf * exp(0.5*vm_minusHalf);
+					Vminus_m_minusHalf[j][m] = abs(vm_minusHalf) / (1.0-exp(-abs(vm_minusHalf)));
+				}
+			}
+			if ( abs(vm_plusHalf) < 1.0e-3 ) {
+				Vm_plusHalf = pow(1.0+gsl_pow_2(vm_plusHalf)/24+gsl_pow_4(vm_plusHalf)/1920,-1);
+				Vplus_m_plusHalf[j][m] = Vm_plusHalf * exp(0.5*vm_plusHalf);
+				Vminus_m_plusHalf[j][m] = Vm_plusHalf * exp(-0.5*vm_plusHalf);
+			} else {
+				Vm_plusHalf = abs(vm_plusHalf)*exp(-0.5*abs(vm_plusHalf)) /
+								(1.0-exp(-abs(vm_plusHalf)));
+				if (vm_plusHalf > 0.0) {
+					Vplus_m_plusHalf[j][m] = abs(vm_plusHalf) / (1.0-exp(-abs(vm_plusHalf)));
+					Vminus_m_plusHalf[j][m] = Vm_plusHalf * exp(-0.5*vm_plusHalf);
+				} else {
+					Vplus_m_plusHalf[j][m] = Vm_plusHalf * exp(0.5*vm_plusHalf);
+					Vminus_m_plusHalf[j][m] = abs(vm_plusHalf) / (1.0-exp(-abs(vm_plusHalf)));
+				}
+			}
+		}
+	}
+	
+	ofstream fileMatrixDistEne, fileMatrixDistPos, fileMatrixDistQT;
+	fileMatrixDistEne.open("matrixCoeffTransportEq_Ene.txt");
+	fileMatrixDistPos.open("matrixCoeffTransportEq_Pos.txt");
+	fileMatrixDistQT.open("matrixCoeffTransportEq_QT.txt");
+	fileMatrixDistEne 	<< "j \t m \t Dj- \t Dj+ \t V-- \t V-+ \t V+- \t V++" << endl;
+	fileMatrixDistPos 	<< "m \t j \t Bj- \t Bj+ \t W-- \t W-+ \t W+- \t W++" << endl;
+	fileMatrixDistQT 	<< "j \t m \t T \t Q \t" << endl;
+	
+	for (size_t j=0;j<J+1;j++) {
+		for (size_t m=0;m<M+1;m++) {
+			fileMatrixDistEne 	<< j << "\t" << m << "\t"
+								<< Djm_minusHalf[j][m] << "\t" << Djm_plusHalf[j][m] << "\t"
+								<< Vminus_m_minusHalf[j][m] << "\t" << Vminus_m_plusHalf[j][m] << "\t"
+								<< Vplus_m_minusHalf[j][m] << "\t" << Vplus_m_plusHalf[j][m] << endl;
+			fileMatrixDistQT	<< j << "\t" << m << "\t"
+								<< Tjm[j][m] << "\t" << Qjm[j][m] << endl;
+		}
+	}
+	for (size_t m=0;m<M+1;m++) {
+		for (size_t j=0;j<J+1;j++) {
+			fileMatrixDistPos	<< m << "\t" << j << "\t"
+								<< Bj_minusHalf_m[m][j] << "\t" << Bj_plusHalf_m[m][j] << "\t"
+								<< Wminus_j_minusHalf[m][j] << "\t" << Wminus_j_plusHalf[m][j] << "\t"
+								<< Wplus_j_minusHalf[m][j] << "\t" << Wplus_j_plusHalf[m][j] << endl;
+		}
+	}
+ 
+	fileMatrixDistEne.close();
+	fileMatrixDistPos.close();
+	fileMatrixDistQT.close();
+	
+	cout << "TRANSPORT EQUATION: Finished matrix calculation" << endl << endl;
+	
+	Vector rr((J+1)*(M+1),0.0);
+	Matrix rrOld;
+	matrixInit(rrOld,J+1,M+1,0.0);
+	Matrix dist;
+	
+	cout << "TRANSPORT EQUATION: Starting time evolution" << endl << endl;
+	
+	for (size_t t=0;t<Ntime;t++) {
+		cout << "t = " << t << endl;
+		for (size_t jt=0;jt<NdeltaTime;jt++) {
+			
+			Vector a((J+1)*(M+1),0.0);
+			Vector b((J+1)*(M+1),0.0);
+			Vector c((J+1)*(M+1),0.0);
+			Vector d((J+1)*(M+1),0.0);
+			Vector e((J+1)*(M+1),0.0);
+			Vector f((J+1)*(M+1),0.0);
+			
+			// BLOCK 1: Advances in half a time step the energy evolution operator.
+			
+			#pragma omp parallel for
+			for (size_t j=0;j<J+1;j++) {
+				
+				for (size_t m=0;m<M+1;m++) {
+					size_t l = j*(M+1)+m;
+				
+					if (j > 0 && j < J) {
+					
+						if (m > 0)
+							a[l] = deltat[t]/delta_g[m] * 0.5*Cjm_minusHalf[j][m];
+						if (m < M)
+							c[l] = - deltat[t]/delta_g[m] * 0.5*Cjm_plusHalf[j][m];
+						b[l] = 1.0 + deltat[t]/delta_g[m] * ( Cjm_minusHalf[j][m] - Cjm_plusHalf[j][m] ) / 2.0 + deltat[t]/Tjm[j][m];
+						
+						d[l] = (0.5*deltat[t])/delta_r[j] * Bj_minusHalf_m[m][j] * Wminus_j_minusHalf[m][j] / delta_r_j_minushalf[j];
+						e[l] = 1.0 - 0.5*(deltat[t])/delta_r[j] * ( Bj_minusHalf_m[m][j] * Wplus_j_minusHalf[m][j] / delta_r_j_minushalf[j] +
+									Bj_plusHalf_m[m][j] * Wminus_j_plusHalf[m][j] / delta_r_j_plushalf[j] );
+						f[l] = (j < J) ? 
+							(0.5*deltat[t])/delta_r[j] * Bj_plusHalf_m[m][j] * Wplus_j_plusHalf[m][j] / delta_r_j_plushalf[j] : 0.0;
+					} else {
+						b[l] = 1.0;
+					}
+					rr[l] = rrOld[j][m] + (j > 0 && j < J ? Qjm[j][m] * deltat[t] : 0.0);
+				}
+			}
+			TriDiagSys(a,b,c,rr,(J+1)*(M+1));
+			
+			#pragma omp parallel for
+			for (size_t j=0;j<J+1;j++) {
+				for (size_t m=0;m<M+1;m++) {
+					size_t l = j*(M+1)+m;
+					rrOld[j][m] = rr[l];
+				}
+			}
+			
+			// BLOCK 2: Advances in a time step the spatial evolution operator.
+			
+			#pragma omp parallel for
+			for (size_t m=0;m<M+1;m++){
+				for (size_t j=0;j<J+1;j++) {
+					size_t lp = m*(J+1)+j;
+					size_t l = j*(M+1)+m;
+					a[lp] = - d[l];
+					b[lp] = 2.0 - e[l];
+					c[lp] = (j < J) ? - f[l] : 0.0;
+					
+					rr[lp] = rrOld[j][m];
+				}
+			}
+			TriDiagSys(a,b,c,rr,(J+1)*(M+1));
+			
+			#pragma omp parallel for
+			for (size_t j=0;j<J+1;j++) {
+				for (size_t m=0;m<M+1;m++) {
+					size_t lp = m*(J+1)+j;
+					rrOld[j][m] = rr[lp];
+				}
+			}
+			
+		}
+		if (t % 100 == 0 || t == Ntime-2) {
+			matrixInit(dist,J+1,M+1,0.0);
+			ofstream fileDist;
+			fileDist.open("dist"+to_string(t)+".txt");
+			for (size_t j=0;j<J+1;j++) {
+				for (size_t m=0;m<M+1;m++) {
+					size_t l = j*(M+1)+m;
+					dist[j][m] = rrOld[j][m] / P2(r_local[j]*schwRadius) / factor;
+					fileDist << r_local[j] << "\t" << -radialVel(r_local[j]*schwRadius)/cLight
+								   << "\t" << g_local[m] << "\t" << dist[j][m] << endl;
+				}
+			}
+			fileDist.close();
+		}
+	}
+	
+	matrixInit(dist,J+1,M+1,0.0);
+	ofstream fileDist;
+	fileDist.open("dist_last.txt");
+	for (size_t j=0;j<J+1;j++) {
+		for (size_t m=0;m<M+1;m++) {
+			size_t l = j*(M+1)+m;
+			dist[j][m] = rr[l] / P2(r_local[j]*schwRadius) / factor;
+			fileDist << r_local[j] << "\t" << -radialVel(r_local[j]*schwRadius)/cLight
+								   << "\t" << g_local[m] << "\t" << dist[j][m] << endl;
+		}
+	}
+	fileDist.close();
+
+	cout << endl << "TRANSPORT EQUATION: Finished time evolution" << endl << endl;
+	
+	particle.ps.iterate([&] (const SpaceIterator& iR) {
+		double r = iR.val(DIM_R);
+		if (r/schwRadius < r_local.back()) {
+			size_t j = 1;
+			while (r_local[j]*schwRadius < r) j++;
+			particle.ps.iterate([&] (const SpaceIterator& iRE) {
+				double g = iRE.val(DIM_E) / (particle.mass*cLight2);
+				size_t m = 0;
+				while (g_local[m] < g) m++;
+				
+				double N11 = dist[j-1][m-1];
+				double N12 = dist[j-1][m];
+				double N1 = 0.0;
+				if (N11 > 0.0 && N12 > 0.0) {
+					double s1 = safeLog10(N12/N11)/safeLog10(g_local[m]/g_local[m-1]);
+					N1 = N11 * pow(g / g_local[m-1], s1);
+				} else {
+					if (N11 > 0.0)
+						N1 = - N11 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]) + N11;
+					else if (N12 > 0.0)
+						N1 = N12 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]);
+					else
+						N1 = 0.0;
+				}
+				double N21 = dist[j][m-1];
+				double N22 = dist[j][m];
+				double N2 = 0.0;
+				if (N21 > 0.0 && N22 > 0.0) {
+					double s2 = safeLog10(N22/N21)/safeLog10(g_local[m]/g_local[m-1]);
+					N2 = N21 * pow(g / g_local[m-1], s2);
+				} else {
+					if (N21 > 0.0)
+						N2 = - N21 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]) + N21;
+					else if (N22 > 0.0)
+						N2 = N22 * (g - g_local[m-1])/(g_local[m]-g_local[m-1]);
+					else
+						N2 = 0.0;
+				}
+				
+				double N = 0.0;
+				if (N1 > 0.0 && N2 > 0.0) {
+					double s = safeLog10(N2/N1)/safeLog10(r_local[j]/r_local[j-1]);
+					N = N1 * pow(r / (r_local[j-1]*schwRadius), s);
+				} else {
+					if (N1 > 0.0)
+						N = - N1 * (r/schwRadius - r_local[j-1])/(r_local[j]-r_local[j-1]) + N1;
+					else if (N2 > 0.0)
+						N = N2 * (r/schwRadius - r_local[j-1])/(r_local[j]-r_local[j-1]);
+					else
+						N = 0.0;
+				}
+				particle.distribution.set(iRE, N / (particle.mass*cLight2));
+			},{-1,iR.coord[DIM_R],0});
+		}
+	},{0,-1,0});
+	
+	// TESTS
+	
+	// CONSERVATION OF FLUX OF PARTICLES CROSSING EACH SHELL
+	particle.ps.iterate([&](const SpaceIterator& iR) {
+		double rB1 = iR.val(DIM_R) / sqrt(paso_r);
+		double area = 4.0*pi*rB1*height_fun(rB1);
+		double vR = abs(radialVel(rB1));
+		double flux = area*vR*integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
+						{
+							return particle.distribution.interpolate({{DIM_E,e}},&iR.coord);
+						},100);
+		cout << iR.coord[DIM_R] << "\t flux = " << flux << endl;
+	},{0,-1,0});
+	
+	// FLUX OF ENERGY
+	particle.ps.iterate([&](const SpaceIterator& iR) {
+		double rB1 = iR.val(DIM_R) / sqrt(paso_r);
+		double area = 4.0*pi*rB1*height_fun(rB1);
+		double vR = abs(radialVel(rB1));
+		double flux = area*vR*integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
+						{
+							return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e;
+						},100);
+		cout << iR.coord[DIM_R] << "\t flux of energy = " << flux << endl;
+	},{0,-1,0});
+	
+	// COSMIC RAY PRESSURE << THERMAL PRESSURE
+	particle.ps.iterate([&](const SpaceIterator& iR) {
+		double r = iR.val(DIM_R);
+		double pCR = integSimpsonLog(particle.emin(),particle.emax(),[&iR,&particle] (double e)
+						{
+							return particle.distribution.interpolate({{DIM_E,e}},&iR.coord)*e/3.0;
+						},100);
+		double pFluid = massDensityADAF(r)*sqrdSoundVel(r);
+		cout << iR.coord[DIM_R] << "\t pCR/pgas = " << pCR/pFluid << endl;
+	},{0,-1,0});
+	
+}
+
