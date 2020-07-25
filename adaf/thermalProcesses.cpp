@@ -804,18 +804,17 @@ void absorptionLumThermal(State& st, Matrix lumOut, Matrix lumCD, Matrix lumRefl
 			double height = height_fun(iR.val(DIM_R));
 			for (size_t jE=0;jE<nE;jE++) {
 				double E = st.photon.ps[DIM_E][jE];
-				double kappa_gg = integSimpson(log(st.photon.emin()),log(st.photon.emax()),
-						[&E,&iR,&st](double logEph)
+				double kappa_gg = integSimpsonLog(st.photon.emin(),st.photon.emax(),
+						[&E,&iR,&st](double Eph)
 						{
-							double Eph = exp(logEph);
 							if (Eph*E > P2(electronRestEnergy))
-								return Eph*st.photon.distribution.interpolate({{0,Eph}},&iR.coord)*
+								return st.photon.distribution.interpolate({{0,Eph}},&iR.coord)*
 										ggCrossSection2(E,Eph);
 							else 
 								return 0.0;
 						},50);
 				double tau_gg = 0.5*sqrt(pi)*kappa_gg*height;
-				double factor_gg = (tau_gg > 1.0e-10) ? 
+				double factor_gg = (tau_gg > 1.0e-5) ? 
 									(1.0-exp(-2*sqrt(3.0)*tau_gg))/(2.0*sqrt(3.0)*tau_gg) : 1.0;
 				double lum = lumOut[jE][iR.coord[DIM_R]] * factor_gg;
 				lumOut_gg[jE][iR.coord[DIM_R]] = lum;
@@ -826,7 +825,7 @@ void absorptionLumThermal(State& st, Matrix lumOut, Matrix lumCD, Matrix lumRefl
 		},{0,-1,0});
 		it++;
 		cout << "Iteration number " << it << "." << endl;
-	} while (cond);
+	} while (cond && it <= 20);
 	cout << "Exit in " << it << " iterarations." << endl;
 }
 /*

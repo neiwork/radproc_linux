@@ -5,29 +5,29 @@
     "inclination":"0",
     "accRateCorona":"1.0",
     "factorTemperature":"1",
-    "powerTransition":"1",
-    "rTr":"2e4",
-    "rOutCD":"2e5",
+    "powerTransition":"0.5",
+    "rTr":"3",
+    "rOutCD":"1e5",
     "zGap":"1.0",
     "tAccBlob":"0",
     "factorDensity":"1",
       
-    "calculateComptonScatt":"0",
+    "calculateComptonScatt":"1",
     "height_method":"1",
     "scatt": {
-        "nRandomPhot":"200",
+        "nRandomPhot":"300",
         "nTheta":"5"
     },
     "calculateNewTemp":"0",
 
-    "calculateThermal":"0",
+    "calculateThermal":"1",
     "thermal": {
         "numProcesses":"5",
         "processNumber": {
 			"0":1,
 			"1":1,
 			"2":0,
-			"3":0,
+			"3":1,
 			"4":1
         },
         
@@ -55,7 +55,7 @@
         "calculateRelCorrections":"0"
     },
     
-    "calculateNonThermal":"1",
+    "calculateNonThermal":"0",
     "nonThermal": {
         "acc_method":"1",
 	    "protons":"1",
@@ -129,7 +129,7 @@
 				"mass":0,
 				"dim": {
 					"energy":{
-						"samples":"100"
+						"samples":"130"
 					},
 					"radius":{
 						"min":1.0,
@@ -137,7 +137,7 @@
 						"samples":50
 					},
 					"radius_cd":{
-                        "samples":2
+                        "samples":50
                     }
 				}
 			},

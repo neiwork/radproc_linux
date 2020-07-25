@@ -243,7 +243,7 @@ void writeFields(State& st) {
 	st.photon.ps.iterate([&](const SpaceIterator& iR) {
 		double r = iR.val(DIM_R);
 		fields << r/schwRadius << "\t"
-			   << accRateADAF(r)/accRateOut << "\t"
+			   << gAcc(r) << "\t"
 			   << accRateColdDisk(r)/accRateOut << "\t"
 			   << st.tempElectrons.get(iR) << "\t"
 			   << st.tempIons.get(iR) << "\t"

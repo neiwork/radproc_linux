@@ -17,6 +17,7 @@ double electronDensity(double);
 double electronDensityTheta(double,double);
 double ionDensity(double);
 double magneticField(double);
+double gAcc(double);
 double accRateADAF(double);
 double accRateColdDisk(double);
 double accretionTime(double);

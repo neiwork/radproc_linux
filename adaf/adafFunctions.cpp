@@ -33,7 +33,7 @@ double electronTemp(double r)
 	double r_rg = r/(schwRadius/2.0);
 	return (r_rg <= 30) ? temp * 1.4/pow(r_rg,0.097) : temp;
 	//double factorTemp = GlobalConfig.get<double>("factorTemperature");
-	//return temp * factorTemp;
+	return temp;
 }
 
 double electronTempOriginal(double r)
@@ -167,27 +167,25 @@ double fAcc(double r)
 			(1.0-pow(rTr/r,powerTransition)) / (1.0-pow(rTr/rOut,powerTransition)) );
 }
 
+double gAccAux(double r)
+{
+	double pIndex = GlobalConfig.get<double>("powerTransition");
+	double rOutADAF = exp(logr.back())*schwRadius;
+	double result = ( (-( pow(r,pIndex+s) - pow(rOutADAF,pIndex+s) ) )*pow(rTr,pIndex)*s -
+            pow(rOutADAF,s) * pow(r*rOutADAF,pIndex) * ( pow(rTr/r,pIndex) -
+            pow(r/rOutADAF,s) * pow(rTr/rOutADAF,pIndex) )*(pIndex+s) ) /
+			( pow(rOutADAF,s) * pow(r*rOutADAF,pIndex) ) /
+			( ( -1.0 + pow(rTr/rOutADAF,pIndex) ) * (pIndex+s) );
+
+		
+	return result;
+
+}
+
 double gAcc(double r)
 {
-	return 1.0-fAcc(r);
-}
-
-double hAccAux(double r)
-{
-	double powerTransition = GlobalConfig.get<double>("powerTransition");
-	double rOutADAF = exp(logr.back())*schwRadius;
-	return -s / (pow(rOutADAF,s) * (1.0 - pow(rTr/rOutADAF,powerTransition))) * (
-			pow(rTr,powerTransition)/(s-powerTransition) * (pow(r,s-powerTransition) - pow(rOutADAF,s-powerTransition)) 
-			- 1.0/s * pow(rTr/rOutADAF,powerTransition) * (pow(r,s) - pow(rOutADAF,s)));
-}
-
-double hAcc(double r)
-{
-	double MdotWind = hAccAux(r);
-	double Mdot_rTr = 1.0 - hAccAux(rTr);
-	double rOutADAF = exp(logr.back())*schwRadius;
-	return (r < rTr ? Mdot_rTr * pow(r/rTr,s) :
-						( (r < rOutADAF) ? 1.0-MdotWind : 1.0 ));
+	double rOut = exp(logr.back())*schwRadius;
+	return (r < rTr ? gAccAux(rTr)*pow(r/rTr,s) : (r > rOut ? 0.0 : gAccAux(r)));
 }
 
 double accRateADAF(double r)
@@ -199,14 +197,10 @@ double accRateADAF(double r)
 	readThermalProcesses(processesFlags);
 	
 	if (processesFlags[3]) {
-		result = accRateOut * gAcc(r) * hAcc(r) * coronaFraction;
-		if (rTr < 5*schwRadius) {
-			double deltaR = rOut/10;
-			result = accRateOut * coronaFraction / 10 * pow(10, gsl_sf_erf((rOut-r)/deltaR)) *
-						pow(r/rOut,s);
-		}
+		result = accRateOut * gAcc(r) * coronaFraction;
+		if (rTr < 5*schwRadius)
+			result = accRateOut * coronaFraction * pow(r/rOut,s);
 	}
-	
 	return result;
 }
 
@@ -217,7 +211,8 @@ double massDensityADAF(double r)
 		result = accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r)));
 	else 
 		result = accRateADAF(r) / (4.0*pi*r*height_fun(r)*(-radialVel(r)));
-	double result_out = accRateADAF(exp(logr.back())*schwRadius/1.1) / (4.0*pi*r*height_fun(r)*(-radialVel(r)));
+	double result_out = accRateADAF(exp(logr.back())*schwRadius/1.1) / 
+			(4.0*pi*r*height_fun(r)*(-radialVel(exp(logr.back())*schwRadius/1.1)));
 	return (result > 0.0 && r < exp(logr.back())*schwRadius) ? result : result_out;
 }
 
@@ -235,7 +230,7 @@ double accRateColdDisk(double r)
 	double result = 0.0;
 	if (r > rTr) {
 		if (rTr < 5*schwRadius) {
-			result = accRateOut * (1.0-accRateADAF(r)/accRateOut);
+			result = accRateOut * fAcc(r);
 		} else
 			result = accRateOut * fAcc(r);
 	}

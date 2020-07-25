@@ -3998,7 +3998,7 @@ void distributionFokkerPlanckCompleteSteadyState(Particle& particle, State& st)
 
 
 
-
+/*
 
 void distributionSpatialDiffusion(Particle& particle, State& st)
 // This routine solves the complete time-dependent transport equation considering turbulence
@@ -4132,7 +4132,7 @@ void distributionSpatialDiffusion(Particle& particle, State& st)
 									(rTrue*(paso_r_local-1.0/paso_r_local));
 					
 					dvRdr = (dvRdr > 0.0) ? dvRdr : 0.0;
-					return - dgdt + 1.0/3.0 * (2.0*vR/rTrue + dvRdr) * g ) * naturalTimescale;
+					return - dgdt + 1.0/3.0 * (2.0*vR/rTrue + dvRdr) * g * naturalTimescale;
 				};
 	
 	fun2 Tfun = [&particle,naturalTimescale] (double r, double g) 
@@ -4151,7 +4151,7 @@ void distributionSpatialDiffusion(Particle& particle, State& st)
 					SpaceCoord i = {0,0,0};
 					double rTrue = r * schwRadius;
 					double E = g * particle.mass*cLight2;
-					return factor * particle.injection.interpolate({{DIM_E,E},{DIM_R,rTrue}},i) : 0.0;
+					return factor * particle.injection.interpolate({{DIM_E,E},{DIM_R,rTrue}},&i);
 				};
 	
 	Matrix Bj_minusHalf_m;				matrixInit(Bj_minusHalf_m,M+1,J+1,0.0);
@@ -4501,3 +4501,4 @@ void distributionSpatialDiffusion(Particle& particle, State& st)
 	
 }
 
+*/
