@@ -16,3 +16,4 @@ void comptonNewNewPruebaVector(Vector tempVec, Vector nuPrimVec, Vector nuVec, V
 			size_t jTemp, Vector energies, size_t jE, Vector& p, double normtemp);
 			
 void comptonNewNewNewPruebaVector(size_t jR, Vector energies, size_t jE, Vector& p, double normtemp);
+double lumInterp(Vector lum, Vector energies, size_t jE, size_t n, double redE);

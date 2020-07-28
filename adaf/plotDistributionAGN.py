@@ -22,7 +22,7 @@ logeVmuon,iR,logr,logqmuon = np.loadtxt('muonInjection.dat',unpack=True)
 logeVmuon,iR,logr,lognmuon = np.loadtxt('muonDistribution.dat',unpack=True)
 logeVpair,iR,logr,logqpair = np.loadtxt('secondaryPairInjection.dat',unpack=True)
 NT_logeV,NT_logSyp,NT_logIC,NT_logpp,NT_logpg,NT_logAbs,NT_logAbsorbido = np.loadtxt('lumNonThermal.dat',unpack=True,skiprows=1)
-NT_logeVs,NT_logSys,NT_logSymu,NT_logSypi,NT_logICs,NT_logpip,NT_logpig,NT_logAbs = np.loadtxt('secondariesLum.dat',unpack=True,skiprows=1)
+NT_logeVs,NT_logSys,NT_logSymu,NT_logSypi,NT_logICs,NT_logpip,NT_logpig,a,NT_logAbs = np.loadtxt('secondariesLum.dat',unpack=True,skiprows=1)
 
 logerge = np.log10(np.power(10,logeVe)*1.6e-12)
 logergp = np.log10(np.power(10,logeVp)*1.6e-12)

@@ -17,6 +17,7 @@ extern const double j;
 extern const double paso_r;
 extern const double paso_rCD;
 extern const double rTr;
+extern const double powerIndex;
 extern const double rOutCD;
 extern const double inclination;
 extern double Ainjection;

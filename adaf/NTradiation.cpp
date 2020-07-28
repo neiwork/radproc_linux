@@ -6,6 +6,7 @@
 #include "adafFunctions.h"
 #include "absorption.h"
 #include "thermalProcesses.h"
+#include "thermalCompton.h"
 
 #include <fmath/RungeKutta.h>
 
@@ -63,7 +64,6 @@ double opticalDepthSSA(int E_ix, State& st, const Particle& p, double r_current)
 				
 			double integral = intSimple(p.emin(),p.emax(),[&](double x) {
 								return fSSA(x,E,p,magneticField,i); });
-
 			double absorptionCoefficient = - P3(planck)*cLight2*integral/(8*pi*P2(E)); 
 		
 			opacity += absorptionCoefficient*delta_r; // parameters.radius;
@@ -73,19 +73,16 @@ double opticalDepthSSA(int E_ix, State& st, const Particle& p, double r_current)
 		
 		return opacity;
 }
-
 double opticalDepthSSA2(int E_ix, State& st, const Particle& p, int iR)
 {
 	double E = st.photon.ps[DIM_E][E_ix];
 	double rMax = st.photon.ps[DIM_R][nR-1];
 	double rMin = st.photon.ps[DIM_R][0];
 	double pasoprim = pow(rMax/rMin,1.0/(nR*2.0));
-
 	SpaceCoord psc = {E_ix,iR,0};
 	double r0 = st.photon.ps[DIM_R][iR];
 	double drprim = r0*(pasoprim-1.0);
 	double thetaprim = inclination*(pi/180.0);
-
 	size_t nPhi = 5;
 	double opticalDepth = 0.0;
 	double theta0 = 0.5*pi;
@@ -129,6 +126,7 @@ double opticalDepthSSA2(int E_ix, State& st, const Particle& p, int iR)
 }
 */
 
+
 void nonThermalRadiation(State& st, const std::string& filename)
 {
 	show_message(msgStart, Module_luminosities);
@@ -151,16 +149,20 @@ void nonThermalRadiation(State& st, const std::string& filename)
 	
 	Particle &ntPh = st.ntPhoton;
 	size_t nEnt = ntPh.ps[DIM_E].size();
-	Matrix eSyLocal;
-	matrixInit(eSyLocal,nEnt,nR,0.0);
+	Vector ntEnergies(nEnt,0.0);
+	Vector energies(nE,0.0);
+	for (size_t jE=0;jE<nEnt;jE++) {
+		energies[jE] = st.photon.ps[DIM_E][jE];
+		ntEnergies[jE] = st.ntPhoton.ps[DIM_E][jE];
+	}
 	
-	Vector eSy(nEnt,0.0);
-	Vector eIC(nEnt,0.0);
-	Vector pSy(nEnt,0.0);
-	Vector pPP(nEnt,0.0);
-	Vector pPG(nEnt,0.0);
-	Vector totNotAbs(nEnt,0.0);
-	Vector totAbs(nEnt,0.0);
+	Matrix eSy;			matrixInit(eSy,nE,nR,0.0);
+	Matrix eIC;			matrixInit(eIC,nEnt,nR,0.0);
+	Matrix pSy;			matrixInit(pSy,nEnt,nR,0.0);
+	Matrix pPP;			matrixInit(pPP,nEnt,nR,0.0);
+	Matrix pPG;			matrixInit(pPG,nEnt,nR,0.0);
+	Matrix totNotAbs;	matrixInit(totNotAbs,nEnt,nR,0.0);
+	Matrix totAbs;		matrixInit(totAbs,nEnt,nR,0.0);
 
 	if (calculateNTelectrons) {
 		#pragma omp parallel for
@@ -168,13 +170,13 @@ void nonThermalRadiation(State& st, const std::string& filename)
 			double E = st.photon.ps[DIM_E][E_ix];
 			st.photon.ps.iterate([&](const SpaceIterator &iR) {
 				double r = iR.val(DIM_R);
-				E = E / redshift_to_inf[iR.coord[DIM_R]];
 				double rB1 = r/sqrt(paso_r);
 				double rB2 = rB1*paso_r;
 				double vol = volume(r);
 				double magf = st.magf.get(iR);
 				SpaceCoord psc = {E_ix,iR.coord[DIM_R],0};
 				
+				// FOR THE OBSERVED LUMINOSITY
 				double alpha_th = jSync(E,st.tempElectrons.get(iR),magf,st.denf_e.get(iR)) / 
 									bb(E/planck,st.tempElectrons.get(iR));
 				double alpha_ssa = ssaAbsorptionCoeff(E,magf,st.ntElectron,psc);
@@ -182,37 +184,30 @@ void nonThermalRadiation(State& st, const std::string& filename)
 				double height = height_fun(r);
 				double tau = 0.5*sqrt(pi)*alpha_tot*height;
 
-				eSyLocal[E_ix][iR.coord[DIM_R]] = luminositySynchrotronExact(E,st.ntElectron,iR,magf)/E;
+				double eSyLocal = luminositySynchrotronExact(E,st.ntElectron,iR,magf)/E;
 				
 				double factor = 0.5/sqrt(3.0);
-				eSyLocal[E_ix][iR.coord[DIM_R]] = (tau > 1.0e-10) ?
-								0.5/sqrt(3.0) * (eSyLocal[E_ix][iR.coord[DIM_R]]/alpha_tot) * 
+				eSyLocal = (tau > 1.0e-10) ?
+								0.5/sqrt(3.0) * (eSyLocal/alpha_tot) * 
 								(1.0-exp(-2.0*sqrt(3.0)*tau)) :
-								eSyLocal[E_ix][iR.coord[DIM_R]] * 0.5 * sqrt(pi) * height;  // flux
-				eSy[E_ix] += ( eSyLocal[E_ix][iR.coord[DIM_R]] * 2.0 * pi*(rB2*rB2-rB1*rB1)
-								* pow(redshift_to_inf[iR.coord[DIM_R]],3) );  // luminosity
+								eSyLocal * 0.5 * sqrt(pi) * height;  // flux
+				eSy[E_ix][iR.coord[DIM_R]]  = eSyLocal * 2.0 * pi*(rB2*rB2-rB1*rB1);  // luminosity
+								
+				
 				double tau_es = st.denf_e.get(iR)*thomson*height;
 				double tescape = height/cLight * (1.0+tau_es);
 				SpaceCoord iE = {E_ix,iR.coord[DIM_R],0};
 				st.photon.distribution.set(iE, st.photon.distribution.get(iE) + 
-											eSyLocal[E_ix][iR.coord[DIM_R]] / E / height * tescape);
+											eSyLocal / E / height * tescape);
 			},{E_ix,-1,0});
 		}
 	}
 
-	/*
-	// Adding nonthermal photons to the thermal ones; specially Sync photons.
-	st.photon.ps.iterate([&](const SpaceIterator& i) {
-		double e = i.val(DIM_E);
-		double nPhNT = st.ntPhoton.distribution.interpolate({{DIM_E,e}},&i.coord);
-		st.photon.distribution.set(i,st.photon.distribution.get(i)+nPhNT);
-	},{-1,-1,0});
-*/
 	#pragma omp parallel for
 	for (int E_ix=0;E_ix<nEnt;E_ix++) {
 		double E = ntPh.ps[DIM_E][E_ix];
+		size_t jR = 0;
 		st.ntPhoton.ps.iterate([&](const SpaceIterator& iR) {
-			E = E / redshift_to_inf[iR.coord[DIM_R]];
 			double r = iR.val(DIM_R);
 			double rB1 = r/sqrt(paso_r);
 			double rB2 = r*sqrt(paso_r);
@@ -261,42 +256,76 @@ void nonThermalRadiation(State& st, const std::string& filename)
 			
 			double eTot = eICLocal+pSyLocal+pPPLocal+pPGLocal;
 
-			pSy[E_ix] += pSyLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
-			eIC[E_ix] += eICLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
-			pPP[E_ix] += pPPLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
-			pPG[E_ix] += pPGLocal*vol * pow(redshift_to_inf[iR.coord[DIM_R]],3);
+			pSy[E_ix][jR] = pSyLocal*vol;
+			eIC[E_ix][jR] = eICLocal*vol;
+			pPP[E_ix][jR] = pPPLocal*vol;
+			pPG[E_ix][jR] = pPGLocal*vol;
+			
 			double totLocal = (taugg > 1.0e-10) ? 
 									factor*vol*eTot/kappagg*(1.0-exp(-2.0*sqrt(3.0)*taugg)) : 
 										eTot*vol;
-			totNotAbs[E_ix] += totLocal * pow(redshift_to_inf[iR.coord[DIM_R]],3);
-			totAbs[E_ix] += (eTot*vol - totLocal) * pow(redshift_to_inf[iR.coord[DIM_R]],3);
+			totNotAbs[E_ix][jR] = totLocal;
+			totAbs[E_ix][jR] = (eTot*vol - totLocal);
+			
 			
 			double tau_es = st.denf_e.get(iR)*thomson*height;
 			double tescape = height/cLight * (1.0+tau_es);
 			double rate_gg = kappagg * cLight;
 			st.ntPhoton.distribution.set(psc, eTot/E * pow(rate_gg+pow(tescape,-1),-1));
 			st.ntPhoton.injection.set(psc, eTot/E * pow(rate_gg+pow(tescape,-1),-1));
+			
+			jR++;
 		},{E_ix,-1,0});
 	}
 	
+	double lum_eSy, lum_pSy, lum_eIC, lum_pPP, lum_pPG, lum_totNotAbs, lum_totAbs;
 	for (size_t jE=0;jE<nEnt;jE++) {
-		double E = st.ntPhoton.ps[DIM_E][jE];
+		lum_pSy = lum_eIC = lum_pPP = lum_pPG = lum_totNotAbs = lum_totAbs = 0.0;
+		double E = ntEnergies[jE];
 		double fmtE = safeLog10(E/EV_TO_ERG);
+		for (size_t jR=0;jR<nR;jR++) {
+			Vector pSyVec(nEnt,0.0), eICVec(nEnt,0.0), pPPVec(nEnt,0.0),
+					pPGVec(nEnt,0.0), totNotAbsVec(nEnt,0.0), totAbsVec(nEnt,0.0);
+			for (size_t jjE=0;jjE<nEnt;jjE++) {
+				pSyVec[jjE] = pSy[jjE][jR];
+				eICVec[jjE] = eIC[jjE][jR];
+				pPPVec[jjE] = pPP[jjE][jR];
+				pPGVec[jjE] = pPG[jjE][jR];
+				totNotAbsVec[jjE] = totNotAbs[jjE][jR];
+				totAbsVec[jjE] = totAbs[jjE][jR];
+			}
+			double localEnergy = E/redshift_to_inf[jR];
+			lum_pSy += lumInterp(pSyVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+			lum_eIC += lumInterp(eICVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+			lum_pPP += lumInterp(pPPVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+			lum_pPG += lumInterp(pPGVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+			lum_totNotAbs += lumInterp(totNotAbsVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+			lum_totAbs += lumInterp(totAbsVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+		}
 		file << fmtE
-			 << '\t' << safeLog10(pSy[jE]*E)
-			 << "\t" << safeLog10(eIC[jE]*E)
-			 << "\t" << safeLog10(pPP[jE]*E)
-			 << "\t" << safeLog10(pPG[jE]*E)
-			 << '\t' << safeLog10(totNotAbs[jE]*E)
-			 << '\t' << safeLog10(totAbs[jE]*E)
+			 << '\t' << safeLog10(lum_pSy*E)
+			 << "\t" << safeLog10(lum_eIC*E)
+			 << "\t" << safeLog10(lum_pPP*E)
+			 << "\t" << safeLog10(lum_pPG*E)
+			 << '\t' << safeLog10(lum_totNotAbs*E)
+			 << '\t' << safeLog10(lum_totAbs*E)
 			 << std::endl;
 	}
 	
 	for (size_t jE=0;jE<nE;jE++) {
-		double E = st.photon.ps[DIM_E][jE];
+		double E = energies[jE];
 		double fmtE = safeLog10(E/EV_TO_ERG);
+		lum_eSy = 0.0;
+		for (size_t jR=0;jR<nR;jR++) {
+			Vector eSyVec(nE,0.0);
+			for (size_t jjE=0;jjE<nE;jjE++)
+				eSyVec[jjE] = eSy[jjE][jR];
+			double localEnergy = E/redshift_to_inf[jR];
+			lum_eSy += lumInterp(eSyVec,energies,jE,nE,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+		}
+		
 		fileSy << fmtE
-			   << '\t' << safeLog10(eSy[jE]*E)
+			   << '\t' << safeLog10(lum_eSy*E)
 			   << std::endl;
 	}
 	
@@ -330,4 +359,3 @@ void nonThermalRadiation(State& st, const std::string& filename)
 //		});
 //	}
 //}
-

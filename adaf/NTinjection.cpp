@@ -231,7 +231,7 @@ void injection(Particle& p, State& st)
 		double vA = st.magf.get(iR)/sqrt(4.0*pi*massDensityADAF(r));
 		double h = height_fun(r);
 		Qfactor[iR.coord[DIM_R]] = (accMethod == 0) ? uth * abs(radialVel(r)) / r :
-										dens * p.mass*cLight2 * cLight/schwRadius;
+										dens * p.mass*cLight2 * cLight/schwRadius * P2(vA/cLight);
 		sum += vol * Qfactor[iR.coord[DIM_R]];
 	},{0,-1,0});
 	Ainjection = etaInj*accRateOut*cLight2 / sum;		// [non-dimensional]
@@ -292,6 +292,8 @@ void injectionChargedPion(Particle& p, State& st)
 {
 	show_message(msgStart,Module_pionInjection);
 	
+	double sumTotp = 0.0;
+	double sumTotpp = 0.0;
 	double sumTot = 0.0;
 	p.ps.iterate([&](const SpaceIterator& iR) {
 		p.ps.iterate([&](const SpaceIterator& iRE) {
@@ -304,13 +306,22 @@ void injectionChargedPion(Particle& p, State& st)
 			double ratecool = lossesHadronics(Epi,st.denf_i.get(iR),p)/Epi;
 			//p.distribution.set(iRE,injection*pow(ratecool+pow(tdecay,-1),-1));
 		},{-1,iR.coord[DIM_R],0});
-		
-		sumTot += integSimpson(log(p.emin()),log(p.emax()),[&](double loge)
+		sumTotp += integSimpsonLog(st.ntProton.emin(),st.ntProton.emax(),[&](double ep)
 					{
-						double e = exp(loge);
-						return e*e*p.injection.interpolate({{DIM_E,e}},&iR.coord);
+						return ep*st.ntProton.injection.interpolate({{DIM_E,ep}},&iR.coord);
+					},100)*volume(iR.val(DIM_R));
+		sumTotpp += integSimpsonLog(st.ntProton.emin(),st.ntProton.emax(),[&](double ep)
+					{
+						return ep*st.ntProton.distribution.interpolate({{DIM_E,ep}},&iR.coord)
+						* lossesHadronics(ep,st.denf_i.get(iR),st.ntProton)/ep ;
+					},100)*volume(iR.val(DIM_R));
+		sumTot += integSimpsonLog(p.emin(),p.emax(),[&](double e)
+					{
+						return e*p.injection.interpolate({{DIM_E,e}},&iR.coord);
 					},100)*volume(iR.val(DIM_R));
 	},{0,-1,0});
+	cout << "Total power injected in " << st.ntProton.id << " = " << sumTotp << "\t" << endl; 
+	cout << "Total power in pp interactions" << " = " << sumTotpp << "\t" << endl; 
 	cout << "Total power injected in " << p.id << " = " << sumTot << "\t" << endl; 
 	show_message(msgEnd,Module_pionInjection);
 }
@@ -373,6 +384,7 @@ void injectionPair(Particle& p, State& st, int it)
 			}
 			double injectionGammaGamma = pairGammaGammaNew(Eee,st.ntPhoton.distribution,st.photon.distribution,
 						iRE,st.photon.emin(),st.photon.emax(),st.ntPhoton.emin(),st.ntPhoton.emax());
+			
 			//double tcool = Eee/lossesSyn(Eee,st.magf.get(iR),p);
 			p.injection.set(iRE,p.injection.get(iRE)+injectionGammaGamma);
 			secondariesGammaGammaFile << safeLog10(Eee/EV_TO_ERG) << "\t" << vol << "\t"

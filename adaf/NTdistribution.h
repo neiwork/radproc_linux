@@ -16,11 +16,10 @@ void distributionMultiZonePrueba(Particle& p, State& st);
 void distributionFokkerPlanckOneZone(Particle& p, State& st);
 void distributionFokkerPlanckMultiZone(Particle& p, State& st);
 void distributionFokkerPlanckRadial(Particle& p, State& st);
-void distributionFokkerPlanckSpatialDiffusion(Particle& p, State& st);
-void distributionFokkerPlanckSpatialDiffusionTimeDependent(Particle& p, State& st);
 void distributionFokkerPlanckComplete(Particle& p, State& st);
-void distributionFokkerPlanckComplete2(Particle& p, State& st);
 void distributionFokkerPlanckCompleteSteadyState(Particle& p, State& st);
-void distributionMultiZoneRadial(Particle& p, State& st);
+void distributionSpatialDiffusion(Particle& p, State& st);
+void distributionSpatialDiffusionSteady(Particle& p, State& st);
+void distributionSpatialDiffusionSteady2(Particle& p, State& st);
 
 //void distributionFokkerPlanckMultiZoneTimeDependent(Particle& p, State& st);

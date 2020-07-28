@@ -31,7 +31,6 @@ void redshiftFactor(State& st)
 		double redshift_factor = sqrt( (1.0-schwRadius/r) * (1.0-beta*beta) );
 		redshift_factor = (redshift_factor > 0.0) ? redshift_factor : 1.0;
 		redshift_to_inf[jR] = redshift_factor;
-		//redshift_to_inf[jR] = 1.0;
 		cout << "r [2M] = " << r/schwRadius << "\t (1+z)^-1 = " << redshift_to_inf[jR] << endl;
 		size_t jjR=0;
 		st.photon.ps.iterate([&](const SpaceIterator& itRR) {
@@ -43,7 +42,6 @@ void redshiftFactor(State& st)
 			double doppler_factor = sqrt( (1.0-relative_beta) / (1.0+relative_beta) );
 			double grav_factor_shells = sqrt( (1.0-schwRadius/r) / (1.0-schwRadius/rr) );
 			redshift[jR][jjR] = grav_factor_shells * doppler_factor;
-			//redshift[jR][jjR] = 1.0;
 			jjR++;
 		},{0,-1,0});
 		

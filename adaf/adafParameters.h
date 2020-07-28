@@ -18,6 +18,7 @@ double delta;							// Fraction of energy released by viscosity that directly
 double paso_r;							// logarithmic step in rADAF.
 double paso_rCD;						// logarithmic step in rCD.
 double rTr;								// Transition radius.
+double powerIndex;							// power involved in the transition SSD to RIAF.
 double rOutCD;							// Outer radius of the cold disk.
 double inclination;						// Inclination of the line of sight.
 double Ainjection;						// Ainj;
@@ -100,6 +101,7 @@ Vector escapeDi;						// Probab. for a photon emitted in a thin disk shell to
 double schwRadius;						// Schwarzschild Radius [cm]
 
 // BLOB PARAMETERS
+double pIndex;
 double rBlob;
 double timeAfterFlare;
 double factorDensity;
@@ -108,7 +110,6 @@ double uth_power;
 double maxRadius;
 double minRadius;
 double etaInj;
-double pIndex;
 
 void adafParameters();
 void redshiftFactor(State& st);

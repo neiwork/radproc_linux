@@ -21,21 +21,22 @@ double fntHadron(double x, const Particle& p, const double density, const SpaceC
 	
 	//double Ekin = Ep/Kpi;
 	
-	double distCreator=0.0;
-	if (eval < p.emax() && eval >= p.emin()) {
+	double distCreator = 0.0;
+	if (eval < p.emax() && eval > p.emin()) {
 		distCreator = p.distribution.interpolate({ { 0, eval } }, &psc);
 	}
 	
 	//double thr = 0.0016; //1GeV
 	//double sigma = 30e-27*(0.95+0.06*log(Ekin/thr));
 	
+	double Eth = 1.22e9 * EV_TO_ERG;
 	double l = log10((protonMass*cLight2+x/Kpi)/1.6); //evaluada en eval
-	double sigma = 1.e-27 * (34.3+1.88*l+0.25*l*l);
+	double sigma = 1.e-27 * (34.3+1.88*l+0.25*l*l) * P2(1.0 - pow(Eth/eval,4));
 	double pionEmiss = cLight*density*sigma*distCreator/Kpi;  //sigma = crossSectionHadronicDelta(Ekin)
 															  //lo saco asi pongo la condicion Ekin > Ethr en el limite de la int
 	
-	double result = 2.0*pionEmiss/(pow(P2(x)-P2(chargedPionMass*cLight2),0.5));
-	return result;
+	double result = pionEmiss/sqrt(P2(x)-P2(chargedPionMass*cLight2));
+	return (x > chargedPionMass*cLight2 ? result : 0.0);
 }
 
 
@@ -46,14 +47,18 @@ double luminosityNTHadronic(double E, const Particle& creator,
 	double Kpi = 0.17;
 	double thr = 0.0016; //1GeV
 
-	double Max  = 1.6e-12*pow(10.0,17.0);   //esto es un infinito 
+	double Max  = creator.emax();   //esto es un infinito 
 	double Min  = std::max(E+P2(chargedPionMass*cLight2)/(4*E),thr*Kpi); //== Ekin > Ethr
+	Min = E+0.25*P2(chargedPionMass*cLight2)/E;
+	double integral = integSimpsonLog(Min, Max,[&](double x)
+				{
+					return fntHadron(x,creator,density,psc);
+				},100);
+	//double integral = RungeKuttaSimple(Min, Max, 
+	//	[&](double x) {return fntHadron(x, creator, density, psc); }
+	//);    //integra entre Emin y Emax
 
-	double integral = RungeKuttaSimple(Min, Max, 
-		[&](double x) {return fntHadron(x, creator, density, psc); }
-	);    //integra entre Emin y Emax
-
-	double luminosity = integral*P2(E); // [erg s^-1 cm^-3 ]
+	double luminosity = 2.0*integral*P2(E); // [erg s^-1 cm^-3 ]
 
 	return luminosity; 
 }

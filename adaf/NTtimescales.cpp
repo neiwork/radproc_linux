@@ -72,7 +72,7 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 			p.ps.iterate([&](const SpaceIterator& iRE) {
 				double E = iRE.val(DIM_E);
 				double tAcc = 1.0/accelerationRate(E,B);
-				if (accMethod == 0) tAcc = accelerationTimeSDA(E,p,B,height,rho);
+				if (accMethod == 1) tAcc = accelerationTimeSDA(E,p,B,height,rho);
 				double tDiff = diffusionTimeTurbulence(E,height,p,B);
 
 				file << (int)(r/schwRadius)
@@ -100,6 +100,7 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 						 << "\t" << safeLog10(tBrem)
 						 << std::endl;
 				} else if(p.id == "ntProton") {
+					double tAdi = 2.0*r/(-radialVel(r)) / (E/p.mass/cLight2);
 					double tSyn = E/lossesSyn(E,B,p);
 					double tIC_Th = E/lossesIC_Th(E,p,st.photon.distribution,iR.coord,st.photon.emin(),
 											st.photon.emax());
@@ -113,6 +114,7 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 						 << "\t" << safeLog10(tPP)
 						 << "\t" << safeLog10(tPG)
 						 << "\t" << safeLog10(tBH)
+						 << "\t" << safeLog10(tAdi)
 						 << std::endl;
 				}
 			},{-1,iR.coord[DIM_R],0});

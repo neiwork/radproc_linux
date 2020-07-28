@@ -87,9 +87,11 @@ int main()
 					writeEandRParamSpace("electronInjection",model.ntElectron.injection,0,1);
 					writeRParamSpace("electronInjection_R", model.ntElectron.injection, 0, 0);
 					if (accMethod == 0)
+						//distributionSpatialDiffusion(model.ntElectron, model);
 						distributionMultiZone(model.ntElectron, model);
+						//distributionSpatialDiffusionSteady(model.ntElectron, model);
 					else
-						distributionFokkerPlanckMultiZone(model.ntElectron, model);
+						distributionSpatialDiffusion(model.ntElectron, model);
 					writeEandRParamSpace("electronDistribution",model.ntElectron.distribution,0,1);
 					writeRParamSpace("electronDistribution_R", model.ntElectron.distribution, 0, 0);
 				} else {
@@ -106,10 +108,10 @@ int main()
 					writeEandRParamSpace("protonInjection", model.ntProton.injection, 0,1);
 					writeRParamSpace("protonInjection_R", model.ntProton.injection, 0, 0);
 					if (accMethod == 0)
-						distributionFokkerPlanckSpatialDiffusion(model.ntProton, model);
+						distributionSpatialDiffusionSteady(model.ntProton, model);
 						//distributionMultiZoneRadial(model.ntProton, model);
 					else
-						distributionFokkerPlanckComplete(model.ntProton, model);
+						distributionSpatialDiffusionSteady(model.ntProton, model);
 						//distributionFokkerPlanckCompleteSteadyState(model.ntProton, model);
 						//distributionFokkerPlanckSpatialDiffusionTimeDependent(model.ntProton, model);
 						//distributionFokkerPlanckRadial(model.ntProton,model);

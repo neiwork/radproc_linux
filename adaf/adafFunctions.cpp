@@ -160,22 +160,20 @@ double costhetaH(double r)
 
 double fAcc(double r)
 {
-	double powerTransition = GlobalConfig.get<double>("powerTransition");
 	double rOut = exp(logr.back())*schwRadius;
 	return (r < rTr) ? 0.0 :
 			(r > rOut ? 1.0 :
-			(1.0-pow(rTr/r,powerTransition)) / (1.0-pow(rTr/rOut,powerTransition)) );
+			(1.0-pow(rTr/r,powerIndex)) / (1.0-pow(rTr/rOut,powerIndex)) );
 }
 
 double gAccAux(double r)
 {
-	double pIndex = GlobalConfig.get<double>("powerTransition");
 	double rOutADAF = exp(logr.back())*schwRadius;
-	double result = ( (-( pow(r,pIndex+s) - pow(rOutADAF,pIndex+s) ) )*pow(rTr,pIndex)*s -
-            pow(rOutADAF,s) * pow(r*rOutADAF,pIndex) * ( pow(rTr/r,pIndex) -
-            pow(r/rOutADAF,s) * pow(rTr/rOutADAF,pIndex) )*(pIndex+s) ) /
-			( pow(rOutADAF,s) * pow(r*rOutADAF,pIndex) ) /
-			( ( -1.0 + pow(rTr/rOutADAF,pIndex) ) * (pIndex+s) );
+	double result = ( (-( pow(r,powerIndex+s) - pow(rOutADAF,powerIndex+s) ) )*pow(rTr,powerIndex)*s -
+            pow(rOutADAF,s) * pow(r*rOutADAF,powerIndex) * ( pow(rTr/r,powerIndex) -
+            pow(r/rOutADAF,s) * pow(rTr/rOutADAF,powerIndex) )*(powerIndex+s) ) /
+			( pow(rOutADAF,s) * pow(r*rOutADAF,powerIndex) ) /
+			( ( -1.0 + pow(rTr/rOutADAF,powerIndex) ) * (powerIndex+s) );
 
 		
 	return result;
@@ -227,13 +225,7 @@ double magneticField(double r)
 double accRateColdDisk(double r)
 {
 	double rOutADAF = exp(logr.back())*schwRadius;
-	double result = 0.0;
-	if (r > rTr) {
-		if (rTr < 5*schwRadius) {
-			result = accRateOut * fAcc(r);
-		} else
-			result = accRateOut * fAcc(r);
-	}
+	double result = accRateOut * fAcc(r);
 	return result;
 }
 

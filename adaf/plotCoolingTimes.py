@@ -12,7 +12,7 @@ rc('text',usetex = True)
 import scipy.optimize as optimization
 
 r,log_ge,logAcce,logAdve,logDiffe,logEmaxHe,logSye,logIC,logBr = np.loadtxt('electronCoolingTimes.dat',unpack=True,skiprows=1)
-r,log_gp,logAccp,logAdvp,logDiffp,logEmaxHp,logSyp,logICp,logpp,logpg,logBH = np.loadtxt('protonCoolingTimes.dat',unpack=True,skiprows=1)
+r,log_gp,logAccp,logAdvp,logDiffp,logEmaxHp,logSyp,logICp,logpp,logpg,logBH,logAdi = np.loadtxt('protonCoolingTimes.dat',unpack=True,skiprows=1)
 #r,log_gMu,logMuAdv,logMuDiff,logMuSy,logMuDecay = np.loadtxt('muonCoolingTimes.dat',unpack=True,skiprows=1)
 #r,log_gPi,logPiAdv,logPiDiff,logPiSy,logPiDecay,logPiPP,logPiPG,logPiBH = np.loadtxt('pionCoolingTimes.dat',unpack=True,skiprows=1)
 
@@ -77,6 +77,7 @@ with PdfPages('protonCoolingTimes.pdf') as pdf:
         ax1.plot(log_gp[r1*nE:(r1+1)*nE],logAccp[r1*nE:(r1+1)*nE],lw=2.0,ls='solid',c='k',label='Acc')
         ax1.plot(log_gp[r1*nE:(r1+1)*nE],logpp[r1*nE:(r1+1)*nE],lw=1.5,ls=(0,(3,1,1,1)),c='purple',label='pp')
         ax1.plot(log_gp[r1*nE:(r1+1)*nE],logph[r1*nE:(r1+1)*nE],lw=2,ls=(0,(5,1)),c='magenta',label=r'p$\gamma$')
+        ax1.plot(log_gp[r1*nE:(r1+1)*nE],logAdi[r1*nE:(r1+1)*nE],lw=2,ls='dashed',label='Adi')
         ax1.plot(log_gp[r1*nE:(r1+1)*nE],logTot[r1*nE:(r1+1)*nE],lw=4,ls='solid',c='r',label='Total')
         ax1.axvline(logEmaxHe[0])
         ax1.legend(loc='best',fontsize=8)

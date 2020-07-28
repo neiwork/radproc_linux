@@ -21,7 +21,7 @@ void adafParameters()
 	adafFile.open("adafFile.txt"); adafParams.open("adafParameters.txt");
 	adafFile >> nRaux;
 	double accRateNorm;
-	adafParams >> blackHoleMass >> accRateNorm >> s >> magFieldPar >> alpha >> j >> delta;
+	adafParams >> blackHoleMass >> accRateNorm >> s >> magFieldPar >> alpha >> j >> delta >> rTr >> powerIndex;
 	adafParams.close();
 	
 	logr.resize(nRaux,0.0);
@@ -42,7 +42,7 @@ void adafParameters()
 	cout << "Total inner accretion power = " << accRateOut*pow(1.0/exp(logr.back()),s)*cLight2 
 		 << " erg s^{-1}" << endl;
     
-	rTr = GlobalConfig.get<double>("rTr") * schwRadius;
+	rTr = rTr * schwRadius;
 	rOutCD = GlobalConfig.get<double>("rOutCD") * schwRadius;
 	eMeanMolecularWeight = GlobalConfig.get<double>("mu_e");
 	iMeanMolecularWeight = GlobalConfig.get<double>("mu_i");

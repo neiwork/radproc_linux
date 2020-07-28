@@ -511,6 +511,29 @@ void comptonNewNewNewPruebaVector(size_t jR, Vector energies, size_t jE, Vector&
 	}
 }
 
+double lumInterp(Vector lum, Vector energies, size_t jE, size_t n, double redE)
+{
+
+	if (redE > energies[nE-1]) return lum[nE-1];
+	if (redE < energies[0]) return lum[0];
+	
+	size_t j = jE;
+	if (redE > energies[j]) 
+		while (redE > energies[j]) j++;
+	if (redE < energies[j]) {
+		while (redE < energies[j]) j--;
+		j++;
+	}
+	double lum1 = lum[j-1];
+	double lum2 = lum[j];
+	double e1 = energies[j-1];
+	double e2 = energies[j];
+	double slope = 0.0;
+	if (lum1 > 0.0 && lum2 > 0.0) slope = log10(lum2/lum1)/log10(e2/e1);
+	
+	return lum1 * pow(redE/e1,slope);
+}
+
 double compton(Vector p, Vector lumIn, size_t jTemp, Vector energies, size_t jE)
 {
 	double pasoNuPrim = pow(energies[nE-1]/energies[0],1.0/nE);
