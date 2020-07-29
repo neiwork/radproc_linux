@@ -224,7 +224,6 @@ double magneticField(double r)
 
 double accRateColdDisk(double r)
 {
-	double rOutADAF = exp(logr.back())*schwRadius;
 	double result = accRateOut * fAcc(r);
 	return result;
 }

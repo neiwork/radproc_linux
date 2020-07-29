@@ -365,7 +365,7 @@ void thermalCompton2(State& st, Matrix& lumOut, Matrix& lumInICm, Matrix& lumOut
 	matrixInitCopy(lumOutLocal, nE, nR, lumOut);
 	Vector p(nR*nE*nE, 0.0);
 	
-	Vector a(nR,1.0);
+	Vector a(nR, 1.0);
 	if (comptonMethod == 1)
 		cNew(st, p, a);
 		//cNew(st, p, redshift_to_inf);

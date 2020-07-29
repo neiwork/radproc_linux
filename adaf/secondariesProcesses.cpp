@@ -192,5 +192,5 @@ void secondariesProcesses(State& st)
 		writeEandRParamSpace("secondaryPairDistribution",st.ntPair.distribution,0,1);
 		secondariesRadiationProcesses(st,"secondariesLum.dat");
 		cout << "Iteration = " << it << "\t Cond = " << cond << endl;
-	} while (it<=0);
+	} while (it<=1);
 }

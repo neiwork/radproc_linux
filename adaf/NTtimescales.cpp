@@ -42,15 +42,17 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 				<< std::endl;
 	}
 	
-	int flag1,flag2,flag3,flag4,flag5;
-	flag1 = flag2 = flag3 = flag4 = flag5 = 0;
-	double logr1,logr2,logr3,logr4,logr5;
+	int flag1, flag2, flag3, flag4, flag5, flag6, flag7;
+	flag1 = flag2 = flag3 = flag4 = flag5 = flag6 = flag7 = 0;
+	double logr1,logr2,logr3,logr4,logr5,logr6,logr7;
 	logr1 = log10(1.5);
-	double aux = log10(st.denf_e.ps[DIM_R].last()/schwRadius)/4.0;
+	double aux = log10(st.denf_e.ps[DIM_R].last()/schwRadius)/7.0;
 	logr2 = logr1+aux;
 	logr3 = logr2+aux;
 	logr4 = logr3+aux;
 	logr5 = logr4+aux;
+	logr6 = logr5+aux;
+	logr7 = logr6+aux;
 	p.ps.iterate([&](const SpaceIterator& iR) {
 		double r = iR.val(DIM_R);
 		double logr = log10(r/schwRadius);
@@ -58,9 +60,12 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 		if (logr > logr2) flag2++;
 		if (logr > logr3) flag3++;
 		if (logr > logr4) flag4++;
-		if (logr > 0.9*logr5) flag5++;
+		if (logr > logr5) flag5++;
+		if (logr > logr6) flag6++;
+		if (logr > 0.9*logr7) flag7++;
 		
-		if (flag1 == 1 || flag2 == 1 || flag3 == 1 || flag4 == 1 || flag5 == 1) {
+		if (flag1 == 1 || flag2 == 1 || flag3 == 1 || flag4 == 1 || flag5 == 1
+				|| flag6 == 1 || flag7 == 1) {
 			double tAdv = accretionTime(r);
 			double vR = radialVel(r/sqrt(paso_r));
 			double dR = r * (sqrt(paso_r)-1.0/sqrt(paso_r));

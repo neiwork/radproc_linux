@@ -18,7 +18,7 @@ double delta;							// Fraction of energy released by viscosity that directly
 double paso_r;							// logarithmic step in rADAF.
 double paso_rCD;						// logarithmic step in rCD.
 double rTr;								// Transition radius.
-double powerIndex;							// power involved in the transition SSD to RIAF.
+double powerIndex;						// Power involved in the transition SSD to RIAF.
 double rOutCD;							// Outer radius of the cold disk.
 double inclination;						// Inclination of the line of sight.
 double Ainjection;						// Ainj;
