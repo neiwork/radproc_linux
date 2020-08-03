@@ -3,6 +3,7 @@
 #include <fmath/physics.h>
 #include <gsl/gsl_math.h>
 #include <boost/property_tree/ptree.hpp>
+#include <gsl/gsl_sf_bessel.h>
 
 double adiabaticLosses(double E, double z, double vel_lat, double gamma)  //en [erg/s]
 {
@@ -99,49 +100,37 @@ double accelerationRateSDA(double E, Particle& p, double B, double height, doubl
 	return diffCoeff_g(gamma,p,height,B,rho) / (gamma*gamma);
 }
 
-/*
-double relaxTime(double E, double r, Particle& p, int indicator) {
+
+double relaxTime_e(double E, double temp, double dens) {
 	
-	double gamma = E / (p.mass*cLight2);
+	double gamma = E / electronRestEnergy;
 	double lnLambda = 20.0;
-	double theta1 = 0.0;
-	double theta2 = 0.0;
-	double ne1,ne2;
-	if (indicator == 1) {
-		theta1 = boltzmann*electronTemp(r)/electronRestEnergy;
-		ne1 = electronDensity(r);
-		massRatio = 1.0;
-	} else if (indicator == 2) {
-		theta1 = boltzmann*ionTemp(r)/(protonMass*cLight2);
-		ne1 = ionDensity(r);
-		massRatio = P2(p.mass/electronMass);
-	} else if (indicator == 3) {
-		theta1 = boltzmann*electronTemp(r)/(electronMass*cLight2);
-		theta2 = boltzmann*ionTemp(r)/(protonMass*cLight2);
-		ne1 = electronDensity(r);
-		ne2 = ionDensity(r);
-		massRatio = protonMass/electronMass;
-	}
+	double theta = boltzmann*temp / electronRestEnergy;
 	
-	if (p.id == "ntElectron" && gamma1 > 2.0 && theta > 0.3) {
-		double k1 = gsl_sf_bessel_K1(1.0/theta1);
-		double k2 = gsl_sf_bessel_Kn(2,1.0/theta1);
-		double factor = abs(k1/k2-1.0/gamma);
-		return 2.0/3.0 * gamma / (ne1*thomson*cLight*(lnLambda+9.0/16.0-log(sqrt(2.0)))) /
+	if (gamma > 2.0 && theta > 0.3) {
+		double k1 = gsl_sf_bessel_K1(1.0/theta);
+		double k2 = gsl_sf_bessel_Kn(2, 1.0/theta);
+		double factor = abs(k1/k2 - 1.0/gamma);
+		return 2.0/3.0 * gamma / (dens*thomson*cLight*(lnLambda+9.0/16.0-0.5*log(2.0))) /
 				factor;
-	} else if (p.id == "ntProton" && gamma > 1.075 && gamma < 1.53) {
-		double beta = sqrt(1.0-1.0/(gamma*gamma));
-		double sigmaH = 2.3e-26;
-		return 4.0*beta*gamma*gamma/(ne1*sigmaH*cLight*(gamma*gamma-1.0));
-	} else if (p.id == "ntProton" && gamma > 4.0 && indicator == 3) {
-		double beta = sqrt(1.0-1.0/(gamma*gamma));
-		return 1.2e3 * (3.8*pow(theta1,1.5)+P3(beta))*(gamma-1.0) /
-				(ne2*thomson*cLight*beta*beta*lnLambda);
-	}
 	} else
-		return 4.0*sqrt(pi)*pow(0.5(theta1+theta2),1.5) * massRatio /
-			(ne1*thomson*cLight*lnLambda);
-}*/
+		return 4.0*sqrt(pi)*pow(theta, 1.5) / (dens*thomson*cLight*lnLambda);
+}
+
+double relaxTime_p(double E, double temp, double dens) {
+	
+	double gamma = E / (protonMass*cLight2);
+	double lnLambda = 20.0;
+	double theta = boltzmann*temp / (protonMass*cLight2);
+	double b1 = 70e6*EV_TO_ERG / (protonMass*cLight2);
+	double b2 = 500e6*EV_TO_ERG / (protonMass*cLight2);
+	if ( gamma-1.0 > b1 && gamma-1.0 < b2 ) {
+		double beta = sqrt(1.0-1.0/(gamma*gamma));
+		double sigma_h = 2.3e-26;
+		return 4.0 * gamma*gamma * beta / (gamma*gamma - 1.0) / (dens*sigma_h*cLight);
+	} else
+		return 4.0*sqrt(pi)*pow(theta, 1.5) * P2(protonMass/electronMass) / (dens*thomson*cLight*lnLambda);
+}
 
 double accelerationRate(double E, double B) //en [s]^-1
 {

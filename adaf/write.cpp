@@ -230,7 +230,11 @@ void writeMatrix(const std::string& filename, Particle& p, Matrix& a)
 void writeFields(State& st) {
 	std::ofstream fields;
 	fields.open("fields.dat",std::ios::out);
-	fields  << "r [Rs]" 	<< "\t"
+	fields		<< "r_in [Rs] = " << exp(logr.front()) << endl;
+	fields		<< "r_out [Rs] = " << exp(logr.back()) << endl << endl;
+	fields  << "rB1 [Rs]" 	<< "\t"
+			<< "r [Rs]" 	<< "\t"
+			<< "rB2 [Rs]" 	<< "\t"
 			<< "MdotRIAF" 	<< "\t"
 			<< "MdotCD" 	<< "\t"
 			<< "Te"			<< "\t"
@@ -242,15 +246,35 @@ void writeFields(State& st) {
 
 	st.photon.ps.iterate([&](const SpaceIterator& iR) {
 		double r = iR.val(DIM_R);
-		fields << r/schwRadius << "\t"
-			   << gAcc(r) << "\t"
-			   << accRateColdDisk(r)/accRateOut << "\t"
-			   << st.tempElectrons.get(iR) << "\t"
-			   << st.tempIons.get(iR) << "\t"
-			   << height_fun(r)/r << "\t"
-			   << electronDensity(r) << "\t"
-			   << abs(radialVel(r))/cLight <<"\t"
-			   << st.magf.get(iR) << endl;
+		fields 	<< r/schwRadius/sqrt(paso_r) << "\t"
+				<< r/schwRadius << "\t"
+				<< r/schwRadius * sqrt(paso_r) << "\t"
+				<< gAcc(r) << "\t"
+				<< accRateColdDisk(r)/accRateOut << "\t"
+				<< st.tempElectrons.get(iR) << "\t"
+				<< st.tempIons.get(iR) << "\t"
+				<< height_fun(r)/r << "\t"
+				<< electronDensity(r) << "\t"
+				<< abs(radialVel(r))/cLight <<"\t"
+				<< st.magf.get(iR) << endl;
 	},{0,-1,0});
 	fields.close();
+	
+	std::ofstream SSD;
+	SSD.open("SSD.dat",std::ios::out);
+	SSD		<< "r_tr [Rs] = " << rTr/schwRadius << endl;
+	SSD		<< "r_outCD [Rs] = " << rOutCD/schwRadius << endl << endl;
+	SSD  	<< "rB1 [Rs]"			<< "\t"
+			<< "r [Rs]" 			<< "\t"
+			<< "rB2 [Rs]"			<< "\t"
+			<< "MdotCD/MdotOut" 	<< endl;
+	
+	st.photon.ps.iterate([&](const SpaceIterator& iRcd) {
+		double rCD = iRcd.val(DIM_Rcd);
+		SSD 	<< rCD/sqrt(paso_rCD)/schwRadius << "\t"
+				<< rCD/schwRadius << "\t"
+				<< rCD*sqrt(paso_rCD)/schwRadius << "\t"
+				<< accRateColdDisk(rCD)/accRateOut << endl;
+	},{0,0,-1});
+	SSD.close();
 }

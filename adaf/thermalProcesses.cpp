@@ -238,7 +238,7 @@ void coldDiskLuminosity(State& st, Matrix lumOut, Matrix& lumOutRefl,
 	matrixInit(lumOutCD,nE,nRcd,0.0);
 	matrixInit(lumOutRefl,nE,nRcd,0.0);
 
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	for (int jRcd=0;jRcd<nRcd;jRcd++) {
 		double rCd = st.photon.ps[DIM_Rcd][jRcd];
 		
@@ -248,11 +248,11 @@ void coldDiskLuminosity(State& st, Matrix lumOut, Matrix& lumOutRefl,
 		double aux1 = auxCD(rCd);
 		double aux2 = 0.0;
 		
-		double pasoE = pow(energies[nE-1]/energies[0],1.0/(nE+1));
-		reflectedSpectrum(lumOut,lumOutRefl,energies,pasoE);
+		double pasoE = pow(st.photon.emax()/st.photon.emin(),1.0/(nE-1));
+		//reflectedSpectrum(lumOut,lumOutRefl,energies,pasoE);
 
 		for (size_t jjE=0;jjE<nE;jjE++) {
-			double frequency = energies[jjE]/planck;
+			double frequency = st.photon.ps[DIM_E][jjE]/planck;
 			double dfreq = frequency*(sqrt(pasoE)-1.0/sqrt(pasoE));
 			double lumInc = 0.0;
 			for (size_t kR=0;kR<nR;kR++) {
@@ -262,11 +262,11 @@ void coldDiskLuminosity(State& st, Matrix lumOut, Matrix& lumOutRefl,
 		}
 		double aux = aux1+aux2;
 		double temp = pow(aux/area/ stefanBoltzmann,0.25);
-		//cout << "Radius = " << rCd/schwRadius << " Temperature = " << scientific << temp << endl;
+		cout << "RadiusCD = " << rCd/schwRadius << " Temperature [K] = " << scientific << temp << endl;
 
 		for(size_t jE=0;jE<nE;jE++) {
-			double frecuency=energies[jE]/planck;
-			lumOutCD[jE][jRcd] = area * pi * bb(frecuency,1.7*temp)/pow(1.7,4);
+			double frequency = st.photon.ps[DIM_E][jE]/planck;
+			lumOutCD[jE][jRcd] = area * pi * bb(frequency,1.7*temp)/pow(1.7,4);
 		};
 	}
 }
@@ -605,7 +605,7 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 	ofstream file1,file2;
 	ofstream fileCell;
 	file1.open(filename.c_str(),ios::out);
-	file2.open("lumRadius.txt",ios::out);
+	file2.open("lumRadius.dat",ios::out);
 	fileCell.open("lumCell.txt",ios::out);
 	
 	double lumSy,lumBr,lumICin,lumIC,lumpp,lumTot,lumCD,lumRefl;
@@ -667,17 +667,22 @@ void writeLuminosities(State& st, Vector energies, Matrix lumOutSy, Matrix lumOu
 	double lumThermal = 0.0;
 	for (size_t jR=0;jR<nR;jR++) {
 		double r = st.denf_i.ps[DIM_R][jR]/schwRadius;
+		Vector lumVec(nE,0.0);
+		for (size_t jjE=0;jjE<nE;jjE++)
+			lumVec[jjE] = lumOut[jjE][jR];
+		
 		for (size_t jE=0;jE<nE;jE++) {
 			double E = energies[jE];
+			double localEnergy = E / redshift_to_inf[jR];
 			double frequency = E/planck;
 			double dfreq = frequency*(pasoF-1.0);
-			lumThermal += lumOut[jE][jR]*dfreq*escapeAi[jR] * pow(redshift_to_inf[jR],3);
+			lumThermal += lumInterp(lumVec,energies,jE,nE,localEnergy)*dfreq*escapeAi[jR] * pow(redshift_to_inf[jR],3);
 		}
 		cout << "percentage of the lum produced inside r = " << r*sqrt(paso_r)
 			 << " equal to " << lumThermal/lumThermalTotRIAF * 100 << " %" << endl;
 	};
 	
-	double eVar = pow(energies[nE-1]/energies[0],1.0/nE);
+	double eVar = pow(energies[nE-1]/energies[0],1.0/(nE-1));
 	size_t jR=0;
 	st.photon.ps.iterate([&](const SpaceIterator& itR) {
 		double r = itR.val(DIM_R)/schwRadius;

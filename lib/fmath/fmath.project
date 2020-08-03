@@ -8,10 +8,10 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="../../../../../../Downloads/mgmres/cg.h"/>
-    <File Name="../../../../../../Downloads/mgmres/cg.cpp"/>
-    <File Name="../../../../../../Downloads/mgmres/mgmres.h"/>
-    <File Name="../../../../../../Downloads/mgmres/mgmres.cpp"/>
+    <File Name="../../../../../../Downloads/mgmres/cg.h" ExcludeProjConfig="Debug;Release;"/>
+    <File Name="../../../../../../Downloads/mgmres/cg.cpp" ExcludeProjConfig="Debug;Release;"/>
+    <File Name="../../../../../../Downloads/mgmres/mgmres.h" ExcludeProjConfig="Debug;Release;"/>
+    <File Name="../../../../../../Downloads/mgmres/mgmres.cpp" ExcludeProjConfig="Debug;Release;"/>
     <File Name="tridiagonal.cpp"/>
     <File Name="tridiagonal.h"/>
     <File Name="configure.h"/>

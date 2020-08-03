@@ -31,7 +31,7 @@ double electronTemp(double r)
 	double logT = m*(logr_actual-logr[pos_r-1])+logTe[pos_r-1];
 	double temp = eMeanMolecularWeight*exp(logT);
 	double r_rg = r/(schwRadius/2.0);
-	return (r_rg <= 30) ? temp * 1.4/pow(r_rg,0.097) : temp;
+	//return (r_rg <= 30) ? temp * 1.4/pow(r_rg,0.097) : temp;
 	//double factorTemp = GlobalConfig.get<double>("factorTemperature");
 	return temp;
 }

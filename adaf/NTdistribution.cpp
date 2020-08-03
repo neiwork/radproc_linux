@@ -10,7 +10,6 @@
 #include <flosses/lossesSyn.h>
 #include <nrMath/brent.h>
 
-#include <fmath/mgmres.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_errno.h>
@@ -759,7 +758,7 @@ void distributionMultiZone(Particle& particle, State& st)
 		double B = st.magf.get(jR);
 		double rho = massDensityADAF(r);
 		double rateAccretion = abs(radialVel(rB1))*4.0*pi*height_fun(rB1)*rB1/vol;
-		double rateWind = 2.0*s*abs(vR)/r;
+		double rateWind = s*abs(vR)/r;
 		
 		// We define a new mesh of points
 		size_t M = 199;
@@ -803,11 +802,12 @@ void distributionMultiZone(Particle& particle, State& st)
 							if (jR[DIM_R] < nR-1) {
 								SpaceCoord jRplus = {0,jR[DIM_R]+1,0};
 								double areaPlus = 4.0*pi*height_fun(rB2)*rB2;
-								double Nplus = particle.distribution.interpolate({{DIM_E,E}},&jRplus)*(particle.mass*cLight2);
-								Qplus = Nplus * areaPlus * abs(radialVel(rB2)) / vol;
+								//double Nplus = particle.distribution.interpolate({{DIM_E,E}},&jRplus)*(particle.mass*cLight2);
+								//Qplus = Nplus * areaPlus * abs(radialVel(rB2)) / vol;
 							}
-							Qplus = 0.0;
-							return particle.injection.interpolate({{DIM_E,E}},&jR)*(particle.mass*cLight2) + Qplus;
+							double Qlocal = (E > particle.emin() && E < particle.emax() ?
+									particle.injection.interpolate({{DIM_E,E}},&jR)*(particle.mass*cLight2) : 0.0);
+							return Qlocal + Qplus;
 						};
 
 		Vector d(M+1,0.0);
@@ -942,6 +942,7 @@ void distributionSecondaries(Particle& particle, State& st)
 				double areaPlus = 4.0*pi*height_fun(rB2)*rB2;
 				double Nplus = particle.distribution.interpolate({{DIM_E,E}},&jRplus);
 				Qplus = Nplus * areaPlus * abs(radialVel(rB2)) / vol;
+				Qplus = 0.0;
 			}
 			Qinj = particle.injection.interpolate({{DIM_E,E}},&jR) + Qplus;
 			
@@ -4615,7 +4616,8 @@ void distributionSpatialDiffusionSteady(Particle& particle, State& st)
 					double height = height_fun(rTrue);
 					double B = magneticField(rTrue);
 					double vR = radialVel(rTrue);
-					double rateDiff = diffCoeff_r(g,particle,height,B) / (height*height);
+					//double rateDiff = diffCoeff_r(g,particle,height,B) / (height*height);
+					double rateDiff = 1.0/diffusionTimeTurbulence(E,height,particle,B);
 					double rateWinds = s*abs(vR)/rTrue;
 					
 					size_t jjR=0;
@@ -4644,7 +4646,6 @@ void distributionSpatialDiffusionSteady(Particle& particle, State& st)
 						SpaceCoord jR = {0,nR-1,0};
 						dgdt = - losses(E,particle,st,jR) / (particle.mass*cLight2);
 					}
-					
 					double rateCool = abs(dgdt)/g;
 					return pow(rateDiff+rateWinds+rateCool,-1) / naturalTimescale;
 				};
@@ -4656,9 +4657,10 @@ void distributionSpatialDiffusionSteady(Particle& particle, State& st)
 					double E = g * particle.mass*cLight2;
 					double Q = (E > particle.emin() && E < particle.emax() &&
 								rTrue > particle.ps[DIM_R].first() && rTrue < particle.ps[DIM_R].last()) ?
-								r*r*naturalTimescale*particle.injection.interpolate({{DIM_E,E},{DIM_R,rTrue}},&i)*
-								particle.mass*cLight2 : 0.0;
-					return Q;
+								particle.injection.interpolate({{DIM_E,E},{DIM_R,rTrue}},&i) : 0.0;
+					double smoother = 0.25 * (1.0 + gsl_sf_erf((r_local[J-5]-r))) 
+											* (1.0 + gsl_sf_erf(r-r_local[0]));
+					return Q * r * r * naturalTimescale * (particle.mass*cLight2) * smoother;
 				};
 	
 	Matrix Bj_minusHalf_m;				matrixInit(Bj_minusHalf_m,M+1,J+1,0.0);
@@ -4787,7 +4789,7 @@ void distributionSpatialDiffusionSteady(Particle& particle, State& st)
 			if (j > 0 && j < J) {
 				if (m > 0)
 					a[l] = - 1.0/delta_r[j] * Bj_minusHalf_m[m][j] * Wminus_j_minusHalf[m][j] / delta_r_j_minushalf[j];
-				b[l] = 1.0/delta_r[j] * ( Bj_minusHalf_m[m][j] * 	Wplus_j_minusHalf[m][j] / delta_r_j_minushalf[j] +
+				b[l] = 1.0/delta_r[j] * ( Bj_minusHalf_m[m][j] * Wplus_j_minusHalf[m][j] / delta_r_j_minushalf[j] +
 							Bj_plusHalf_m[m][j] * Wminus_j_plusHalf[m][j] / delta_r_j_plushalf[j] ) + 1.0/Tjm[j][m];
 				if (m < M)
 					c[l] = - 1.0/delta_r[j] * Bj_plusHalf_m[m][j] * Wplus_j_plusHalf[m][j] / delta_r_j_plushalf[j];

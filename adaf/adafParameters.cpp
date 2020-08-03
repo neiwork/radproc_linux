@@ -51,8 +51,8 @@ void adafParameters()
 	nE = GlobalConfig.get<int>("model.particle.photon.dim.energy.samples");
 	nRcd = GlobalConfig.get<int>("model.particle.default.dim.radius_cd.samples");
     
-    paso_r = pow(exp(logr.back())/exp(logr.front()),1.0/(nR-1.0));
-	paso_rCD = pow(rOutCD/rTr,1.0/(nRcd-1));
+    paso_r = pow(exp(logr.back())/exp(logr.front()),1.0/(nR));
+	paso_rCD = pow(rOutCD/rTr,1.0/(nRcd));
 
 	logMinEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.min");
 	logMaxEnergy = GlobalConfig.get<double>("model.particle.photon.dim.energy.max");
@@ -111,6 +111,7 @@ void adafParameters()
 		calculateFlare = GlobalConfig.get<int>("nonThermal.calculateFlare");
         calculateNTdistributions = GlobalConfig.get<int>("nonThermal.calculateDistributions");
         calculateNonThermalLum = GlobalConfig.get<int>("nonThermal.calculateLuminosities");
+		calculateNonThermalHE = GlobalConfig.get<int>("nonThermal.calculateHighEnergyProcesses");
         calculateNeutronInj = GlobalConfig.get<int>("nonThermal.neutrons.calculateInjection");
 		calculateNeutronDis = GlobalConfig.get<int>("nonThermal.neutrons.calculatePropagation");
 		calculateJetDecay = GlobalConfig.get<int>("nonThermal.neutrons.calculateJetDecay");

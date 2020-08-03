@@ -38,6 +38,7 @@ int calculateNTelectrons;				// If 1 calculate the non-thermal processes for ele
 int calculateLosses;                    // If 1 calculate radiative losses for electrons and protons.
 int calculateNTdistributions;           // If 1 calculate non-thermal particle distributions.
 int calculateNonThermalLum;             // If 1 calculate non-thermal luminosities.
+int calculateNonThermalHE;             // If 1 calculate non-thermal high-energy processes.
 int calculateSecondaries;				// If 1 calculate electromagnetic cascades.
 int calculateFlare;						// If 1 calculate non-thermal flare distributions.
 int calculateNeutronInj;                // If 1 calculate neutron injection.

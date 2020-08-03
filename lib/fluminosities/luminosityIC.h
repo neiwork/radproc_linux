@@ -12,5 +12,8 @@ double luminosityIC(double E, const Particle& creator, const SpaceCoord& distCoo
 // Moderski et al. (2005):
 double luminosityIC_2(double E, const Particle& creator, const SpaceCoord& distCoord, const ParamSpaceValues& tpf,
 					double tpEmin, double tpEmax);
+// Blumenthal:
+double luminosityIC_Th(double E, const Particle& creator, const SpaceCoord& distCoord, const ParamSpaceValues& tpf,
+					double tpEmin, double tpEmax);
 					
 double luminositySyKN(double Eph, const Particle& creator, const SpaceCoord& distCoord, double magf);

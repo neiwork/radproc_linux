@@ -10,6 +10,8 @@
 
 #include <fmath/RungeKutta.h>
 
+#include <fluminosities/thermalSync.h>
+#include <fluminosities/blackBody.h>
 #include <fluminosities/luminositySynchrotron.h>
 #include <fluminosities/luminosityPhotoHadronic.h>
 #include <fluminosities/luminosityNTHadronic.h>
@@ -81,15 +83,28 @@ void secondariesRadiationProcesses(State& st, const std::string& filename)
 			muSyLocal = luminositySynchrotronExact(E,st.ntMuon,iR,magf)/E;
 			piSyLocal = luminositySynchrotronExact(E,st.ntChargedPion,iR,magf)/E;
 			
-			if (E/EV_TO_ERG > 1.0e7) {
+			if (E/EV_TO_ERG > 1.0e7) {	
 				piPGLocal = luminosityPhotoHadronic(E,st.ntChargedPion,st.photon.distribution,iR,Ephmin,Ephmax)/E;
 				piPPLocal = luminosityNTHadronic(E,st.ntChargedPion,st.denf_i.get(iR),iR)/E;
 			}
+			
+			double alpha_th = jSync(E,st.tempElectrons.get(iR),magf,st.denf_e.get(iR)) / 
+									bb(E/planck,st.tempElectrons.get(iR));
+			double alpha_ssa = ssaAbsorptionCoeff(E,magf,st.ntElectron,psc);
+			double alpha_tot = alpha_th + alpha_ssa;
+			double tau = 0.5*sqrt(pi)*alpha_tot*height;
+			
+			double eSyLocalFlux = (tau > 1.0e-10) ?
+								0.5/sqrt(3.0) * (eSyLocal/alpha_tot) * 
+								(1.0-exp(-2.0*sqrt(3.0)*tau)) :
+								eSyLocal * 0.5 * sqrt(pi) * height;  // flux
+			eSy[E_ix][jR]  = eSyLocalFlux * 2.0 * pi*(rB2*rB2-rB1*rB1);  // luminosity
+				
 
 			double factor = pi/sqrt(3.0)*(rB2*rB2-rB1*rB1) / vol;
 			double eTot = eSyLocal+eICLocal+muSyLocal+piSyLocal+piPPLocal+piPGLocal+ePairAnnLocal;
 
-			eSy[E_ix][jR] = eSyLocal*vol;
+			//eSy[E_ix][jR] = eSyLocal*vol;
 			muSy[E_ix][jR] = muSyLocal*vol;
 			piSy[E_ix][jR] = piSyLocal*vol;
 			eIC[E_ix][jR] = eICLocal*vol;
@@ -99,6 +114,8 @@ void secondariesRadiationProcesses(State& st, const std::string& filename)
 			
 			double totLocal = (taugg > 1.0e-10) ? factor*vol*eTot/kappagg*(1.0-exp(-2.0*sqrt(3.0)*taugg)) : 
 								eTot*vol;
+			//totLocal = eTot*vol*exp(-taugg);
+			
 			double totLocalNA = eTot;
 			totAbs[E_ix][jR] = totLocal;
 			
@@ -192,5 +209,5 @@ void secondariesProcesses(State& st)
 		writeEandRParamSpace("secondaryPairDistribution",st.ntPair.distribution,0,1);
 		secondariesRadiationProcesses(st,"secondariesLum.dat");
 		cout << "Iteration = " << it << "\t Cond = " << cond << endl;
-	} while (it<=1);
+	} while (it<=0);
 }

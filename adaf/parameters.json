@@ -13,7 +13,7 @@
     "calculateComptonScatt":"0",
     "height_method":"1",
     "scatt": {
-        "nRandomPhot":"300",
+        "nRandomPhot":"100",
         "nTheta":"5"
     },
     "calculateNewTemp":"0",
@@ -30,7 +30,7 @@
         },
         
         "compton": {
-            "method":"3",
+            "method":"1",
             
             "calculateRedMatrix":"0",
             "redMatrixParams": {
@@ -55,30 +55,31 @@
     
     "calculateNonThermal":"1",
     "nonThermal": {
-        "acc_method":"0",
+        "calculateLosses":"0",
+		"calculateDistributions":"1",
+        "calculateLuminosities":"1",
+        "calculateHighEnergyProcesses":"1",
+		"calculateSecondaries":"1",
+		"acc_method":"0",
 	    "protons":"1",
-	    "electrons":"1",
+	    "electrons":"0",
         "comptonLosses":"0",
         "injection": {
 		    "calculateMagneticReconnection":"0",
 	        "calculateDSA":"0",
 			"calculateSDA":"0",
 		    "calculatePL":"1",
-            "energyFraction_e":"1.0e-5",
-		    "energyFraction_i":"3.0e-2",
+            "energyFraction_e":"0.5e-5",
+		    "energyFraction_i":"6.0e-3",
 			"PL": {
-		    	"accEfficiency":"0.01"
+		    	"accEfficiency":"0.0001"
 		    },
 		    "SDA": {
 			    "fractionTurbulent":"0.2",
 			    "powerSpectrumIndex":"1.666"
 		    },
-		    "primaryIndex":"2.7"
+		    "primaryIndex":"2.0"
         },
-        "calculateLosses":"1",
-		"calculateDistributions":"0",
-        "calculateLuminosities":"0",
-		"calculateSecondaries":"0",
 		"calculateJetEmission":"0",
     	"neutrons":{
 			"calculateInjection":"0",
@@ -135,7 +136,7 @@
 						"samples":50
 					},
 					"radius_cd":{
-                        "samples":3
+                        "samples":5
                     }
 				}
 			},
@@ -151,7 +152,7 @@
 			"ntPhoton": {
 				"dim":{
 					"energy": {
-						"min":-2.0,
+						"min":-4.5,
 						"max":17.0
 					}
 				}

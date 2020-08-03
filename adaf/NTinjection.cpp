@@ -230,8 +230,8 @@ void injection(Particle& p, State& st)
 		double uth = aTheta * dens * p.mass*cLight2 * norm_temp;
 		double vA = st.magf.get(iR)/sqrt(4.0*pi*massDensityADAF(r));
 		double h = height_fun(r);
-		Qfactor[iR.coord[DIM_R]] = (accMethod == 0) ? uth * abs(radialVel(r)) / r :
-										dens * p.mass*cLight2 * cLight/schwRadius * P2(vA/cLight);
+		Qfactor[iR.coord[DIM_R]] = (accMethod == 0 ? (r/schwRadius < 200.0 ? uth * st.magf.get(iR) : 0.0) : //	 * abs(radialVel(r)) / r :
+										dens * p.mass*cLight2 * cLight/schwRadius * P2(vA/cLight) );
 		sum += vol * Qfactor[iR.coord[DIM_R]];
 	},{0,-1,0});
 	Ainjection = etaInj*accRateOut*cLight2 / sum;		// [non-dimensional]
@@ -364,22 +364,26 @@ void injectionPair(Particle& p, State& st, int it)
 		secondariesGammaGammaFile.open("secondariesInjectionGammaGamma.dat", std::ios::out);
 	}
 	
+	//p.ps.iterate([&](const SpaceIterator& iR) {
 	double sumTot = 0.0;
 	double sumTotPh = 0.0;
-	p.ps.iterate([&](const SpaceIterator& iR) {
-		double r = iR.val(DIM_R);
+	#pragma omp parallel for
+	for (size_t jR=0;jR<nR;jR++) {
+		SpaceCoord iR = {0,jR,0};
+		double r = st.denf_e.ps[DIM_R][jR];
+		//double r = iR.val(DIM_R);
 		double vol = volume(r);
-		double height = height_fun(iR.val(DIM_R));
+		double height = height_fun(r);
 		p.ps.iterate([&](const SpaceIterator& iRE) {
 			double Eee = iRE.val(DIM_E);
 			if (it == 1) {
-				double injectionMuon = pairMuonDecayNew(Eee,st.ntMuon,iRE);
-				double injectionBH = pairBH(Eee,st.ntProton,st.photon.distribution,iRE,
+				double injectionMuon = pairMuonDecayNew(Eee,st.ntMuon,iR);
+				double injectionBH = pairBH(Eee,st.ntProton,st.photon.distribution,iR,
 								st.photon.emin(),st.photon.emax());
 				p.injection.set(iRE, injectionMuon + injectionBH);
-				secondariesMuonFile << safeLog10(Eee/EV_TO_ERG) << "\t" << iR.coord[DIM_R] << "\t"
+				secondariesMuonFile << safeLog10(Eee/EV_TO_ERG) << "\t" << iRE.coord[DIM_R] << "\t"
 								<< r/schwRadius << "\t" << injectionMuon*vol << endl;
-				secondariesBHFile << safeLog10(Eee/EV_TO_ERG) << "\t" << iR.coord[DIM_R] << "\t"
+				secondariesBHFile << safeLog10(Eee/EV_TO_ERG) << "\t" << iRE.coord[DIM_R] << "\t"
 								<< r/schwRadius << "\t" << injectionBH*vol << endl;
 			}
 			double injectionGammaGamma = pairGammaGammaNew(Eee,st.ntPhoton.distribution,st.photon.distribution,
@@ -389,22 +393,22 @@ void injectionPair(Particle& p, State& st, int it)
 			p.injection.set(iRE,p.injection.get(iRE)+injectionGammaGamma);
 			secondariesGammaGammaFile << safeLog10(Eee/EV_TO_ERG) << "\t" << vol << "\t"
 								<< r/schwRadius << "\t" << injectionGammaGamma << endl;
-		},{-1,iR.coord[DIM_R],0});
+		},{-1,jR,0});
 		sumTot += integSimpsonLog(p.emin(),p.emax(),[&st,&p,iR](double e)
 					{
 						//double tcool = e/lossesSyn(e,st.magf.get(iR),p);
-						double inj = p.injection.interpolate({{DIM_E,e}},&iR.coord);
+						double inj = p.injection.interpolate({{DIM_E,e}},&iR);
 						return e*inj;
-					},100)*volume(iR.val(DIM_R));
+					},100)*volume(r);
 		sumTotPh += integSimpsonLog(st.ntPhoton.emin(),st.ntPhoton.emax(),
 					[&st,&iR,height](double Eg)
 					{
-						double ntPh = st.ntPhoton.distribution.interpolate({{DIM_E,Eg}},&iR.coord);
-						double kappa_gg = 2.0/sqrt(pi)*st.tau_gg.interpolate({{DIM_E,Eg}},&iR.coord)/height;
+						double ntPh = st.ntPhoton.distribution.interpolate({{DIM_E,Eg}},&iR);
+						double kappa_gg = 2.0/sqrt(pi)*st.tau_gg.interpolate({{DIM_E,Eg}},&iR)/height;
 						double rategg = cLight*kappa_gg;
 						return Eg*ntPh*rategg;
-					},100)*volume(iR.val(DIM_R));
-	},{0,-1,0});
+					},100)*volume(r);
+	};
 	cout << "Total photon power absorbed to create pairs = " << sumTotPh << "\t" << endl;
 	cout << "Total power injected in " << p.id << " = " << sumTot << "\t" << endl;
 	writeEandRParamSpace("secondaryPairInjection",p.injection,0,1);

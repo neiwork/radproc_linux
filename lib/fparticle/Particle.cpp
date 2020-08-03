@@ -66,10 +66,10 @@ Dimension* Particle::eDim() const
 
 double Particle::emin() const
 {
-	return 1.6e-12*pow(10.0, logEmin);
+	return EV_TO_ERG*pow(10.0, logEmin);
 }
 
 double Particle::emax() const
 {
-	return 1.6e-12*pow(10.0, logEmax);
+	return EV_TO_ERG*pow(10.0, logEmax);
 }

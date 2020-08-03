@@ -137,6 +137,7 @@ void nonThermalRadiation(State& st, const std::string& filename)
 	file << "log(E/eV)"
 		 << '\t' << "pSyn"
 		 << "\t" << "eIC"
+		 << "\t" << "pIC"
 		 << "\t" << "pPP"
 		 << "\t" << "pPG"
 		 << "\t" << "totAbs"
@@ -159,6 +160,7 @@ void nonThermalRadiation(State& st, const std::string& filename)
 	Matrix eSy;			matrixInit(eSy,nE,nR,0.0);
 	Matrix eIC;			matrixInit(eIC,nEnt,nR,0.0);
 	Matrix pSy;			matrixInit(pSy,nEnt,nR,0.0);
+	Matrix pIC;			matrixInit(pIC,nEnt,nR,0.0);
 	Matrix pPP;			matrixInit(pPP,nEnt,nR,0.0);
 	Matrix pPG;			matrixInit(pPG,nEnt,nR,0.0);
 	Matrix totNotAbs;	matrixInit(totNotAbs,nEnt,nR,0.0);
@@ -203,126 +205,144 @@ void nonThermalRadiation(State& st, const std::string& filename)
 		}
 	}
 
-	#pragma omp parallel for
-	for (int E_ix=0;E_ix<nEnt;E_ix++) {
-		double E = ntPh.ps[DIM_E][E_ix];
-		size_t jR = 0;
-		st.ntPhoton.ps.iterate([&](const SpaceIterator& iR) {
-			double r = iR.val(DIM_R);
-			double rB1 = r/sqrt(paso_r);
-			double rB2 = r*sqrt(paso_r);
-			double vol = volume(r);
-			double magf = st.magf.get(iR);
-			SpaceCoord psc = {E_ix,iR.coord[DIM_R],0};
-			
-			double alpha_th = jSync(E,st.tempElectrons.get(iR),magf,st.denf_e.get(iR)) / 
-								bb(E/planck,st.tempElectrons.get(iR));
-			double kappa_ssa_p = ssaAbsorptionCoeff(E,magf,st.ntProton,psc)+alpha_th;
-			double kappagg = 0.0;
-			double Ephmin_gg = P2(electronRestEnergy)/E;
-			if (Ephmin_gg < Ephmax) {
-				kappagg = integSimpsonLog(Ephmin_gg,Ephmax,[&E,&psc,&st](double Eph)
-								{
-									double nPh = st.photon.distribution.interpolate({{0,Eph}},&psc);
-									return ggCrossSection2(E,Eph)*nPh;
-								},50);
-			}
-			double height = height_fun(r);
-			double tau_ssa_p = 0.5*sqrt(pi)*kappa_ssa_p*height;
-			double taugg = 0.5*sqrt(pi)*kappagg*height;
-			st.tau_gg.set(psc,taugg);
-			
-			double factor = pi/sqrt(3.0)*(rB2*rB2-rB1*rB1) / vol;
-			
-			double eICLocal,pSyLocal,pPPLocal,pPGLocal;
-			eICLocal = pSyLocal = pPPLocal = pPGLocal = 0.0;
-			
-			if (calculateNTelectrons)
-				eICLocal = luminosityIC_2(E,st.ntElectron,iR.coord,st.photon.distribution,Ephmin,Ephmax)/E;
-			if (calculateNTprotons) {
-				pSyLocal = luminositySynchrotronExact(E,st.ntProton,iR,st.magf.get(iR))/E;
-			
-				if (E/EV_TO_ERG > 1.0e7) {
-					pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,iR,Ephmin,Ephmax)/E;
-					pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(iR),iR)/E;
-					if (E/EV_TO_ERG < 1.0e10)
-						pPPLocal += 4.0*pi*luminosityHadronic(E,st.denf_i.get(iR),st.tempIons.get(iR))/planck;
+	if (calculateNonThermalHE) {
+		#pragma omp parallel for
+		for (int E_ix=0;E_ix<nEnt;E_ix++) {
+			double E = ntPh.ps[DIM_E][E_ix];
+			size_t jR = 0;
+			st.ntPhoton.ps.iterate([&](const SpaceIterator& iR) {
+				double r = iR.val(DIM_R);
+				double rB1 = r/sqrt(paso_r);
+				double rB2 = r*sqrt(paso_r);
+				double vol = volume(r);
+				double magf = st.magf.get(iR);
+				SpaceCoord psc = {E_ix,iR.coord[DIM_R],0};
+				
+				double alpha_th = jSync(E,st.tempElectrons.get(iR),magf,st.denf_e.get(iR)) / 
+									bb(E/planck,st.tempElectrons.get(iR));
+				double kappa_ssa_p = ssaAbsorptionCoeff(E,magf,st.ntProton,psc)+alpha_th;
+				double kappagg = 0.0;
+				double Ephmin_gg = P2(electronRestEnergy)/E;
+				if (Ephmin_gg < Ephmax) {
+					kappagg = integSimpsonLog(Ephmin_gg,Ephmax,[&E,&psc,&st](double Eph)
+									{
+										double nPh = st.photon.distribution.interpolate({{0,Eph}},&psc);
+										return ggCrossSection2(E,Eph)*nPh;
+									},50);
+				}
+				double height = height_fun(r);
+				double tau_ssa_p = 0.5*sqrt(pi)*kappa_ssa_p*height;
+				double taugg = 0.5*sqrt(pi)*kappagg*height;
+				st.tau_gg.set(psc,taugg);
+				
+				double factor = pi/sqrt(3.0)*(rB2*rB2-rB1*rB1) / vol;
+				
+				double eICLocal, pSyLocal, pICLocal, pPPLocal, pPGLocal;
+				eICLocal = pSyLocal = pICLocal = pPPLocal = pPGLocal = 0.0;
+				
+				if (calculateNTelectrons)
+					eICLocal = luminosityIC_2(E,st.ntElectron,iR.coord,st.photon.distribution,Ephmin,Ephmax)/E;
+				
+				if (calculateNTprotons) {
+					pSyLocal = luminositySynchrotronExact(E,st.ntProton,iR,st.magf.get(iR))/E;
+					pICLocal = luminosityIC_Th(E,st.ntProton,iR,st.photon.distribution,Ephmin,Ephmax)/E;
+				
+					if (E/EV_TO_ERG > 1.0e7) {
+						pPGLocal = luminosityPhotoHadronic(E,st.ntProton,st.photon.distribution,iR,Ephmin,Ephmax)/E;
+						pPPLocal = luminosityNTHadronic(E,st.ntProton,st.denf_i.get(iR),iR)/E;
+						if (E/EV_TO_ERG < 1.0e11)
+							pPPLocal += 4.0*pi*luminosityHadronic(E,st.denf_i.get(iR),st.tempIons.get(iR))/planck;
+					}
+					
+					pSyLocal = (tau_ssa_p > 1.0e-10) ? 
+								factor*(pSyLocal/kappa_ssa_p)*(1.0-exp(-2.0*sqrt(3.0)*tau_ssa_p)) :
+								pSyLocal;
 				}
 				
-				pSyLocal = (tau_ssa_p > 1.0e-10) ? 
-							factor*(pSyLocal/kappa_ssa_p)*(1.0-exp(-2.0*sqrt(3.0)*tau_ssa_p)) :
-							pSyLocal;
-			}
-			
-			double eTot = eICLocal+pSyLocal+pPPLocal+pPGLocal;
+				double eTot = eICLocal+pSyLocal+pICLocal+pPPLocal+pPGLocal;
 
-			pSy[E_ix][jR] = pSyLocal*vol;
-			eIC[E_ix][jR] = eICLocal*vol;
-			pPP[E_ix][jR] = pPPLocal*vol;
-			pPG[E_ix][jR] = pPGLocal*vol;
-			
-			double totLocal = (taugg > 1.0e-10) ? 
-									factor*vol*eTot/kappagg*(1.0-exp(-2.0*sqrt(3.0)*taugg)) : 
-										eTot*vol;
-			totNotAbs[E_ix][jR] = totLocal;
-			totAbs[E_ix][jR] = (eTot*vol - totLocal);
-			
-			
-			double tau_es = st.denf_e.get(iR)*thomson*height;
-			double tescape = height/cLight * (1.0+tau_es);
-			double rate_gg = kappagg * cLight;
-			st.ntPhoton.distribution.set(psc, eTot/E * pow(rate_gg+pow(tescape,-1),-1));
-			st.ntPhoton.injection.set(psc, eTot/E * pow(rate_gg+pow(tescape,-1),-1));
-			
-			jR++;
-		},{E_ix,-1,0});
-	}
-	
-	double lum_eSy, lum_pSy, lum_eIC, lum_pPP, lum_pPG, lum_totNotAbs, lum_totAbs;
-	for (size_t jE=0;jE<nEnt;jE++) {
-		lum_pSy = lum_eIC = lum_pPP = lum_pPG = lum_totNotAbs = lum_totAbs = 0.0;
-		double E = ntEnergies[jE];
-		double fmtE = safeLog10(E/EV_TO_ERG);
-		for (size_t jR=0;jR<nR;jR++) {
-			Vector pSyVec(nEnt,0.0), eICVec(nEnt,0.0), pPPVec(nEnt,0.0),
-					pPGVec(nEnt,0.0), totNotAbsVec(nEnt,0.0), totAbsVec(nEnt,0.0);
-			for (size_t jjE=0;jjE<nEnt;jjE++) {
-				pSyVec[jjE] = pSy[jjE][jR];
-				eICVec[jjE] = eIC[jjE][jR];
-				pPPVec[jjE] = pPP[jjE][jR];
-				pPGVec[jjE] = pPG[jjE][jR];
-				totNotAbsVec[jjE] = totNotAbs[jjE][jR];
-				totAbsVec[jjE] = totAbs[jjE][jR];
-			}
-			double localEnergy = E/redshift_to_inf[jR];
-			lum_pSy += lumInterp(pSyVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
-			lum_eIC += lumInterp(eICVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
-			lum_pPP += lumInterp(pPPVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
-			lum_pPG += lumInterp(pPGVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
-			lum_totNotAbs += lumInterp(totNotAbsVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
-			lum_totAbs += lumInterp(totAbsVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+				pSy[E_ix][jR] = pSyLocal*vol;
+				pIC[E_ix][jR] = pICLocal*vol;
+				eIC[E_ix][jR] = eICLocal*vol;
+				pPP[E_ix][jR] = pPPLocal*vol;
+				pPG[E_ix][jR] = pPGLocal*vol;
+				
+				double totLocal = (taugg > 1.0e-10) ? 
+										factor*vol*eTot/kappagg*(1.0-exp(-2.0*sqrt(3.0)*taugg)) : 
+											eTot*vol;
+				//totLocal = eTot*vol*exp(-taugg);
+				totNotAbs[E_ix][jR] = totLocal;
+				totAbs[E_ix][jR] = (eTot*vol - totLocal);
+				
+				
+				double tau_es = st.denf_e.get(iR)*thomson*height;
+				double tescape = height/cLight * (1.0+tau_es);
+				double rate_gg = kappagg * cLight;
+				st.ntPhoton.distribution.set(psc, eTot/E * pow(rate_gg+pow(tescape,-1),-1));
+				st.ntPhoton.injection.set(psc, eTot/E * pow(rate_gg+pow(tescape,-1),-1));
+				
+				jR++;
+			},{E_ix,-1,0});
 		}
-		file << fmtE
-			 << '\t' << safeLog10(lum_pSy*E)
-			 << "\t" << safeLog10(lum_eIC*E)
-			 << "\t" << safeLog10(lum_pPP*E)
-			 << "\t" << safeLog10(lum_pPG*E)
-			 << '\t' << safeLog10(lum_totNotAbs*E)
-			 << '\t' << safeLog10(lum_totAbs*E)
-			 << std::endl;
 	}
 	
+	double lum_eSy, lum_pSy, lum_eIC, lum_pIC, lum_pPP, lum_pPG, lum_totNotAbs, lum_totAbs;
+	
+	if (calculateNonThermalHE) {
+		for (size_t jE=0;jE<nEnt;jE++) {
+			lum_pSy = lum_eIC = lum_pIC = lum_pPP = lum_pPG = lum_totNotAbs = lum_totAbs = 0.0;
+			double E = ntEnergies[jE];
+			double fmtE = safeLog10(E/EV_TO_ERG);
+			for (size_t jR=0;jR<nR;jR++) {
+				Vector pSyVec(nEnt,0.0), eICVec(nEnt,0.0), pICVec(nEnt,0.0), pPPVec(nEnt,0.0),
+						pPGVec(nEnt,0.0), totNotAbsVec(nEnt,0.0), totAbsVec(nEnt,0.0);
+				for (size_t jjE=0;jjE<nEnt;jjE++) {
+					pSyVec[jjE] = pSy[jjE][jR];
+					eICVec[jjE] = eIC[jjE][jR];
+					pICVec[jjE] = pIC[jjE][jR];
+					pPPVec[jjE] = pPP[jjE][jR];
+					pPGVec[jjE] = pPG[jjE][jR];
+					totNotAbsVec[jjE] = totNotAbs[jjE][jR];
+					totAbsVec[jjE] = totAbs[jjE][jR];
+				}
+				double localEnergy = E/redshift_to_inf[jR];
+				lum_pSy += lumInterp(pSyVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+				lum_eIC += lumInterp(eICVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+				lum_pIC += lumInterp(pICVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+				lum_pPP += lumInterp(pPPVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+				lum_pPG += lumInterp(pPGVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+				lum_totNotAbs += lumInterp(totNotAbsVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+				lum_totAbs += lumInterp(totAbsVec,ntEnergies,jE,nEnt,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+			}
+			file << fmtE
+				 << '\t' << safeLog10(lum_pSy*E)
+				 << "\t" << safeLog10(lum_eIC*E)
+				 << "\t" << safeLog10(lum_pIC*E)
+				 << "\t" << safeLog10(lum_pPP*E)
+				 << "\t" << safeLog10(lum_pPG*E)
+				 << '\t' << safeLog10(lum_totNotAbs*E)
+				 << '\t' << safeLog10(lum_totAbs*E)
+				 << std::endl;
+		}
+	}
+	
+	ofstream file2;
+	file2.open("lumSy_radius.dat");
 	for (size_t jE=0;jE<nE;jE++) {
 		double E = energies[jE];
 		double fmtE = safeLog10(E/EV_TO_ERG);
 		lum_eSy = 0.0;
 		for (size_t jR=0;jR<nR;jR++) {
+			double r = st.denf_e.ps[DIM_R][jR];
 			Vector eSyVec(nE,0.0);
 			for (size_t jjE=0;jjE<nE;jjE++)
 				eSyVec[jjE] = eSy[jjE][jR];
 			double localEnergy = E/redshift_to_inf[jR];
-			lum_eSy += lumInterp(eSyVec,energies,jE,nE,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+			double lumR = lumInterp(eSyVec,energies,jE,nE,localEnergy) * pow(redshift_to_inf[jR],3) * escapeAi[jR];
+			lum_eSy += lumR;
+			file2 << E/EV_TO_ERG << "\t" << r*sqrt(paso_r)/schwRadius << "\t" << lum_eSy << endl;
 		}
+		
 		
 		fileSy << fmtE
 			   << '\t' << safeLog10(lum_eSy*E)
@@ -331,6 +351,42 @@ void nonThermalRadiation(State& st, const std::string& filename)
 	
 	file.close();
 	fileSy.close();
+	file2.close();
+	
+	ofstream file_r;
+	file_r.open("lumNonThermal_r.dat");
+	double pasoE = pow(ntEnergies[nEnt-1]/ntEnergies[0],1.0/(nEnt-1));
+	double pasoE2 = pow(energies[nEnt-1]/energies[0],1.0/(nE-1));
+	double lum_eSy_r, lum_eIC_r, lum_pSy_r, lum_pp_r, lum_pg_r, lum_tot_r;
+	for (size_t jR=0;jR<nR;jR++) {
+		lum_eSy_r = lum_eIC_r = lum_pSy_r = lum_pp_r = lum_pg_r = lum_tot_r = 0.0;
+		double r = st.denf_e.ps[DIM_R][jR];
+		for (size_t jE=0;jE<nEnt;jE++) {
+			double E = ntEnergies[jE];
+			double E_eV = E / EV_TO_ERG;
+			double dE = E * (sqrt(pasoE)-1.0/sqrt(pasoE));
+			lum_eIC_r += eIC[jE][jR] * dE;
+			lum_pSy_r += pSy[jE][jR] * dE;
+			lum_pp_r += pPP[jE][jR] * dE;
+			lum_pg_r += pPG[jE][jR] * dE;
+			lum_tot_r += totNotAbs[jE][jR] * dE;
+		}
+		for (size_t jE=0;jE<nE;jE++) {
+			double E = energies[jE];
+			double E_eV = E / EV_TO_ERG;
+			double dE = E * (sqrt(pasoE2)-1.0/sqrt(pasoE2));
+			lum_eSy_r += eSy[jE][jR] * dE;
+		}
+		file_r	<< r / schwRadius
+				<< '\t' << lum_eSy_r * escapeAi[jR] * pow(redshift_to_inf[jR],4)
+				<< '\t' << lum_eIC_r * escapeAi[jR] * pow(redshift_to_inf[jR],4)
+				<< '\t' << lum_pSy_r * escapeAi[jR] * pow(redshift_to_inf[jR],4)
+				<< '\t' << lum_pp_r * escapeAi[jR] * pow(redshift_to_inf[jR],4)
+				<< '\t' << lum_pg_r * escapeAi[jR] * pow(redshift_to_inf[jR],4)
+				<< '\t' << lum_tot_r * escapeAi[jR] * pow(redshift_to_inf[jR],4)
+				<< std::endl;
+	}
+	file_r.close();
 	
 	show_message(msgEnd,Module_luminosities);
 }

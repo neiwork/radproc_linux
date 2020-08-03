@@ -25,8 +25,8 @@ void initEnergyPoints(Vector& v, double logEmin, double logEmax)
 
 void initGridLogarithmically(Vector& v, double min, double max)
 {
-	double ratio = pow(max/min,1.0/(v.size()-1));
-	v[0]=min;
+	double ratio = pow(max/min,1.0/v.size());
+	v[0] = min*sqrt(ratio);
 	for (size_t i=1; i < v.size(); ++i) 
 		v[i] = v[i-1]*ratio;
 }
