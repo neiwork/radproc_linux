@@ -218,10 +218,10 @@ double fPion(double epi, double density, double temp)
 	double piGeV = neutralPionMass*cLight2/1.6e-3;
 	double constant = cLight*density*density/(4.0*piGeV*normtemp*k2*k2);
 	
-	//return constant * RungeKuttaSimple(1.0,1.0e3,[&](double gr)
-	//					{return auxf(gr,epi,normtemp);});         //  [cm-3 s-1 GeV-1]
-	return constant * qImpropLog(1.0,1.0e3,[epi,normtemp](double gr)
-						{return auxf(gr,epi,normtemp);},1.0e-2);
+	return constant * RungeKuttaSimple(1.0,1.0e3,[&](double gr)
+						{return auxf(gr,epi,normtemp);});         //  [cm-3 s-1 GeV-1]
+	//return constant * qImpropLog(1.0,1.0e3,[epi,normtemp](double gr)
+	//					{return auxf(gr,epi,normtemp);},1.0e-2);
 }
 
 

@@ -12,16 +12,17 @@ from matplotlib import cm
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 viridis = cm.get_cmap('viridis', 12)
 
-logeVp,iR,logr,lognp = np.loadtxt('protonDistribution.dat',unpack=True)
-logeVe,iR,logr,logne = np.loadtxt('electronDistribution.dat',unpack=True)
-logeVp,iR,logr,logqp = np.loadtxt('protonInjection.dat',unpack=True)
-logeVe,iR,logr,logqe = np.loadtxt('electronInjection.dat',unpack=True)
+logeVp,iR,logr,lognp = np.loadtxt('protonDistribution_vol.dat',unpack=True)
+logeVe,iR,logr,logne = np.loadtxt('electronDistribution_vol.dat',unpack=True)
+logeVp,iR,logr,logqp = np.loadtxt('protonInjection_vol.dat',unpack=True)
+logeVe,iR,logr,logqe = np.loadtxt('electronInjection_vol.dat',unpack=True)
 logeVpion,iR,logr,logqpion = np.loadtxt('pionInjection.dat',unpack=True)
 logeVpion,iR,logr,lognpion = np.loadtxt('pionDistribution.dat',unpack=True)
 logeVmuon,iR,logr,logqmuon = np.loadtxt('muonInjection.dat',unpack=True)
 logeVmuon,iR,logr,lognmuon = np.loadtxt('muonDistribution.dat',unpack=True)
 logeVpair,iR,logr,logqpair = np.loadtxt('secondaryPairInjection.dat',unpack=True)
-NT_logeV,NT_logSyp,NT_logIC,NT_logpp,NT_logpg,NT_logAbs,NT_logAbsorbido = np.loadtxt('lumNonThermal.dat',unpack=True,skiprows=1)
+logeVneutrino,iR,logr,logqneutrino = np.loadtxt('neutrinoInjection.dat',unpack=True)
+a,NT_logeV,NT_logSyp,NT_logIC,NT_logpp,NT_logpg,NT_logAbs,NT_logAbsorbido = np.loadtxt('lumNonThermal.dat',unpack=True,skiprows=1)
 NT_logeVs,NT_logSys,NT_logSymu,NT_logSypi,NT_logICs,NT_logpip,NT_logpig,a,NT_logAbs = np.loadtxt('secondariesLum.dat',unpack=True,skiprows=1)
 
 logerge = np.log10(np.power(10,logeVe)*1.6e-12)
@@ -29,6 +30,7 @@ logergp = np.log10(np.power(10,logeVp)*1.6e-12)
 logergpion = np.log10(np.power(10,logeVpion)*1.6e-12)
 logergmuon = np.log10(np.power(10,logeVmuon)*1.6e-12)
 logergpair = np.log10(np.power(10,logeVpair)*1.6e-12)
+logergneutrino = np.log10(np.power(10,logeVneutrino)*1.6e-12)
 
 log_gp = logeVp - 8.973
 log_ge = logeVe - 5.71
@@ -138,6 +140,7 @@ qpTot = np.zeros(nE)
 qpionTot = np.zeros(nE)
 qmuonTot = np.zeros(nE)
 qpairTot = np.zeros(nE)
+qneutrinoTot = np.zeros(nE)
 
 for r1 in np.arange(nR//f):
     ax1.plot(log_gp[f*r1*nE:(f*r1+1)*nE],2.0*logergp[f*r1*nE:(f*r1+1)*nE] +
@@ -149,6 +152,7 @@ for r1 in np.arange(nR):
         qpionTot[e] = qpionTot[e] + np.power(10,logqpion[r1*nE+e])
         qmuonTot[e] = qmuonTot[e] + np.power(10,logqmuon[r1*nE+e])
         qpairTot[e] = qpairTot[e] + np.power(10,logqpair[r1*nE+e])
+        qneutrinoTot[e] = qneutrinoTot[e] + np.power(10,logqneutrino[r1*nE+e])
 
 ax1.plot(log_gp[:nE],2.0*logergp[:nE]+np.log10(qpTot),ls='-',lw=4,color='red',label='Total')
 
@@ -210,6 +214,7 @@ ax1.set_ylabel(r'$\mathrm{Log}(E^2 Q_\mathrm{p}(E) ~ [\mathrm{erg~cm^{-3}s^{-1}}
 #ax1.plot(logeVp[:nE],2.0*logergp[:nE]+np.log10(qpTot),ls='-',lw=4,color='red',label='Primary protons')
 #ax1.plot(logeVe[:nE],2.0*logerge[:nE]+np.log10(qeTot),ls='-',lw=4,color='cyan',label='Primary electrons')
 ax1.plot(logeVpion[:nE],2.0*logergpion[:nE]+np.log10(qpionTot),ls='-.',lw=3,color='blue',label='Pions')
+ax1.plot(logeVneutrino[:nE],2.0*logergneutrino[:nE]+np.log10(qneutrinoTot/2),ls='-.',lw=3,color='k',label='Neutrino')
 ax1.plot(logeVmuon[:nE],2.0*logergmuon[:nE]+np.log10(qmuonTot),ls=':',lw=3,color='green',label='Muons')
 ax1.plot(logeVpair[:nE],2.0*logergpair[:nE]+np.log10(qpairTot),ls='-',lw=4,color='yellow',label='Pairs')
 ax1.plot(NT_logeV,NT_logpp,ls='--',lw=2,color='purple',label='pp')

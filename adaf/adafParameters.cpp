@@ -116,5 +116,6 @@ void adafParameters()
 		calculateNeutronDis = GlobalConfig.get<int>("nonThermal.neutrons.calculatePropagation");
 		calculateJetDecay = GlobalConfig.get<int>("nonThermal.neutrons.calculateJetDecay");
 		calculateSecondaries = GlobalConfig.get<int>("nonThermal.calculateSecondaries");
+		calculateNeutrinos = GlobalConfig.get<int>("nonThermal.calculateNeutrinos");
 	}
 }

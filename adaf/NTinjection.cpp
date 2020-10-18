@@ -46,7 +46,8 @@ double eEmax(Particle& p, double r, double B, double v, double dens, int jR)
 		sumAdvTime += Baux * tCellAux;
 	}
 
-    double Emax_adv = accE*cLight*electronCharge*sumAdvTime; 
+    double Emax_adv = accE*cLight*electronCharge*sumAdvTime;
+	Emax_adv = accE*cLight*electronCharge*B*accretionTime(r);
     double Emax_syn = p.mass*cLight2*sqrt(accE*6.0*pi*electronCharge / (thomson*B)) * p.mass/electronMass;
     double Emax_Hillas = electronCharge*B*h;
 	double zeda = GlobalConfig.get<double>("nonThermal.injection.SDA.fractionTurbulent");
@@ -102,7 +103,7 @@ double eEmax_numerical(Particle& p, double r, double B, double v, double dens, i
 	double Emax_adv = (accMethod == 0) ? sumAdvTime :
 				p.mass*cLight2 * (pow((4.0-q*q)*sumAdvTime + pow(gamma_min,2.0-q),1.0/(2.0-q)));
 	double Emax_Hillas = electronCharge*B*h * (vA/cLight);
-							
+	Emax_adv = accE*electronCharge*cLight*B*accretionTime(r);
 	fun1 rate_cool_acc = [&p,&st,&i,accE,B,h,rho,r] (double E)
 						{
 							double rate_cool = losses(E,p,st,i)/E;
@@ -230,7 +231,7 @@ void injection(Particle& p, State& st)
 		double uth = aTheta * dens * p.mass*cLight2 * norm_temp;
 		double vA = st.magf.get(iR)/sqrt(4.0*pi*massDensityADAF(r));
 		double h = height_fun(r);
-		Qfactor[iR.coord[DIM_R]] = (accMethod == 0 ? (r/schwRadius < 200.0 ? uth * st.magf.get(iR) : 0.0) : //	 * abs(radialVel(r)) / r :
+		Qfactor[iR.coord[DIM_R]] = (accMethod == 0 ? (r/schwRadius < 1000.0 ? uth * st.magf.get(iR) : 0.0) : //	 * abs(radialVel(r)) / r :
 										dens * p.mass*cLight2 * cLight/schwRadius * P2(vA/cLight) );
 		sum += vol * Qfactor[iR.coord[DIM_R]];
 	},{0,-1,0});

@@ -60,6 +60,7 @@ extern const int calculateNTprotons;
 extern const int calculateNTelectrons;
 extern const int calculateNeutronInj;
 extern const int calculateNeutronDis;
+extern const int calculateNeutrinos;
 extern const int calculateJetDecay;
 extern const int calculateJetEmission;
 extern const int calculateComptonProbs;

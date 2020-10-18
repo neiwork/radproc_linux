@@ -25,6 +25,7 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 	file << "r [2M]" 
 		<< "\t" << "Log(gamma)"
 		<< "\t" << "Acc"
+		<< "\t" << "Acc_SDA"
 		<< "\t" << "Adv"
 		<< "\t" << "Diff_K"
 		<< "\t" << "Diff_B"
@@ -82,7 +83,7 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 			p.ps.iterate([&](const SpaceIterator& iRE) {
 				double E = iRE.val(DIM_E);
 				double tAcc = 1.0/accelerationRate(E,B);
-				if (accMethod == 1) tAcc = accelerationTimeSDA(E,p,B,height,rho);
+				double tAccSDA = accelerationTimeSDA(E,p,B,height,rho);
 				double tDiffKol = diffusionTimeTurbulence(E,height,p,B);
 				double tDiffBohm = height*height/BohmDiffusionCoeff(E,B);
 				double tDiffParallel = diffusionTimeParallel(E,height,B);
@@ -91,12 +92,13 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 				file << (int)(r/schwRadius)												// 0
 					 << "\t" << safeLog10(E/(p.mass*cLight2))							// 1
 					 << "\t" << safeLog10(tAcc)											// 2
-					 << "\t" << safeLog10(tAdv)											// 3
-					 << "\t" << safeLog10(tDiffKol)										// 4
-					 << "\t" << safeLog10(tDiffBohm)									// 5
-					 << "\t" << safeLog10(tDiffParallel)								// 6
-					 << "\t" << safeLog10(tDiffPerpend)									// 7
-					 << "\t" << safeLog10(eMaxHillas/1.602e-12/(p.mass*cLight2));		// 8
+					 << "\t" << safeLog10(tAccSDA)										// 3
+					 << "\t" << safeLog10(tAdv)											// 4
+					 << "\t" << safeLog10(tDiffKol)										// 5
+					 << "\t" << safeLog10(tDiffBohm)									// 6
+					 << "\t" << safeLog10(tDiffParallel)								// 7
+					 << "\t" << safeLog10(tDiffPerpend)									// 8
+					 << "\t" << safeLog10(eMaxHillas/1.602e-12/(p.mass*cLight2));		// 9
 				if (p.id == "ntProton") {
 					double diff_length = diffLength(E/(p.mass*cLight2),p,r,height,B,vR);
 					file2   << (int)(r/schwRadius)
@@ -111,10 +113,10 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 					double tIC = E/lossesIC(E,p,st.photon.distribution,iR.coord,st.photon.emin(),
 											st.photon.emax());
 					double tBrem = E/lossesBremss(E,st.denf_e.get(iR)+st.denf_i.get(iR),p);  
-					file << "\t" << safeLog10(tSyn)		// 9
-						 << "\t" << safeLog10(tIC)		// 10
-						 << "\t" << safeLog10(tBrem)	// 11
-						 << "\t" << safeLog10(relaxTime_e(E,st.tempElectrons.get(iR),st.denf_e.get(iR)))	// 12
+					file << "\t" << safeLog10(tSyn)		// 10
+						 << "\t" << safeLog10(tIC)		// 11
+						 << "\t" << safeLog10(tBrem)	// 12
+						 << "\t" << safeLog10(relaxTime_e(E,st.tempElectrons.get(iR),st.denf_e.get(iR)))	// 13
 						 << std::endl;
 				} else if(p.id == "ntProton") {
 					double tAdi = 2.0*r/(-radialVel(r)) / (E/p.mass/cLight2);
@@ -126,13 +128,13 @@ void nonThermalTimescales(Particle& p, State& st, const std::string& filename)
 									st.photon.emax());
 					double tBH = E/lossesPhotoPair(E,p,st.photon.distribution,iR,st.photon.emin(),
 									st.photon.emax());
-					file << "\t" << safeLog10(tSyn)				// 9
-						 << "\t" << safeLog10(tIC_Th)			// 10
-						 << "\t" << safeLog10(tPP)				// 11
-						 << "\t" << safeLog10(tPG)				// 12
-						 << "\t" << safeLog10(tBH)				// 13
-						 << "\t" << safeLog10(tAdi)				// 14
-						 << "\t" << safeLog10(relaxTime_p(E,st.tempIons.get(iR),st.denf_i.get(iR)))		// 15
+					file << "\t" << safeLog10(tSyn)				// 10
+						 << "\t" << safeLog10(tIC_Th)			// 11
+						 << "\t" << safeLog10(tPP)				// 12
+						 << "\t" << safeLog10(tPG)				// 13
+						 << "\t" << safeLog10(tBH)				// 14
+						 << "\t" << safeLog10(tAdi)				// 15
+						 << "\t" << safeLog10(relaxTime_p(E,st.tempIons.get(iR),st.denf_i.get(iR)))		// 16
 						 << std::endl;
 				}
 			},{-1,iR.coord[DIM_R],0});

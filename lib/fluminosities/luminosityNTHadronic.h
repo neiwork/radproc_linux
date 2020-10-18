@@ -7,3 +7,6 @@
 
 double luminosityNTHadronic(double E, const Particle& creator,
 	const double density, const SpaceCoord& psc);
+	
+double luminosityThHadronic(double E, const double temp,
+	const double density, const SpaceCoord& psc);

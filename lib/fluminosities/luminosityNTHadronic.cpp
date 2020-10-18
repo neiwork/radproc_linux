@@ -1,5 +1,5 @@
 #include "luminosityHadronic.h"
-
+#include <gsl/gsl_sf_bessel.h>
 #include <fparameters/parameters.h>
 #include <fmath/RungeKutta.h>
 #include <nrMath/integrators.h>
@@ -39,8 +39,6 @@ double fntHadron(double x, const Particle& p, const double density, const SpaceC
 	return (x > chargedPionMass*cLight2 ? result : 0.0);
 }
 
-
-
 double luminosityNTHadronic(double E, const Particle& creator,
 	const double density, const SpaceCoord& psc)
 {
@@ -61,6 +59,53 @@ double luminosityNTHadronic(double E, const Particle& creator,
 	double luminosity = 2.0*integral*P2(E); // [erg s^-1 cm^-3 ]
 
 	return luminosity; 
+}
+
+double fntHadronTh(double x, const double temp, const double density, const SpaceCoord& psc) //funcion a integrar   x=Ecreator; L=L(Ega)
+{	
+	double Kpi = 0.17;
+	double eval = protonMass*cLight2+x/Kpi;
+	
+	//double Ekin = Ep/Kpi;
+	double g = eval / (protonMass*cLight2);
+	double beta = sqrt(1.0-1.0/(g*g));
+	double theta = boltzmann*temp/(protonMass*cLight2);
+	double bessel = gsl_sf_bessel_Kn(2, 1.0/theta);
+	double distCreator = (bessel > 0.0 ? density * g*g*beta / (theta*bessel) * exp(-g/theta) / (protonMass*cLight2) : 0.0);
+	
+	//double thr = 0.0016; //1GeV
+	//double sigma = 30e-27*(0.95+0.06*log(Ekin/thr));
+	
+	double Eth = 1.22e9 * EV_TO_ERG;
+	double l = log10((protonMass*cLight2+x/Kpi)/1.6); //evaluada en eval
+	double sigma = 1.e-27 * (34.3+1.88*l+0.25*l*l) * P2(1.0 - pow(Eth/eval,4));
+	double pionEmiss = cLight*density*sigma*distCreator/Kpi;  //sigma = crossSectionHadronicDelta(Ekin)
+															  //lo saco asi pongo la condicion Ekin > Ethr en el limite de la int
+	
+	double result = pionEmiss/sqrt(P2(x)-P2(chargedPionMass*cLight2));
+	return (x > chargedPionMass*cLight2 ? result : 0.0);
+}
+
+double luminosityThHadronic(double E, const double temp,
+	const double density, const SpaceCoord& psc)
+{
+	double Kpi = 0.17;
+	double thr = 0.0016; //1GeV
+
+	double Max  = pow(10,1.5)*protonMass*cLight2;   //esto es un infinito 
+	double Min  = std::max(E+P2(chargedPionMass*cLight2)/(4*E),thr*Kpi); //== Ekin > Ethr
+	Min = E+0.25*P2(chargedPionMass*cLight2)/E;
+	double integral = (Min < Max ? integSimpsonLog(Min, Max,[&](double x)
+				{
+					return fntHadronTh(x,temp, density,psc);
+				},100) : 0.0);
+	//double integral = RungeKuttaSimple(Min, Max, 
+	//	[&](double x) {return fntHadron(x, creator, density, psc); }
+	//);    //integra entre Emin y Emax
+
+	double luminosity = 2.0*integral*P2(E); // [erg s^-1 cm^-3 ]
+
+	return 2.0*luminosity; 
 }
 
 

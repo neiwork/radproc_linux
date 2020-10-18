@@ -112,7 +112,8 @@ void secondariesRadiationProcesses(State& st, const std::string& filename)
 			piPG[E_ix][jR] = piPGLocal*vol;
 			eeAnn[E_ix][jR] = ePairAnnLocal*vol;
 			
-			double totLocal = (taugg > 1.0e-10) ? factor*vol*eTot/kappagg*(1.0-exp(-2.0*sqrt(3.0)*taugg)) : 
+			double totLocal = (taugg+tau > 1.0e-10) ? factor*vol*eTot/(alpha_tot+kappagg) * 
+								(1.0-exp(-2.0*sqrt(3.0)*(taugg+tau))) : 
 								eTot*vol;
 			//totLocal = eTot*vol*exp(-taugg);
 			
@@ -197,9 +198,6 @@ void secondariesProcesses(State& st)
 	distributionSecondaries(st.ntMuon,st);
 	writeEandRParamSpace("muonDistribution",st.ntMuon.distribution,0,1);
 	
-	// NEUTRINO INJECTION
-	injectionNeutrino(st.neutrino,st);
-	
 	int cond = 0;
 	int it = 0;
 	do {
@@ -209,5 +207,5 @@ void secondariesProcesses(State& st)
 		writeEandRParamSpace("secondaryPairDistribution",st.ntPair.distribution,0,1);
 		secondariesRadiationProcesses(st,"secondariesLum.dat");
 		cout << "Iteration = " << it << "\t Cond = " << cond << endl;
-	} while (it<=0);
+	} while (it<=1);
 }

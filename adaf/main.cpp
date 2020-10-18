@@ -153,8 +153,16 @@ int main()
 			if (calculateSecondaries) {
 				secondariesProcesses(model);
 				writeEandRParamSpace("NTphotonDensity",model.ntPhoton.distribution,0,0);
+			} else {
+				readEandRParamSpace("muonDistribution",model.ntMuon.distribution,0,0);
+				readEandRParamSpace("pionDistribution",model.ntChargedPion.distribution,0,0);
 			}
+			
+			// NEUTRINO TRANSPORT
+			if (calculateNeutrinos)
+				injectionNeutrino(model.neutrino,model);
 				
+			// NEUTRON TRANPOSRT
 			if (calculateNeutronInj) {
 				injectionNeutrons(model);
 				radiativeLossesNeutron(model.ntNeutron,model,"neutronTimescales.dat");
