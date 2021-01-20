@@ -10,10 +10,10 @@
     "tAccBlob":"0",
     "factorDensity":"1",
       
-    "calculateComptonScatt":"1",
+    "calculateComptonScatt":"0",
     "height_method":"1",
     "scatt": {
-        "nRandomPhot":"100",
+        "nRandomPhot":"300",
         "nTheta":"5"
     },
     "calculateNewTemp":"0",
@@ -53,35 +53,34 @@
         "calculateRelCorrections":"0"
     },
     
-    "calculateNonThermal":"1",
+    "calculateNonThermal":"0",
     "nonThermal": {
         "calculateLosses":"0",
-	"calculateDistributions":"1",
+		"calculateDistributions":"1",
         "calculateLuminosities":"1",
         "calculateHighEnergyProcesses":"1",
-	"calculateSecondaries":"1",
-    "calculateNeutrinos":"1",
-	"acc_method":"0",
-	"protons":"1",
-	"electrons":"1",
+		"calculateSecondaries":"1",
+		"acc_method":"0",
+	    "protons":"1",
+	    "electrons":"1",
         "comptonLosses":"1",
         "injection": {
-		"calculateMagneticReconnection":"0",
+		    "calculateMagneticReconnection":"0",
 	        "calculateDSA":"0",
-		"calculateSDA":"0",
-		"calculatePL":"1",
-            	"energyFraction_e":"0.6e-4",
-		"energyFraction_i":"6.0e-3",
-		"PL": {
-			"accEfficiency":"0.0001"
-		},
-		"SDA": {
-			"fractionTurbulent":"0.2",
-			"powerSpectrumIndex":"1.666"
-		},
-		"primaryIndex":"2.0"
+			"calculateSDA":"0",
+		    "calculatePL":"1",
+            "energyFraction_e":"1.0e-4",
+		    "energyFraction_i":"0.6e-2",
+			"PL": {
+		    	"accEfficiency":"0.0001"
+		    },
+		    "SDA": {
+			    "fractionTurbulent":"0.2",
+			    "powerSpectrumIndex":"1.666"
+		    },
+		    "primaryIndex":"2.0"
         },
-	"calculateJetEmission":"0",
+		"calculateJetEmission":"0",
     	"neutrons":{
 			"calculateInjection":"0",
         	"calculatePropagation":"0",
@@ -137,8 +136,8 @@
 						"samples":50
 					},
 					"radius_cd":{
-                        		"samples":50
-                    			}
+                        "samples":50
+                    }
 				}
 			},
 			"photon": {
@@ -153,7 +152,7 @@
 			"ntPhoton": {
 				"dim":{
 					"energy": {
-						"min":-4.5,
+						"min":-2.0,
 						"max":17.0
 					}
 				}
@@ -227,7 +226,7 @@
 	"math": {
 		"runge-kutta-1": {
 			"samples": {
-				"x": 30
+				"x": 50
 			}
 		},
 
