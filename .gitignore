@@ -5,6 +5,7 @@ boost_1_64_0/
 boost_1_66_0/
 external/
 radproc/
+__pychache__/
 **/.codelite/
 
 .vscode/
