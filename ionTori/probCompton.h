@@ -1,1 +1,0 @@
-void probCompton(double **,int);

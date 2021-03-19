@@ -1,1 +1,0 @@
-/usr/bin/g++ -o ./Debug/ADAF @"ADAF.txt" -L../lib/ssADAF/Debug -L../lib/nrMath/Debug -L../lib/fmath/Debug -L. -lssADAF -lfmath -lnrMath
