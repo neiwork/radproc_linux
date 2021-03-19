@@ -56,9 +56,9 @@
     "calculateNonThermal":"0",
     "nonThermal": {
         "calculateLosses":"0",
-		"calculateDistributions":"1",
+		"calculateDistributions":"0",
         "calculateLuminosities":"1",
-        "calculateHighEnergyProcesses":"1",
+	"calculateHighEnergyProcesses":"1",
 		"calculateSecondaries":"1",
 		"acc_method":"0",
 	    "protons":"1",
@@ -69,8 +69,8 @@
 	        "calculateDSA":"0",
 			"calculateSDA":"0",
 		    "calculatePL":"1",
-            "energyFraction_e":"1.0e-4",
-		    "energyFraction_i":"0.6e-2",
+            "energyFraction_e":"1.0e-5",
+		    "energyFraction_i":"1.0e-2",
 			"PL": {
 		    	"accEfficiency":"0.0001"
 		    },
